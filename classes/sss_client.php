@@ -22,37 +22,38 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
-use tool_sssfs\sss_client;
+namespace tool_sssfs;
+require(dirname(dirname(__FILE__)).'/sdk/aws-autoloader.php');
+use Aws\S3\S3Client;
 
-/**
- *  Task that pushes files to S3.
- *
- * @package   tool_sssfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class push_to_sss extends \core\task\scheduled_task {
+define('AWS_API_VERSION', '2006-03-01');
+define('AWS_REGION', 'ap-southeast-2');
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('push_to_sss_task', 'tool_sssfs');
+class sss_client {
+
+    private $s3client;
+    private $bucketname;
+
+    public function __construct() {
+        global $CFG;
+
+        $config = $CFG->sss_config;
+
+        $this->s3client = S3Client::factory( array (
+                'credentials' => array('key' => $config['key'], 'secret' => $config['secret']),
+                'version' => AWS_API_VERSION,
+                'region' => AWS_REGION
+            ));
+
+        $this->bucketname = $config['bucket'];
     }
 
-    /**
-     * Execute task
-     */
-    public function execute() {
-        echo 's3 upload task';
+    public function push_object() {
 
-        $s3client = new sss_client();
 
-        $s3client->push_object();
-
+        $result = $this->s3client->putObject(
+            array('Bucket' => $this->bucketname,
+                  'Key' => 'testkey',
+                  'Body' => 'Test Body'));
     }
 }
-
-
