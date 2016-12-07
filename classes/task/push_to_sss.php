@@ -23,28 +23,30 @@
  */
 
 namespace tool_sssfs\task;
+require(dirname(dirname(dirname(__FILE__))).'/sdk/aws-autoloader.php');
 
 /**
- * checkprod
+ *  Task that pushes files to S3.
  *
- * @package    local_envbar
- * @copyright  2016 Brendan Heywood <brendan@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   tool_sssfs
+ * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sss_task extends \core\task\scheduled_task {
+class push_to_sss extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('pluginname', 'tool_sssfs');
+        return get_string('push_to_sss_task', 'tool_sssfs');
     }
 
     /**
      * Execute task
      */
     public function execute() {
-
+        echo 's3 upload task';
     }
 }
 

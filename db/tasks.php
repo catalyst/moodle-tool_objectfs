@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * tool_sssfs tasks
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,13 +23,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.'); // It must be included from a Moodle page.
-}
-
-$plugin->version   = 2016120602;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2016120602;      // Same as version
-$plugin->requires  = 2016011400;      // Requires Filesystem API.
-$plugin->component = "tool_sssfs";
-$plugin->maturity  = MATURITY_STABLE;
+$tasks = array(
+    array(
+        'classname' => 'tool_sssfs\task\push_to_sss',
+        'blocking'  => 0,
+        'minute'    => '*',
+        'hour '     => '*',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*'
+    ),
+);
 

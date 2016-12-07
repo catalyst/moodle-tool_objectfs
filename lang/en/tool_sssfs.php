@@ -25,3 +25,4 @@
    */
 
 $string['pluginname'] = 'S3 File System';
+$string['push_to_sss_task'] = 'S3 file system upload task';
