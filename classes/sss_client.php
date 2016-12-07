@@ -50,13 +50,14 @@ class sss_client {
             ));
     }
 
-    public function push_object() {
+    public function push_file($filekey, $filecontent) {
+
         $result = $this->s3client->putObject(array(
                 'Bucket' => $this->bucketname,
-                'Key' => 'testkey',
-                'Body' => 'Test Body'
+                'Key' => $filekey,
+                'Body' => $filecontent
             ));
 
-        echo $result;
+        return $result;
     }
 }

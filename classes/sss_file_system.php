@@ -47,4 +47,14 @@ class sss_file_system extends file_system {
         parent::__construct($filedir, $trashdir, $dirpermissions, $filepermissions, $fs);
 
     }
+
+    /**
+     * Get the full path for the specified hash, including the path to the filedir.
+     *
+     * @param string $contenthash The content hash
+     * @return string The full path to the content file
+     */
+    public function get_fullpath_from_hash($contenthash) {
+        return parent::get_fullpath_from_hash($contenthash);
+    }
 }
