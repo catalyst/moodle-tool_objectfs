@@ -1,0 +1,62 @@
+
+language: php
+
+notifications:
+  email:
+    recipients:
+    - kennethhendricks@catalyst-au.net
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+php:
+ - 5.6
+
+env:
+  - DB=pgsql MOODLE_BRANCH=MOODLE_26_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
+  - DB=pgsql MOODLE_BRANCH=master
+  - DB=mysqli MOODLE_BRANCH=MOODLE_26_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_28_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_29_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
+  - DB=mysqli MOODLE_BRANCH=master
+
+matrix:
+  include:
+    - php: 7.0
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
+    - php: 7.0
+      env: DB=pgsql MOODLE_BRANCH=master
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=master
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - cd ../..
+  - composer selfupdate
+  - composer create-project -n --no-dev moodlerooms/moodle-plugin-ci ci ^1
+  - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
+install:
+  - moodle-plugin-ci install
+
+script:
+  - moodle-plugin-ci phplint
+  - moodle-plugin-ci phpcpd
+# - moodle-plugin-ci phpmd
+  - moodle-plugin-ci codechecker
+# - moodle-plugin-ci csslint    # No CSS
+  - moodle-plugin-ci shifter
+# - moodle-plugin-ci jshint     # No JS
+  - moodle-plugin-ci phpunit
+# - moodle-plugin-ci behat      # No tests yet
