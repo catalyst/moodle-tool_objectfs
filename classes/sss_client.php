@@ -26,6 +26,8 @@ namespace tool_sssfs;
 require(dirname(dirname(__FILE__)).'/sdk/aws-autoloader.php');
 use Aws\S3\S3Client;
 
+defined('MOODLE_INTERNAL') || die();
+
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_REGION', 'ap-southeast-2');
 
@@ -39,21 +41,22 @@ class sss_client {
 
         $config = $CFG->sss_config;
 
-        $this->s3client = S3Client::factory( array (
+        $this->bucketname = $config['bucket'];
+
+        $this->s3client = S3Client::factory(array(
                 'credentials' => array('key' => $config['key'], 'secret' => $config['secret']),
                 'version' => AWS_API_VERSION,
                 'region' => AWS_REGION
             ));
-
-        $this->bucketname = $config['bucket'];
     }
 
     public function push_object() {
+        $result = $this->s3client->putObject(array(
+                'Bucket' => $this->bucketname,
+                'Key' => 'testkey',
+                'Body' => 'Test Body'
+            ));
 
-
-        $result = $this->s3client->putObject(
-            array('Bucket' => $this->bucketname,
-                  'Key' => 'testkey',
-                  'Body' => 'Test Body'));
+        echo $result;
     }
 }

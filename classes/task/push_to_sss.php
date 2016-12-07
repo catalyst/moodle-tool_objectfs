@@ -25,6 +25,8 @@
 namespace tool_sssfs\task;
 use tool_sssfs\sss_client;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  *  Task that pushes files to S3.
  *

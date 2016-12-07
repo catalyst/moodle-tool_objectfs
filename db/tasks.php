@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $tasks = array(
     array(
         'classname' => 'tool_sssfs\task\push_to_sss',

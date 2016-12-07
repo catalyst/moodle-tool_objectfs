@@ -27,6 +27,8 @@ namespace tool_sssfs;
 use core_files\filestorage\file_system;
 use core_files\filestorage\file_storage;
 
+defined('MOODLE_INTERNAL') || die();
+
 class sss_file_system extends file_system {
 
     /**
