@@ -23,7 +23,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs;
+namespace tool_sssfs\renderables;
+
+defined('MOODLE_INTERNAL') || die();
 
 class sss_file_status implements \renderable {
 
@@ -33,31 +35,28 @@ class sss_file_status implements \renderable {
         $this->get_file_status();
     }
 
-    public function get_file_status() {
+    private function get_file_status() {
         global $DB;
 
         $statusdata = array();
 
-        // TODO: refactor constants so i dont have to do this.
-        $filesystem = \tool_sssfs\sss_file_system::instance();
-
-        $sql = 'SELECT count(*) as filecount, COALESCE(SUM(F.filesize),0) as filesum
+        $sql = 'SELECT count(*) as filecount, COALESCE(SUM(F.filesize) ,0) as filesum
                 FROM {tool_sssfs_filestate} SFS
                 JOIN {files} F ON F.contenthash=sfs.contenthash
                 WHERE SFS.state = ?';
 
         $result = $DB->get_records_sql($sql, array(SSS_FILE_STATE_DUPLICATED));
-        $statusdata['duplicate'] = reset($result);
+        $statusdata[SSS_FILE_STATE_DUPLICATED] = reset($result);
 
         $result = $DB->get_records_sql($sql, array(SSS_FILE_STATE_EXTERNAL));
-        $statusdata['s3'] = reset($result);
+        $statusdata[SSS_FILE_STATE_EXTERNAL] = reset($result);
 
-        $sql = 'SELECT count(DISTINCT contenthash) as filecount, SUM(filesize) as filesum from {files}';
+        $sql = 'SELECT count(DISTINCT contenthash) as filecount, COALESCE(SUM(filesize) ,0) as filesum from {files}';
         $result = $DB->get_records_sql($sql);
-        $statusdata['disk'] = reset($result);
 
-        $statusdata['disk']->filecount -= $statusdata['duplicate']->filecount + $statusdata['s3']->filecount;
-        $statusdata['disk']->filesum -= $statusdata['duplicate']->filesum + $statusdata['s3']->filesum;
+        $statusdata[SSS_FILE_STATE_LOCAL] = reset($result);
+        $statusdata[SSS_FILE_STATE_LOCAL]->filecount -= $statusdata[SSS_FILE_STATE_DUPLICATED]->filecount + $statusdata[SSS_FILE_STATE_EXTERNAL]->filecount;
+        $statusdata[SSS_FILE_STATE_LOCAL]->filesum -= $statusdata[SSS_FILE_STATE_DUPLICATED]->filesum + $statusdata[SSS_FILE_STATE_EXTERNAL]->filesum;
 
         $this->statusdata = $statusdata;
     }

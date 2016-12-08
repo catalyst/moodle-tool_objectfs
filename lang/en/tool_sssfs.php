@@ -26,4 +26,13 @@
 
 $string['pluginname'] = 'S3 File System';
 $string['push_to_sss_task'] = 'S3 file system upload task';
-$string['file_status_page'] = 'S3 file status';
+
+$string['file_status:page'] = 'S3 file status';
+$string['file_status:location'] = 'File location';
+$string['file_status:files'] = 'Files';
+$string['file_status:size'] = 'Total size (MB)';
+$string['file_status:state:duplicated'] = 'Duplicated';
+$string['file_status:state:local'] = 'Local';
+$string['file_status:state:external'] = 'External';
+$string['file_status:state:unknown'] = 'Unknown';
+

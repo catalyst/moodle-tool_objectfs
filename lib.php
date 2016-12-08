@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Lib
+ * S3 file system lib
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,11 +23,41 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-function get_file_content_hashes_over_threshold($threshold) {
+define('SSS_FILE_STATE_LOCAL', 0);
+define('SSS_FILE_STATE_DUPLICATED', 1);
+define('SSS_FILE_STATE_EXTERNAL', 2);
+
+function get_content_hashes_over_threshold($threshold) {
     global $DB;
     $sql = "SELECT DISTINCT contenthash FROM {files} WHERE filesize > ?";
     $contenthashes = $DB->get_fieldset_sql($sql, array($threshold));
     return $contenthashes;
+}
+
+function get_content_hashes_in_sss() {
+    global $DB;
+    $sql = 'SELECT contenthash FROM {tool_sssfs_filestate} WHERE STATE in (?, ?)';
+    $ssscontenthashes = $DB->get_fieldset_sql($sql, array(SSS_FILE_STATE_DUPLICATED, SSS_FILE_STATE_EXTERNAL));
+    return $ssscontenthashes;
+}
+
+function log_file_state($contenthash, $state) {
+    global $DB;
+
+    $logrecord = new \stdClass();
+    $logrecord->contenthash = $contenthash;
+    $logrecord->timeduplicated = time();
+    $logrecord->state = $state;
+
+    $existing = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $contenthash));
+
+    if ($existing) {
+        $logrecord->id = $existing->id;
+        $DB->update_record('tool_sssfs_filestate', $logrecord);
+
+    } else {
+        $DB->insert_record('tool_sssfs_filestate', $logrecord);
+    }
 }

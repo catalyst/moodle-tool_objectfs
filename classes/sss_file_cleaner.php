@@ -15,31 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File status page - stats on where files are b/w local file system and s3
+ * Deletes files that are old enough and are in S3.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-require_once(__DIR__ . '/../../../config.php');
-require_once( __DIR__ . '/lib.php');
-require_once($CFG->libdir.'/adminlib.php');
-
-admin_externalpage_setup('tool_sssfs');
-
-$output = $PAGE->get_renderer('tool_sssfs');
-
-echo $output->header();
-
-echo $output->heading(get_string('file_status:page', 'tool_sssfs'));
-
-$filestatus = new \tool_sssfs\renderables\sss_file_status();
-
-echo $output->render($filestatus);
-
-echo $output->footer();
-
-
-

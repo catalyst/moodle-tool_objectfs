@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Task that pushes files to S3.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -24,18 +25,12 @@
 
 namespace tool_sssfs\task;
 
-require(dirname(dirname(dirname(__FILE__))).'/lib.php');
+use tool_sssfs\sss_file_pusher;
+use tool_sssfs\sss_client;
+use tool_sssfs\sss_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- *  Task that pushes files to S3.
- *
- * @package   tool_sssfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class push_to_sss extends \core\task\scheduled_task {
 
     /**
@@ -49,30 +44,12 @@ class push_to_sss extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        global $DB;
+        $client = new sss_client();
+        $filesystem = sss_file_system::instance();
 
-        $s3client = new \tool_sssfs\sss_client();
-        $filesystem = \tool_sssfs\sss_file_system::instance();
-        $logger = new \tool_sssfs\sss_filestate_logger();
+        $filepusher = new sss_file_pusher($client, $filesystem);
 
-        $contenthashestopush = $filesystem->get_content_hashes_over_threshold(1000);
-
-        $ssscontenthashes = $filesystem->get_content_hashes_in_sss();
-
-        foreach ($contenthashestopush as $contenthash) {
-
-            if (in_array($contenthash, $ssscontenthashes)) {
-                continue;
-            }
-
-            $filecontent = $filesystem->get_content_from_hash($contenthash);
-
-            if ($filecontent) {
-                // TODO: deal with response.
-                $response = $s3client->push_file($contenthash, $filecontent);
-                $logger->log_new_file($contenthash, SSS_FILE_STATE_DUPLICATED);
-            }
-        }
+        $filepusher->push();
     }
 }
 

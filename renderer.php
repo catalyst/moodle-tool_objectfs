@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.\
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * File status renderer.
@@ -23,22 +23,41 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_sssfs\renderables\sss_file_status;
+
 class tool_sssfs_renderer extends plugin_renderer_base {
-    protected function render_sss_file_status(tool_sssfs\sss_file_status $filestatus) {
+
+    protected function render_sss_file_status(sss_file_status $filestatus) {
         $output = '';
 
         $table = new html_table();
-        // TODO: Make these lang strings.
-        // TODO: Convert size to readable format.
-        $table->head = array('File location', 'Files', 'Total size');
 
-        foreach ($filestatus->statusdata as $filetype  => $filetypedata) {
-            $table->data[] = array($filetype, $filetypedata->filecount, $filetypedata->filesum);
+        $table->head = array(get_string('file_status:location', 'tool_sssfs'),
+                             get_string('file_status:files', 'tool_sssfs'),
+                             get_string('file_status:size', 'tool_sssfs'));
+
+        foreach ($filestatus->statusdata as $filestate => $filetypedata) {
+            $size = $filetypedata->filesum / 1024 / 1024; // Convert to MB.
+            $size = round($size, 2);
+            $filestate = $this->get_file_state_string($filestate);
+            $table->data[] = array($filestate, $filetypedata->filecount, $size);
         }
+
         $output .= html_writer::table($table);
 
         return $output;
     }
 
-
+    private function get_file_state_string($filestate) {
+        switch ($filestate){
+            case SSS_FILE_STATE_LOCAL:
+                return get_string('file_status:state:local', 'tool_sssfs');
+            case SSS_FILE_STATE_DUPLICATED:
+                return get_string('file_status:state:duplicated', 'tool_sssfs');
+            case SSS_FILE_STATE_EXTERNAL:
+                return get_string('file_status:state:external', 'tool_sssfs');
+            default;
+                return get_string('file_status:state:unknown', 'tool_sssfs');
+        }
+    }
 }

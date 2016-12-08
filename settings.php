@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 if ($hassiteconfig) {
 
     $externalpage = new admin_externalpage('tool_sssfs',
-        get_string('file_status_page', 'tool_sssfs'),
+        get_string('file_status:page', 'tool_sssfs'),
         new moodle_url('/admin/tool/sssfs/file_status.php'));
 
     $ADMIN->add('reports', $externalpage);

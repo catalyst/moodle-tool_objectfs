@@ -15,40 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Pulls files from  s3 if they meet the configured criterea.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace tool_sssfs;
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- *  Class Manipulates the tool_sssfs_filestate DB table.
- *
- * @package   tool_sssfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class sss_filestate_logger {
-
-    public function __construct() {
-
-    }
-
-    public function log_new_file($contenthash, $state) {
-        global $DB;
-        $logrecord = new \stdClass();
-        $logrecord->contenthash = $contenthash;
-        $logrecord->timeduplicated = time();
-        $logrecord->state = $state;
-        $DB->insert_record('tool_sssfs_filestate', $logrecord);
-    }
-
-}
-
-

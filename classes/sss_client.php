@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * S3 client.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,8 +24,10 @@
  */
 
 namespace tool_sssfs;
-require(dirname(dirname(__FILE__)).'/sdk/aws-autoloader.php');
+
 use Aws\S3\S3Client;
+
+require_once(__DIR__ . '/../sdk/aws-autoloader.php');
 
 defined('MOODLE_INTERNAL') || die();
 
