@@ -48,13 +48,17 @@ class sss_file_system extends file_system {
 
     }
 
-    /**
-     * Get the full path for the specified hash, including the path to the filedir.
-     *
-     * @param string $contenthash The content hash
-     * @return string The full path to the content file
-     */
-    public function get_fullpath_from_hash($contenthash) {
-        return parent::get_fullpath_from_hash($contenthash);
+    // Does not check if it is readable.
+    public function get_content_from_hash($contenthash) {
+        $filepath = $this->get_fullpath_from_hash($contenthash);
+        return file_get_contents($filepath);
     }
+
+    public function get_content_hashes_over_threshold($threshold) {
+        global $DB;
+        $sql = "SELECT DISTINCT contenthash FROM {files} WHERE filesize > ?";
+        $contenthashes = $DB->get_fieldset_sql($sql, array($threshold));
+        return $contenthashes;
+    }
+
 }

@@ -28,6 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 function get_file_content_hashes_over_threshold($threshold) {
     global $DB;
     $sql = "SELECT DISTINCT contenthash FROM {files} WHERE filesize > ?";
-    $contenthashes = $DB->get_records_sql($sql, array($threshold));
+    $contenthashes = $DB->get_fieldset_sql($sql, array($threshold));
     return $contenthashes;
 }

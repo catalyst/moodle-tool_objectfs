@@ -53,19 +53,19 @@ class push_to_sss extends \core\task\scheduled_task {
     public function execute() {
         echo 's3 upload task';
 
-        $filestopush = get_file_content_hashes_over_threshold(1000);
-
-        // TODO: Filter based on objects already there.
-
         $s3client = new sss_client();
         $filesystem = \tool_sssfs\sss_file_system::instance();
 
-        foreach ($filestopush as $file) {
-            $filepath = $filesystem->get_fullpath_from_hash($file->contenthash);
-            $filecontent = file_get_contents($filepath);
+        $contenthashestopush = $filesystem->get_content_hashes_over_threshold(1000);
+
+        // TODO: Filter based on objects already there.
+
+        foreach ($contenthashestopush as $contenthash) {
+
+            $filecontent = $filesystem->get_content_from_hash($contenthash);
 
             if ($filecontent) {
-                $s3client->push_file($file->contenthash, $filecontent);
+                $s3client->push_file($contenthash, $filecontent);
             }
         }
     }
