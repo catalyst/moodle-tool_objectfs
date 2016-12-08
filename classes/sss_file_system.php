@@ -29,6 +29,10 @@ use core_files\filestorage\file_storage;
 
 defined('MOODLE_INTERNAL') || die();
 
+define('SSS_FILE_STATE_LOCAL', 0);
+define('SSS_FILE_STATE_DUPLICATED', 1);
+define('SSS_FILE_STATE_EXTERNAL', 2);
+
 class sss_file_system extends file_system {
 
     /**
@@ -59,6 +63,13 @@ class sss_file_system extends file_system {
         $sql = "SELECT DISTINCT contenthash FROM {files} WHERE filesize > ?";
         $contenthashes = $DB->get_fieldset_sql($sql, array($threshold));
         return $contenthashes;
+    }
+
+    public function get_content_hashes_in_sss() {
+        global $DB;
+        $sql = 'SELECT contenthash FROM {tool_sssfs_filestate} WHERE STATE in (?, ?)';
+        $ssscontenthashes = $DB->get_fieldset_sql($sql, array(SSS_FILE_STATE_DUPLICATED, SSS_FILE_STATE_EXTERNAL));
+        return $ssscontenthashes;
     }
 
 }

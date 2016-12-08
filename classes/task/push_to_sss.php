@@ -23,8 +23,6 @@
  */
 
 namespace tool_sssfs\task;
-use tool_sssfs\sss_client;
-use tool_sssfs;
 
 require(dirname(dirname(dirname(__FILE__))).'/lib.php');
 
@@ -51,21 +49,28 @@ class push_to_sss extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        echo 's3 upload task';
+        global $DB;
 
-        $s3client = new sss_client();
+        $s3client = new \tool_sssfs\sss_client();
         $filesystem = \tool_sssfs\sss_file_system::instance();
+        $logger = new \tool_sssfs\sss_filestate_logger();
 
         $contenthashestopush = $filesystem->get_content_hashes_over_threshold(1000);
 
-        // TODO: Filter based on objects already there.
+        $ssscontenthashes = $filesystem->get_content_hashes_in_sss();
 
         foreach ($contenthashestopush as $contenthash) {
+
+            if (in_array($contenthash, $ssscontenthashes)) {
+                continue;
+            }
 
             $filecontent = $filesystem->get_content_from_hash($contenthash);
 
             if ($filecontent) {
-                $s3client->push_file($contenthash, $filecontent);
+                // TODO: deal with response.
+                $response = $s3client->push_file($contenthash, $filecontent);
+                $logger->log_new_file($contenthash, SSS_FILE_STATE_DUPLICATED);
             }
         }
     }
