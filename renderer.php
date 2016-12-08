@@ -12,10 +12,10 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.\
 
 /**
- * Settings
+ * File status renderer.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,15 +23,22 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+class tool_sssfs_renderer extends plugin_renderer_base {
+    protected function render_sss_file_status(tool_sssfs\sss_file_status $filestatus) {
+        $output = '';
 
-if ($hassiteconfig) {
+        $table = new html_table();
+        // TODO: Make these lang strings.
+        // TODO: Convert size to readable format.
+        $table->head = array('File location', 'Files', 'Total size');
 
-    $externalpage = new admin_externalpage('tool_sssfs',
-        get_string('file_status_page', 'tool_sssfs'),
-        new moodle_url('/admin/tool/sssfs/file_status.php'));
+        foreach ($filestatus->statusdata as $filetype  => $filetypedata) {
+            $table->data[] = array($filetype, $filetypedata->filecount, $filetypedata->filesum);
+        }
+        $output .= html_writer::table($table);
 
-    $ADMIN->add('reports', $externalpage);
+        return $output;
+    }
 
-    $settings = null;
+
 }

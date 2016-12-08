@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Settings
+ * File status page - stats on where files are b/w local file system and s3
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,15 +23,21 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require('../../../config.php');
+require_once($CFG->libdir.'/adminlib.php');
 
-if ($hassiteconfig) {
+admin_externalpage_setup('tool_sssfs');
 
-    $externalpage = new admin_externalpage('tool_sssfs',
-        get_string('file_status_page', 'tool_sssfs'),
-        new moodle_url('/admin/tool/sssfs/file_status.php'));
+$output = $PAGE->get_renderer('tool_sssfs');
 
-    $ADMIN->add('reports', $externalpage);
+echo $output->header();
 
-    $settings = null;
-}
+echo $output->heading(get_string('file_status_page', 'tool_sssfs'));
+
+$filestatus = new \tool_sssfs\sss_file_status();
+echo $output->render($filestatus);
+
+echo $output->footer();
+
+
+
