@@ -55,7 +55,7 @@ function save_config_data($data) {
     $config->secret = $data->secret;
     $config->bucket = $data->bucket;
     $config->region = $data->region;
-    $config->sizethreshold = $data->sizethreshold;
+    $config->sizethreshold = $data->sizethreshold * 1024; // Convert from kb.
     $config->minimumage = $data->minimumage;
     $config->consistancydelay = $data->consistancydelay;
     $config->logginglocation = $data->logginglocation;

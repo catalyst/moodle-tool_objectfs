@@ -43,48 +43,44 @@ class sss_file_pusher {
         $this->maxruntime = 60; // Seconds.
     }
 
+    private function get_push_candidate_content_hashes() {
+        global $DB;
+        $sql = 'SELECT F.contenthash, MAX(F.filesize), MIN(F.timecreated)
+                FROM mdl_files F
+                LEFT JOIN mdl_tool_sssfs_filestate SF on F.contenthash = SF.contenthash
+                GROUP BY F.contenthash, F.filesize, SF.state
+                HAVING MIN(F.timecreated) < ? AND MAX(F.filesize) > ?
+                AND (SF.state IS NULL OR SF.state = ?)';
+
+        $maxcreatedtimestamp = time() - $this->minimumage;
+
+        $params = array($maxcreatedtimestamp, $this->sizethreshold, SSS_FILE_STATE_LOCAL);
+
+        $contenthashes = $DB->get_records_sql($sql, $params);
+
+        return $contenthashes;
+    }
+
     public function push() {
         global $DB;
 
         $finishtime = time() + $this->maxruntime;
 
-        // This Should filter down the file list the most so we do this first.
-        // TODO: refactor into get_push_candidate_content_hashes.
-        $contenthashestopush = $this->get_content_hashes_over_threshold($this->sizethreshold);
-
-        $ssscontenthashes = $this->get_content_hashes_in_sss();
+        $contenthashestopush = $this->get_push_candidate_content_hashes();
 
         foreach ($contenthashestopush as $contenthash) {
             if (time() > $finishtime) {
                 break;
             }
 
-            if (in_array($contenthash, $ssscontenthashes)) {
-                continue;
-            }
-
-            $filecontent = $this->filesystem->get_content_from_hash($contenthash);
+            $filecontent = $this->filesystem->get_content_from_hash($contenthash->contenthash);
 
             if ($filecontent) {
                 // TODO: deal with response.
-                $response = $this->client->push_file($contenthash, $filecontent);
-                log_file_state($contenthash, SSS_FILE_STATE_DUPLICATED);
+                $response = $this->client->push_file($contenthash->contenthash, $filecontent);
+                log_file_state($contenthash->contenthash, SSS_FILE_STATE_DUPLICATED);
             }
         }
-    }
-
-    private function get_content_hashes_over_threshold($threshold) {
-        global $DB;
-        $sql = "SELECT DISTINCT contenthash FROM {files} WHERE filesize > ?";
-        $contenthashes = $DB->get_fieldset_sql($sql, array($threshold));
-        return $contenthashes;
-    }
-
-    private function get_content_hashes_in_sss() {
-        global $DB;
-        $sql = 'SELECT contenthash FROM {tool_sssfs_filestate} WHERE STATE in (?, ?)';
-        $ssscontenthashes = $DB->get_fieldset_sql($sql, array(SSS_FILE_STATE_DUPLICATED, SSS_FILE_STATE_EXTERNAL));
-        return $ssscontenthashes;
     }
 }
 
