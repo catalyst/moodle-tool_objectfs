@@ -40,10 +40,15 @@ class sss_file_status implements \renderable {
 
         $statusdata = array();
 
-        $sql = 'SELECT count(*) as filecount, COALESCE(SUM(F.filesize) ,0) as filesum
-                FROM {tool_sssfs_filestate} SFS
-                JOIN {files} F ON F.contenthash=sfs.contenthash
-                WHERE SFS.state = ?';
+        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) as filecount,
+                COALESCE(SUM(sub.filesize) ,0) as filesum
+                FROM (
+                    SELECT F.contenthash, MAX(F.filesize) as filesize
+                    FROM {files} F
+                    JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
+                    GROUP BY F.contenthash, F.filesize, SF.state
+                    HAVING SF.state = ?
+                ) as sub';
 
         $result = $DB->get_records_sql($sql, array(SSS_FILE_STATE_DUPLICATED));
         $statusdata[SSS_FILE_STATE_DUPLICATED] = reset($result);
