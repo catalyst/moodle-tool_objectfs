@@ -32,35 +32,27 @@ require_once(__DIR__ . '/../sdk/aws-autoloader.php');
 defined('MOODLE_INTERNAL') || die();
 
 define('AWS_API_VERSION', '2006-03-01');
-define('AWS_REGION', 'ap-southeast-2');
 
 class sss_client {
 
-    private $s3client;
-    private $bucketname;
+    private $client;
+    private $bucket;
 
-    public function __construct() {
-        global $CFG;
-
-        $config = $CFG->sss_config;
-
-        $this->bucketname = $config['bucket'];
-
-        $this->s3client = S3Client::factory(array(
-                'credentials' => array('key' => $config['key'], 'secret' => $config['secret']),
-                'version' => AWS_API_VERSION,
-                'region' => AWS_REGION
+    public function __construct($config) {
+        $this->bucket = $config->bucket;
+        $this->client = S3Client::factory(array(
+                'credentials' => array('key' => $config->key, 'secret' => $config->secret),
+                'region' => $config->region,
+                'version' => AWS_API_VERSION
             ));
     }
 
     public function push_file($filekey, $filecontent) {
-
-        $result = $this->s3client->putObject(array(
-                'Bucket' => $this->bucketname,
+        $result = $this->client->putObject(array(
+                'Bucket' => $this->bucket,
                 'Key' => $filekey,
                 'Body' => $filecontent
             ));
-
         return $result;
     }
 }

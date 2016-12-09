@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * File status page - stats on where files are b/w local file system and s3
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,37 +23,29 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
+use \tool_sssfs\form\settings_form;
 
-use tool_sssfs\sss_file_pusher;
-use tool_sssfs\sss_client;
-use tool_sssfs\sss_file_system;
+require_once(__DIR__ . '/../../../config.php');
+require_once( __DIR__ . '/lib.php');
+require_once($CFG->libdir.'/adminlib.php');
 
-defined('MOODLE_INTERNAL') || die();
+admin_externalpage_setup('tool_sssfs_settings');
 
-class push_to_sss extends \core\task\scheduled_task {
+$output = $PAGE->get_renderer('tool_sssfs');
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('push_to_sss_task', 'tool_sssfs');
-    }
+$config = get_config('tool_sssfs');
 
-    /**
-     * Execute task
-     */
-    public function execute() {
+$form = new settings_form(null, array('config' => $config));
 
-        $config = get_config('tool_sssfs');
-
-        if ($config->enabled) {
-            $client = new sss_client($config);
-            $filesystem = sss_file_system::instance();
-            $filepusher = new sss_file_pusher($client, $filesystem, $config);
-            $filepusher->push();
-        }
-    }
+if ($data = $form->get_data()) {
+    save_config_data($data);
+    redirect(new moodle_url('/admin/tool/sssfs/index.php'));
 }
+
+echo $output->header();
+echo $output->heading(get_string('pluginname', 'tool_sssfs'));
+$form->display();
+echo $output->footer();
+
 
 
