@@ -76,9 +76,10 @@ class sss_file_pusher {
             $filecontent = $this->filesystem->get_content_from_hash($contenthash->contenthash);
 
             if ($filecontent) {
-                // TODO: deal with response.
-                $response = $this->client->push_file($contenthash->contenthash, $filecontent);
-                log_file_state($contenthash->contenthash, SSS_FILE_STATE_DUPLICATED);
+                $success = $this->client->push_file($contenthash->contenthash, $filecontent);
+                if ($success) {
+                    log_file_state($contenthash->contenthash, SSS_FILE_STATE_DUPLICATED);
+                }
             }
         }
     }
