@@ -40,6 +40,13 @@ class sss_client {
 
     public function __construct($config) {
         $this->bucket = $config->bucket;
+        $this->key = $config->key;
+        $this->secret = $config->secret;
+        $this->region = $config->region;
+
+    }
+
+    private function initialise() {
         $this->client = S3Client::factory(array(
                 'credentials' => array('key' => $config->key, 'secret' => $config->secret),
                 'region' => $config->region,
@@ -48,11 +55,17 @@ class sss_client {
     }
 
     public function push_file($filekey, $filecontent) {
+
+        if (!$client) {
+            $this->initialise();
+        }
+
         $result = $this->client->putObject(array(
                 'Bucket' => $this->bucket,
                 'Key' => $filekey,
                 'Body' => $filecontent
             ));
+
         return $result;
     }
 }

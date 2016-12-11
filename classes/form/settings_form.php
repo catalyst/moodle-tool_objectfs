@@ -27,6 +27,8 @@ namespace tool_sssfs\form;
 
 require_once($CFG->libdir . "/formslib.php");
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Form for editing an Enviroment bar.
  *
@@ -100,7 +102,6 @@ class settings_form extends \moodleform {
         if (isset($config->sizethreshold)) {
             $mform->setDefault('sizethreshold', $config->sizethreshold);
         }
-
 
         $mform->addElement('duration', 'minimumage', get_string('settings:minimumage', 'tool_sssfs'));
         $mform->addHelpButton('minimumage', 'settings:minimumage', 'tool_sssfs');

@@ -25,6 +25,8 @@
 
 use tool_sssfs\renderables\sss_file_status;
 
+defined('MOODLE_INTERNAL') || die();
+
 class tool_sssfs_renderer extends plugin_renderer_base {
 
     protected function render_sss_file_status(sss_file_status $filestatus) {

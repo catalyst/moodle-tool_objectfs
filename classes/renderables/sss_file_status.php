@@ -32,10 +32,10 @@ class sss_file_status implements \renderable {
     public $statusdata;
 
     public function __construct () {
-        $this->get_file_status();
+        $this->calculate_file_status();
     }
 
-    private function get_file_status() {
+    private function calculate_file_status() {
         global $DB;
 
         $statusdata = array();
