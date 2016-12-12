@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 class sss_file_status implements \renderable {
 
-    public $statusdata;
+    public $data;
 
     public function __construct () {
         $this->calculate_file_status();
@@ -38,7 +38,7 @@ class sss_file_status implements \renderable {
     private function calculate_file_status() {
         global $DB;
 
-        $statusdata = array();
+        $data = array();
 
         $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) as filecount,
                 COALESCE(SUM(sub.filesize) ,0) as filesum
@@ -51,18 +51,18 @@ class sss_file_status implements \renderable {
                 ) as sub';
 
         $result = $DB->get_records_sql($sql, array(SSS_FILE_STATE_DUPLICATED));
-        $statusdata[SSS_FILE_STATE_DUPLICATED] = reset($result);
+        $data[SSS_FILE_STATE_DUPLICATED] = reset($result);
 
         $result = $DB->get_records_sql($sql, array(SSS_FILE_STATE_EXTERNAL));
-        $statusdata[SSS_FILE_STATE_EXTERNAL] = reset($result);
+        $data[SSS_FILE_STATE_EXTERNAL] = reset($result);
 
         $sql = 'SELECT count(DISTINCT contenthash) as filecount, COALESCE(SUM(filesize) ,0) as filesum from {files}';
         $result = $DB->get_records_sql($sql);
 
-        $statusdata[SSS_FILE_STATE_LOCAL] = reset($result);
-        $statusdata[SSS_FILE_STATE_LOCAL]->filecount -= $statusdata[SSS_FILE_STATE_DUPLICATED]->filecount + $statusdata[SSS_FILE_STATE_EXTERNAL]->filecount;
-        $statusdata[SSS_FILE_STATE_LOCAL]->filesum -= $statusdata[SSS_FILE_STATE_DUPLICATED]->filesum + $statusdata[SSS_FILE_STATE_EXTERNAL]->filesum;
+        $data[SSS_FILE_STATE_LOCAL] = reset($result);
+        $data[SSS_FILE_STATE_LOCAL]->filecount -= $data[SSS_FILE_STATE_DUPLICATED]->filecount + $data[SSS_FILE_STATE_EXTERNAL]->filecount;
+        $data[SSS_FILE_STATE_LOCAL]->filesum -= $data[SSS_FILE_STATE_DUPLICATED]->filesum + $data[SSS_FILE_STATE_EXTERNAL]->filesum;
 
-        $this->statusdata = $statusdata;
+        $this->data = $data;
     }
 }

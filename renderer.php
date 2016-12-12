@@ -38,7 +38,7 @@ class tool_sssfs_renderer extends plugin_renderer_base {
                              get_string('file_status:files', 'tool_sssfs'),
                              get_string('file_status:size', 'tool_sssfs'));
 
-        foreach ($filestatus->statusdata as $filestate => $filetypedata) {
+        foreach ($filestatus->data as $filestate => $filetypedata) {
             $size = $filetypedata->filesum / 1024 / 1024; // Convert to MB.
             $size = round($size, 2);
             $filestate = $this->get_file_state_string($filestate);
