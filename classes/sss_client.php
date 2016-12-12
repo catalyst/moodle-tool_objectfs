@@ -25,11 +25,10 @@
 
 namespace tool_sssfs;
 
+require_once(__DIR__ . '/../sdk/aws-autoloader.php');
+
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
-
-
-require_once(__DIR__ . '/../sdk/aws-autoloader.php');
 
 defined('MOODLE_INTERNAL') || die();
 
