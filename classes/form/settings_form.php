@@ -56,51 +56,49 @@ class settings_form extends \moodleform {
             $connection = $client->test_connection();
         }
 
-        $regionoptions = array ('us-east-1' => 'us-east-1',
-                                'us-east-2' => 'us-east-2',
-                                'us-west-1' => 'us-west-1',
-                                'us-west-2' => 'us-west-2',
-                                'ap-northeast-2' => 'ap-northeast-2',
-                                'ap-southeast-1' => 'ap-southeast-1',
-                                'ap-southeast-2' => 'ap-southeast-2',
-                                'ap-northeast-1' => 'ap-northeast-1',
-                                'eu-central-1' => 'eu-central-1',
-                                'eu-west-1' => 'eu-west-1');
+        $regionoptions = array( 'us-east-1'          => 'us-east-1',
+                                'us-east-2'         => 'us-east-2',
+                                'us-west-1'         => 'us-west-1',
+                                'us-west-2'         => 'us-west-2',
+                                'ap-northeast-2'    => 'ap-northeast-2',
+                                'ap-southeast-1'    => 'ap-southeast-1',
+                                'ap-southeast-2'    => 'ap-southeast-2',
+                                'ap-northeast-1'    => 'ap-northeast-1',
+                                'eu-central-1'      => 'eu-central-1',
+                                'eu-west-1'         => 'eu-west-1');
+
+        $defaults = array(
+            'enabled'           => 0,
+            'key'               => '',
+            'secret'            => '',
+            'bucket'            => '',
+            'region'            => 'us-east-1',
+            'sizethreshold'     => 1024,
+            'minimumage'        => 86400,
+            'consistencydelay'  => 0,
+            'maxtaskruntime'    => 60,
+            'logging'           => 0
+        );
 
         $mform->addElement('advcheckbox', 'enabled', get_string('settings:enabled', 'tool_sssfs'));
         $mform->addHelpButton('enabled', 'settings:enabled', 'tool_sssfs');
-        if (isset($config->enabled)) {
-            $mform->setDefault('enabled', $config->enabled);
-        }
 
         $mform->addElement('header', 'awsheader', get_string('settings:awsheader', 'tool_sssfs'));
 
         $mform->addElement('text', 'key', get_string('settings:key', 'tool_sssfs'));
         $mform->addHelpButton('key', 'settings:key', 'tool_sssfs');
         $mform->setType("key", PARAM_TEXT);
-        if (isset($config->key)) {
-            $mform->setDefault('key', $config->key);
-        }
 
         $mform->addElement('passwordunmask', 'secret', get_string('settings:secret', 'tool_sssfs'), array('size' => 40));
         $mform->addHelpButton('secret', 'settings:secret', 'tool_sssfs');
         $mform->setType("secret", PARAM_TEXT);
-        if (isset($config->secret)) {
-            $mform->setDefault('secret', $config->secret);
-        }
 
         $mform->addElement('text', 'bucket', get_string('settings:bucket', 'tool_sssfs'));
         $mform->addHelpButton('bucket', 'settings:bucket', 'tool_sssfs');
         $mform->setType("bucket", PARAM_TEXT);
-        if (isset($config->bucket)) {
-            $mform->setDefault('bucket', $config->bucket);
-        }
 
         $mform->addElement('select', 'region', get_string('settings:region', 'tool_sssfs'), $regionoptions);
         $mform->addHelpButton('region', 'settings:region', 'tool_sssfs');
-        if (isset($config->region)) {
-            $mform->setDefault('region', $config->region);
-        }
 
         if ($connection) {
             $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_sssfs'), 'notifysuccess'));
@@ -114,30 +112,18 @@ class settings_form extends \moodleform {
         $mform->addElement('text', 'sizethreshold', get_string('settings:sizethreshold', 'tool_sssfs'));
         $mform->addHelpButton('sizethreshold', 'settings:sizethreshold', 'tool_sssfs');
         $mform->setType("sizethreshold", PARAM_INT);
-        if (isset($config->sizethreshold)) {
-            $mform->setDefault('sizethreshold', $config->sizethreshold);
-        }
 
         $mform->addElement('duration', 'minimumage', get_string('settings:minimumage', 'tool_sssfs'));
         $mform->addHelpButton('minimumage', 'settings:minimumage', 'tool_sssfs');
         $mform->setType("minimumage", PARAM_INT);
-        if (isset($config->minimumage)) {
-            $mform->setDefault('minimumage', $config->minimumage);
-        }
 
-        $mform->addElement('text', 'consistencydelay', get_string('settings:consistencydelay', 'tool_sssfs'));
+        $mform->addElement('duration', 'consistencydelay', get_string('settings:consistencydelay', 'tool_sssfs'));
         $mform->addHelpButton('consistencydelay', 'settings:consistencydelay', 'tool_sssfs');
         $mform->setType("consistencydelay", PARAM_INT);
-        if (isset($config->consistencydelay)) {
-            $mform->setDefault('consistencydelay', $config->consistencydelay);
-        }
 
         $mform->addElement('duration', 'maxtaskruntime', get_string('settings:maxtaskruntime', 'tool_sssfs'));
         $mform->addHelpButton('maxtaskruntime', 'settings:maxtaskruntime', 'tool_sssfs');
         $mform->setType("maxtaskruntime", PARAM_INT);
-        if (isset($config->minimumage)) {
-            $mform->setDefault('maxtaskruntime', $config->minimumage);
-        }
 
         $mform->addElement('header', 'loggingheader', get_string('settings:loggingheader', 'tool_sssfs'));
         $mform->setExpanded('loggingheader');
@@ -145,8 +131,13 @@ class settings_form extends \moodleform {
         $mform->addElement('advcheckbox', 'logging', get_string('settings:logging', 'tool_sssfs'));
         $mform->addHelpButton('logging', 'settings:logging', 'tool_sssfs');
         $mform->setType("logging", PARAM_INT);
-        if (isset($config->logging)) {
-            $mform->setDefault('logging', $config->logging);
+
+        foreach ($defaults as $key => $value) {
+            if (isset($config->$key)) {
+                $mform->setDefault($key, $config->$key);
+            } else {
+                $mform->setDefault($key, $value);
+            }
         }
 
         $this->add_action_buttons();
