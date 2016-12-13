@@ -26,6 +26,7 @@
 
 $string['pluginname'] = 'S3 File System';
 $string['push_to_sss_task'] = 'S3 file system upload task';
+$string['generate_status_report_task'] = 'S3 file status report generator task';
 
 $string['file_status:page'] = 'S3 file status';
 $string['file_status:location'] = 'File location';
@@ -35,7 +36,8 @@ $string['file_status:state:duplicated'] = 'Duplicated';
 $string['file_status:state:local'] = 'Local';
 $string['file_status:state:external'] = 'External';
 $string['file_status:state:unknown'] = 'Unknown';
-
+$string['file_status:last_run'] = 'This report was generated on {$a}';
+$string['file_status:never_run'] = 'The task to generate this report has not been run.';
 
 $string['settings:enabled'] = 'Enable S3 file system';
 $string['settings:enabled_help'] = 'Enable or disable the S3 file system.';

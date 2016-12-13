@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * tool_sssfs tasks
+ * Task that pushes files to S3.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,26 +23,35 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_sssfs\task;
+
+use tool_sssfs\renderables\sss_file_status;
+require_once( __DIR__ . '/../../lib.php');
+
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = array(
-    array(
-        'classname' => 'tool_sssfs\task\push_to_sss',
-        'blocking'  => 0,
-        'minute'    => '*',
-        'hour '     => '*',
-        'day'       => '*',
-        'dayofweek' => '*',
-        'month'     => '*'
-    ),
-    array(
-        'classname' => 'tool_sssfs\task\generate_status_report',
-        'blocking'  => 0,
-        'minute'    => '7',
-        'hour '     => '*',
-        'day'       => '*',
-        'dayofweek' => '*',
-        'month'     => '*'
-    ),
-);
+class generate_status_report extends \core\task\scheduled_task {
+
+    /**
+     * Get task name
+     */
+    public function get_name() {
+        return get_string('generate_status_report_task', 'tool_sssfs');
+    }
+
+    /**
+     * Execute task
+     */
+    public function execute() {
+
+        $config = get_config('tool_sssfs');
+
+        if ($config->enabled) {
+            $filestatus = new sss_file_status();
+            $filestatus->calculate_file_status();
+            $filestatus->save_data();
+        }
+    }
+}
+
 

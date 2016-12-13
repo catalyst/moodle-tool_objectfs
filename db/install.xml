@@ -15,5 +15,17 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="tool_sssfs_file_status_data" COMMENT="File status for S3 files">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="state" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="filecount" TYPE="int" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="filesum" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecalculated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="What time the data was calculated"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
   </TABLES>
 </XMLDB>

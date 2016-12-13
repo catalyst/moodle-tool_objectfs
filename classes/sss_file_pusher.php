@@ -24,9 +24,12 @@
  */
 
 namespace tool_sssfs;
-require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+
+
 
 class sss_file_pusher {
     private $client;

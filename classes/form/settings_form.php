@@ -25,11 +25,11 @@
 
 namespace tool_sssfs\form;
 
+defined('MOODLE_INTERNAL') || die();
+
 use tool_sssfs\sss_client;
 
 require_once($CFG->libdir . "/formslib.php");
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Form for editing an Enviroment bar.

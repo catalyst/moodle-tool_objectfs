@@ -29,13 +29,68 @@ defined('MOODLE_INTERNAL') || die();
 
 class sss_file_status implements \renderable {
 
-    public $data;
+    private $data;
 
     public function __construct () {
-        $this->calculate_file_status();
+
     }
 
-    private function calculate_file_status() {
+    private function load_data() {
+        global $DB;
+        $data = array();
+
+        $records = $DB->get_records('tool_sssfs_file_status_data');
+
+        if (count($records) === 0) {
+            return false;
+        }
+
+        foreach ($records as $record) {
+            $data[$record->state] = new \stdClass();
+            $data[$record->state]->filecount = $record->filecount;
+            $data[$record->state]->filesum = $record->filesum;
+            $data[$record->state]->timecalculated = $record->timecalculated;
+        }
+
+        $this->data = $data;
+
+        return true;
+    }
+
+    public function save_data() {
+        global $DB;
+        $timecalculated = time();
+        foreach ($this->data as $filestate => $filestatedata) {
+
+            $record = $DB->get_record('tool_sssfs_file_status_data', array('state' => $filestate));
+
+            if (!$record) {
+                $record = new \stdClass();
+            }
+
+            $record->state = $filestate;
+            $record->filecount = $filestatedata->filecount;
+            $record->filesum = $filestatedata->filesum;
+            $record->timecalculated = $timecalculated;
+
+            if (isset($record->id)) {
+                $DB->update_record('tool_sssfs_file_status_data', $record);
+            } else {
+                $DB->insert_record('tool_sssfs_file_status_data', $record);
+            }
+        }
+    }
+
+    public function get_data() {
+        if ($this->data || $this->load_data()) {
+            return $this->data;
+        }
+        return false;
+    }
+
+
+
+    public function calculate_file_status() {
         global $DB;
 
         $data = array();
@@ -64,5 +119,7 @@ class sss_file_status implements \renderable {
         $data[SSS_FILE_STATE_LOCAL]->filesum -= $data[SSS_FILE_STATE_DUPLICATED]->filesum + $data[SSS_FILE_STATE_EXTERNAL]->filesum;
 
         $this->data = $data;
+
+        return $data;
     }
 }

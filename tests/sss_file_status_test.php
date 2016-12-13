@@ -55,12 +55,13 @@ class tool_sssfs_sss_file_status_testcase extends advanced_testcase {
         global $DB;
         $states = array(SSS_FILE_STATE_LOCAL, SSS_FILE_STATE_DUPLICATED, SSS_FILE_STATE_EXTERNAL);
 
-        $status = new sss_file_status();
+        $filestatus = new sss_file_status();
+        $data = $filestatus->calculate_file_status();
 
         // Should all be 0 duplicated and external states.
         foreach ($states as $state) {
-            $this->check_state_file_summary($status->data, SSS_FILE_STATE_DUPLICATED, 0, 0);
-            $this->check_state_file_summary($status->data, SSS_FILE_STATE_EXTERNAL, 0, 0);
+            $this->check_state_file_summary($data, SSS_FILE_STATE_DUPLICATED, 0, 0);
+            $this->check_state_file_summary($data, SSS_FILE_STATE_EXTERNAL, 0, 0);
         }
 
         $client = new sss_mock_client();
@@ -75,11 +76,11 @@ class tool_sssfs_sss_file_status_testcase extends advanced_testcase {
 
         $pusher->push();
 
-        $status = new sss_file_status();
+        $data = $filestatus->calculate_file_status();
 
         $postpushcount = $DB->count_records('tool_sssfs_filestate');
         $this->assertEquals(10, $postpushcount);
-        $this->check_state_file_summary($status->data, SSS_FILE_STATE_DUPLICATED, 10, $singlefilesize * 10);
+        $this->check_state_file_summary($data, SSS_FILE_STATE_DUPLICATED, 10, $singlefilesize * 10);
 
         // TODO: when clean task implemented. Check External portion.
     }

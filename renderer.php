@@ -32,20 +32,35 @@ class tool_sssfs_renderer extends plugin_renderer_base {
     protected function render_sss_file_status(sss_file_status $filestatus) {
         $output = '';
 
-        $table = new html_table();
+        $data = $filestatus->get_data();
 
-        $table->head = array(get_string('file_status:location', 'tool_sssfs'),
-                             get_string('file_status:files', 'tool_sssfs'),
-                             get_string('file_status:size', 'tool_sssfs'));
+        $lastrun = 0;
 
-        foreach ($filestatus->data as $filestate => $filetypedata) {
-            $size = $filetypedata->filesum / 1024 / 1024; // Convert to MB.
-            $size = round($size, 2);
-            $filestate = $this->get_file_state_string($filestate);
-            $table->data[] = array($filestate, $filetypedata->filecount, $size);
+        if ($data) {
+            $table = new html_table();
+
+            $table->head = array(get_string('file_status:location', 'tool_sssfs'),
+                                 get_string('file_status:files', 'tool_sssfs'),
+                                 get_string('file_status:size', 'tool_sssfs'));
+
+            foreach ($data as $filestate => $filestatedata) {
+                $size = $filestatedata->filesum / 1024 / 1024; // Convert to MB.
+                $size = round($size, 2);
+                $filestate = $this->get_file_state_string($filestate);
+                $table->data[] = array($filestate, $filestatedata->filecount, $size);
+                $lastrun = $filestatedata->timecalculated;
+            }
+
+            $output .= html_writer::table($table);
         }
 
-        $output .= html_writer::table($table);
+        if ($lastrun) {
+            $labeltext = get_string('file_status:last_run', 'tool_sssfs', userdate($lastrun));
+        } else {
+            $labeltext = get_string('file_status:never_run', 'tool_sssfs');
+        }
+
+        $output .= html_writer::label($labeltext, null);
 
         return $output;
     }
