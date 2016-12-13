@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * Deletes files that are old enough and are in S3.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,38 +23,23 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
-
-use tool_sssfs\file_manipulators\pusher;
-use tool_sssfs\sss_client;
-use tool_sssfs\sss_file_system;
+namespace tool_sssfs\file_manipulators;
 
 defined('MOODLE_INTERNAL') || die();
 
-class push_to_sss extends \core\task\scheduled_task {
+require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('push_to_sss_task', 'tool_sssfs');
+abstract class manipulator {
+    protected $client;
+    protected $filesystem;
+
+    public function __construct($client, $filesystem, $maxruntime) {
+         $this->client = $client;
+         $this->filesystem = $filesystem;
+         $this->finishtime = time() + $maxruntime;
     }
 
-    /**
-     * Execute task
-     */
-    public function execute() {
+    abstract public function get_candidate_content_hashes();
 
-        $config = get_config('tool_sssfs');
-
-        if ($config->enabled) {
-            $client = new sss_client($config);
-            $filesystem = sss_file_system::instance();
-            $filepusher = new pusher($client, $filesystem, $config);
-            $contenthashes = $filepusher->get_candidate_content_hashes();
-            $filepusher->execute($contenthashes);
-        }
-    }
+    abstract public function execute($candidatehashes);
 }
-
-

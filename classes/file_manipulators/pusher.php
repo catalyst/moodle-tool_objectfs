@@ -23,32 +23,26 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs;
+namespace tool_sssfs\file_manipulators;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
-
-
-class sss_file_pusher {
-    private $client;
-    private $filesystem;
+class pusher extends manipulator {
     private $sizethreshold;
     private $minimumage;
-    private $maxruntime;
 
     public function __construct($client, $filesystem, $config) {
-        $this->client = $client;
-        $this->filesystem = $filesystem;
+        parent::__construct($client, $filesystem, $config->maxtaskruntime);
         $this->sizethreshold = $config->sizethreshold;
         $this->minimumage = $config->minimumage;
-        $this->maxruntime = $config->maxtaskruntime; // Seconds.
+
     }
 
-    private function get_push_candidate_content_hashes() {
+    public function get_candidate_content_hashes() {
         global $DB;
-        $sql = 'SELECT F.contenthash, MAX(F.filesize), MIN(F.timecreated)
+        $sql = 'SELECT F.contenthash
                 FROM {files} F
                 LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
                 GROUP BY F.contenthash, F.filesize, SF.state
@@ -59,29 +53,25 @@ class sss_file_pusher {
 
         $params = array($maxcreatedtimestamp, $this->sizethreshold, SSS_FILE_STATE_LOCAL);
 
-        $contenthashes = $DB->get_records_sql($sql, $params);
+        $contenthashes = $DB->get_fieldset_sql($sql, $params);
 
         return $contenthashes;
     }
 
-    public function push() {
+    public function execute($candidatehashes) {
         global $DB;
 
-        $finishtime = time() + $this->maxruntime;
-
-        $contenthashestopush = $this->get_push_candidate_content_hashes();
-
-        foreach ($contenthashestopush as $contenthash) {
-            if (time() > $finishtime) {
+        foreach ($candidatehashes as $contenthash) {
+            if (time() > $this->finishtime) {
                 break;
             }
 
-            $filecontent = $this->filesystem->get_content_from_hash($contenthash->contenthash);
+            $filecontent = $this->filesystem->get_content_from_hash($contenthash);
 
             if ($filecontent !== false) {
-                $success = $this->client->push_file($contenthash->contenthash, $filecontent);
+                $success = $this->client->push_file($contenthash, $filecontent);
                 if ($success) {
-                    log_file_state($contenthash->contenthash, SSS_FILE_STATE_DUPLICATED);
+                    log_file_state($contenthash, SSS_FILE_STATE_DUPLICATED);
                 }
             }
         }

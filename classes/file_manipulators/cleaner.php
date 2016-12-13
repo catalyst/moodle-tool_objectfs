@@ -23,6 +23,26 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- namespace tool_sssfs;
+namespace tool_sssfs\file_manipulators;
 
- defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+
+class cleaner extends manipulator {
+    private $consistencydelay;
+
+    public function __construct($client, $filesystem, $config) {
+        parent::__construct($client, $filesystem);
+        $this->consistencydelay = $config->consistencydelay;
+    }
+
+    public function get_candidate_content_hashes() {
+        // Get records from table over consistancy delay.
+        // Ensure contents, hashed = their content hash.
+    }
+
+    public function execute($candidatehashes) {
+        
+    }
+}

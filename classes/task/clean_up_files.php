@@ -25,13 +25,12 @@
 
 namespace tool_sssfs\task;
 
-use tool_sssfs\file_manipulators\pusher;
 use tool_sssfs\sss_client;
 use tool_sssfs\sss_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
-class push_to_sss extends \core\task\scheduled_task {
+class clean_up_files extends \core\task\scheduled_task {
 
     /**
      * Get task name
@@ -50,9 +49,6 @@ class push_to_sss extends \core\task\scheduled_task {
         if ($config->enabled) {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
-            $filepusher = new pusher($client, $filesystem, $config);
-            $contenthashes = $filepusher->get_candidate_content_hashes();
-            $filepusher->execute($contenthashes);
         }
     }
 }

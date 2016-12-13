@@ -29,7 +29,7 @@ require_once(__DIR__ . '/sss_mock_client.php');
 require_once(__DIR__ . '/testlib.php');
 
 use tool_sssfs\sss_file_system;
-use tool_sssfs\sss_file_pusher;
+use tool_sssfs\file_manipulators\pusher;
 
 class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
 
@@ -51,7 +51,7 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         $filesystem = sss_file_system::instance();
         $config = generate_config();
 
-        $pusher = new sss_file_pusher($client, $filesystem, $config);
+        $filepusher = new pusher($client, $filesystem, $config);
 
         $file = save_file_to_local_storage();
 
@@ -61,7 +61,8 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
 
         $this->assertEquals(0, $prepushcount);
 
-        $pusher->push();
+        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $filepusher->execute($contenthashes);
 
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -77,7 +78,7 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         // Set size threshold of 1000.
         $config = generate_config(1000);
 
-        $pusher = new sss_file_pusher($client, $filesystem, $config);
+        $filepusher = new pusher($client, $filesystem, $config);
 
         // Set file size to 100.
         $file = save_file_to_local_storage(100);
@@ -89,7 +90,8 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         // Assert table does not contain entry.
         $this->assertEquals(0, $prepushcount);
 
-        $pusher->push();
+        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $filepusher->execute($contenthashes);
 
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -106,7 +108,7 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         // Set minimum age to a large value.
         $config = generate_config(0, 99999);
 
-        $pusher = new sss_file_pusher($client, $filesystem, $config);
+        $filepusher = new pusher($client, $filesystem, $config);
 
         $file = save_file_to_local_storage();
 
@@ -117,7 +119,8 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         // Assert table does not contain entry.
         $this->assertEquals(0, $prepushcount);
 
-        $pusher->push();
+        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $filepusher->execute($contenthashes);
 
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -134,7 +137,7 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         $filesystem = sss_file_system::instance();
         $config = generate_config();
 
-        $pusher = new sss_file_pusher($client, $filesystem, $config);
+        $filepusher = new pusher($client, $filesystem, $config);
         $file = save_file_to_local_storage();
         $filecontenthash = $file->get_contenthash();
         $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
@@ -144,7 +147,8 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
 
         $client->set_push_success(false);
 
-        $pusher->push();
+        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $filepusher->execute($contenthashes);
 
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -161,7 +165,7 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         // Set max runtime to 0.
         $config = generate_config(0, -10, 0);
 
-        $pusher = new sss_file_pusher($client, $filesystem, $config);
+        $filepusher = new pusher($client, $filesystem, $config);
         $file = save_file_to_local_storage();
         $filecontenthash = $file->get_contenthash();
         $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
@@ -171,7 +175,8 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
 
         $client->set_push_success(false);
 
-        $pusher->push();
+        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $filepusher->execute($contenthashes);
 
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
