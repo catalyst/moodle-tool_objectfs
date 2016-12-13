@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 use tool_sssfs\renderables\sss_file_status;
 use tool_sssfs\sss_file_system;
-use tool_sssfs\sss_file_pusher;
+use tool_sssfs\file_manipulators\pusher;
 require_once(__DIR__ . '/../lib.php');
 require_once(__DIR__ . '/testlib.php');
 require_once(__DIR__ . '/sss_mock_client.php');
@@ -67,14 +67,15 @@ class tool_sssfs_sss_file_status_testcase extends advanced_testcase {
         $client = new sss_mock_client();
         $filesystem = sss_file_system::instance();
         $config = generate_config(10); // 10 MB size threshold.
-        $pusher = new sss_file_pusher($client, $filesystem, $config);
+        $pusher = new pusher($client, $filesystem, $config);
 
         $singlefilesize = 100 * 1024; // 100mb.
         for ($i = 1; $i <= 10; $i++) {
             save_file_to_local_storage(1024 * 100, "test-{$i}.txt", "test-{$i} content"); // 100 mb files.
         }
 
-        $pusher->push();
+        $contenthashes = $pusher->get_candidate_content_hashes();
+        $pusher->execute($contenthashes);
 
         $data = $filestatus->calculate_file_status();
 

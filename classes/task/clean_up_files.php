@@ -25,6 +25,7 @@
 
 namespace tool_sssfs\task;
 
+use tool_sssfs\file_manipulators\cleaner;
 use tool_sssfs\sss_client;
 use tool_sssfs\sss_file_system;
 
@@ -36,7 +37,7 @@ class clean_up_files extends \core\task\scheduled_task {
      * Get task name
      */
     public function get_name() {
-        return get_string('push_to_sss_task', 'tool_sssfs');
+        return get_string('clean_up_files_task', 'tool_sssfs');
     }
 
     /**
@@ -49,6 +50,8 @@ class clean_up_files extends \core\task\scheduled_task {
         if ($config->enabled) {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
+            $cleaner = new cleaner($client, $filesystem, $config);
+            $cleaner->get_candidate_content_hashes();
         }
     }
 }

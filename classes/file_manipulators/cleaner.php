@@ -33,16 +33,34 @@ class cleaner extends manipulator {
     private $consistencydelay;
 
     public function __construct($client, $filesystem, $config) {
-        parent::__construct($client, $filesystem);
+        parent::__construct($client, $filesystem, $config->maxtaskruntime);
         $this->consistencydelay = $config->consistencydelay;
     }
 
     public function get_candidate_content_hashes() {
         // Get records from table over consistancy delay.
         // Ensure contents, hashed = their content hash.
+        global $DB;
+
+        // Consistency delay of -1 means never remove local files.
+        if ($this->consistencydelay === -1) {
+            return array();
+        }
+
+        $sql = 'SELECT SF.contenthash
+                FROM {tool_sssfs_filestate} SF
+                WHERE SF.timeduplicated < ? and SF.state = ?';
+
+        $consistancythrehold = time() - $this->consistencydelay;
+
+        $params = array($consistancythrehold, SSS_FILE_STATE_DUPLICATED);
+
+        $contenthashes = $DB->get_fieldset_sql($sql, $params);
+
+        return $contenthashes;
     }
 
     public function execute($candidatehashes) {
-        
+
     }
 }

@@ -26,6 +26,8 @@
 
 $string['pluginname'] = 'S3 File System';
 $string['push_to_sss_task'] = 'S3 file system upload task';
+$string['clean_up_files_task'] = 'S3 file system delete local files task';
+
 $string['generate_status_report_task'] = 'S3 file status report generator task';
 
 $string['file_status:page'] = 'S3 file status';
