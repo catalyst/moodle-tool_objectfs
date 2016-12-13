@@ -40,7 +40,7 @@ class sss_file_pusher {
         $this->filesystem = $filesystem;
         $this->sizethreshold = $config->sizethreshold;
         $this->minimumage = $config->minimumage;
-        $this->maxruntime = 60; // Seconds.
+        $this->maxruntime = $config->maxtaskruntime; // Seconds.
     }
 
     private function get_push_candidate_content_hashes() {

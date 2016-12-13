@@ -151,4 +151,31 @@ class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
         // Assert table still does not contain entry.
         $this->assertEquals(0, $postpushcount);
     }
+
+    public function test_max_task_runtime () {
+        global $DB;
+
+        $client = new sss_mock_client();
+        $filesystem = sss_file_system::instance();
+
+        // Set max runtime to 0.
+        $config = generate_config(0, -10, 0);
+
+        $pusher = new sss_file_pusher($client, $filesystem, $config);
+        $file = save_file_to_local_storage();
+        $filecontenthash = $file->get_contenthash();
+        $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+
+        // Assert table does not contain entry.
+        $this->assertEquals(0, $prepushcount);
+
+        $client->set_push_success(false);
+
+        $pusher->push();
+
+        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+
+        // Assert table still does not contain entry.
+        $this->assertEquals(0, $postpushcount);
+    }
 }

@@ -57,8 +57,9 @@ function save_config_data($data) {
     $config->region = $data->region;
     $config->sizethreshold = $data->sizethreshold * 1024; // Convert from kb.
     $config->minimumage = $data->minimumage;
-    $config->consistancydelay = $data->consistancydelay;
-    $config->logginglocation = $data->logginglocation;
+    $config->consistencydelay = $data->consistencydelay;
+    $config->logging = $data->logging;
+    $config->maxtaskruntime = $data->maxtaskruntime;
 
     // TODO: Encrypt credentials.
 

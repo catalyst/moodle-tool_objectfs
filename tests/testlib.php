@@ -54,7 +54,7 @@ function save_file_to_local_storage($filesize = 10, $filename = 'test.txt', $fil
     return $file;
 }
 
-function generate_config($sizethreshold = 0, $minimumage = -10, $consistancydelay = -1) {
+function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime = 60, $consistencydelay = -1) {
     $config = new stdClass();
     $config->enabled = 1;
     $config->key = 123;
@@ -63,9 +63,9 @@ function generate_config($sizethreshold = 0, $minimumage = -10, $consistancydela
     $config->region = 'aws-region';
     $config->sizethreshold = $sizethreshold * 1024; // Convert from kb.
     $config->minimumage = $minimumage;
-    $config->consistancydelay = $consistancydelay;
-    $config->logginglocation = '';
-
+    $config->consistencydelay = $consistencydelay;
+    $config->logging = 1;
+    $config->maxtaskruntime = $maxtaskruntime;
     return $config;
 }
 

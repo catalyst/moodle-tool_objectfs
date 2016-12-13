@@ -61,4 +61,24 @@ class sss_client {
             return false;
         }
     }
+
+    public function test_connection() {
+        try {
+            // There is no check connection in the AWS API.
+            // We use list buckets instead and check the bucket is in the list.
+            $result = $this->client->listBuckets();
+            $buckets = $result['Buckets'];
+
+            foreach ($buckets as $bucket) {
+                if ($bucket['Name'] == $this->bucket) {
+                    return true;
+                }
+            }
+
+        } catch (S3Exception $e) {
+            mtrace($e);
+
+        }
+        return false;
+    }
 }

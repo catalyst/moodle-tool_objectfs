@@ -25,6 +25,8 @@
 
 namespace tool_sssfs\form;
 
+use tool_sssfs\sss_client;
+
 require_once($CFG->libdir . "/formslib.php");
 
 defined('MOODLE_INTERNAL') || die();
@@ -42,9 +44,17 @@ class settings_form extends \moodleform {
      * @see moodleform::definition()
      */
     public function definition() {
+
+        global $OUTPUT;
         $mform = $this->_form;
 
         $config = $this->_customdata['config'];
+
+        $connection = false;
+        if (isset($config->key) && isset($config->secret) && isset($config->bucket)) {
+            $client = new sss_client($config);
+            $connection = $client->test_connection();
+        }
 
         $regionoptions = array ('us-east-1' => 'us-east-1',
                                 'us-east-2' => 'us-east-2',
@@ -72,7 +82,7 @@ class settings_form extends \moodleform {
             $mform->setDefault('key', $config->key);
         }
 
-        $mform->addElement('text', 'secret', get_string('settings:secret', 'tool_sssfs'));
+        $mform->addElement('passwordunmask', 'secret', get_string('settings:secret', 'tool_sssfs'), array('size' => 40));
         $mform->addHelpButton('secret', 'settings:secret', 'tool_sssfs');
         $mform->setType("secret", PARAM_TEXT);
         if (isset($config->secret)) {
@@ -92,9 +102,14 @@ class settings_form extends \moodleform {
             $mform->setDefault('region', $config->region);
         }
 
-        $mform->addElement('button', 'checkconnection', get_string('settings:checkconnenction', 'tool_sssfs'));
+        if ($connection) {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_sssfs'), 'notifysuccess'));
+        } else {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_sssfs'), 'notifyfailure'));
+        }
 
         $mform->addElement('header', 'filetransferheader', get_string('settings:filetransferheader', 'tool_sssfs'));
+        $mform->setExpanded('filetransferheader');
 
         $mform->addElement('text', 'sizethreshold', get_string('settings:sizethreshold', 'tool_sssfs'));
         $mform->addHelpButton('sizethreshold', 'settings:sizethreshold', 'tool_sssfs');
@@ -110,20 +125,28 @@ class settings_form extends \moodleform {
             $mform->setDefault('minimumage', $config->minimumage);
         }
 
-        $mform->addElement('text', 'consistancydelay', get_string('settings:consistancydelay', 'tool_sssfs'));
-        $mform->addHelpButton('consistancydelay', 'settings:consistancydelay', 'tool_sssfs');
-        $mform->setType("consistancydelay", PARAM_INT);
-        if (isset($config->consistancydelay)) {
-            $mform->setDefault('consistancydelay', $config->consistancydelay);
+        $mform->addElement('text', 'consistencydelay', get_string('settings:consistencydelay', 'tool_sssfs'));
+        $mform->addHelpButton('consistencydelay', 'settings:consistencydelay', 'tool_sssfs');
+        $mform->setType("consistencydelay", PARAM_INT);
+        if (isset($config->consistencydelay)) {
+            $mform->setDefault('consistencydelay', $config->consistencydelay);
+        }
+
+        $mform->addElement('duration', 'maxtaskruntime', get_string('settings:maxtaskruntime', 'tool_sssfs'));
+        $mform->addHelpButton('maxtaskruntime', 'settings:maxtaskruntime', 'tool_sssfs');
+        $mform->setType("maxtaskruntime", PARAM_INT);
+        if (isset($config->minimumage)) {
+            $mform->setDefault('maxtaskruntime', $config->minimumage);
         }
 
         $mform->addElement('header', 'loggingheader', get_string('settings:loggingheader', 'tool_sssfs'));
+        $mform->setExpanded('loggingheader');
 
-        $mform->addElement('text', 'logginglocation', get_string('settings:logginglocation', 'tool_sssfs'));
-        $mform->addHelpButton('logginglocation', 'settings:logginglocation', 'tool_sssfs');
-        $mform->setType("logginglocation", PARAM_SAFEPATH);
-        if (isset($config->logginglocation)) {
-            $mform->setDefault('logginglocation', $config->logginglocation);
+        $mform->addElement('advcheckbox', 'logging', get_string('settings:logging', 'tool_sssfs'));
+        $mform->addHelpButton('logging', 'settings:logging', 'tool_sssfs');
+        $mform->setType("logging", PARAM_INT);
+        if (isset($config->logging)) {
+            $mform->setDefault('logging', $config->logging);
         }
 
         $this->add_action_buttons();
