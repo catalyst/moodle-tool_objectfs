@@ -26,10 +26,15 @@ namespace tool_sssfs;
 
 use core_files\filestorage\file_system;
 use core_files\filestorage\file_storage;
+use core_files\filestorage\stored_file;
+use core_files\filestorage\file_exception;
+use tool_sssfs\sss_client;
 
 defined('MOODLE_INTERNAL') || die();
 
 class sss_file_system extends file_system {
+
+    private $sssclient;
 
     /**
      * Constructor.
@@ -44,8 +49,9 @@ class sss_file_system extends file_system {
      */
     public function __construct($filedir, $trashdir, $dirpermissions, $filepermissions, file_storage $fs = null) {
         parent::__construct($filedir, $trashdir, $dirpermissions, $filepermissions, $fs);
+        $this->config = get_config('tool_sssfs');
+        $this->sssclient = new sss_client($this->config);
     }
-
 
     public function get_content_from_contenthash($contenthash) {
         if ($this->is_readable_by_hash($contenthash)) {
@@ -64,4 +70,39 @@ class sss_file_system extends file_system {
         return false;
     }
 
+    private function get_sss_fullpath_from_file(stored_file $file) {
+        $contenthash = $file->get_contenthash();
+        $path = $this->sssclient->get_fullpath_from_contenthash($contenthash);
+        return $path;
+    }
+
+    public function readfile(stored_file $file) {
+        $canreadlocal = $this->is_readable($file);
+        if ($canreadlocal) {
+            $path = $this->get_fullpath_from_storedfile($file, true);
+        } else {
+            $path = $this->get_sss_fullpath_from_file($file);
+        }
+        readfile_allow_large($path, $file->get_filesize());
+    }
+
+    public function get_content(stored_file $file) {
+        $canreadlocal = $this->is_readable($file);
+        if ($canreadlocal) {
+            $path = $this->get_fullpath_from_storedfile($file, true);
+        } else {
+            $path = $this->get_sss_fullpath_from_file($file);
+        }
+        return file_get_contents($path);
+    }
+
+    public function get_content_file_handle($file, $type = stored_file::FILE_HANDLE_FOPEN) {
+        $canreadlocal = $this->is_readable($file);
+        if ($canreadlocal) {
+            $path = $this->get_fullpath_from_storedfile($file, true);
+        } else {
+            $path = $this->get_sss_fullpath_from_file($file);
+        }
+        return self::get_file_handle_for_path($path, $type);
+    }
 }

@@ -38,7 +38,7 @@ $config = get_config('tool_sssfs');
 $form = new settings_form(null, array('config' => $config));
 
 if ($data = $form->get_data()) {
-    save_config_data($data);
+    save_sss_config_data($data);
     redirect(new moodle_url('/admin/tool/sssfs/index.php'));
 }
 

@@ -38,6 +38,9 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
         global $CFG;
         $this->resetAfterTest(true);
         $CFG->filesystem_handler_class = '\tool_sssfs\sss_file_system';
+        $this->config = generate_config();
+        $this->client = new sss_mock_client();
+        $this->filesystem = sss_file_system::instance();
     }
 
     protected function tearDown() {
@@ -46,12 +49,7 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
 
     public function test_can_clean_file() {
         global $DB;
-
-        $client = new sss_mock_client();
-        $filesystem = sss_file_system::instance();
-        $config = generate_config();
-
-        $filecleaner = new cleaner($client, $filesystem, $config);
+        $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
 
         $file = save_file_to_local_storage();
 
@@ -69,19 +67,17 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
 
         $filecleaner->execute($candidatehashes);
 
-        $isreadable = $filesystem->is_readable($file);
+        $isreadable = $this->filesystem->is_readable($file);
 
         $this->assertFalse($isreadable);
     }
 
     public function test_consisency_delay() {
-        $client = new sss_mock_client();
-        $filesystem = sss_file_system::instance();
 
         // Set consistency delay to 0 - should not run.
-        $config = generate_config(0, -10, 60, 0);
+        $this->config = generate_config(0, -10, 60, 0);
 
-        $filecleaner = new cleaner($client, $filesystem, $config);
+        $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
 
         $file = save_file_to_local_storage();
 
@@ -95,7 +91,7 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
         // Should not delete the file.
         $filecleaner->execute($candidatehashes);
 
-        $isreadable = $filesystem->is_readable($file);
+        $isreadable = $this->filesystem->is_readable($file);
 
         $this->assertTrue($isreadable);
     }

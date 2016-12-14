@@ -48,7 +48,7 @@ function log_file_state($contenthash, $state) {
     }
 }
 
-function save_config_data($data) {
+function save_sss_config_data($data) {
     $config = new stdClass();
     $config->enabled = $data->enabled;
     $config->key = $data->key;

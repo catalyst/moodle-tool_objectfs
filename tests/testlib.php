@@ -23,8 +23,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 defined('MOODLE_INTERNAL') || die;
+
+require_once(__DIR__ . '/../lib.php');
 
 function save_file_to_local_storage($filesize = 10, $filename = 'test.txt', $filecontent = 'test') {
     global $DB;
@@ -75,6 +76,7 @@ function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime 
     $config->consistencydelay = $consistencydelay;
     $config->logging = 1;
     $config->maxtaskruntime = $maxtaskruntime;
+    save_sss_config_data($config);
     return $config;
 }
 

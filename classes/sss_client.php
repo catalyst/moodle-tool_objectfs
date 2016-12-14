@@ -46,6 +46,7 @@ class sss_client {
                 'region' => $config->region,
                 'version' => AWS_API_VERSION
         ));
+        $this->client->registerStreamWrapper();
     }
 
     public function push_file($filekey, $filecontent) {
@@ -78,6 +79,11 @@ class sss_client {
             mtrace($e);
         }
         return false;
+    }
+
+    // Returns s3 fullpath to use with php file functions.
+    public function get_fullpath_from_contenthash($contenthash) {
+        return "s3://{$this->bucket}/{$contenthash}";
     }
 
     public function test_connection() {

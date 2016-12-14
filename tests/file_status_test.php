@@ -40,6 +40,9 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
         global $CFG;
         $this->resetAfterTest(true);
         $CFG->filesystem_handler_class = '\tool_sssfs\sss_file_system';
+        $this->config = generate_config();
+        $this->client = new sss_mock_client();
+        $this->filesystem = sss_file_system::instance();
     }
 
     protected function tearDown() {
@@ -64,10 +67,8 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
             $this->check_state_file_summary($data, SSS_FILE_STATE_EXTERNAL, 0, 0);
         }
 
-        $client = new sss_mock_client();
-        $filesystem = sss_file_system::instance();
-        $config = generate_config(10); // 10 MB size threshold.
-        $pusher = new pusher($client, $filesystem, $config);
+        $this->config = generate_config(10); // 10 MB size threshold.
+        $pusher = new pusher($this->client, $this->filesystem, $this->config);
 
         $singlefilesize = 100 * 1024; // 100mb.
         for ($i = 1; $i <= 10; $i++) {
