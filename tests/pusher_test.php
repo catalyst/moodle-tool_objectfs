@@ -31,7 +31,7 @@ require_once(__DIR__ . '/testlib.php');
 use tool_sssfs\sss_file_system;
 use tool_sssfs\file_manipulators\pusher;
 
-class tool_sssfs_sss_file_pusher_testcase extends advanced_testcase {
+class tool_sssfs_pusher_testcase extends advanced_testcase {
 
 
     protected function setUp() {

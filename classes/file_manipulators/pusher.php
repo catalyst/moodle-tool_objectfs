@@ -62,11 +62,11 @@ class pusher extends manipulator {
         global $DB;
 
         foreach ($candidatehashes as $contenthash) {
-            if (time() > $this->finishtime) {
+            if (time() >= $this->finishtime) {
                 break;
             }
 
-            $filecontent = $this->filesystem->get_content_from_hash($contenthash);
+            $filecontent = $this->filesystem->get_content_from_contenthash($contenthash);
 
             if ($filecontent !== false) {
                 $success = $this->client->push_file($contenthash, $filecontent);

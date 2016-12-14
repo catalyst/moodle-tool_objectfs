@@ -51,7 +51,8 @@ class clean_up_files extends \core\task\scheduled_task {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
             $cleaner = new cleaner($client, $filesystem, $config);
-            $cleaner->get_candidate_content_hashes();
+            $candidatehashes = $cleaner->get_candidate_content_hashes();
+            $cleaner->execute($candidatehashes);
         }
     }
 }

@@ -38,12 +38,10 @@ class cleaner extends manipulator {
     }
 
     public function get_candidate_content_hashes() {
-        // Get records from table over consistancy delay.
-        // Ensure contents, hashed = their content hash.
         global $DB;
 
-        // Consistency delay of -1 means never remove local files.
-        if ($this->consistencydelay === -1) {
+        // Consistency delay of 0 means never remove local files.
+        if ($this->consistencydelay == 0) {
             return array();
         }
 
@@ -61,6 +59,29 @@ class cleaner extends manipulator {
     }
 
     public function execute($candidatehashes) {
+        global $DB;
+        foreach ($candidatehashes as $contenthash) {
 
+            if (time() >= $this->finishtime) {
+                break;
+            }
+
+            // We find the size here instead of in get_candidate_hashes
+            // so we dont have to do a massive group by.
+            $sql = 'SELECT max(filesize) from {files} where contenthash = ?';
+
+            $filesize = $DB->get_fieldset_sql($sql, array($contenthash));
+
+            $filesize = reset($filesize);
+
+            $fileinsss = $this->client->check_file($contenthash, $filesize);
+
+            if ($fileinsss) {
+                $success = $this->filesystem->delete_file_from_contenthash($contenthash);
+                if ($success) {
+                    log_file_state($contenthash, SSS_FILE_STATE_EXTERNAL);
+                }
+            }
+        }
     }
 }

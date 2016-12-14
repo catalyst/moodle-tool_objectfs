@@ -31,9 +31,11 @@ defined('MOODLE_INTERNAL') || die;
 class sss_mock_client extends sss_client {
 
     private $pushsuccess;
+    private $checksuccess;
 
     public function __construct() {
         $this->pushsuccess = true;
+        $this->checksuccess = true;
     }
 
     // True for success, false for failure.
@@ -41,8 +43,21 @@ class sss_mock_client extends sss_client {
         $this->pushsuccess = $success;
     }
 
+    // True for success, false for failure.
+    public function set_check_success($success) {
+        $this->checksuccess = $success;
+    }
+
     public function push_file($filekey, $filecontent) {
         if ($this->pushsuccess) {
+            return true;
+        } else {
+            return false; // Mock a failure.
+        }
+    }
+
+    public function check_file($filekey, $expectedsize) {
+        if ($this->checksuccess) {
             return true;
         } else {
             return false; // Mock a failure.

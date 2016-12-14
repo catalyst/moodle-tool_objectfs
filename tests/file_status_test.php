@@ -34,7 +34,7 @@ require_once(__DIR__ . '/sss_mock_client.php');
 
 
 
-class tool_sssfs_sss_file_status_testcase extends advanced_testcase {
+class tool_sssfs_file_status_testcase extends advanced_testcase {
 
     protected function setUp() {
         global $CFG;

@@ -46,9 +46,22 @@ class sss_file_system extends file_system {
         parent::__construct($filedir, $trashdir, $dirpermissions, $filepermissions, $fs);
     }
 
-    // Does not check if it is readable.
-    public function get_content_from_hash($contenthash) {
-        $filepath = $this->get_fullpath_from_hash($contenthash);
-        return file_get_contents($filepath);
+
+    public function get_content_from_contenthash($contenthash) {
+        if ($this->is_readable_by_hash($contenthash)) {
+            $filepath = $this->get_fullpath_from_hash($contenthash);
+            return file_get_contents($filepath);
+        }
+        return false;
     }
+
+    public function delete_file_from_contenthash($contenthash) {
+        if ($this->is_readable_by_hash($contenthash)) {
+            $filepath = $this->get_fullpath_from_hash($contenthash);
+            unlink($filepath);
+            return true;
+        }
+        return false;
+    }
+
 }

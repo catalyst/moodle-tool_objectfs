@@ -51,15 +51,33 @@ class sss_client {
     public function push_file($filekey, $filecontent) {
         try {
             $result = $this->client->putObject(array(
-                    'Bucket' => $this->bucket,
-                    'Key' => $filekey,
-                    'Body' => $filecontent
-                ));
+                        'Bucket' => $this->bucket,
+                        'Key' => $filekey,
+                        'Body' => $filecontent
+                    ));
             return $result;
         } catch (S3Exception $e) {
             mtrace($e);
             return false;
         }
+    }
+
+    // Checks file is in s3 and its size matches expeted.
+    public function check_file($filekey, $expectedsize) {
+        try {
+            $result = $this->client->headObject(array(
+                        'Bucket' => $this->bucket,
+                        'Key' => $filekey,
+                ));
+
+            if ($result['ContentLength'] == $expectedsize) {
+                return true;
+            }
+
+        } catch (S3Exception $e) {
+            mtrace($e);
+        }
+        return false;
     }
 
     public function test_connection() {
@@ -77,8 +95,8 @@ class sss_client {
 
         } catch (S3Exception $e) {
             mtrace($e);
-
         }
+
         return false;
     }
 }
