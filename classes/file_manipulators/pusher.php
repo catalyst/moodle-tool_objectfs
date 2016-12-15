@@ -24,6 +24,9 @@
  */
 
 namespace tool_sssfs\file_manipulators;
+use core_files\filestorage\file_exception;
+use Aws\S3\Exception\S3Exception;
+
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -66,13 +69,18 @@ class pusher extends manipulator {
                 break;
             }
 
-            $filecontent = $this->filesystem->get_content_from_contenthash($contenthash);
-
-            if ($filecontent !== false) {
-                $success = $this->client->push_file($contenthash, $filecontent);
-                if ($success) {
+            try {
+                $filecontent = $this->filesystem->get_local_content_from_contenthash($contenthash);
+                $result = $this->client->push_file($contenthash, $filecontent);
+                if ($result) {
                     log_file_state($contenthash, SSS_FILE_STATE_DUPLICATED);
                 }
+            } catch (file_exception $e) {
+                mtrace($e);
+                continue;
+            } catch (S3Exception $e) {
+                mtrace($e);
+                continue;
             }
         }
     }

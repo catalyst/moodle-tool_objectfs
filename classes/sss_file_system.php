@@ -49,30 +49,31 @@ class sss_file_system extends file_system {
      */
     public function __construct($filedir, $trashdir, $dirpermissions, $filepermissions, file_storage $fs = null) {
         parent::__construct($filedir, $trashdir, $dirpermissions, $filepermissions, $fs);
-        $this->config = get_config('tool_sssfs');
-        $this->sssclient = new sss_client($this->config);
+        $config = get_config('tool_sssfs');
+        $sssclient = new sss_client($config);
+        $this->set_sss_client($sssclient);
     }
 
-    public function get_content_from_contenthash($contenthash) {
-        if ($this->is_readable_by_hash($contenthash)) {
-            $filepath = $this->get_fullpath_from_hash($contenthash);
-            return file_get_contents($filepath);
-        }
-        return false;
+    // We do this so we can inject a mocked one for unit testing.
+    public function set_sss_client($client) {
+        $this->sssclient = $client;
     }
 
-    public function delete_file_from_contenthash($contenthash) {
-        if ($this->is_readable_by_hash($contenthash)) {
-            $filepath = $this->get_fullpath_from_hash($contenthash);
-            unlink($filepath);
-            return true;
-        }
-        return false;
+    public function get_local_content_from_contenthash($contenthash) {
+        $this->ensure_readable_by_hash($contenthash);
+        $filepath = $this->get_fullpath_from_hash($contenthash);
+        return file_get_contents($filepath);
+    }
+
+    public function delete_local_file_from_contenthash($contenthash) {
+        $this->ensure_readable_by_hash($contenthash);
+        $filepath = $this->get_fullpath_from_hash($contenthash);
+        unlink($filepath);
     }
 
     private function get_sss_fullpath_from_file(stored_file $file) {
         $contenthash = $file->get_contenthash();
-        $path = $this->sssclient->get_fullpath_from_contenthash($contenthash);
+        $path = $this->sssclient->get_sss_fullpath_from_contenthash($contenthash);
         return $path;
     }
 

@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once(__DIR__ . '/sss_mock_client.php');
+require_once(__DIR__ . '/mock/sss_mock_client.php');
 require_once(__DIR__ . '/testlib.php');
 
 use tool_sssfs\sss_file_system;
@@ -41,10 +41,12 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
         $this->config = generate_config();
         $this->client = new sss_mock_client();
         $this->filesystem = sss_file_system::instance();
+        ob_start(); // Start a buffer to catch all the mtraces in the task.
+
     }
 
     protected function tearDown() {
-
+        ob_end_clean(); // Throw away the buffer content.
     }
 
     public function test_can_push_file() {
@@ -121,28 +123,14 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
         $this->assertEquals(0, $postpushcount);
     }
 
-    // Failure should not produce a fatal error,
-    // but should not log.
-    public function test_sss_client_push_failure () {
+
+    public function test_sss_client_push_file_execption_catch () {
         global $DB;
-
         $filepusher = new pusher($this->client, $this->filesystem, $this->config);
-        $file = save_file_to_local_storage();
-        $filecontenthash = $file->get_contenthash();
-        $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
-
-        // Assert table does not contain entry.
-        $this->assertEquals(0, $prepushcount);
-
-        $this->client->set_push_success(false);
-
-        $contenthashes = $filepusher->get_candidate_content_hashes();
-        $filepusher->execute($contenthashes);
-
+        $filecontenthash = 'not_a_hash';
+        $filepusher->execute(array($filecontenthash));
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
-
-        // Assert table still does not contain entry.
-        $this->assertEquals(0, $postpushcount);
+        $this->assertEquals(0, $postpushcount); // Assert table still does not contain entry.
     }
 
     public function test_max_task_runtime () {
@@ -158,8 +146,6 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
 
         // Assert table does not contain entry.
         $this->assertEquals(0, $prepushcount);
-
-        $this->client->set_push_success(false);
 
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);

@@ -24,45 +24,56 @@
  */
 
 use tool_sssfs\sss_client;
+use core_files\filestorage\file_exception;
+use Aws\S3\Exception\S3Exception;
 
 defined('MOODLE_INTERNAL') || die;
 
 
 class sss_mock_client extends sss_client {
 
-    private $pushsuccess;
-    private $checksuccess;
+    private $return;
+    private $throwexception;
 
     public function __construct() {
-        $this->pushsuccess = true;
-        $this->checksuccess = true;
+        global $CFG;
+        $this->return = true;
+        $this->throwexception = false;
+        mkdir($CFG->phpunit_dataroot . '/mockbucket');
     }
 
-    // True for success, false for failure.
-    public function set_push_success($success) {
-        $this->pushsuccess = $success;
+    public function set_return($return) {
+        $this->return = $return;
     }
 
-    // True for success, false for failure.
-    public function set_check_success($success) {
-        $this->checksuccess = $success;
+    public function set_throw_exception($throwexception) {
+        $this->throwexception = $throwexception;
     }
 
     public function push_file($filekey, $filecontent) {
-        if ($this->pushsuccess) {
-            return true;
+        if ($this->throwexception) {
+            throw new S3Exception('Mock S3 exception', 'file', 'line');
         } else {
-            return false; // Mock a failure.
+            $mockpath = $this->get_sss_fullpath_from_contenthash($filekey);
+            file_put_contents($mockpath, $filecontent);
+            return true;
         }
     }
 
     public function check_file($filekey, $expectedsize) {
-        if ($this->checksuccess) {
-            return true;
+        if ($this->throwexception) {
+            throw new file_exception('storedfilecannotread', '', $this->get_sss_fullpath_from_contenthash($filekey));
+        } else if ($this->return) {
+            return true; // Mock a failure.
         } else {
-            return false; // Mock a failure.
+            return false;
         }
     }
 
+    // Returns s3 fullpath to use with php file functions.
+    public function get_sss_fullpath_from_contenthash($contenthash) {
+        global $CFG;
+        return "{$CFG->phpunit_dataroot}/mockbucket/{$contenthash}";
+    }
 }
 

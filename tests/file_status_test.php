@@ -30,7 +30,7 @@ use tool_sssfs\sss_file_system;
 use tool_sssfs\file_manipulators\pusher;
 require_once(__DIR__ . '/../lib.php');
 require_once(__DIR__ . '/testlib.php');
-require_once(__DIR__ . '/sss_mock_client.php');
+require_once(__DIR__ . '/mock/sss_mock_client.php');
 
 
 

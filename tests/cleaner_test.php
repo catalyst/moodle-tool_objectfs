@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once(__DIR__ . '/sss_mock_client.php');
+require_once(__DIR__ . '/mock/sss_mock_client.php');
 require_once(__DIR__ . '/testlib.php');
 
 use tool_sssfs\sss_file_system;
@@ -49,16 +49,12 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
 
     public function test_can_clean_file() {
         global $DB;
-        $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
 
         $file = save_file_to_local_storage();
-
         $filecontenthash = $file->get_contenthash();
+        save_filestate_record($filecontenthash, SSS_FILE_STATE_DUPLICATED, time()); // Save file as already duplicated.
 
-        // Save file as already duplicated.
-        save_filestate_record($filecontenthash, SSS_FILE_STATE_DUPLICATED, time());
-
-        // Should only be one.
+        $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
         $candidatehashes = $filecleaner->get_candidate_content_hashes();
         $candidatehash = reset($candidatehashes);
 
@@ -68,7 +64,6 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
         $filecleaner->execute($candidatehashes);
 
         $isreadable = $this->filesystem->is_readable($file);
-
         $this->assertFalse($isreadable);
     }
 

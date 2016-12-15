@@ -39,6 +39,11 @@ class sss_client {
     private $client;
     private $bucket;
 
+    /**
+     * Initialises s3 client to use.
+     *
+     * @param object $config sssfs config
+     */
     public function __construct($config) {
         $this->bucket = $config->bucket;
         $this->client = S3Client::factory(array(
@@ -46,50 +51,74 @@ class sss_client {
                 'region' => $config->region,
                 'version' => AWS_API_VERSION
         ));
+
+        // Registers 's3://bucket' as a prefix for file actions.
         $this->client->registerStreamWrapper();
     }
 
+    /**
+     * Pushes a file's contents into s3. Uses $filekey to index the file.
+     *
+     * @param  string $filekey contenthash to be used as key in s3.
+     * @param  string $filecontent file contents.
+     *
+     * @return object result from s3.
+     *
+     * @throws S3Exceptions.
+     */
     public function push_file($filekey, $filecontent) {
-        try {
-            $result = $this->client->putObject(array(
+        $result = $this->client->putObject(array(
                         'Bucket' => $this->bucket,
                         'Key' => $filekey,
-                        'Body' => $filecontent
-                    ));
-            return $result;
-        } catch (S3Exception $e) {
-            mtrace($e);
-            return false;
-        }
+                        'Body' => $filecontent));
+
+        return $result;
     }
 
-    // Checks file is in s3 and its size matches expeted.
+    /**
+     * Checks file is in s3 and its size matches expeted.
+     * We could hash the contents and compare, but we
+     * do this to keep executions speed low.
+     *
+     * @param  string $filekey contenthash used as key in s3.
+     * @param  int $expectedsize expected size of the file.
+     *
+     * @return boolean true on success, false on failure
+     *
+     * @throws S3Exceptions.
+     */
     public function check_file($filekey, $expectedsize) {
-        try {
-            $result = $this->client->headObject(array(
+        $result = $this->client->headObject(array(
                         'Bucket' => $this->bucket,
-                        'Key' => $filekey,
-                ));
+                        'Key' => $filekey));
 
-            if ($result['ContentLength'] == $expectedsize) {
-                return true;
-            }
-
-        } catch (S3Exception $e) {
-            mtrace($e);
+        if ($result['ContentLength'] == $expectedsize) {
+            return true;
         }
+
         return false;
     }
 
-    // Returns s3 fullpath to use with php file functions.
-    public function get_fullpath_from_contenthash($contenthash) {
+    /**
+     * Returns s3 fullpath to use with php file functions.
+     *
+     * @param  string $contenthash contenthash used as key in s3.
+     *
+     * @return string fullpath to s3 object.
+     */
+    public function get_sss_fullpath_from_contenthash($contenthash) {
         return "s3://{$this->bucket}/{$contenthash}";
     }
 
+    /**
+     * Tests connection to S3 and bucket.
+     * There is no check connection in the AWS API.
+     * We use list buckets instead and check the bucket is in the list.
+     *
+     * @return boolean true on success, false on failure.
+     */
     public function test_connection() {
         try {
-            // There is no check connection in the AWS API.
-            // We use list buckets instead and check the bucket is in the list.
             $result = $this->client->listBuckets();
             $buckets = $result['Buckets'];
 
@@ -98,11 +127,9 @@ class sss_client {
                     return true;
                 }
             }
-
         } catch (S3Exception $e) {
             mtrace($e);
         }
-
         return false;
     }
 }

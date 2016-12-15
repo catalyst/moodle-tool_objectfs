@@ -74,13 +74,16 @@ class cleaner extends manipulator {
 
             $filesize = reset($filesize);
 
-            $fileinsss = $this->client->check_file($contenthash, $filesize);
-
-            if ($fileinsss) {
-                $success = $this->filesystem->delete_file_from_contenthash($contenthash);
-                if ($success) {
-                    log_file_state($contenthash, SSS_FILE_STATE_EXTERNAL);
-                }
+            try {
+                $fileinsss = $this->client->check_file($contenthash, $filesize);
+                $this->filesystem->delete_local_file_from_contenthash($contenthash);
+                log_file_state($contenthash, SSS_FILE_STATE_EXTERNAL);
+            } catch (file_exception $e) {
+                mtrace($e);
+                continue;
+            } catch (S3Exception $e) {
+                mtrace($e);
+                continue;
             }
         }
     }
