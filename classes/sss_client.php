@@ -61,9 +61,7 @@ class sss_client {
      *
      * @param  string $filekey contenthash to be used as key in s3.
      * @param  string $filecontent file contents.
-     *
      * @return object result from s3.
-     *
      * @throws S3Exceptions.
      */
     public function push_file($filekey, $filecontent) {
@@ -82,9 +80,7 @@ class sss_client {
      *
      * @param  string $filekey contenthash used as key in s3.
      * @param  int $expectedsize expected size of the file.
-     *
      * @return boolean true on success, false on failure
-     *
      * @throws S3Exceptions.
      */
     public function check_file($filekey, $expectedsize) {
@@ -103,7 +99,6 @@ class sss_client {
      * Returns s3 fullpath to use with php file functions.
      *
      * @param  string $contenthash contenthash used as key in s3.
-     *
      * @return string fullpath to s3 object.
      */
     public function get_sss_fullpath_from_contenthash($contenthash) {

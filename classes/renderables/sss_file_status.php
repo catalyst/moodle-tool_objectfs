@@ -88,8 +88,6 @@ class sss_file_status implements \renderable {
         return false;
     }
 
-
-
     public function calculate_file_status() {
         global $DB;
 

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Deletes files that are old enough and are in S3.
+ * File manipulator abstract class.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -30,16 +30,52 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
 abstract class manipulator {
+
+    /**
+     * S3 client
+     *
+     * @var sss_client
+     */
     protected $client;
+
+    /**
+     * S3 file system
+     *
+     * @var sss_file_system
+     */
     protected $filesystem;
 
+    /**
+     * What time the file manipulator should finish execution by.
+     *
+     * @var int
+     */
+    protected $finishtime;
+
+    /**
+     * Manipulator constructor
+     *
+     * @param sss_client $client S3 client
+     * @param sss_file_system $filesystem S3 file system
+     * @param int $maxruntime What time the file manipulator should finish execution by
+     */
     public function __construct($client, $filesystem, $maxruntime) {
          $this->client = $client;
          $this->filesystem = $filesystem;
          $this->finishtime = time() + $maxruntime;
     }
 
+    /**
+     * get candidate content hashes for execution.
+     *
+     * @return [type] [description]
+     */
     abstract public function get_candidate_content_hashes();
 
+    /**
+     * execute file manipulation.
+     *
+     * @param  array $candidatehashes candidate content hashes
+     */
     abstract public function execute($candidatehashes);
 }

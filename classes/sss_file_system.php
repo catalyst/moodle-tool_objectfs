@@ -37,9 +37,9 @@ class sss_file_system extends file_system {
     private $sssclient;
 
     /**
-     * Constructor.
+     * sss_file_system Constructor.
      *
-     * Please use file_system::instance() instead.
+     * Calls file_system contructor and sets S3 client.
      *
      * @param string $filedir The path to the local filedir.
      * @param string $trashdir The path to the trashdir.
@@ -54,29 +54,66 @@ class sss_file_system extends file_system {
         $this->set_sss_client($sssclient);
     }
 
-    // We do this so we can inject a mocked one for unit testing.
+    /**
+     * Sets s3 client.
+     *
+     * We have this so we can inject a mocked one for unit testing.
+     *
+     * @param [type] $client [description]
+     */
     public function set_sss_client($client) {
         $this->sssclient = $client;
     }
 
+    /**
+     * Gets a local file's content from it's contenthash.
+     *
+     * @param  string $contenthash content hash
+     * @return string file contents
+     * @throws file_exception
+     */
     public function get_local_content_from_contenthash($contenthash) {
         $this->ensure_readable_by_hash($contenthash);
         $filepath = $this->get_fullpath_from_hash($contenthash);
         return file_get_contents($filepath);
     }
 
+    /**
+     * Deletes a local file from it's contenthash.
+     *
+     * @param  string $contenthash content hash
+     * @throws file_exception
+     */
     public function delete_local_file_from_contenthash($contenthash) {
         $this->ensure_readable_by_hash($contenthash);
         $filepath = $this->get_fullpath_from_hash($contenthash);
         unlink($filepath);
     }
 
+    /**
+     * Returns S3 path.
+     *
+     * @param  stored_file $file stored file
+     * @return string S3 file path
+     */
     private function get_sss_fullpath_from_file(stored_file $file) {
         $contenthash = $file->get_contenthash();
         $path = $this->sssclient->get_sss_fullpath_from_contenthash($contenthash);
         return $path;
     }
 
+    /**
+     * Output the content of the specified stored file.
+     *
+     * Note, this is different to get_content() as it uses the built-in php
+     * readfile function which is more efficient.
+     *
+     * If it cannot read a file locally, it tries to read from S3.
+     *
+     * @param stored_file $file The file to serve.
+     * @throws file_exception
+     * @throws S3Exceptions
+     */
     public function readfile(stored_file $file) {
         $canreadlocal = $this->is_readable($file);
         if ($canreadlocal) {
@@ -87,6 +124,20 @@ class sss_file_system extends file_system {
         readfile_allow_large($path, $file->get_filesize());
     }
 
+    /**
+     * Get the content of the specified stored file.
+     *
+     * Generally you will probably want to use readfile() to serve content,
+     * and where possible you should see if you can use
+     * get_content_file_handle and work with the file stream instead.
+     *
+     * If it cannot read a file locally, it tries to read from S3.
+     *
+     * @param stored_file $file The file to retrieve
+     * @return string The full file content
+     * @throws file_exception
+     * @throws S3Exceptions
+     */
     public function get_content(stored_file $file) {
         $canreadlocal = $this->is_readable($file);
         if ($canreadlocal) {
@@ -97,6 +148,17 @@ class sss_file_system extends file_system {
         return file_get_contents($path);
     }
 
+    /**
+     * Returns file handle - read only mode, no writing allowed into pool files!
+     *
+     * When you want to modify a file, create a new file and delete the old one.
+     *
+     * @param stored_file $file The file to retrieve a handle for
+     * @param int $type Type of file handle (FILE_HANDLE_xx constant)
+     * @return resource file handle
+     * @throws file_exception
+     * @throws S3Exceptions
+     */
     public function get_content_file_handle($file, $type = stored_file::FILE_HANDLE_FOPEN) {
         $canreadlocal = $this->is_readable($file);
         if ($canreadlocal) {
