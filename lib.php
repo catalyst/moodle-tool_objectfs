@@ -60,8 +60,7 @@ function save_sss_config_data($data) {
     $config->consistencydelay = $data->consistencydelay;
     $config->logging = $data->logging;
     $config->maxtaskruntime = $data->maxtaskruntime;
-
-    // TODO: Encrypt credentials.
+    $config->deletelocal = $data->deletelocal;
 
     foreach (get_object_vars($config) as $key => $value) {
         set_config($key, $value, 'tool_sssfs');

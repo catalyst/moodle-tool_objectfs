@@ -75,6 +75,7 @@ class settings_form extends \moodleform {
             'region'            => 'us-east-1',
             'sizethreshold'     => 1024,
             'minimumage'        => 86400,
+            'deletelocal'       => 0,
             'consistencydelay'  => 0,
             'maxtaskruntime'    => 60,
             'logging'           => 0
@@ -117,13 +118,18 @@ class settings_form extends \moodleform {
         $mform->addHelpButton('minimumage', 'settings:minimumage', 'tool_sssfs');
         $mform->setType("minimumage", PARAM_INT);
 
-        $mform->addElement('duration', 'consistencydelay', get_string('settings:consistencydelay', 'tool_sssfs'));
-        $mform->addHelpButton('consistencydelay', 'settings:consistencydelay', 'tool_sssfs');
-        $mform->setType("consistencydelay", PARAM_INT);
-
         $mform->addElement('duration', 'maxtaskruntime', get_string('settings:maxtaskruntime', 'tool_sssfs'));
         $mform->addHelpButton('maxtaskruntime', 'settings:maxtaskruntime', 'tool_sssfs');
         $mform->setType("maxtaskruntime", PARAM_INT);
+
+        $mform->addElement('advcheckbox', 'deletelocal', get_string('settings:deletelocal', 'tool_sssfs'));
+        $mform->addHelpButton('deletelocal', 'settings:deletelocal', 'tool_sssfs');
+        $mform->setType("deletelocal", PARAM_INT);
+
+        $mform->addElement('duration', 'consistencydelay', get_string('settings:consistencydelay', 'tool_sssfs'));
+        $mform->addHelpButton('consistencydelay', 'settings:consistencydelay', 'tool_sssfs');
+        $mform->disabledIf('consistencydelay', 'deletelocal');
+        $mform->setType("consistencydelay", PARAM_INT);
 
         $mform->addElement('header', 'loggingheader', get_string('settings:loggingheader', 'tool_sssfs'));
         $mform->setExpanded('loggingheader');

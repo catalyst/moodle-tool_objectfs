@@ -31,35 +31,38 @@ require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
 class cleaner extends manipulator {
     private $consistencydelay;
+    private $deletelocal;
 
     public function __construct($client, $filesystem, $config) {
         parent::__construct($client, $filesystem, $config->maxtaskruntime);
         $this->consistencydelay = $config->consistencydelay;
+        $this->deletelocal = $config->deletelocal;
     }
 
     public function get_candidate_content_hashes() {
         global $DB;
 
-        // Consistency delay of 0 means never remove local files.
-        if ($this->consistencydelay == 0) {
+        if ($this->deletelocal == 0) {
             return array();
         }
 
         $sql = 'SELECT SF.contenthash
                 FROM {tool_sssfs_filestate} SF
-                WHERE SF.timeduplicated < ? and SF.state = ?';
+                WHERE SF.timeduplicated <= ? and SF.state = ?';
 
         $consistancythrehold = time() - $this->consistencydelay;
-
         $params = array($consistancythrehold, SSS_FILE_STATE_DUPLICATED);
-
         $contenthashes = $DB->get_fieldset_sql($sql, $params);
-
         return $contenthashes;
     }
 
     public function execute($candidatehashes) {
         global $DB;
+
+        if ($this->deletelocal == 0) {
+            return;
+        }
+
         foreach ($candidatehashes as $contenthash) {
 
             if (time() >= $this->finishtime) {

@@ -26,7 +26,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once(__DIR__ . '/mock/sss_mock_client.php');
-require_once(__DIR__ . '/mock/sss_mock_file_system.php');
 require_once(__DIR__ . '/testlib.php');
 
 use tool_sssfs\file_manipulators\pusher;

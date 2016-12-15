@@ -49,45 +49,28 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
 
     public function test_can_clean_file() {
         global $DB;
-
         $file = save_file_to_local_storage();
         $filecontenthash = $file->get_contenthash();
         save_filestate_record($filecontenthash, SSS_FILE_STATE_DUPLICATED, time()); // Save file as already duplicated.
-
         $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
         $candidatehashes = $filecleaner->get_candidate_content_hashes();
         $candidatehash = reset($candidatehashes);
-
         $this->assertEquals(1, count($candidatehashes));
         $this->assertEquals($filecontenthash, $candidatehash);
-
         $filecleaner->execute($candidatehashes);
-
         $isreadable = $this->filesystem->is_readable($file);
         $this->assertFalse($isreadable);
     }
 
     public function test_consisency_delay() {
-
-        // Set consistency delay to 0 - should not run.
-        $this->config = generate_config(0, -10, 60, 0);
-
+        $this->config = generate_config(0, -10, 60, 0); // Set deletelocal to 0.
         $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
-
         $file = save_file_to_local_storage();
-
         $filecontenthash = $file->get_contenthash();
-
-        // Save file as already duplicated.
-        save_filestate_record($filecontenthash, SSS_FILE_STATE_DUPLICATED, time());
-
+        save_filestate_record($filecontenthash, SSS_FILE_STATE_DUPLICATED, time()); // Save file as already duplicated.
         $candidatehashes = $filecleaner->get_candidate_content_hashes();
-
-        // Should not delete the file.
-        $filecleaner->execute($candidatehashes);
-
+        $filecleaner->execute($candidatehashes); // Should not delete the file.
         $isreadable = $this->filesystem->is_readable($file);
-
         $this->assertTrue($isreadable);
     }
 

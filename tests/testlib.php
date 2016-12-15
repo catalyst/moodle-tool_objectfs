@@ -64,7 +64,7 @@ function save_filestate_record($contenthash, $state, $timeduplicated) {
     $DB->insert_record('tool_sssfs_filestate', $record);
 }
 
-function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime = 60, $consistencydelay = -1) {
+function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime = 60, $deletelocal = 1, $consistencydelay = 0) {
     $config = new stdClass();
     $config->enabled = 1;
     $config->key = 123;
@@ -76,6 +76,7 @@ function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime 
     $config->consistencydelay = $consistencydelay;
     $config->logging = 1;
     $config->maxtaskruntime = $maxtaskruntime;
+    $config->deletelocal = $deletelocal;
     save_sss_config_data($config);
     return $config;
 }
