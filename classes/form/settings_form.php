@@ -73,10 +73,10 @@ class settings_form extends \moodleform {
             'secret'            => '',
             'bucket'            => '',
             'region'            => 'us-east-1',
-            'sizethreshold'     => 1024,
-            'minimumage'        => 86400,
+            'sizethreshold'     => 1024 * 10,
+            'minimumage'        => 7 * 24 * 60 * 60,
             'deletelocal'       => 0,
-            'consistencydelay'  => 0,
+            'consistencydelay'  => 10 * 60,
             'maxtaskruntime'    => 60,
             'logging'           => 0
         );
