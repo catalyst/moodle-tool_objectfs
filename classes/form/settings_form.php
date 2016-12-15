@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * S3 settings form
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -31,12 +31,6 @@ use tool_sssfs\sss_client;
 
 require_once($CFG->libdir . "/formslib.php");
 
-/**
- * Form for editing an Enviroment bar.
- *
- * @copyright Catalyst IT
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class settings_form extends \moodleform {
 
     /**
