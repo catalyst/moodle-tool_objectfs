@@ -25,17 +25,21 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-define('SSS_FILE_STATE_LOCAL', 0);
-define('SSS_FILE_STATE_DUPLICATED', 1);
-define('SSS_FILE_STATE_EXTERNAL', 2);
+define('SSS_FILE_LOCATION_LOCAL', 0);
+define('SSS_FILE_LOCATION_DUPLICATED', 1);
+define('SSS_FILE_LOCATION_EXTERNAL', 2);
 
-function log_file_state($contenthash, $state) {
+define('SSSFS_REPORT_FILE_LOCATION', 0);
+define('SSSFS_REPORT_LOG_SIZE', 1);
+define('SSSFS_REPORT_MIME_TYPE', 2);
+
+function log_file_state($contenthash, $location) {
     global $DB;
 
     $logrecord = new \stdClass();
     $logrecord->contenthash = $contenthash;
     $logrecord->timeduplicated = time();
-    $logrecord->state = $state;
+    $logrecord->location = $location;
 
     $existing = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $contenthash));
 

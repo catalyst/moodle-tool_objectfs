@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * Log size report
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,38 +23,34 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
-
-use tool_sssfs\file_manipulators\pusher;
-use tool_sssfs\sss_client;
-use tool_sssfs\sss_file_system;
+namespace tool_sssfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class push_to_sss extends \core\task\scheduled_task {
+class log_size_report extends sss_report {
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('push_to_sss_task', 'tool_sssfs');
+    public function __construct() {
+        $this->reporttype = SSSFS_REPORT_LOG_SIZE;
     }
 
-    /**
-     * Execute task
-     */
-    public function execute() {
+    public function calculate_report_data() {
+        global $DB;
 
-        $config = get_config('tool_sssfs');
+        $data = array();
 
-        if (isset($config->enabled) && $config->enabled) {
-            $client = new sss_client($config);
-            $filesystem = sss_file_system::instance();
-            $filepusher = new pusher($client, $filesystem, $config);
-            $contenthashes = $filepusher->get_candidate_content_hashes();
-            $filepusher->execute($contenthashes);
+        $sql = 'SELECT log logindex, sum(filesize) filesum, count(*) filecount from
+                    (SELECT distinct contenthash, filesize, floor(log(2,filesize) * 4) as log
+                        from mdl_files
+                        where filesize != 0
+                    ) d
+                group by log order by log';
+
+        $logdata = $DB->get_records_sql($sql);
+
+        foreach ($logdata as $record) {
+            $data[$record->logindex] = self::create_report_data_record(SSSFS_REPORT_LOG_SIZE, $record->logindex, $record->filecount, $record->filesum);
         }
+
+        return $data;
     }
 }
-
-

@@ -28,6 +28,8 @@ defined('MOODLE_INTERNAL') || die;
 use tool_sssfs\renderables\sss_file_status;
 use tool_sssfs\sss_file_system;
 use tool_sssfs\file_manipulators\pusher;
+use tool_sssfs\report\file_location_report;
+use tool_sssfs\report\log_size_report;
 require_once(__DIR__ . '/../lib.php');
 require_once(__DIR__ . '/testlib.php');
 require_once(__DIR__ . '/mock/sss_mock_client.php');
@@ -49,23 +51,21 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
 
     }
 
-    private function check_state_file_summary($data, $state, $expectedcount, $expectedsum) {
-        $this->assertEquals($expectedcount, $data[$state]->filecount);
-        $this->assertEquals($expectedsum, $data[$state]->filesum);
+    private function check_file_location_record($record, $expectedcount, $expectedsum) {
+        $this->assertEquals($expectedcount, $record->filecount);
+        $this->assertEquals($expectedsum, $record->filesum);
     }
 
-    public function test_can_get_status () {
-        global $DB;
-        $states = array(SSS_FILE_STATE_LOCAL, SSS_FILE_STATE_DUPLICATED, SSS_FILE_STATE_EXTERNAL);
 
-        $filestatus = new sss_file_status();
-        $data = $filestatus->calculate_file_status();
+    public function test_calculate_file_location_data () {
 
-        // Should all be 0 duplicated and external states.
-        foreach ($states as $state) {
-            $this->check_state_file_summary($data, SSS_FILE_STATE_DUPLICATED, 0, 0);
-            $this->check_state_file_summary($data, SSS_FILE_STATE_EXTERNAL, 0, 0);
-        }
+        $locationreport = new file_location_report();
+
+        $data = $locationreport->calculate_report_data();
+
+        // Duplicated and external states should be 0 for sum and count.
+        $this->check_file_location_record($data[SSS_FILE_LOCATION_DUPLICATED], 0, 0);
+        $this->check_file_location_record($data[SSS_FILE_LOCATION_EXTERNAL], 0, 0);
 
         $this->config = generate_config(10); // 10 MB size threshold.
         $pusher = new pusher($this->client, $this->filesystem, $this->config);
@@ -78,13 +78,16 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
         $contenthashes = $pusher->get_candidate_content_hashes();
         $pusher->execute($contenthashes);
 
-        $data = $filestatus->calculate_file_status();
+        $data = $locationreport->calculate_report_data();
 
-        $postpushcount = $DB->count_records('tool_sssfs_filestate');
-        $this->assertEquals(10, $postpushcount);
-        $this->check_state_file_summary($data, SSS_FILE_STATE_DUPLICATED, 10, $singlefilesize * 10);
-
-        // TODO: when clean task implemented. Check External portion.
+        $this->check_file_location_record($data[SSS_FILE_LOCATION_DUPLICATED], 10, $singlefilesize * 10);
     }
+
+    public function test_calculate_file_logsize_data () {
+
+        $locationreport = new log_size_report();
+        $locationreport->calculate_report_data();
+    }
+
 
 }

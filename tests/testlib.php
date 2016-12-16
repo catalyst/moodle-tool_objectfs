@@ -55,14 +55,6 @@ function save_file_to_local_storage($filesize = 10, $filename = 'test.txt', $fil
     return $file;
 }
 
-function save_filestate_record($contenthash, $state, $timeduplicated) {
-    global $DB;
-    $record = new stdClass();
-    $record->contenthash = $contenthash;
-    $record->state = $state;
-    $record->timeduplicated = $timeduplicated;
-    $DB->insert_record('tool_sssfs_filestate', $record);
-}
 
 function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime = 60, $deletelocal = 1, $consistencydelay = 0) {
     $config = new stdClass();

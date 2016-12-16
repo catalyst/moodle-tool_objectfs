@@ -29,95 +29,25 @@ defined('MOODLE_INTERNAL') || die();
 
 class sss_file_status implements \renderable {
 
-    private $data;
+    private $reports;
+    private $reportclasses;
 
     public function __construct () {
+        $reportclasses = array('file_location_report', 'log_size_report');
 
-    }
-
-    private function load_data() {
-        global $DB;
-        $data = array();
-
-        $records = $DB->get_records('tool_sssfs_file_status_data');
-
-        if (count($records) === 0) {
-            return false;
-        }
-
-        foreach ($records as $record) {
-            $data[$record->state] = new \stdClass();
-            $data[$record->state]->filecount = $record->filecount;
-            $data[$record->state]->filesum = $record->filesum;
-            $data[$record->state]->timecalculated = $record->timecalculated;
-        }
-
-        $this->data = $data;
-
-        return true;
-    }
-
-    public function save_data() {
-        global $DB;
-        $timecalculated = time();
-        foreach ($this->data as $filestate => $filestatedata) {
-
-            $record = $DB->get_record('tool_sssfs_file_status_data', array('state' => $filestate));
-
-            if (!$record) {
-                $record = new \stdClass();
-            }
-
-            $record->state = $filestate;
-            $record->filecount = $filestatedata->filecount;
-            $record->filesum = $filestatedata->filesum;
-            $record->timecalculated = $timecalculated;
-
-            if (isset($record->id)) {
-                $DB->update_record('tool_sssfs_file_status_data', $record);
-            } else {
-                $DB->insert_record('tool_sssfs_file_status_data', $record);
-            }
+        foreach ($reportclasses as $reportclass) {
+            $reportclass = "tool_sssfs\\report\\{$reportclass}";
+            $report = new $reportclass();
+            $reporttype = $report->get_type();
+            $this->reports[$reporttype] = $report->get_report_data();
         }
     }
 
-    public function get_data() {
-        if ($this->data || $this->load_data()) {
-            return $this->data;
-        }
-        return false;
+    public function get_report($reporttype) {
+        return $this->reports[$reporttype];
     }
 
-    public function calculate_file_status() {
-        global $DB;
 
-        $data = array();
 
-        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) as filecount,
-                COALESCE(SUM(sub.filesize) ,0) as filesum
-                FROM (
-                    SELECT F.contenthash, MAX(F.filesize) as filesize
-                    FROM {files} F
-                    JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
-                    GROUP BY F.contenthash, F.filesize, SF.state
-                    HAVING SF.state = ?
-                ) as sub';
 
-        $result = $DB->get_records_sql($sql, array(SSS_FILE_STATE_DUPLICATED));
-        $data[SSS_FILE_STATE_DUPLICATED] = reset($result);
-
-        $result = $DB->get_records_sql($sql, array(SSS_FILE_STATE_EXTERNAL));
-        $data[SSS_FILE_STATE_EXTERNAL] = reset($result);
-
-        $sql = 'SELECT count(DISTINCT contenthash) as filecount, COALESCE(SUM(filesize) ,0) as filesum from {files}';
-        $result = $DB->get_records_sql($sql);
-
-        $data[SSS_FILE_STATE_LOCAL] = reset($result);
-        $data[SSS_FILE_STATE_LOCAL]->filecount -= $data[SSS_FILE_STATE_DUPLICATED]->filecount + $data[SSS_FILE_STATE_EXTERNAL]->filecount;
-        $data[SSS_FILE_STATE_LOCAL]->filesum -= $data[SSS_FILE_STATE_DUPLICATED]->filesum + $data[SSS_FILE_STATE_EXTERNAL]->filesum;
-
-        $this->data = $data;
-
-        return $data;
-    }
 }

@@ -47,7 +47,7 @@ class clean_up_files extends \core\task\scheduled_task {
 
         $config = get_config('tool_sssfs');
 
-        if ($config->enabled) {
+        if (isset($config->enabled) && $config->enabled) {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
             $cleaner = new cleaner($client, $filesystem, $config);
@@ -56,5 +56,3 @@ class clean_up_files extends \core\task\scheduled_task {
         }
     }
 }
-
-

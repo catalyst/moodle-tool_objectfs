@@ -46,10 +46,10 @@ class generate_status_report extends \core\task\scheduled_task {
 
         $config = get_config('tool_sssfs');
 
-        if ($config->enabled) {
-            $filestatus = new sss_file_status();
-            $filestatus->calculate_file_status();
-            $filestatus->save_data();
+        if (isset($config->enabled) && $config->enabled) {
+            $reportdata = sss_file_status::calculate_file_location_data();
+            $reportdata = array_merge($reportdata, sss_file_status::calculate_file_logsize_data());
+            sss_file_status::save_report_data($reportdata);
         }
     }
 }

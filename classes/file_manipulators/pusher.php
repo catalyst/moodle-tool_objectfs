@@ -65,7 +65,7 @@ class pusher extends manipulator {
      * Get candidate content hashes for pushing.
      * Files that are bigger than the sizethreshold,
      * older than the minimum age
-     * and have no state / are in local state.
+     * and have no location / are in local.
      *
      * @return array candidate contenthashes
      */
@@ -74,13 +74,13 @@ class pusher extends manipulator {
         $sql = 'SELECT F.contenthash
                 FROM {files} F
                 LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
-                GROUP BY F.contenthash, F.filesize, SF.state
+                GROUP BY F.contenthash, F.filesize, SF.location
                 HAVING MIN(F.timecreated) < ? AND MAX(F.filesize) > ?
-                AND (SF.state IS NULL OR SF.state = ?)';
+                AND (SF.location IS NULL OR SF.location = ?)';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
 
-        $params = array($maxcreatedtimestamp, $this->sizethreshold, SSS_FILE_STATE_LOCAL);
+        $params = array($maxcreatedtimestamp, $this->sizethreshold, SSS_FILE_LOCATION_LOCAL);
 
         $contenthashes = $DB->get_fieldset_sql($sql, $params);
 
@@ -104,7 +104,7 @@ class pusher extends manipulator {
                 $filecontent = $this->filesystem->get_local_content_from_contenthash($contenthash);
                 $result = $this->client->push_file($contenthash, $filecontent);
                 if ($result) {
-                    log_file_state($contenthash, SSS_FILE_STATE_DUPLICATED);
+                    log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
                 }
             } catch (file_exception $e) {
                 mtrace($e);

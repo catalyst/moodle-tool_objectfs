@@ -24,6 +24,7 @@
  */
 
 use tool_sssfs\renderables\sss_file_status;
+use tool_sssfs\report\sss_report;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -32,26 +33,17 @@ class tool_sssfs_renderer extends plugin_renderer_base {
     protected function render_sss_file_status(sss_file_status $filestatus) {
         $output = '';
 
-        $data = $filestatus->get_data();
+        $locationreport = $filestatus->get_report(SSSFS_REPORT_FILE_LOCATION);
+        $logsizereport = $filestatus->get_report(SSSFS_REPORT_LOG_SIZE);
 
-        $lastrun = 0;
+        $lastrun = sss_report::get_last_task_runtime();
 
-        if ($data) {
-            $table = new html_table();
+        if ($locationreport) {
+            $output .= $this->render_file_location_report($locationreport, $output);
+        }
 
-            $table->head = array(get_string('file_status:location', 'tool_sssfs'),
-                                 get_string('file_status:files', 'tool_sssfs'),
-                                 get_string('file_status:size', 'tool_sssfs'));
-
-            foreach ($data as $filestate => $filestatedata) {
-                $size = $filestatedata->filesum / 1024 / 1024; // Convert to MB.
-                $size = round($size, 2);
-                $filestate = $this->get_file_state_string($filestate);
-                $table->data[] = array($filestate, $filestatedata->filecount, $size);
-                $lastrun = $filestatedata->timecalculated;
-            }
-
-            $output .= html_writer::table($table);
+        if ($logsizereport) {
+            $output .= $this->render_log_size_report($logsizereport);
         }
 
         if ($lastrun) {
@@ -65,13 +57,50 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    private function render_log_size_report($logsizereport) {
+        $table = new html_table();
+
+        $table->head = array('logsize',
+                             get_string('file_status:files', 'tool_sssfs'),
+                             get_string('file_status:size', 'tool_sssfs'));
+
+        foreach ($logsizereport as $record) {
+            $filesum = $record->filesum / 1024 / 1024; // Convert to MB.
+            $filesum = round($filesum, 2);
+            $table->data[] = array($record->key, $record->filecount, $filesum);
+        }
+
+        $output = html_writer::table($table);
+
+        return $output;
+    }
+
+    private function render_file_location_report($locationreport) {
+        $table = new html_table();
+
+        $table->head = array(get_string('file_status:location', 'tool_sssfs'),
+                             get_string('file_status:files', 'tool_sssfs'),
+                             get_string('file_status:size', 'tool_sssfs'));
+
+        foreach ($locationreport as $record) {
+            $filesum = $record->filesum / 1024 / 1024; // Convert to MB.
+            $filesum = round($filesum, 2);
+            $filestate = $this->get_file_state_string($record->key);
+            $table->data[] = array($filestate, $record->filecount, $filesum);
+        }
+
+        $output = html_writer::table($table);
+
+        return $output;
+    }
+
     private function get_file_state_string($filestate) {
         switch ($filestate){
-            case SSS_FILE_STATE_LOCAL:
+            case SSS_FILE_LOCATION_LOCAL:
                 return get_string('file_status:state:local', 'tool_sssfs');
-            case SSS_FILE_STATE_DUPLICATED:
+            case SSS_FILE_LOCATION_DUPLICATED:
                 return get_string('file_status:state:duplicated', 'tool_sssfs');
-            case SSS_FILE_STATE_EXTERNAL:
+            case SSS_FILE_LOCATION_EXTERNAL:
                 return get_string('file_status:state:external', 'tool_sssfs');
             default;
                 return get_string('file_status:state:unknown', 'tool_sssfs');

@@ -63,7 +63,7 @@ class cleaner extends manipulator {
     /**
      * Get candidate content hashes for cleaning.
      * Files that are past the consistancy delay
-     * and are in state duplicated.
+     * and are in location duplicated.
      *
      * @return array candidate contenthashes
      */
@@ -76,10 +76,10 @@ class cleaner extends manipulator {
 
         $sql = 'SELECT SF.contenthash
                 FROM {tool_sssfs_filestate} SF
-                WHERE SF.timeduplicated <= ? and SF.state = ?';
+                WHERE SF.timeduplicated <= ? and SF.location = ?';
 
         $consistancythrehold = time() - $this->consistencydelay;
-        $params = array($consistancythrehold, SSS_FILE_STATE_DUPLICATED);
+        $params = array($consistancythrehold, SSS_FILE_LOCATION_DUPLICATED);
         $contenthashes = $DB->get_fieldset_sql($sql, $params);
         return $contenthashes;
     }
@@ -111,7 +111,7 @@ class cleaner extends manipulator {
             try {
                 $fileinsss = $this->client->check_file($contenthash, $filesize);
                 $this->filesystem->delete_local_file_from_contenthash($contenthash);
-                log_file_state($contenthash, SSS_FILE_STATE_EXTERNAL);
+                log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL);
             } catch (file_exception $e) {
                 mtrace($e);
                 continue;
