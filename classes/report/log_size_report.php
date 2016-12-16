@@ -40,7 +40,7 @@ class log_size_report extends sss_report {
 
         $sql = 'SELECT log logindex, sum(filesize) filesum, count(*) filecount from
                     (SELECT distinct contenthash, filesize, floor(log(2,filesize) * 4) as log
-                        from mdl_files
+                        from {files}
                         where filesize != 0
                     ) d
                 group by log order by log';
@@ -48,7 +48,7 @@ class log_size_report extends sss_report {
         $logdata = $DB->get_records_sql($sql);
 
         foreach ($logdata as $record) {
-            $data[$record->logindex] = self::create_report_data_record(SSSFS_REPORT_LOG_SIZE, $record->logindex, $record->filecount, $record->filesum);
+            $data[$record->logindex] = $this->create_report_data_record(SSSFS_REPORT_LOG_SIZE, $record->logindex, $record->filecount, $record->filesum);
         }
 
         return $data;

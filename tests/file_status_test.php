@@ -30,6 +30,7 @@ use tool_sssfs\sss_file_system;
 use tool_sssfs\file_manipulators\pusher;
 use tool_sssfs\report\file_location_report;
 use tool_sssfs\report\log_size_report;
+use tool_sssfs\report\mime_type_report;
 require_once(__DIR__ . '/../lib.php');
 require_once(__DIR__ . '/testlib.php');
 require_once(__DIR__ . '/mock/sss_mock_client.php');
@@ -86,6 +87,11 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
     public function test_calculate_file_logsize_data () {
 
         $locationreport = new log_size_report();
+        $locationreport->calculate_report_data();
+    }
+
+    public function test_calculate_file_mimetype_data () {
+        $locationreport = new mime_type_report();
         $locationreport->calculate_report_data();
     }
 

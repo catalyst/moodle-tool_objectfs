@@ -33,8 +33,10 @@ class tool_sssfs_renderer extends plugin_renderer_base {
     protected function render_sss_file_status(sss_file_status $filestatus) {
         $output = '';
 
+        // Could refactor this to have less duplication, but requirements may change for data.
         $locationreport = $filestatus->get_report(SSSFS_REPORT_FILE_LOCATION);
         $logsizereport = $filestatus->get_report(SSSFS_REPORT_LOG_SIZE);
+        $mimetypereport = $filestatus->get_report(SSSFS_REPORT_MIME_TYPE);
 
         $lastrun = sss_report::get_last_task_runtime();
 
@@ -46,6 +48,10 @@ class tool_sssfs_renderer extends plugin_renderer_base {
             $output .= $this->render_log_size_report($logsizereport);
         }
 
+        if ($mimetypereport) {
+            $output .= $this->render_mime_type_report($mimetypereport);
+        }
+
         if ($lastrun) {
             $labeltext = get_string('file_status:last_run', 'tool_sssfs', userdate($lastrun));
         } else {
@@ -53,6 +59,24 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         }
 
         $output .= html_writer::label($labeltext, null);
+
+        return $output;
+    }
+
+    private function render_mime_type_report($mimetypereport) {
+        $table = new html_table();
+
+        $table->head = array('mimetype',
+                             get_string('file_status:files', 'tool_sssfs'),
+                             get_string('file_status:size', 'tool_sssfs'));
+
+        foreach ($mimetypereport as $record) {
+            $filesum = $record->filesum / 1024 / 1024; // Convert to MB.
+            $filesum = round($filesum, 2);
+            $table->data[] = array($record->key, $record->filecount, $filesum);
+        }
+
+        $output = html_writer::table($table);
 
         return $output;
     }

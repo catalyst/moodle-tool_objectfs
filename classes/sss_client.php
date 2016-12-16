@@ -87,7 +87,7 @@ class sss_client {
         $result = $this->client->headObject(array(
                         'Bucket' => $this->bucket,
                         'Key' => $filekey));
-
+        print_r($result);
         if ($result['ContentLength'] == $expectedsize) {
             return true;
         }
@@ -123,7 +123,7 @@ class sss_client {
                 }
             }
         } catch (S3Exception $e) {
-            mtrace($e);
+            return false;
         }
         return false;
     }

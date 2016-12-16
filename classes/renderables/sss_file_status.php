@@ -33,7 +33,9 @@ class sss_file_status implements \renderable {
     private $reportclasses;
 
     public function __construct () {
-        $reportclasses = array('file_location_report', 'log_size_report');
+        $reportclasses = array('file_location_report',
+                               'log_size_report',
+                               'mime_type_report');
 
         foreach ($reportclasses as $reportclass) {
             $reportclass = "tool_sssfs\\report\\{$reportclass}";

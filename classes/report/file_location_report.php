@@ -45,7 +45,8 @@ class file_location_report extends sss_report {
                     JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
                     GROUP BY F.contenthash, F.filesize, SF.location
                     HAVING SF.location = ?
-                ) as sub';
+                ) as sub
+                WHERE sub.filesize != 0';
 
         $duplicate = $DB->get_records_sql($sql, array(SSS_FILE_LOCATION_DUPLICATED));
         $duplicate = reset($duplicate);
@@ -57,14 +58,14 @@ class file_location_report extends sss_report {
         $external = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_EXTERNAL, $external->filecount, $external->filesum);
         $data[SSS_FILE_LOCATION_EXTERNAL] = $external;
 
-        $sql = 'SELECT count(DISTINCT contenthash) as filecount, COALESCE(SUM(filesize) ,0) as filesum from {files}';
+        $sql = 'SELECT count(DISTINCT contenthash) as filecount, COALESCE(SUM(filesize) ,0) as filesum from {files} WHERE filesize != 0';
         $local = $DB->get_records_sql($sql);
         $local = reset($local);
 
         $local->filecount -= $duplicate->filecount + $external->filecount;
         $local->filesum -= $duplicate->filesum + $external->filesum;
 
-        $local = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_LOCAL, $local->filecount, $local->filesum);
+        $local = $this->create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_LOCAL, $local->filecount, $local->filesum);
         $data[SSS_FILE_LOCATION_LOCAL] = $local;
 
         return $data;
