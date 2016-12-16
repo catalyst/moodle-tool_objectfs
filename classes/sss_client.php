@@ -87,7 +87,6 @@ class sss_client {
         $result = $this->client->headObject(array(
                         'Bucket' => $this->bucket,
                         'Key' => $filekey));
-        print_r($result);
         if ($result['ContentLength'] == $expectedsize) {
             return true;
         }

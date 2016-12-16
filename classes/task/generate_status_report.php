@@ -50,7 +50,6 @@ class generate_status_report extends \core\task\scheduled_task {
                                'log_size_report',
                                'mime_type_report');
 
-
         if (isset($config->enabled) && $config->enabled) {
             foreach ($reportclasses as $reportclass) {
                 $reportclass = "tool_sssfs\\report\\{$reportclass}";
@@ -61,5 +60,3 @@ class generate_status_report extends \core\task\scheduled_task {
         }
     }
 }
-
-
