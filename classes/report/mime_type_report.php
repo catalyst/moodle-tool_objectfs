@@ -57,7 +57,7 @@ class mime_type_report extends sss_report {
                             WHEN mimetype =    'application/x-7z-compressed'                    THEN 'archive'
                             WHEN mimetype =    'application/x-rar-compressed'                   THEN 'archive'
                             WHEN mimetype like 'application/%'                                  THEN 'other'
-                            ELSE         substr(mimetype,0,strpos(mimetype, '/'))
+                            ELSE         substr(mimetype,0,position('/' IN mimetype))
                         END AS filetype
                         FROM {files}
                         WHERE mimetype IS NOT NULL) stats
