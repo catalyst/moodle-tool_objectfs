@@ -102,9 +102,10 @@ class pusher extends manipulator {
 
             try {
                 $filecontent = $this->filesystem->get_local_content_from_contenthash($contenthash);
+                $filemd5 = md5($filecontent);
                 $result = $this->client->push_file($contenthash, $filecontent);
                 if ($result) {
-                    log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
+                    log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
                 }
             } catch (file_exception $e) {
                 mtrace($e);

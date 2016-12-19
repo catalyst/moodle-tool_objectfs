@@ -83,11 +83,13 @@ class sss_client {
      * @return boolean true on success, false on failure
      * @throws S3Exceptions.
      */
-    public function check_file($filekey, $expectedsize) {
+    public function check_file($filekey, $expectedmd5) {
         $result = $this->client->headObject(array(
                         'Bucket' => $this->bucket,
                         'Key' => $filekey));
-        if ($result['ContentLength'] == $expectedsize) {
+        $awsmd5 = trim($result['ETag'], '"'); // Strip quotation marks.
+
+        if ($awsmd5 == $expectedmd5) {
             return true;
         }
 

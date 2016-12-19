@@ -51,7 +51,7 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
         global $DB;
         $file = save_file_to_local_storage();
         $filecontenthash = $file->get_contenthash();
-        log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED); // Save file as already duplicated.
+        log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
         $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
         $candidatehashes = $filecleaner->get_candidate_content_hashes();
         $candidatehash = reset($candidatehashes);
@@ -67,7 +67,7 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
         $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
         $file = save_file_to_local_storage();
         $filecontenthash = $file->get_contenthash();
-        log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED); // Save file as already duplicated.
+        log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
         $candidatehashes = $filecleaner->get_candidate_content_hashes();
         $filecleaner->execute($candidatehashes); // Should not delete the file.
         $isreadable = $this->filesystem->is_readable($file);

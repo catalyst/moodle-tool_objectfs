@@ -53,21 +53,17 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
         global $DB;
 
         $filepusher = new pusher($this->client, $this->filesystem, $this->config);
-
         $file = save_file_to_local_storage();
-
         $filecontenthash = $file->get_contenthash();
-
         $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
-        $this->assertEquals(0, $prepushcount);
+        $this->assertEquals(0, $prepushcount); // Assert table does not contain items.
 
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);
-
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
-        $this->assertEquals(1, $postpushcount);
+        $this->assertEquals(1, $postpushcount); // Assert table has item.
     }
 
     public function test_wont_push_file_under_threshold() {
@@ -75,22 +71,11 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
 
         // Set size threshold of 1000.
         $this->config = generate_config(1000);
-
         $filepusher = new pusher($this->client, $this->filesystem, $this->config);
-
-        // Set file size to 100.
-        $file = save_file_to_local_storage(100);
-
+        $file = save_file_to_local_storage(100); // Set file size to 100.
         $filecontenthash = $file->get_contenthash();
-
-        $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
-
-        // Assert table does not contain entry.
-        $this->assertEquals(0, $prepushcount);
-
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);
-
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
         // Assert table still does not contain entry.
@@ -102,21 +87,11 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
 
         // Set minimum age to a large value.
         $this->config = generate_config(0, 99999);
-
         $filepusher = new pusher($this->client, $this->filesystem, $this->config);
-
         $file = save_file_to_local_storage();
-
         $filecontenthash = $file->get_contenthash();
-
-        $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
-
-        // Assert table does not contain entry.
-        $this->assertEquals(0, $prepushcount);
-
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);
-
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
         // Assert table still does not contain entry.
@@ -142,17 +117,26 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
         $filepusher = new pusher($this->client, $this->filesystem, $this->config);
         $file = save_file_to_local_storage();
         $filecontenthash = $file->get_contenthash();
-        $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
-
-        // Assert table does not contain entry.
-        $this->assertEquals(0, $prepushcount);
-
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);
-
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
-        // Assert table still does not contain entry.
+        // Assert table does not contain entry.
         $this->assertEquals(0, $postpushcount);
+    }
+
+    public function test_saves_md5_hash () {
+        global $DB;
+
+        $filepusher = new pusher($this->client, $this->filesystem, $this->config);
+        $file = save_file_to_local_storage();
+        $expectedcontent = 'This is my files content';
+        $file = save_file_to_local_storage(100, 'testfile.txt', $expectedcontent);
+        $filecontenthash = $file->get_contenthash();
+        $expectedmd5 = md5($expectedcontent);
+        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $filepusher->execute($contenthashes);
+        $savedrecord = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+        $this->assertEquals($expectedmd5, $savedrecord->md5);
     }
 }

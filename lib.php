@@ -33,7 +33,7 @@ define('SSSFS_REPORT_FILE_LOCATION', 0);
 define('SSSFS_REPORT_LOG_SIZE', 1);
 define('SSSFS_REPORT_MIME_TYPE', 2);
 
-function log_file_state($contenthash, $location) {
+function log_file_state($contenthash, $location, $md5 = null) {
     global $DB;
 
     $logrecord = new \stdClass();
@@ -42,6 +42,14 @@ function log_file_state($contenthash, $location) {
     $logrecord->location = $location;
 
     $existing = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $contenthash));
+
+    if ($md5) {
+        $logrecord->md5 = $md5;
+    } else if ($existing) {
+        $logrecord->md5 = $existing->md5;
+    } else {
+        throw new coding_exception('No existing record and md5 not supplied for file state');
+    }
 
     if ($existing) {
         $logrecord->id = $existing->id;
