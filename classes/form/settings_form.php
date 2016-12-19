@@ -50,6 +50,10 @@ class settings_form extends \moodleform {
             $connection = $client->test_connection();
         }
 
+        if (isset($config->sizethreshold)) {
+            $config->sizethreshold = $config->sizethreshold / 1024; // Convert to KB.
+        }
+
         $regionoptions = array( 'us-east-1'          => 'us-east-1',
                                 'us-east-2'         => 'us-east-2',
                                 'us-west-1'         => 'us-west-1',
