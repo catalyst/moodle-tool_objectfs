@@ -53,5 +53,14 @@ $tasks = array(
         'dayofweek' => '*',
         'month'     => '*'
     ),
+    array(
+        'classname' => 'tool_sssfs\task\pull_from_sss',
+        'blocking'  => 0,
+        'minute'    => '*',
+        'hour '     => '*',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*'
+    ),
 );
 

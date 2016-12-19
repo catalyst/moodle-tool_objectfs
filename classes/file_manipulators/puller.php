@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Pulls files from  s3 if they meet the configured criterea.
+ * Pushes files to s3 if they meet the configured criterea.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -24,5 +24,83 @@
  */
 
 namespace tool_sssfs\file_manipulators;
+use core_files\filestorage\file_exception;
+use Aws\S3\Exception\S3Exception;
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+
+class puller extends manipulator {
+
+    /**
+     * Size threshold for pulling files from S3 in bytes.
+     *
+     * @var int
+     */
+    private $sizethreshold;
+
+    /**
+     * Puller constructor.
+     *
+     * @param sss_client $client S3 client
+     * @param sss_file_system $filesystem S3 file system
+     * @param object $config sssfs config.
+     */
+    public function __construct($client, $filesystem, $config) {
+        parent::__construct($client, $filesystem, $config->maxtaskruntime);
+        $this->sizethreshold = $config->sizethreshold;
+    }
+
+    /**
+     * Get candidate content hashes for pulling.
+     * Files that are less or equal to the sizethreshold,
+     * and are external.
+     *
+     * @return array candidate contenthashes
+     */
+    public function get_candidate_content_hashes() {
+        global $DB;
+        $sql = 'SELECT F.contenthash
+                FROM {files} F
+                LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
+                GROUP BY F.contenthash, F.filesize, SF.location
+                HAVING MAX(F.filesize) <= ?
+                AND (SF.location = ?)';
+
+        $params = array($this->sizethreshold, SSS_FILE_LOCATION_EXTERNAL);
+
+        $contenthashes = $DB->get_fieldset_sql($sql, $params);
+
+        return $contenthashes;
+    }
+
+    /**
+     * Pushes files from local file system to S3.
+     *
+     * @param  array $candidatehashes content hashes to push
+     */
+    public function execute($candidatehashes) {
+        global $DB;
+
+        foreach ($candidatehashes as $contenthash) {
+            if (time() >= $this->finishtime) {
+                break;
+            }
+
+            try {
+                $contents = $this->client->get_file_contents($contenthash);
+                $this->filesystem->add_string_to_pool($contents);
+                log_file_state($contenthash, SSS_FILE_LOCATION_LOCAL);
+            } catch (file_exception $e) {
+                mtrace($e);
+                continue;
+            } catch (S3Exception $e) {
+                mtrace($e);
+                continue;
+            }
+        }
+    }
+}
+
+

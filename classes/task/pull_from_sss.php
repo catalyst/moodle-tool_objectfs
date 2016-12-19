@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Task that pulls files from S3.
  *
  * @package   tool_sssfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,11 +23,38 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_sssfs\task;
+
+use tool_sssfs\file_manipulators\puller;
+use tool_sssfs\sss_client;
+use tool_sssfs\sss_file_system;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2016121304;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2016121304;      // Same as version
-$plugin->requires  = 2016011400;      // Requires Filesystem API.
-$plugin->component = "tool_sssfs";
-$plugin->maturity  = MATURITY_STABLE;
+class pull_from_sss extends \core\task\scheduled_task {
+
+    /**
+     * Get task name
+     */
+    public function get_name() {
+        return get_string('pull_from_sss_task', 'tool_sssfs');
+    }
+
+    /**
+     * Execute task
+     */
+    public function execute() {
+
+        $config = get_config('tool_sssfs');
+
+        if (isset($config->enabled) && $config->enabled) {
+            $client = new sss_client($config);
+            $filesystem = sss_file_system::instance();
+            $filepuller = new puller($client, $filesystem, $config);
+            $contenthashes = $filepuller->get_candidate_content_hashes();
+            $filepuller->execute($contenthashes);
+        }
+    }
+}
+
 

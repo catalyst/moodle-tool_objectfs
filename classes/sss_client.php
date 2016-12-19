@@ -73,6 +73,13 @@ class sss_client {
         return $result;
     }
 
+    public function get_file_contents($filekey) {
+        $result = $this->client->getObject(array(
+                        'Bucket' => $this->bucket,
+                        'Key' => $filekey));
+        return $result['Body'];
+    }
+
     /**
      * Checks file is in s3 and its size matches expeted.
      * We could hash the contents and compare, but we
