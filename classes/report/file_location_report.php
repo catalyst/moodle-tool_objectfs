@@ -58,7 +58,15 @@ class file_location_report extends sss_report {
         $external = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_EXTERNAL, $external->filecount, $external->filesum);
         $data[SSS_FILE_LOCATION_EXTERNAL] = $external;
 
-        $sql = 'SELECT count(DISTINCT contenthash) as filecount, COALESCE(SUM(filesize) ,0) as filesum from {files} WHERE filesize != 0';
+        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) as filecount,
+                       COALESCE(SUM(sub.filesize) ,0) as filesum
+                        FROM (
+                            SELECT F.contenthash, MAX(F.filesize) as filesize
+                            FROM {files} F
+                            GROUP BY F.contenthash, F.filesize
+                        ) as sub
+                        WHERE sub.filesize != 0';
+
         $local = $DB->get_records_sql($sql);
         $local = reset($local);
 
