@@ -48,21 +48,6 @@ class tool_sssfs_sss_file_system_testcase extends advanced_testcase {
 
     }
 
-    public function test_get_local_content_from_contenthash() {
-        $expectedcontent = 'This is my files content';
-        $file = save_file_to_local_storage(100, 'testfile.txt', $expectedcontent);
-        $filecontenthash = $file->get_contenthash();
-        $actualcontent = $this->filesystem->get_local_content_from_contenthash($filecontenthash);
-        $this->assertEquals($expectedcontent, $actualcontent);
-    }
-
-    public function test_get_local_content_from_contenthash_throws_exception() {
-        $filecontenthash = 'not_a_contenthash';
-        $this->setExpectedExceptionRegexp('\core_files\filestorage\file_exception',
-            '/Can not read file, either file does not exist or there are permission problems/');
-        $actualcontent = $this->filesystem->get_local_content_from_contenthash($filecontenthash);
-    }
-
     public function test_delete_local_file_from_contenthash() {
         $file = save_file_to_local_storage();
         $isreadable = $this->filesystem->is_readable($file);
@@ -99,8 +84,4 @@ class tool_sssfs_sss_file_system_testcase extends advanced_testcase {
         $actualcontent = $this->filesystem->get_content($file);
         $this->assertEquals($expectedcontent, $actualcontent);
     }
-
-
-
-
 }

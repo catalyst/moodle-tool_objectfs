@@ -41,6 +41,7 @@ class tool_sssfs_pusher_testcase extends advanced_testcase {
         $this->config = generate_config();
         $this->client = new sss_mock_client();
         $this->filesystem = sss_file_system::instance();
+        $this->filesystem->set_sss_client($this->client);
         ob_start(); // Start a buffer to catch all the mtraces in the task.
 
     }

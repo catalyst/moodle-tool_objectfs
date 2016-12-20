@@ -74,13 +74,13 @@ class cleaner extends manipulator {
             return array();
         }
 
-        $sql = 'SELECT SF.contenthash
+        $sql = 'SELECT SF.contenthash, SF.md5
                 FROM {tool_sssfs_filestate} SF
                 WHERE SF.timeduplicated <= ? and SF.location = ?';
 
         $consistancythrehold = time() - $this->consistencydelay;
         $params = array($consistancythrehold, SSS_FILE_LOCATION_DUPLICATED);
-        $contenthashes = $DB->get_fieldset_sql($sql, $params);
+        $contenthashes = $DB->get_records_sql_menu($sql, $params);
         return $contenthashes;
     }
 
@@ -96,22 +96,20 @@ class cleaner extends manipulator {
             return;
         }
 
-        foreach ($candidatehashes as $contenthash) {
+        foreach ($candidatehashes as $contenthash => $md5) {
 
             if (time() >= $this->finishtime) {
                 break;
             }
 
-            // We find the size here instead of in get_candidate_hashes
-            // so we dont have to do a massive group by.
-            $sql = 'SELECT max(filesize) from {files} where contenthash = ?';
-            $filesize = $DB->get_fieldset_sql($sql, array($contenthash));
-            $filesize = reset($filesize);
-
             try {
-                $fileinsss = $this->client->check_file($contenthash, $filesize);
-                $this->filesystem->delete_local_file_from_contenthash($contenthash);
-                log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL);
+                $fileinsss = $this->client->check_file($contenthash, $md5);
+                if ($fileinsss) {
+                    $success = $this->filesystem->delete_local_file_from_contenthash($contenthash);
+                    if ($success) {
+                        log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL);
+                    }
+                }
             } catch (file_exception $e) {
                 mtrace($e);
                 continue;

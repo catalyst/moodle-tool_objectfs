@@ -41,6 +41,7 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
         $this->config = generate_config();
         $this->client = new sss_mock_client();
         $this->filesystem = sss_file_system::instance();
+        $this->filesystem->set_sss_client($this->client);
     }
 
     protected function tearDown() {
@@ -54,9 +55,9 @@ class tool_sssfs_cleaner_testcase extends advanced_testcase {
         log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
         $filecleaner = new cleaner($this->client, $this->filesystem, $this->config);
         $candidatehashes = $filecleaner->get_candidate_content_hashes();
-        $candidatehash = reset($candidatehashes);
         $this->assertEquals(1, count($candidatehashes));
-        $this->assertEquals($filecontenthash, $candidatehash);
+        reset($candidatehashes); // Reset array so key fives us key of first value.
+        $this->assertEquals($filecontenthash, key($candidatehashes));
         $filecleaner->execute($candidatehashes);
         $isreadable = $this->filesystem->is_readable($file);
         $this->assertFalse($isreadable);

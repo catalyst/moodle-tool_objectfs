@@ -89,9 +89,10 @@ class puller extends manipulator {
             }
 
             try {
-                $contents = $this->client->get_file_contents($contenthash);
-                $this->filesystem->add_string_to_pool($contents);
-                log_file_state($contenthash, SSS_FILE_LOCATION_LOCAL);
+                $success = $this->filesystem->copy_file_from_sss_to_local($contenthash);
+                if ($success) {
+                    log_file_state($contenthash, SSS_FILE_LOCATION_LOCAL);
+                }
             } catch (file_exception $e) {
                 mtrace($e);
                 continue;

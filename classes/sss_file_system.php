@@ -66,19 +66,6 @@ class sss_file_system extends file_system {
     }
 
     /**
-     * Gets a local file's content from it's contenthash.
-     *
-     * @param  string $contenthash content hash
-     * @return string file contents
-     * @throws file_exception
-     */
-    public function get_local_content_from_contenthash($contenthash) {
-        $this->ensure_readable_by_hash($contenthash);
-        $filepath = $this->get_fullpath_from_hash($contenthash);
-        return file_get_contents($filepath);
-    }
-
-    /**
      * Deletes a local file from it's contenthash.
      *
      * @param  string $contenthash content hash
@@ -87,7 +74,26 @@ class sss_file_system extends file_system {
     public function delete_local_file_from_contenthash($contenthash) {
         $this->ensure_readable_by_hash($contenthash);
         $filepath = $this->get_fullpath_from_hash($contenthash);
-        unlink($filepath);
+        return unlink($filepath);
+    }
+
+    public function copy_file_from_sss_to_local($contenthash) {
+        $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash);
+        $sssfilepath = $this->sssclient->get_sss_fullpath_from_contenthash($contenthash);
+        return copy($sssfilepath, $localfilepath);
+    }
+
+    public function copy_file_from_local_to_sss($contenthash) {
+        $this->ensure_readable_by_hash($contenthash);
+        $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash);
+        $sssfilepath = $this->sssclient->get_sss_fullpath_from_contenthash($contenthash);
+        return copy($localfilepath, $sssfilepath);
+    }
+
+    public function get_local_md5_from_contenthash($contenthash) {
+        $localfilepath = $this->get_fullpath_from_hash($contenthash);
+        $md5 = md5_file($localfilepath);
+        return $md5;
     }
 
     /**

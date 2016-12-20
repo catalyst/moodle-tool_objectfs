@@ -46,6 +46,7 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
         $this->config = generate_config();
         $this->client = new sss_mock_client();
         $this->filesystem = sss_file_system::instance();
+        $this->filesystem->set_sss_client($this->client);
     }
 
     protected function tearDown() {

@@ -57,30 +57,6 @@ class sss_client {
     }
 
     /**
-     * Pushes a file's contents into s3. Uses $filekey to index the file.
-     *
-     * @param  string $filekey contenthash to be used as key in s3.
-     * @param  string $filecontent file contents.
-     * @return object result from s3.
-     * @throws S3Exceptions.
-     */
-    public function push_file($filekey, $filecontent) {
-        $result = $this->client->putObject(array(
-                        'Bucket' => $this->bucket,
-                        'Key' => $filekey,
-                        'Body' => $filecontent));
-
-        return $result;
-    }
-
-    public function get_file_contents($filekey) {
-        $result = $this->client->getObject(array(
-                        'Bucket' => $this->bucket,
-                        'Key' => $filekey));
-        return $result['Body'];
-    }
-
-    /**
      * Checks file is in s3 and its size matches expeted.
      * We could hash the contents and compare, but we
      * do this to keep executions speed low.
