@@ -64,6 +64,7 @@ class pusher extends manipulator {
     /**
      * Get candidate content hashes for pushing.
      * Files that are bigger than the sizethreshold,
+     * less than 5GB (S3 upload max),
      * older than the minimum age
      * and have no location / are in local.
      *
@@ -76,6 +77,7 @@ class pusher extends manipulator {
                 LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
                 GROUP BY F.contenthash, F.filesize, SF.location
                 HAVING MIN(F.timecreated) < ? AND MAX(F.filesize) > ?
+                AND MAX(F.filesize) < 5000000000
                 AND (SF.location IS NULL OR SF.location = ?)';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
