@@ -54,7 +54,7 @@ class sss_mock_client extends sss_client {
         if ($this->throwexception) {
             throw new S3Exception('Mock S3 exception', 'file', 'line');
         } else {
-            $mockpath = $this->get_sss_fullpath_from_contenthash($filekey);
+            $mockpath = $this->get_fullpath_from_hash($filekey);
             file_put_contents($mockpath, $filecontent);
             return true;
         }
@@ -62,7 +62,7 @@ class sss_mock_client extends sss_client {
 
     public function check_file($filekey, $expectedsize) {
         if ($this->throwexception) {
-            throw new file_exception('storedfilecannotread', '', $this->get_sss_fullpath_from_contenthash($filekey));
+            throw new file_exception('storedfilecannotread', '', $this->get_fullpath_from_hash($filekey));
         } else if ($this->return) {
             return true; // Mock a failure.
         } else {
@@ -71,7 +71,7 @@ class sss_mock_client extends sss_client {
     }
 
     // Returns s3 fullpath to use with php file functions.
-    public function get_sss_fullpath_from_contenthash($contenthash) {
+    public function get_fullpath_from_hash($contenthash) {
         global $CFG;
         return "{$CFG->phpunit_dataroot}/mockbucket/{$contenthash}";
     }

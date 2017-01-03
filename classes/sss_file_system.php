@@ -74,21 +74,21 @@ class sss_file_system extends file_system {
      * @throws file_exception
      */
     public function delete_local_file_from_contenthash($contenthash) {
-        $filepath = $this->get_fullpath_from_hash($contenthash);
+        $filepath = $this->get_fullpath_from_hash($contenthash, true);
         $this->ensure_readable_by_hash($contenthash);
         return unlink($filepath);
     }
 
     public function copy_file_from_sss_to_local($contenthash) {
         $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash, true);
-        $sssfilepath = $this->sssclient->get_sss_fullpath_from_contenthash($contenthash);
+        $sssfilepath = $this->sssclient->get_fullpath_from_hash($contenthash);
         return copy($sssfilepath, $localfilepath);
     }
 
     public function copy_file_from_local_to_sss($contenthash) {
         $this->ensure_readable_by_hash($contenthash);
         $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash, true);
-        $sssfilepath = $this->sssclient->get_sss_fullpath_from_contenthash($contenthash);
+        $sssfilepath = $this->sssclient->get_fullpath_from_hash($contenthash);
         return copy($localfilepath, $sssfilepath);
     }
 
@@ -102,10 +102,10 @@ class sss_file_system extends file_system {
     protected function is_hash_in_sss($contenthash) {
         global $DB;
         $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
-        $ssslocations = array(SSS_FILE_LOCATION_DUPLICATED, SSS_FILE_LOCATION_EXTERNAL);
-        if ($location && in_array($location, $ssslocations)) {
+        if ($location && $location == SSS_FILE_LOCATION_EXTERNAL) {
             return true;
         }
+        return false;
     }
 
     /**

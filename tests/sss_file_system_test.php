@@ -64,6 +64,7 @@ class tool_sssfs_sss_file_system_testcase extends advanced_testcase {
         $filecontenthash = $file->get_contenthash();
         $this->client->push_file($filecontenthash, $expectedcontent);
         $this->filesystem->delete_local_file_from_contenthash($filecontenthash);
+        log_file_state($filecontenthash, SSS_FILE_LOCATION_EXTERNAL, 'bogusmd5');
         $this->expectOutputString($expectedcontent);
         $this->filesystem->readfile($file);
     }
@@ -74,6 +75,7 @@ class tool_sssfs_sss_file_system_testcase extends advanced_testcase {
         $filecontenthash = $file->get_contenthash();
         $this->client->push_file($filecontenthash, $expectedcontent);
         $this->filesystem->delete_local_file_from_contenthash($filecontenthash);
+        log_file_state($filecontenthash, SSS_FILE_LOCATION_EXTERNAL, 'bogusmd5');
         $actualcontent = $this->filesystem->get_content($file);
         $this->assertEquals($expectedcontent, $actualcontent);
     }
