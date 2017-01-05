@@ -103,7 +103,7 @@ class pusher extends manipulator {
             }
 
             try {
-                $success = $this->filesystem->copy_file_from_local_to_sss($contenthash);
+                $success = $this->filesystem->copy_local_file_to_sss($contenthash);
                 if ($success) {
                     $filemd5 = $this->filesystem->get_local_md5_from_contenthash($contenthash);
                     log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);

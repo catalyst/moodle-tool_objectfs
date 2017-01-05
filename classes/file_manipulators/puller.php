@@ -89,7 +89,7 @@ class puller extends manipulator {
             }
 
             try {
-                $success = $this->filesystem->copy_file_from_sss_to_local($contenthash);
+                $success = $this->filesystem->copy_sss_file_to_local($contenthash);
                 if ($success) {
                     log_file_state($contenthash, SSS_FILE_LOCATION_LOCAL);
                 }

@@ -76,7 +76,8 @@ class settings_form extends \moodleform {
             'deletelocal'       => 0,
             'consistencydelay'  => 10 * 60,
             'maxtaskruntime'    => 60,
-            'logging'           => 0
+            'logging'           => 0,
+            'prefersss'         => 0
         );
 
         $mform->addElement('advcheckbox', 'enabled', get_string('settings:enabled', 'tool_sssfs'));
@@ -128,6 +129,10 @@ class settings_form extends \moodleform {
         $mform->addHelpButton('consistencydelay', 'settings:consistencydelay', 'tool_sssfs');
         $mform->disabledIf('consistencydelay', 'deletelocal');
         $mform->setType("consistencydelay", PARAM_INT);
+
+        $mform->addElement('advcheckbox', 'prefersss', get_string('settings:prefersss', 'tool_sssfs'));
+        $mform->addHelpButton('prefersss', 'settings:prefersss', 'tool_sssfs');
+        $mform->setType("prefersss", PARAM_INT);
 
         $mform->addElement('header', 'loggingheader', get_string('settings:loggingheader', 'tool_sssfs'));
         $mform->setExpanded('loggingheader');

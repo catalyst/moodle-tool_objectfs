@@ -65,9 +65,10 @@ $string['settings:consistencydelay'] = 'Consistency delay';
 $string['settings:consistencydelay_help'] = 'How long a file must existed after being transfered to S3 before they are a candidate for deletion locally.';
 $string['settings:maxtaskruntime'] = 'Maximum task runtime';
 $string['settings:maxtaskruntime_help'] = 'Maximum runtime for all S3 related tasks; pushing to S3, pulling from S3 and cleaning files that are in S3.';
+$string['settings:prefersss'] = 'Prefer S3 files';
+$string['settings:prefersss_help'] = 'If a file is stored both locally and in S3, read from S3. This is setting is mainly for testing purposes and introduces overhead to check the location.';
 $string['settings:loggingheader'] = 'Logging Settings';
 $string['settings:logging'] = 'Enable logging';
 $string['settings:logging_help'] = 'Log file access to the php log.';
 $string['settings:connectionsuccess'] = 'Could establish connection to AWS S3 bucket.';
 $string['settings:connectionfailure'] = 'Could not establish connection to AWS S3 bucket.';
-

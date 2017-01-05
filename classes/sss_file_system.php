@@ -37,6 +37,7 @@ require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 class sss_file_system extends file_system {
 
     private $sssclient;
+    private $prefersss;
 
     /**
      * sss_file_system Constructor.
@@ -54,6 +55,7 @@ class sss_file_system extends file_system {
         $config = get_config('tool_sssfs');
         $sssclient = new sss_client($config);
         $this->set_sss_client($sssclient);
+        $this->prefersss = $config->prefersss;
     }
 
     /**
@@ -68,71 +70,252 @@ class sss_file_system extends file_system {
     }
 
     /**
-     * Deletes a local file from it's contenthash.
+     * Deletes local file based on it's content hash.
      *
-     * @param  string $contenthash content hash
-     * @throws file_exception
+     * @param  string $contenthash files contenthash
+     *
+     * @return bool success of operation
      */
     public function delete_local_file_from_contenthash($contenthash) {
-        $filepath = $this->get_fullpath_from_hash($contenthash, true);
+        $filepath = $this->get_local_fullpath_from_hash($contenthash, true);
         $this->ensure_readable_by_hash($contenthash);
         return unlink($filepath);
     }
 
-    public function copy_file_from_sss_to_local($contenthash) {
+    /**
+     * Copy file from s3 to local storage.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return bool success of operation
+     */
+    public function copy_sss_file_to_local($contenthash) {
         $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash, true);
         $sssfilepath = $this->sssclient->get_fullpath_from_hash($contenthash);
         return copy($sssfilepath, $localfilepath);
     }
 
-    public function copy_file_from_local_to_sss($contenthash) {
+    /**
+     * Copy file from local to s3 storage.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return bool success of operation
+     */
+    public function copy_local_file_to_sss($contenthash) {
         $this->ensure_readable_by_hash($contenthash);
         $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash, true);
         $sssfilepath = $this->sssclient->get_fullpath_from_hash($contenthash);
         return copy($localfilepath, $sssfilepath);
     }
 
+    /**
+     * Calculated md5 of file.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return string md5 hash of file
+     */
     public function get_local_md5_from_contenthash($contenthash) {
-        $localfilepath = $this->get_fullpath_from_hash($contenthash, true);
+        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
         $md5 = md5_file($localfilepath);
         return $md5;
     }
 
-
-    protected function is_hash_in_sss($contenthash) {
+    /**
+     * Whether a file designated by a contenthash is in s3.
+     * relies on the DB to provide this information.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return bool true if in s3, false if not.
+     */
+    protected function hash_in_sss($contenthash) {
         global $DB;
+        $externallocations = array(SSS_FILE_LOCATION_DUPLICATED, SSS_FILE_LOCATION_EXTERNAL);
         $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
-        if ($location && $location == SSS_FILE_LOCATION_EXTERNAL) {
+        if ($location && in_array($location, $externallocations)) {
             return true;
         }
         return false;
     }
 
     /**
-     * Get the full directory to the stored file, including the path to the
-     * filedir, and the directory which the file is actually in.
+     * Returns path to the file if it was in s3.
+     * Does not check if it actually is there.
      *
-     * @param string $contenthash The content hash
-     * @return string The full path to the content directory
+     * @param  stored_file $file stored file record
+     *
+     * @return string s3 file path
      */
-    protected function get_fulldir_from_hash($contenthash, $forcelocal = false) {
-        if ($forcelocal || !$this->is_hash_in_sss($contenthash)) {
-            return $this->filedir . DIRECTORY_SEPARATOR . $this->get_contentdir_from_hash($contenthash);
-        }
-        return $this->sssclient->get_fulldir();
+    protected function get_sss_fullpath_from_file(stored_file $file) {
+        return $this->get_sss_fullpath_from_hash($file->get_contenthash());
     }
 
     /**
-     * Get the full path for the specified hash, including the path to the filedir.
+     * Returns path to the file if it was in s3 based on conenthash.
+     * Does not check if it actually is there.
      *
-     * @param string $contenthash The content hash
-     * @return string The full path to the content file
+     * @param  string $contenthash files contenthash
+     *
+     * @return string s3 file path
      */
-    protected function get_fullpath_from_hash($contenthash, $forcelocal = false) {
-        if ($forcelocal || !$this->is_hash_in_sss($contenthash)) {
-            return $this->filedir . DIRECTORY_SEPARATOR . $this->get_contentpath_from_hash($contenthash);
+    protected function get_sss_fullpath_from_hash($contenthash) {
+        $path = $this->sssclient->get_fullpath_from_hash($contenthash);
+        return $path;
+    }
+
+    /**
+     * Returns path to the file as if it was stored locally.
+     * Does not check if it actually is there.
+     *
+     * Taken from get_fullpath_from_storedfile in parent class.
+     *
+     * @param  stored_file $file stored file record
+     * @param  boolean     $sync sync external files.
+     *
+     * @return string local file path
+     */
+    protected function get_local_fullpath_from_file(stored_file $file, $sync = false) {
+        if ($sync) {
+            $file->sync_external_file();
         }
-        return $this->sssclient->get_fullpath_from_hash($contenthash);
+        return $this->get_local_fullpath_from_hash($file->get_contenthash());
+    }
+
+    /**
+     * Returns path to the file as if it was stored locally from hash.
+     * Does not check if it actually is there.
+     *
+     * Taken from get_fullpath_from_hash in parent class.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return string local file path
+     */
+    protected function get_local_fullpath_from_hash($contenthash) {
+        return $this->filedir . DIRECTORY_SEPARATOR . $this->get_contentpath_from_hash($contenthash);
+    }
+
+    /**
+     * Whether a file is readable locally. Will
+     * try content recovery if not.
+     *
+     * Taken from is_readable in parent class.
+     *
+     * @param  stored_file $file stored file record
+     *
+     * @return boolean true if readable, false if not
+     */
+    protected function is_local_readable(stored_file $file) {
+        $path = $this->get_local_fullpath_from_file($file, true);
+        if (!is_readable($path)) {
+            if (!$this->try_content_recovery($file) or !is_readable($path)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Whether a file is readable in s3.
+     *
+     * @param  stored_file $file stored file record
+     *
+     * @return boolean true if readable, false if not
+     */
+    protected function is_sss_readable($file) {
+        $path = $this->get_sss_fullpath_from_file($file);
+        return is_readable($path);
+    }
+
+    /**
+     * Whether a file is readable anywhere.
+     * Will check if it can read local, and if it cant,
+     * it will try to read from s3.
+     *
+     * We dont just call is_readable_by_hash because following
+     * precedent set by parent, we try content recovery for local
+     * files here.
+     *
+     * @param  stored_file $file stored file record
+     *
+     * @return boolean true if readable, false if not
+     */
+    public function is_readable(stored_file $file) {
+        if ($this->is_local_readable($file) || $this->is_sss_readable($file)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Whether a file is readable anywhere by hash.
+     * Will check if it can read local, and if it cant,
+     * it will try to read from s3.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return boolean true if readable, false if not
+     */
+    public function is_readable_by_hash($contenthash) {
+        $localpath  = $this->get_local_fullpath_from_hash($contenthash);
+        $localreadable = is_readable($localpath);
+        if ($localreadable) {
+            return true;
+        }
+        $ssspath = $this->get_sss_fullpath_from_hash($contenthash);
+        return is_readable($ssspath);
+    }
+
+    /**
+     * Returns the fullpath for a given contenthash. This is
+     * the main workhorse for this s3 filesystem.
+     *
+     * First we test if we can read locally and if we can, return
+     * the local path. If we cant, we assume it's in S3 and return the s3
+     * path to avoid overhead.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return string file path
+     */
+    protected function get_fullpath_from_hash($contenthash) {
+
+        // Check for duplicate sss testing mode first.
+        // if enabled and in SSS acording to DB we
+        // return its s3 path.
+        if ($this->prefersss && $this->hash_in_sss($contenthash)) {
+            return $this->get_sss_fullpath_from_hash($contenthash);
+        }
+
+        $localpath  = $this->get_local_fullpath_from_hash($contenthash);
+        $localreadable = is_readable($localpath);
+
+        if ($localreadable) {
+            return $localpath;
+        }
+
+        // We assume its in sss, we do not check if it's readable.
+        return $this->get_sss_fullpath_from_hash($contenthash);
+
+    }
+
+    public function readfile(stored_file $file) {
+        $path = $this->get_fullpath_from_storedfile($file, true);
+        readfile_allow_large($path, $file->get_filesize());
+    }
+
+
+    public function get_content(stored_file $file) {
+        $path = $this->get_fullpath_from_storedfile($file, true);
+        return file_get_contents($path);
+
+    }
+
+    public function get_content_file_handle($file, $type = stored_file::FILE_HANDLE_FOPEN) {
+        $path = $this->get_fullpath_from_storedfile($file, true);
+        return self::get_file_handle_for_path($path, $type);
     }
 
 }

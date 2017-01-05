@@ -73,6 +73,7 @@ function save_sss_config_data($data) {
     $config->logging = $data->logging;
     $config->maxtaskruntime = $data->maxtaskruntime;
     $config->deletelocal = $data->deletelocal;
+    $config->prefersss = $data->prefersss;
 
     foreach (get_object_vars($config) as $key => $value) {
         set_config($key, $value, 'tool_sssfs');
