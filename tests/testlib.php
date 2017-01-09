@@ -69,6 +69,7 @@ function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime 
     $config->logging = 1;
     $config->maxtaskruntime = $maxtaskruntime;
     $config->deletelocal = $deletelocal;
+    $config->prefersss = 0;
     save_sss_config_data($config);
     return $config;
 }
