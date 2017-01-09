@@ -99,7 +99,14 @@ class sss_client {
         return "s3://{$this->bucket}";
     }
 
-
+    public function path_is_local($path) {
+        $sssprefix = 's3://';
+        $pathprefix = substr($path, 0, 5);
+        if ($sssprefix === $pathprefix) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Tests connection to S3 and bucket.

@@ -70,6 +70,16 @@ class sss_mock_client extends sss_client {
         }
     }
 
+    public function path_is_local($path) {
+        global $CFG;
+        $sssprefix = $CFG->phpunit_dataroot . '/mockbucket';
+        $pathprefix = substr($path, 0, strlen($sssprefix));
+        if ($sssprefix === $pathprefix) {
+            return false;
+        }
+        return true;
+    }
+
     // Returns s3 fullpath to use with php file functions.
     public function get_fullpath_from_hash($contenthash) {
         global $CFG;

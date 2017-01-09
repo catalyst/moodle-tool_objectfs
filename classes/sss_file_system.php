@@ -123,21 +123,23 @@ class sss_file_system extends file_system {
     }
 
     /**
-     * Whether a file designated by a contenthash is in s3.
-     * relies on the DB to provide this information.
+     * get location of contenthash file from the
+     * tool_sssfs_filestate table. if content hash is not in the table,
+     * we assume it is stored locally or is to be stored locally.
      *
      * @param  string $contenthash files contenthash
      *
-     * @return bool true if in s3, false if not.
+     * @return int contenthash file location.
      */
-    protected function hash_in_sss($contenthash) {
+    protected function get_hash_location($contenthash) {
         global $DB;
-        $externallocations = array(SSS_FILE_LOCATION_DUPLICATED, SSS_FILE_LOCATION_EXTERNAL);
         $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
-        if ($location && in_array($location, $externallocations)) {
-            return true;
+
+        if ($location) {
+            return $location;
         }
-        return false;
+
+        return SSS_FILE_LOCATION_LOCAL;
     }
 
     /**
@@ -250,31 +252,63 @@ class sss_file_system extends file_system {
     }
 
     /**
+     * Checks if a file is readable if it's path is local.
+     *
+     * @param  stored_file $file stored file record
+     * @param  string $path file path
+     *
+     * @throws file_exception When the file could not be read locally.
+     */
+    protected function ensure_file_readable_if_local(stored_file $file, $path) {
+        if ($this->sssclient->path_is_local($path) && !$this->is_local_readable($file)) {
+            throw new file_exception('storedfilecannotread', '', $this->get_fullpath_from_storedfile($file));
+        }
+    }
+
+    /**
      * Whether a file is readable anywhere by hash.
      * Will check if it can read local, and if it cant,
      * it will try to read from s3.
+     *
+     * Does not attempt content recovery if local.
      *
      * @param  string $contenthash files contenthash
      *
      * @return boolean true if readable, false if not
      */
     public function is_readable_by_hash($contenthash) {
+        $isreadable = ($this->is_local_readable_by_hash($contenthash) || $this->is_sss_readable_by_hash($contenthash));
+        return $isreadable;
+    }
+
+    /**
+     * Checks if file is readable locally by hash.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return boolean true if readable, false if not
+     */
+    protected function is_local_readable_by_hash($contenthash) {
         $localpath  = $this->get_local_fullpath_from_hash($contenthash);
-        $localreadable = is_readable($localpath);
-        if ($localreadable) {
-            return true;
-        }
+        return is_readable($localpath);
+    }
+
+    /**
+     * Checks if file is readable in s3 by hash.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return boolean true if readable, false if not
+     */
+    protected function is_sss_readable_by_hash($contenthash) {
         $ssspath = $this->get_sss_fullpath_from_hash($contenthash);
         return is_readable($ssspath);
     }
 
     /**
-     * Returns the fullpath for a given contenthash. This is
-     * the main workhorse for this s3 filesystem.
-     *
-     * First we test if we can read locally and if we can, return
-     * the local path. If we cant, we assume it's in S3 and return the s3
-     * path to avoid overhead.
+     * Returns the fullpath for a given contenthash.
+     * Queries the DB to determine file location and
+     * then uses appropriate path function.
      *
      * @param  string $contenthash files contenthash
      *
@@ -282,39 +316,41 @@ class sss_file_system extends file_system {
      */
     protected function get_fullpath_from_hash($contenthash) {
 
-        // Check for duplicate sss testing mode first.
-        // if enabled and in SSS acording to DB we
-        // return its s3 path.
-        if ($this->prefersss && $this->hash_in_sss($contenthash)) {
-            return $this->get_sss_fullpath_from_hash($contenthash);
+        $filelocation  = $this->get_hash_location($contenthash);
+
+        switch ($filelocation) {
+            case SSS_FILE_LOCATION_LOCAL:
+                return $this->get_local_fullpath_from_hash($contenthash);
+            case SSS_FILE_LOCATION_DUPLICATED:
+                if ($this->prefersss) {
+                    return $this->get_sss_fullpath_from_hash($contenthash);
+                } else {
+                    return $this->get_local_fullpath_from_hash($contenthash);
+                }
+            case SSS_FILE_LOCATION_EXTERNAL:
+                return $this->get_sss_fullpath_from_hash($contenthash);
+            default:
+                return $this->get_local_fullpath_from_hash($contenthash);
         }
-
-        $localpath  = $this->get_local_fullpath_from_hash($contenthash);
-        $localreadable = is_readable($localpath);
-
-        if ($localreadable) {
-            return $localpath;
-        }
-
-        // We assume its in sss, we do not check if it's readable.
-        return $this->get_sss_fullpath_from_hash($contenthash);
-
     }
 
     public function readfile(stored_file $file) {
         $path = $this->get_fullpath_from_storedfile($file, true);
+        $this->ensure_file_readable_if_local($file, $path);
         readfile_allow_large($path, $file->get_filesize());
     }
 
 
     public function get_content(stored_file $file) {
         $path = $this->get_fullpath_from_storedfile($file, true);
+        $this->ensure_file_readable_if_local($file, $path);
         return file_get_contents($path);
 
     }
 
     public function get_content_file_handle($file, $type = stored_file::FILE_HANDLE_FOPEN) {
         $path = $this->get_fullpath_from_storedfile($file, true);
+        $this->ensure_file_readable_if_local($file, $path);
         return self::get_file_handle_for_path($path, $type);
     }
 
