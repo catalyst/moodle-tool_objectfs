@@ -20,7 +20,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="report" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="key" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="datakey" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="filecount" TYPE="int" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="filesum" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>

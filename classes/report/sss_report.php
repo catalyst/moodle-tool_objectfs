@@ -40,10 +40,10 @@ abstract class sss_report {
         return $lastruntime;
     }
 
-    protected function create_report_data_record($reporttype, $key, $filecount, $filesum) {
+    protected function create_report_data_record($reporttype, $datakey, $filecount, $filesum) {
         $record = new \stdClass();
         $record->report = $reporttype;
-        $record->key = $key;
+        $record->datakey = $datakey;
         $record->filecount = $filecount;
         $record->filesum = $filesum;
         return $record;

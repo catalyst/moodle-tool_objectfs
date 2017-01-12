@@ -73,7 +73,7 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         foreach ($mimetypereport as $record) {
             $filesum = $record->filesum / 1024 / 1024; // Convert to MB.
             $filesum = round($filesum, 2);
-            $table->data[] = array($record->key, $record->filecount, $filesum);
+            $table->data[] = array($record->datakey, $record->filecount, $filesum);
         }
 
         $output = html_writer::table($table);
@@ -91,7 +91,7 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         foreach ($logsizereport as $record) {
             $filesum = $record->filesum / 1024 / 1024; // Convert to MB.
             $filesum = round($filesum, 2);
-            $table->data[] = array($record->key, $record->filecount, $filesum);
+            $table->data[] = array($record->datakey, $record->filecount, $filesum);
         }
 
         $output = html_writer::table($table);
@@ -109,7 +109,7 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         foreach ($locationreport as $record) {
             $filesum = $record->filesum / 1024 / 1024; // Convert to MB.
             $filesum = round($filesum, 2);
-            $filestate = $this->get_file_state_string($record->key);
+            $filestate = $this->get_file_state_string($record->datakey);
             $table->data[] = array($filestate, $record->filecount, $filesum);
         }
 
