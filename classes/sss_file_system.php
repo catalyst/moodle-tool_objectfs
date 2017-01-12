@@ -77,8 +77,8 @@ class sss_file_system extends file_system {
      * @return bool success of operation
      */
     public function delete_local_file_from_contenthash($contenthash) {
-        $filepath = $this->get_local_fullpath_from_hash($contenthash, true);
         $this->ensure_readable_by_hash($contenthash);
+        $filepath = $this->get_local_fullpath_from_hash($contenthash);
         return unlink($filepath);
     }
 
@@ -90,8 +90,8 @@ class sss_file_system extends file_system {
      * @return bool success of operation
      */
     public function copy_sss_file_to_local($contenthash) {
-        $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash, true);
-        $sssfilepath = $this->sssclient->get_fullpath_from_hash($contenthash);
+        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
+        $sssfilepath = $this->get_sss_fullpath_from_hash($contenthash);
         return copy($sssfilepath, $localfilepath);
     }
 
@@ -104,8 +104,8 @@ class sss_file_system extends file_system {
      */
     public function copy_local_file_to_sss($contenthash) {
         $this->ensure_readable_by_hash($contenthash);
-        $localfilepath = $filepath = $this->get_fullpath_from_hash($contenthash, true);
-        $sssfilepath = $this->sssclient->get_fullpath_from_hash($contenthash);
+        $localfilepath = $filepath = $this->get_local_fullpath_from_hash($contenthash);
+        $sssfilepath = $this->get_sss_fullpath_from_hash($contenthash);
         return copy($localfilepath, $sssfilepath);
     }
 
