@@ -61,9 +61,9 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
 
     public function test_calculate_file_location_data () {
 
-        $locationreport = new file_location_report();
+        $report = new file_location_report();
 
-        $data = $locationreport->calculate_report_data();
+        $data = $report->calculate_report_data();
 
         // Duplicated and external states should be 0 for sum and count.
         $this->check_file_location_record($data[SSS_FILE_LOCATION_DUPLICATED], 0, 0);
@@ -80,20 +80,23 @@ class tool_sssfs_file_status_testcase extends advanced_testcase {
         $contenthashes = $pusher->get_candidate_content_hashes();
         $pusher->execute($contenthashes);
 
-        $data = $locationreport->calculate_report_data();
+        $data = $report->calculate_report_data();
 
         $this->check_file_location_record($data[SSS_FILE_LOCATION_DUPLICATED], 10, $singlefilesize * 10);
+
+        $report->save_report_data($data);
     }
 
     public function test_calculate_file_logsize_data () {
-
-        $locationreport = new log_size_report();
-        $locationreport->calculate_report_data();
+        $report = new log_size_report();
+        $data = $report->calculate_report_data();
+        $report->save_report_data($data);
     }
 
     public function test_calculate_file_mimetype_data () {
-        $locationreport = new mime_type_report();
-        $locationreport->calculate_report_data();
+        $report = new mime_type_report();
+        $data = $report->calculate_report_data();
+        $report->save_report_data($data);
     }
 
 
