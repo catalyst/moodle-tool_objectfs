@@ -86,17 +86,9 @@ class sss_client {
      * @return string fullpath to s3 object.
      */
     public function get_fullpath_from_hash($contenthash) {
-        return "s3://{$this->bucket}/{$contenthash}";
-    }
-
-    /**
-     * Returns s3 fullpath to use with php file functions.
-     *
-     * @param  string $contenthash contenthash used as key in s3.
-     * @return string fullpath to s3 object.
-     */
-    public function get_fulldir() {
-        return "s3://{$this->bucket}";
+        $l1 = $contenthash[0] . $contenthash[1];
+        $l2 = $contenthash[2] . $contenthash[3];
+        return "s3://{$this->bucket}/$l1/$l2/{$contenthash}";
     }
 
     public function path_is_local($path) {
