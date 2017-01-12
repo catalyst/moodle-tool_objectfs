@@ -354,4 +354,41 @@ class sss_file_system extends file_system {
         return self::get_file_handle_for_path($path, $type);
     }
 
+    /**
+     * Marks pool file as candidate for deleting.
+     *
+     * DO NOT call directly - reserved for core!!
+     *
+     * We dont delete S3 files.
+     *
+     * @param string $contenthash
+     */
+    public function deleted_file_cleanup($contenthash) {
+        $localreadable = $this->is_local_readable_by_hash($contenthash);
+
+        if (!$localreadable) {
+            return; // Already deleted or in s3 which we dont want to delete.
+        }
+
+        $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
+        $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
+        $contentfile = $this->get_fullpath_from_hash($contenthash);
+
+        if (!is_dir($trashpath)) {
+            mkdir($trashpath, $this->dirpermissions, true);
+        }
+
+        if (file_exists($trashfile)) {
+            // A copy of this file is already in the trash.
+            // Remove the old version.
+            unlink($contentfile);
+            return;
+        }
+
+        // Move the contentfile to the trash, and fix permissions as required.
+        rename($contentfile, $trashfile);
+        chmod($trashfile, $this->filepermissions);
+    }
+
+
 }
