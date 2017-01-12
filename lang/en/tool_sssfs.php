@@ -31,7 +31,7 @@ $string['pull_from_sss_task'] = 'S3 file system download files task';
 
 
 $string['generate_status_report_task'] = 'S3 file status report generator task';
-
+$string['not_enabled'] = 'The S3 file system is not enabled';
 $string['file_status:page'] = 'S3 file status';
 $string['file_status:location'] = 'File location';
 $string['file_status:files'] = 'Files';

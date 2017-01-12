@@ -33,6 +33,14 @@ class tool_sssfs_renderer extends plugin_renderer_base {
     protected function render_sss_file_status(sss_file_status $filestatus) {
         $output = '';
 
+        $config = get_config('tool_sssfs');
+
+        if (!isset($config->enabled) || !$config->enabled) {
+            $labeltext = get_string('not_enabled', 'tool_sssfs');
+            $output .= html_writer::label($labeltext, null);
+            return $output;
+        }
+
         // Could refactor this to have less duplication, but requirements may change for data.
         $locationreport = $filestatus->get_report(SSSFS_REPORT_FILE_LOCATION);
         $logsizereport = $filestatus->get_report(SSSFS_REPORT_LOG_SIZE);
