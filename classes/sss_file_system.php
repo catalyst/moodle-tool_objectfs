@@ -54,10 +54,14 @@ class sss_file_system extends file_system {
     public function __construct($filedir, $trashdir, $dirpermissions, $filepermissions, file_storage $fs = null) {
         parent::__construct($filedir, $trashdir, $dirpermissions, $filepermissions, $fs);
         $config = get_config('tool_sssfs');
-        $sssclient = new sss_client($config);
-        $this->set_sss_client($sssclient);
-        $this->prefersss = $config->prefersss;
-        $this->enabled = $config->enabled;
+        if (isset($config->enabled) && $config->enabled) {
+            $sssclient = new sss_client($config);
+            $this->set_sss_client($sssclient);
+            $this->prefersss = $config->prefersss;
+            $this->enabled = $config->enabled;
+        } else {
+            $this->enabled = false;
+        }
     }
 
     /**

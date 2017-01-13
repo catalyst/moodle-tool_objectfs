@@ -57,6 +57,8 @@ class generate_status_report extends \core\task\scheduled_task {
                 $data = $report->calculate_report_data();
                 $report->save_report_data($data);
             }
+        } else {
+            mtrace(get_string('not_enabled', 'tool_sssfs'));
         }
     }
 }
