@@ -138,7 +138,7 @@ class pusher extends manipulator {
                 mtrace($e);
                 continue;
             } catch (S3Exception $e) {
-                mtrace($e);
+                mtrace($e->getMessage());
                 continue;
             }
         }
