@@ -38,6 +38,7 @@ class sss_file_system extends file_system {
 
     private $sssclient;
     private $prefersss;
+    private $enabled;
 
     /**
      * sss_file_system Constructor.
@@ -56,6 +57,7 @@ class sss_file_system extends file_system {
         $sssclient = new sss_client($config);
         $this->set_sss_client($sssclient);
         $this->prefersss = $config->prefersss;
+        $this->enabled = $config->enabled;
     }
 
     /**
@@ -192,6 +194,11 @@ class sss_file_system extends file_system {
      * @return boolean true if readable, false if not
      */
     public function is_readable(stored_file $file) {
+        // Must go at the start of every overridden method.
+        if (!$this->enabled) {
+            return parent::is_readable($file);
+        }
+
         if ($this->is_local_readable($file) || $this->is_sss_readable($file)) {
             return true;
         }
@@ -224,6 +231,11 @@ class sss_file_system extends file_system {
      * @return boolean true if readable, false if not
      */
     public function is_readable_by_hash($contenthash) {
+        // Must go at the start of every overridden method.
+        if (!$this->enabled) {
+            return parent::is_readable_by_hash($file);
+        }
+
         $isreadable = ($this->is_local_readable_by_hash($contenthash) || $this->is_sss_readable_by_hash($contenthash));
         return $isreadable;
     }
@@ -262,6 +274,10 @@ class sss_file_system extends file_system {
      * @return string file path
      */
     protected function get_fullpath_from_hash($contenthash) {
+        // Must go at the start of every overridden method.
+        if (!$this->enabled) {
+            return parent::get_fullpath_from_hash($contenthash);
+        }
 
         $filelocation  = $this->get_hash_location($contenthash);
 
@@ -282,6 +298,11 @@ class sss_file_system extends file_system {
     }
 
     public function readfile(stored_file $file) {
+        // Must go at the start of every overridden method.
+        if (!$this->enabled) {
+            return parent::readfile($file);
+        }
+
         $path = $this->get_fullpath_from_storedfile($file, true);
         $this->ensure_file_readable_if_local($file, $path);
         readfile_allow_large($path, $file->get_filesize());
@@ -289,6 +310,11 @@ class sss_file_system extends file_system {
 
 
     public function get_content(stored_file $file) {
+        // Must go at the start of every overridden method.
+        if (!$this->enabled) {
+            return parent::get_content($file);
+        }
+
         $path = $this->get_fullpath_from_storedfile($file, true);
         $this->ensure_file_readable_if_local($file, $path);
         return file_get_contents($path);
@@ -296,6 +322,11 @@ class sss_file_system extends file_system {
     }
 
     public function get_content_file_handle($file, $type = stored_file::FILE_HANDLE_FOPEN) {
+        // Must go at the start of every overridden method.
+        if (!$this->enabled) {
+            return parent::get_content_file_handle($file, $type);
+        }
+
         $path = $this->get_fullpath_from_storedfile($file, true);
         $this->ensure_file_readable_if_local($file, $path);
         return self::get_file_handle_for_path($path, $type);
@@ -311,6 +342,11 @@ class sss_file_system extends file_system {
      * @param string $contenthash
      */
     public function deleted_file_cleanup($contenthash) {
+        // Must go at the start of every overridden method.
+        if (!$this->enabled) {
+            return parent::deleted_file_cleanup($contenthash);
+        }
+
         $localreadable = $this->is_local_readable_by_hash($contenthash);
 
         if (!$localreadable) {
@@ -319,7 +355,7 @@ class sss_file_system extends file_system {
 
         $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
         $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
-        $contentfile = $this->get_fullpath_from_hash($contenthash);
+        $contentfile = $this->get_local_fullpath_from_hash($contenthash);
 
         if (!is_dir($trashpath)) {
             mkdir($trashpath, $this->dirpermissions, true);
@@ -336,6 +372,4 @@ class sss_file_system extends file_system {
         rename($contentfile, $trashfile);
         chmod($trashfile, $this->filepermissions);
     }
-
-
 }
