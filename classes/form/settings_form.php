@@ -69,23 +69,26 @@ class settings_form extends \moodleform {
                                 'eu-central-1'      => 'eu-central-1',
                                 'eu-west-1'         => 'eu-west-1');
 
-        $defaults = array(
-            'enabled'           => 0,
-            'key'               => '',
-            'secret'            => '',
-            'bucket'            => '',
-            'region'            => 'us-east-1',
-            'sizethreshold'     => 1024 * 10,
-            'minimumage'        => 7 * 24 * 60 * 60,
-            'deletelocal'       => 0,
-            'consistencydelay'  => 10 * 60,
-            'maxtaskruntime'    => 60,
-            'logging'           => 0,
-            'prefersss'         => 0
-        );
+        $defaults = array(      'enabled'           => 0,
+                                'key'               => '',
+                                'secret'            => '',
+                                'bucket'            => '',
+                                'region'            => 'us-east-1',
+                                'sizethreshold'     => 1024 * 10,
+                                'minimumage'        => 7 * 24 * 60 * 60,
+                                'deletelocal'       => 0,
+                                'consistencydelay'  => 10 * 60,
+                                'maxtaskruntime'    => 60,
+                                'logging'           => 0,
+                                'prefersss'         => 0);
 
         $mform->addElement('advcheckbox', 'enabled', get_string('settings:enabled', 'tool_sssfs'));
         $mform->addHelpButton('enabled', 'settings:enabled', 'tool_sssfs');
+
+        global $CFG;
+        if (!isset($CFG->filesystem_handler_class) || $CFG->filesystem_handler_class !== '\tool_sssfs\sss_file_system') {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:handlernotset', 'tool_sssfs'), 'notifyproblem'));
+        }
 
         $mform->addElement('header', 'awsheader', get_string('settings:awsheader', 'tool_sssfs'));
 

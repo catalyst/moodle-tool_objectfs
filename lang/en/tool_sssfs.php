@@ -76,4 +76,4 @@ $string['settings:writefailure'] = 'Could not write object to the S3 bucket. ';
 $string['settings:readfailure'] = 'Could not read object from the S3 bucket. ';
 $string['settings:deletesuccess'] = 'Could delete object from the S3 bucket - It is not recommended for the AWS user to have delete permissions. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
-
+$string['settings:handlernotset'] = '$CFG->filesystem_handler_class is not set, the file system will not be able to read from S3. Background tasks will still function.';
