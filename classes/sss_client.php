@@ -34,6 +34,10 @@ defined('MOODLE_INTERNAL') || die();
 
 define('AWS_API_VERSION', '2006-03-01');
 
+define('AWS_CAN_READ_OBJECT', 0);
+define('AWS_CAN_WRITE_OBJECT', 1);
+define('AWS_CAN_DELETE_OBJECT', 2);
+
 class sss_client {
 
     private $client;
@@ -115,5 +119,52 @@ class sss_client {
         } catch (S3Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * Tests connection to S3 and bucket.
+     * There is no check connection in the AWS API.
+     * We use list buckets instead and check the bucket is in the list.
+     *
+     * @return boolean true on success, false on failure.
+     */
+    public function permissions_check() {
+
+        $permissions = array();
+
+        try {
+            $result = $this->client->putObject(array(
+                            'Bucket' => $this->bucket,
+                            'Key' => 'permissions_check_file',
+                            'Body' => 'test content'));
+            $permissions[AWS_CAN_WRITE_OBJECT] = true;
+        } catch (S3Exception $e) {
+            $permissions[AWS_CAN_WRITE_OBJECT] = false;
+        }
+
+        try {
+            $result = $this->client->getObject(array(
+                            'Bucket' => $this->bucket,
+                            'Key' => 'permissions_check_file'));
+            $permissions[AWS_CAN_READ_OBJECT] = true;
+        } catch (S3Exception $e) {
+            if ($e->getAwsErrorCode() === 'NoSuchKey') {
+                // Write could have failed.
+                $permissions[AWS_CAN_READ_OBJECT] = true;
+            } else {
+                $permissions[AWS_CAN_READ_OBJECT] = false;
+            }
+        }
+
+        try {
+            $result = $this->client->deleteObject(array(
+                            'Bucket' => $this->bucket,
+                            'Key' => 'permissions_check_file'));
+            $permissions[AWS_CAN_DELETE_OBJECT] = true;
+        } catch (S3Exception $e) {
+            $permissions[AWS_CAN_DELETE_OBJECT] = false;
+        }
+
+        return $permissions;
     }
 }

@@ -50,6 +50,10 @@ class settings_form extends \moodleform {
             $connection = $client->test_connection();
         }
 
+        if ($connection) {
+            $permissions = $client->permissions_check();
+        }
+
         if (isset($config->sizethreshold)) {
             $config->sizethreshold = $config->sizethreshold / 1024; // Convert to KB.
         }
@@ -103,7 +107,28 @@ class settings_form extends \moodleform {
         if ($connection) {
             $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_sssfs'), 'notifysuccess'));
         } else {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_sssfs'), 'notifyfailure'));
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_sssfs'), 'notifyproblem'));
+        }
+
+        if ($permissions) {
+            $errormsg = '';
+            if (!$permissions[AWS_CAN_WRITE_OBJECT]) {
+                $errormsg .= get_string('settings:writefailure', 'tool_sssfs');
+            }
+
+            if (!$permissions[AWS_CAN_READ_OBJECT]) {
+                $errormsg .= get_string('settings:readfailure', 'tool_sssfs');
+            }
+
+            if ($permissions[AWS_CAN_DELETE_OBJECT]) {
+                $errormsg .= get_string('settings:deletesuccess', 'tool_sssfs');
+            }
+
+            if (strlen($errormsg) > 0) {
+                $mform->addElement('html', $OUTPUT->notification($errormsg, 'notifyproblem'));
+            } else {
+                $mform->addElement('html', $OUTPUT->notification(get_string('settings:permissioncheckpassed', 'tool_sssfs'), 'notifysuccess'));
+            }
         }
 
         $mform->addElement('header', 'filetransferheader', get_string('settings:filetransferheader', 'tool_sssfs'));

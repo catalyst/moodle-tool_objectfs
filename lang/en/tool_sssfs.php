@@ -70,5 +70,10 @@ $string['settings:prefersss_help'] = 'If a file is stored both locally and in S3
 $string['settings:loggingheader'] = 'Logging Settings';
 $string['settings:logging'] = 'Enable logging';
 $string['settings:logging_help'] = 'Log file access to the php log.';
-$string['settings:connectionsuccess'] = 'Could establish connection to AWS S3 bucket.';
-$string['settings:connectionfailure'] = 'Could not establish connection to AWS S3 bucket.';
+$string['settings:connectionsuccess'] = 'Could establish connection to the AWS S3 bucket.';
+$string['settings:connectionfailure'] = 'Could not establish connection to the AWS S3 bucket.';
+$string['settings:writefailure'] = 'Could not write object to the S3 bucket. ';
+$string['settings:readfailure'] = 'Could not read object from the S3 bucket. ';
+$string['settings:deletesuccess'] = 'Could delete object from the S3 bucket - It is not recommended for the AWS user to have delete permissions. ';
+$string['settings:permissioncheckpassed'] = 'Permissions check passed.';
+
