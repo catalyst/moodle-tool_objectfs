@@ -47,8 +47,8 @@ class puller extends manipulator {
      * @param sss_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
-    public function __construct($client, $filesystem, $config) {
-        parent::__construct($client, $filesystem, $config->maxtaskruntime);
+    public function __construct($config, $client) {
+        parent::__construct($client, $config->maxtaskruntime);
         $this->sizethreshold = $config->sizethreshold;
     }
 
@@ -76,6 +76,19 @@ class puller extends manipulator {
     }
 
     /**
+     * Copy file from s3 to local storage.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return bool success of operation
+     */
+    private function copy_sss_file_to_local($contenthash) {
+        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
+        $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
+        return copy($sssfilepath, $localfilepath);
+    }
+
+    /**
      * Pushes files from local file system to S3.
      *
      * @param  array $candidatehashes content hashes to push
@@ -89,9 +102,9 @@ class puller extends manipulator {
             }
 
             try {
-                $success = $this->filesystem->copy_sss_file_to_local($contenthash);
+                $success = $this->copy_sss_file_to_local($contenthash);
                 if ($success) {
-                    log_file_state($contenthash, SSS_FILE_LOCATION_LOCAL);
+                    log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
                 }
             } catch (file_exception $e) {
                 mtrace($e);

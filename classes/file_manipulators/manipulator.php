@@ -29,6 +29,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
+use core_files\filestorage\file_exception;
+
+
 abstract class manipulator {
 
     /**
@@ -59,10 +62,45 @@ abstract class manipulator {
      * @param sss_file_system $filesystem S3 file system
      * @param int $maxruntime What time the file manipulator should finish execution by
      */
-    public function __construct($client, $filesystem, $maxruntime) {
+    public function __construct($client, $maxruntime) {
          $this->client = $client;
-         $this->filesystem = $filesystem;
          $this->finishtime = time() + $maxruntime;
+    }
+
+    /**
+     * Returns local fullpath. We redifine this function here so
+     * that our file moving functions can exist outside of the fsapi.
+     * Which means filesystem_handler_class does not need to be set for them
+     * to function.
+     *
+     * @param  string $contenthash contenthash
+     * @return string fullpath to local object.
+     */
+    protected function get_local_fullpath_from_hash($contenthash) {
+        global $CFG;
+        if (isset($CFG->filedir)) {
+            $filedir = $CFG->filedir;
+        } else {
+            $filedir = $CFG->dataroot.'/filedir';
+        }
+        $l1 = $contenthash[0] . $contenthash[1];
+        $l2 = $contenthash[2] . $contenthash[3];
+        return "$filedir/$l1/$l2/$contenthash";
+    }
+
+
+    /**
+     * Ensures a path is readable, S3 or local. We dont want to use
+     * the FS API so we redifine here.
+     *
+     * @param  string $contenthash contenthash
+     * @return string fullpath to local object.
+     */
+    protected function ensure_path_is_readable($path) {
+        if (!is_readable($path)) {
+            throw new file_exception('storedfilecannotread', '', $path);
+        }
+        return true;
     }
 
     /**

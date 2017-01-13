@@ -70,59 +70,6 @@ class sss_file_system extends file_system {
     }
 
     /**
-     * Deletes local file based on it's content hash.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return bool success of operation
-     */
-    public function delete_local_file_from_contenthash($contenthash) {
-        $this->ensure_readable_by_hash($contenthash);
-        $filepath = $this->get_local_fullpath_from_hash($contenthash);
-        return unlink($filepath);
-    }
-
-    /**
-     * Copy file from s3 to local storage.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return bool success of operation
-     */
-    public function copy_sss_file_to_local($contenthash) {
-        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
-        $sssfilepath = $this->get_sss_fullpath_from_hash($contenthash);
-        return copy($sssfilepath, $localfilepath);
-    }
-
-    /**
-     * Copy file from local to s3 storage.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return bool success of operation
-     */
-    public function copy_local_file_to_sss($contenthash) {
-        $this->ensure_readable_by_hash($contenthash);
-        $localfilepath = $filepath = $this->get_local_fullpath_from_hash($contenthash);
-        $sssfilepath = $this->get_sss_fullpath_from_hash($contenthash);
-        return copy($localfilepath, $sssfilepath);
-    }
-
-    /**
-     * Calculated md5 of file.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return string md5 hash of file
-     */
-    public function get_local_md5_from_contenthash($contenthash) {
-        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
-        $md5 = md5_file($localfilepath);
-        return $md5;
-    }
-
-    /**
      * get location of contenthash file from the
      * tool_sssfs_filestate table. if content hash is not in the table,
      * we assume it is stored locally or is to be stored locally.
@@ -163,7 +110,7 @@ class sss_file_system extends file_system {
      * @return string s3 file path
      */
     protected function get_sss_fullpath_from_hash($contenthash) {
-        $path = $this->sssclient->get_fullpath_from_hash($contenthash);
+        $path = $this->sssclient->get_sss_fullpath_from_hash($contenthash);
         return $path;
     }
 

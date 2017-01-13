@@ -85,10 +85,10 @@ class sss_client {
      * @param  string $contenthash contenthash used as key in s3.
      * @return string fullpath to s3 object.
      */
-    public function get_fullpath_from_hash($contenthash) {
+    public function get_sss_fullpath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
-        return "s3://{$this->bucket}/$l1/$l2/{$contenthash}";
+        return "s3://$this->bucket/$l1/$l2/$contenthash";
     }
 
     public function path_is_local($path) {
@@ -109,17 +109,11 @@ class sss_client {
      */
     public function test_connection() {
         try {
-            $result = $this->client->listBuckets();
-            $buckets = $result['Buckets'];
-
-            foreach ($buckets as $bucket) {
-                if ($bucket['Name'] == $this->bucket) {
-                    return true;
-                }
-            }
+            $result = $this->client->headBucket(array(
+                            'Bucket' => $this->bucket));
+            return true;
         } catch (S3Exception $e) {
             return false;
         }
-        return false;
     }
 }

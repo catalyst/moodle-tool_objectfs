@@ -54,11 +54,10 @@ class pusher extends manipulator {
      * @param sss_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
-    public function __construct($client, $filesystem, $config) {
-        parent::__construct($client, $filesystem, $config->maxtaskruntime);
+    public function __construct($config, $client) {
+        parent::__construct($client, $config->maxtaskruntime);
         $this->sizethreshold = $config->sizethreshold;
         $this->minimumage = $config->minimumage;
-
     }
 
     /**
@@ -90,6 +89,33 @@ class pusher extends manipulator {
     }
 
     /**
+     * Copy file from local to s3 storage.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return bool success of operation
+     */
+    private function copy_local_file_to_sss($contenthash) {
+        $localfilepath = $filepath = $this->get_local_fullpath_from_hash($contenthash);
+        $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
+        $this->ensure_path_is_readable($localfilepath);
+        return copy($localfilepath, $sssfilepath);
+    }
+
+    /**
+     * Calculated md5 of file.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return string md5 hash of file
+     */
+    private function get_local_md5_from_contenthash($contenthash) {
+        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
+        $md5 = md5_file($localfilepath);
+        return $md5;
+    }
+
+    /**
      * Pushes files from local file system to S3.
      *
      * @param  array $candidatehashes content hashes to push
@@ -103,9 +129,9 @@ class pusher extends manipulator {
             }
 
             try {
-                $success = $this->filesystem->copy_local_file_to_sss($contenthash);
+                $success = $this->copy_local_file_to_sss($contenthash);
                 if ($success) {
-                    $filemd5 = $this->filesystem->get_local_md5_from_contenthash($contenthash);
+                    $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
                     log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
                 }
             } catch (file_exception $e) {

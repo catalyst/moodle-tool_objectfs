@@ -74,3 +74,23 @@ function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime 
     return $config;
 }
 
+/**
+ * Returns local fullpath. We redifine this function here so
+ * that our file moving functions can exist outside of the fsapi.
+ * Which means filesystem_handler_class does not need to be set for them
+ * to function.
+ *
+ * @param  string $contenthash contenthash
+ * @return string fullpath to local object.
+ */
+function get_local_fullpath_from_hash($contenthash) {
+    global $CFG;
+    if (isset($CFG->filedir)) {
+        $filedir = $CFG->filedir;
+    } else {
+        $filedir = $CFG->dataroot.'/filedir';
+    }
+    $l1 = $contenthash[0] . $contenthash[1];
+    $l2 = $contenthash[2] . $contenthash[3];
+    return "$filedir/$l1/$l2/$contenthash";
+}

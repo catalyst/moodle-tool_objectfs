@@ -23,23 +23,24 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 use tool_sssfs\sss_client;
 use core_files\filestorage\file_exception;
 use Aws\S3\Exception\S3Exception;
-
-defined('MOODLE_INTERNAL') || die;
-
 
 class sss_mock_client extends sss_client {
 
     private $return;
     private $throwexception;
+    private $bucketpath;
 
     public function __construct() {
         global $CFG;
         $this->return = true;
         $this->throwexception = false;
-        mkdir($CFG->phpunit_dataroot . '/mockbucket');
+        $this->bucketpath = $CFG->phpunit_dataroot . '/mockbucket';
+        mkdir($this->bucketpath);
     }
 
     public function set_return($return) {
@@ -81,9 +82,9 @@ class sss_mock_client extends sss_client {
     }
 
     // Returns s3 fullpath to use with php file functions.
-    public function get_fullpath_from_hash($contenthash) {
+    public function get_sss_fullpath_from_hash($contenthash) {
         global $CFG;
-        return "{$CFG->phpunit_dataroot}/mockbucket/{$contenthash}";
+        return "$this->bucketpath/{$contenthash}";
     }
 }
 

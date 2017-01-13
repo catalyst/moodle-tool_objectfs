@@ -54,8 +54,8 @@ class cleaner extends manipulator {
      * @param sss_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
-    public function __construct($client, $filesystem, $config) {
-        parent::__construct($client, $filesystem, $config->maxtaskruntime);
+    public function __construct($config, $client) {
+        parent::__construct($client, $config->maxtaskruntime);
         $this->consistencydelay = $config->consistencydelay;
         $this->deletelocal = $config->deletelocal;
     }
@@ -85,6 +85,18 @@ class cleaner extends manipulator {
     }
 
     /**
+     * Deletes local file based on it's content hash.
+     *
+     * @param  string $contenthash files contenthash
+     *
+     * @return bool success of operation
+     */
+    private function delete_local_file_from_contenthash($contenthash) {
+        $filepath = $this->get_local_fullpath_from_hash($contenthash);
+        return unlink($filepath);
+    }
+
+    /**
      * Cleans local file system of candidate hash files.
      *
      * @param  array $candidatehashes content hashes to delete
@@ -105,7 +117,7 @@ class cleaner extends manipulator {
             try {
                 $fileinsss = $this->client->check_file($contenthash, $md5);
                 if ($fileinsss) {
-                    $success = $this->filesystem->delete_local_file_from_contenthash($contenthash);
+                    $success = $this->delete_local_file_from_contenthash($contenthash);
                     if ($success) {
                         log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL);
                     }
