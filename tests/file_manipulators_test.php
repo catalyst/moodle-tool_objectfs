@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * local_catdeleter scheduler tests.
+ * tool_sssfs file manipulator tests.
  *
  * @package   local_catdeleter
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -25,22 +25,19 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once(__DIR__ . '/mock/sss_mock_client.php');
-require_once(__DIR__ . '/testlib.php');
+require_once( __DIR__ . '/tool_sssfs_testcase.php');
 
-use tool_sssfs\sss_file_system;
 use tool_sssfs\file_manipulators\cleaner;
-use tool_sssfs\file_manipulators\pusher;
 use tool_sssfs\file_manipulators\puller;
+use tool_sssfs\file_manipulators\pusher;
 
 
-class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
-
+class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
 
     protected function setUp() {
         global $CFG;
         $this->resetAfterTest(true);
-        $this->config = generate_config();
+        $this->config = $this->generate_config();
         $this->client = new sss_mock_client();
     }
 
@@ -50,7 +47,7 @@ class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
 
     public function test_cleaner_can_clean_file() {
         global $DB;
-        $file = save_file_to_local_storage();
+        $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
         log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
         $filecleaner = new cleaner($this->config, $this->client);
@@ -59,20 +56,20 @@ class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
         reset($candidatehashes); // Reset array so key fives us key of first value.
         $this->assertEquals($filecontenthash, key($candidatehashes));
         $filecleaner->execute($candidatehashes);
-        $fullpath = get_local_fullpath_from_hash($filecontenthash);
+        $fullpath = $this->get_local_fullpath_from_hash($filecontenthash);
         $isreadable = is_readable($fullpath);
         $this->assertFalse($isreadable);
     }
 
     public function test_cleaner_consisency_delay() {
-        $this->config = generate_config(0, -10, 60, 0); // Set deletelocal to 0.
+        $this->config = $this->generate_config(0, -10, 60, 0); // Set deletelocal to 0.
         $filecleaner = new cleaner($this->config, $this->client);
-        $file = save_file_to_local_storage();
+        $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
         log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
         $candidatehashes = $filecleaner->get_candidate_content_hashes();
         $filecleaner->execute($candidatehashes); // Should not delete the file.
-        $fullpath = get_local_fullpath_from_hash($filecontenthash);
+        $fullpath = $this->get_local_fullpath_from_hash($filecontenthash);
         $isreadable = is_readable($fullpath);
         $this->assertTrue($isreadable);
     }
@@ -81,7 +78,7 @@ class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
         global $DB;
 
         $filepusher = new pusher($this->config, $this->client);
-        $file = save_file_to_local_storage();
+        $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
         $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -98,9 +95,9 @@ class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
         global $DB;
 
         // Set size threshold of 1000.
-        $this->config = generate_config(1000);
+        $this->config = $this->generate_config(1000);
         $filepusher = new pusher($this->config, $this->client);
-        $file = save_file_to_local_storage(100); // Set file size to 100.
+        $file = $this->save_file_to_local_storage_from_string(100); // Set file size to 100.
         $filecontenthash = $file->get_contenthash();
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);
@@ -114,9 +111,9 @@ class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
         global $DB;
 
         // Set minimum age to a large value.
-        $this->config = generate_config(0, 99999);
+        $this->config = $this->generate_config(0, 99999);
         $filepusher = new pusher($this->config, $this->client);
-        $file = save_file_to_local_storage();
+        $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);
@@ -142,10 +139,10 @@ class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
         global $DB;
 
         // Set max runtime to 0.
-        $this->config = generate_config(0, -10, 0);
+        $this->config = $this->generate_config(0, -10, 0);
 
         $filepusher = new pusher($this->config, $this->client);
-        $file = save_file_to_local_storage();
+        $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
         $contenthashes = $filepusher->get_candidate_content_hashes();
         $filepusher->execute($contenthashes);
@@ -159,9 +156,9 @@ class tool_sssfs_file_manipulators_testcase extends advanced_testcase {
         global $DB;
 
         $filepusher = new pusher($this->config, $this->client);
-        $file = save_file_to_local_storage();
+        $file = $this->save_file_to_local_storage_from_string();
         $expectedcontent = 'This is my files content';
-        $file = save_file_to_local_storage(100, 'testfile.txt', $expectedcontent);
+        $file = $this->save_file_to_local_storage_from_string(100, 'testfile.txt', $expectedcontent);
         $filecontenthash = $file->get_contenthash();
         $expectedmd5 = md5($expectedcontent);
         $contenthashes = $filepusher->get_candidate_content_hashes();

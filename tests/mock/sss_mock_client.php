@@ -51,16 +51,6 @@ class sss_mock_client extends sss_client {
         $this->throwexception = $throwexception;
     }
 
-    public function push_file($filekey, $filecontent) {
-        if ($this->throwexception) {
-            throw new S3Exception('Mock S3 exception', 'file', 'line');
-        } else {
-            $mockpath = $this->get_fullpath_from_hash($filekey);
-            file_put_contents($mockpath, $filecontent);
-            return true;
-        }
-    }
-
     public function check_file($filekey, $expectedsize) {
         if ($this->throwexception) {
             throw new file_exception('storedfilecannotread', '', $this->get_fullpath_from_hash($filekey));
