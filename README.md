@@ -17,7 +17,7 @@ An AWS S3 file system for Moodle. This plugin implements the file system as well
 $CFG->filesystem_handler_class = '\tool_sssfs\sss_file_system';
 </pre>
 
-## Configuration
+## Moodle Configuration
 Go to Site Administration -> Plugins -> Admin tools -> S3 File System. Descriptions for the various settings are as follows:
 
 - **Key**: AWS credential key
@@ -31,10 +31,35 @@ Go to Site Administration -> Plugins -> Admin tools -> S3 File System. Descripti
 - **Consistency delay**: How long a file must existed after being transfered to S3 before they are a candidate for deletion locally.
 - **Enable logging**: Log file access to the php log.
 
+## AWS Configuration
+- The AWS Users access policy should mirror the policy listed below.
+- Replace 'bucketname' with the name of your S3 bucket.
+- The moodle config page for sssfs will test for these permissions.
 
-TODO: MD5 check on uploading and deleting.
-TODO: S3 backups - can it be configured to be immutable write.
-TODO: implement logging.
-TODO: implement pulling task.
+<pre>
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::bucketname"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": ["arn:aws:s3:::bucketname/*"]
+    }
+  ]
+}
+</pre>
+
+
+
+
 
 
