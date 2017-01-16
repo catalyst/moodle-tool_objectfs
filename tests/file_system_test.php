@@ -93,8 +93,7 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         $this->assertTrue($isreadable); // Should still be readable.
         $ssspath = $this->client->get_sss_fullpath_from_hash($contenthash);
         unlink($ssspath);
-        $this->setExpectedExceptionRegexp('\core_files\filestorage\file_exception',
-            '/Cannot read file. Either the file does not exist or there is a permission problem./');
+        $this->setExpectedException('\core_files\filestorage\file_exception');
         $this->filesystem->ensure_readable($file);
     }
 
