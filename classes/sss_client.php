@@ -72,9 +72,13 @@ class sss_client {
      */
     public function check_file($filekey, $expectedmd5) {
 
-        $result = $this->client->headObject(array(
-                        'Bucket' => $this->bucket,
-                        'Key' => $filekey));
+        try {
+            $result = $this->client->headObject(array(
+                            'Bucket' => $this->bucket,
+                            'Key' => $filekey));
+        } catch (S3Exception $e) {
+            return false;
+        }
 
         $awsmd5 = trim($result['ETag'], '"'); // Strip quotation marks.
 

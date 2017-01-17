@@ -50,7 +50,7 @@ class clean_up_files extends \core\task\scheduled_task {
         if (isset($config->enabled) && $config->enabled) {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
-            $cleaner = new cleaner($client, $filesystem, $config);
+            $cleaner = new cleaner($config, $client);
             $candidatehashes = $cleaner->get_candidate_content_hashes();
             $cleaner->execute($candidatehashes);
         } else {

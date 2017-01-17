@@ -333,8 +333,15 @@ class sss_file_system extends file_system {
             return parent::get_content_file_handle($file, $type);
         }
 
-        $path = $this->get_fullpath_from_storedfile($file, true);
-        $this->ensure_file_readable_if_local($file, $path);
+        if ($type == stored_file::FILE_HANDLE_GZOPEN) {
+            $this->pull_file_back_to_local_if_in_sss($file);
+            $this->ensure_local_readable($file);
+            // If prefersss is enabled we need to still read from local if duplicated.
+            $path = $this->get_local_fullpath_from_file($file, true);
+        } else {
+            $path = $this->get_fullpath_from_storedfile($file, true);
+            $this->ensure_file_readable_if_local($file, $path);
+        }
         return self::get_file_handle_for_path($path, $type);
     }
 
@@ -506,9 +513,10 @@ class sss_file_system extends file_system {
      * @return array of file infos
      */
     public function list_files($file, file_packer $packer) {
-        $this->ensure_readable($file);
         $this->pull_file_back_to_local_if_in_sss($file);
-        $archivefile = $this->get_fullpath_from_storedfile($file, true);
+        $this->ensure_local_readable($file);
+        // If prefersss is enabled we need to still read from local if duplicated.
+        $archivefile = $this->get_local_fullpath_from_file($file, true);
         return $packer->list_files($archivefile);
     }
 
@@ -523,7 +531,9 @@ class sss_file_system extends file_system {
      */
     public function extract_to_pathname(stored_file $file, file_packer $packer, $pathname, file_progress $progress = null) {
         $this->pull_file_back_to_local_if_in_sss($file);
-        $archivefile = $this->get_fullpath_from_storedfile($file, true);
+        $this->ensure_local_readable($file);
+        // If prefersss is enabled we need to still read from local if duplicated.
+        $archivefile = $this->get_local_fullpath_from_file($file, true);
         return $packer->extract_to_pathname($archivefile, $pathname, null, $progress);
     }
 
@@ -544,11 +554,20 @@ class sss_file_system extends file_system {
     public function extract_to_storage(stored_file $file, file_packer $packer, $contextid,
             $component, $filearea, $itemid, $pathbase, $userid = null, file_progress $progress = null) {
 
-        // The extract_to_storage function needs the file to exist on disk.
-        $this->ensure_readable($file);
         $this->pull_file_back_to_local_if_in_sss($file);
-        $archivefile = $this->get_fullpath_from_storedfile($file, true);
+        // The extract_to_storage function needs the file to exist on disk.
+        $this->ensure_local_readable($file);
+        // If prefersss is enabled we need to still read from local if duplicated.
+        $archivefile = $this->get_local_fullpath_from_file($file, true);
         return $packer->extract_to_storage($archivefile, $contextid,
                 $component, $filearea, $itemid, $pathbase, $userid, $progress);
     }
+
+    protected function ensure_local_readable($file) {
+        if (!$this->is_local_readable($file)) {
+            throw new file_exception('storedfilecannotread', '', $this->get_fullpath_from_storedfile($file));
+        }
+        return true;
+    }
+
 }

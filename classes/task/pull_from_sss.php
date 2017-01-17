@@ -50,7 +50,7 @@ class pull_from_sss extends \core\task\scheduled_task {
         if (isset($config->enabled) && $config->enabled) {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
-            $filepuller = new puller($client, $filesystem, $config);
+            $filepuller = new puller($config, $client);
             $contenthashes = $filepuller->get_candidate_content_hashes();
             $filepuller->execute($contenthashes);
         } else {

@@ -50,7 +50,7 @@ class push_to_sss extends \core\task\scheduled_task {
         if (isset($config->enabled) && $config->enabled) {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
-            $filepusher = new pusher($client, $filesystem, $config);
+            $filepusher = new pusher($config, $client);
             $contenthashes = $filepusher->get_candidate_content_hashes();
             $filepusher->execute($contenthashes);
         } else {

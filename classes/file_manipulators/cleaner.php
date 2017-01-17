@@ -125,6 +125,9 @@ class cleaner extends manipulator {
                     if ($success) {
                         log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL);
                     }
+                } else {
+                    mtrace("File not in sss: $sssfilepath. Setting state back to local\n");
+                    log_file_state($contenthash, SSS_FILE_LOCATION_LOCAL);
                 }
             } catch (file_exception $e) {
                 mtrace($e);
