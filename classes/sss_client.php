@@ -40,8 +40,8 @@ define('AWS_CAN_DELETE_OBJECT', 2);
 
 class sss_client {
 
-    private $client;
-    private $bucket;
+    protected $client;
+    protected $bucket;
 
     /**
      * Initialises s3 client to use.
@@ -71,9 +71,11 @@ class sss_client {
      * @throws S3Exceptions.
      */
     public function check_file($filekey, $expectedmd5) {
+
         $result = $this->client->headObject(array(
                         'Bucket' => $this->bucket,
                         'Key' => $filekey));
+
         $awsmd5 = trim($result['ETag'], '"'); // Strip quotation marks.
 
         if ($awsmd5 == $expectedmd5) {
@@ -92,10 +94,17 @@ class sss_client {
     public function get_sss_fullpath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
-        return "s3://$this->bucket/$l1/$l2/$contenthash";
+        $filepath = $this->get_sss_filepath_from_hash($contenthash);
+        return "s3://$this->bucket/$filepath";
     }
 
-    public function path_is_local($path) {
+    public function get_sss_filepath_from_hash($contenthash) {
+        $l1 = $contenthash[0] . $contenthash[1];
+        $l2 = $contenthash[2] . $contenthash[3];
+        return "$l1/$l2/$contenthash";
+    }
+
+    public static function path_is_local($path) {
         $sssprefix = 's3://';
         $pathprefix = substr($path, 0, 5);
         if ($sssprefix === $pathprefix) {

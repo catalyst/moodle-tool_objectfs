@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once( __DIR__ . '/../lib.php');
 require_once( __DIR__ . '/mock/sss_mock_client.php');
+require_once( __DIR__ . '/mock/sss_integration_test_client.php');
 
 abstract class tool_sssfs_testcase extends advanced_testcase {
 
@@ -55,6 +56,34 @@ abstract class tool_sssfs_testcase extends advanced_testcase {
         $DB->set_field('files', 'filesize', $filesize, array('contenthash' => $file->get_contenthash()));
 
         return $file;
+    }
+
+    /**
+     * If integration_test_config.php is set, we use the integration test client.
+     * Else we use the mock client.
+     *
+     * @return object sss test client.
+     */
+    protected function get_test_client() {
+        if (file_exists(__DIR__ . '/mock/integration_test_config.php')) {
+            $integrationconfig = include('mock/integration_test_config.php');
+            $client = new sss_integration_test_client($integrationconfig);
+        } else {
+            $client = new sss_mock_client();
+        }
+        return $client;
+    }
+
+    protected function move_file_to_sss($file, $state = SSS_FILE_LOCATION_EXTERNAL) {
+        $contenthash = $file->get_contenthash();
+        $localpath = $this->get_local_fullpath_from_hash($contenthash);
+        $md5 = md5_file($localpath);
+        $ssspath = $this->client->get_sss_fullpath_from_hash($contenthash);
+        copy($localpath, $ssspath);
+        if ($state == SSS_FILE_LOCATION_EXTERNAL) {
+            unlink($localpath);
+        }
+        log_file_state($contenthash, $state, $md5);
     }
 
     protected function save_file_to_local_storage_from_pathname($pathname) {
@@ -87,7 +116,7 @@ abstract class tool_sssfs_testcase extends advanced_testcase {
         $config->key = 123;
         $config->secret = 123;
         $config->bucket = 'test-bucket';
-        $config->region = 'aws-region';
+        $config->region = 'ap-southeast-2';
         $config->sizethreshold = $sizethreshold * 1024; // Convert from kb.
         $config->minimumage = $minimumage;
         $config->consistencydelay = $consistencydelay;

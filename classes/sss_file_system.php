@@ -376,4 +376,85 @@ class sss_file_system extends file_system {
         rename($contentfile, $trashfile);
         chmod($trashfile, $this->filepermissions);
     }
+
+    /**
+     * Return mimetype by given file pathname.
+     *
+     * If file has a known extension, we return the mimetype based on extension.
+     * Otherwise (when possible) we try to get the mimetype from file contents.
+     *
+     * @param string $fullpath Full path to the file on disk
+     * @param string $filename Correct file name with extension, if omitted will be taken from $path
+     * @return string
+     */
+    public static function mimetype($fullpath, $filename = null) {
+        if (empty($filename)) {
+            $filename = $fullpath;
+        }
+
+        // The mimeinfo function determines the mimetype purely based on the file extension.
+        $type = mimeinfo('type', $filename);
+
+        if ($type === 'document/unknown') {
+            // The type is unknown. Inspect the file now.
+            $type = self::mimetype_from_path($fullpath);
+        }
+        return $type;
+    }
+
+    /**
+     * Inspect a file on disk for it's mimetype.
+     * If it's in S3 we return document/unknown as finfo will not work.
+     * Mimetype should be calculated on file creation, this is just a precaution.
+     *
+     * @param string $fullpath Path to file on disk
+     * @param string $default The default mimetype to use if the file was not found.
+     * @return string The mimetype
+     */
+    public static function mimetype_from_path($fullpath, $default = 'document/unknown') {
+        $type = $default;
+
+        $islocalpath = sss_client::path_is_local($fullpath);
+
+        if ($islocalpath && file_exists($fullpath) && class_exists('finfo')) {
+            // The type is unknown. Attempt to look up the file type now.
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            return mimeinfo_from_type('type', $finfo->file($fullpath));
+        }
+
+        return 'document/unknown';
+    }
+
+    /**
+     * Inspect a file on disk for it's mimetype.
+     *
+     * @param string $contenthash The content hash of the file to query
+     * @param string $default The default mimetype to use if the file was not found.
+     * @return string The mimetype
+     */
+    public function mimetype_from_hash($contenthash, $filename) {
+        $fullpath = $this->get_fullpath_from_hash($contenthash);
+        return self::mimetype($fullpath, $filename);
+    }
+
+    /**
+     * Retrieve the mime information for the specified stored file.
+     *
+     * @param stored_file $file The stored file to retrieve mime information for
+     * @return string The MIME type.
+     */
+    public function mimetype_from_storedfile(stored_file $file) {
+        $pathname = $this->get_fullpath_from_storedfile($file);
+        $mimetype = self::mimetype($pathname, $file->get_filename());
+
+        if (!$this->is_readable($file) && $mimetype === 'document/unknown') {
+            // The type is unknown, but the full checks weren't completed because the file isn't locally available.
+            // Ensure we have a local copy and try again.
+            $this->ensure_readable($file);
+
+            $mimetype = self::mimetype_from_path($pathname);
+        }
+
+        return $mimetype;
+    }
 }

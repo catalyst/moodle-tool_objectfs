@@ -29,6 +29,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
+use core_files\filestorage\file_exception;
+use Aws\S3\Exception\S3Exception;
+
 class cleaner extends manipulator {
 
     /**
@@ -115,7 +118,8 @@ class cleaner extends manipulator {
             }
 
             try {
-                $fileinsss = $this->client->check_file($contenthash, $md5);
+                $sssfilepath = $this->client->get_sss_filepath_from_hash($contenthash);
+                $fileinsss = $this->client->check_file($sssfilepath, $md5);
                 if ($fileinsss) {
                     $success = $this->delete_local_file_from_contenthash($contenthash);
                     if ($success) {

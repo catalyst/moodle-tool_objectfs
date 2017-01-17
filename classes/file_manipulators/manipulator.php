@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
 
 use core_files\filestorage\file_exception;
-
+use Aws\S3\Exception\S3Exception;
 
 abstract class manipulator {
 

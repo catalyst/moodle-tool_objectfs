@@ -39,7 +39,7 @@ class tool_sssfs_file_status_testcase extends tool_sssfs_testcase {
         $this->resetAfterTest(true);
         $CFG->filesystem_handler_class = '\tool_sssfs\sss_file_system';
         $this->config = $this->generate_config();
-        $this->client = new sss_mock_client();
+        $this->client = $this->get_test_client();
     }
 
     protected function tearDown() {
