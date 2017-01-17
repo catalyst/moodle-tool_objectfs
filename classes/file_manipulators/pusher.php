@@ -99,6 +99,12 @@ class pusher extends manipulator {
     private function copy_local_file_to_sss($contenthash) {
         $localfilepath = $filepath = $this->get_local_fullpath_from_hash($contenthash);
         $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
+
+        // If already there.
+        if (is_readable($sssfilepath)) {
+            return true;
+        }
+
         $this->ensure_path_is_readable($localfilepath);
         return copy($localfilepath, $sssfilepath);
     }

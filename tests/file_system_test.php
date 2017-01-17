@@ -83,8 +83,12 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         $this->move_file_to_sss($file);
         $isreadable = $this->filesystem->ensure_readable($file);
         $this->assertTrue($isreadable); // Should still be readable.
-        $ssspath = $this->client->get_sss_fullpath_from_hash($contenthash);
-        unlink($ssspath);
+    }
+
+    public function test_ensure_readable_exception() {
+        $file = $this->save_file_to_local_storage_from_string(10, $filename = 'test.txt', $filecontent = 'ensure_readable_exception content');
+        $localpath = $this->get_local_fullpath_from_hash($file->get_contenthash());
+        unlink($localpath);
         $this->setExpectedException('\core_files\filestorage\file_exception');
         $this->filesystem->ensure_readable($file);
     }
@@ -126,6 +130,7 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
     }
 
     public function test_sss_list_files() {
+        global $DB;
         $zipfile = $this->generate_zip_archive_file();
         $packer = get_file_packer('application/zip');
         $this->move_file_to_sss($zipfile);
@@ -133,6 +138,10 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         $this->assertEquals('fileone', $result[0]->pathname);
         $this->assertEquals('filetwo', $result[1]->pathname);
         $this->assertEquals('filethree', $result[2]->pathname);
+        $contenthash = $zipfile->get_contenthash();
+        $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
+        // Should have been pulled back to local when list_files called.
+        $this->assertEquals(SSS_FILE_LOCATION_DUPLICATED, $location);
     }
 
     private function generate_zip_archive_file() {
@@ -154,7 +163,7 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
     }
 
     public function test_sss_extract_to_pathname() {
-        global $CFG;
+        global $CFG, $DB;
         $zipfile = $this->generate_zip_archive_file();
         $packer = get_file_packer('application/zip');
         $this->move_file_to_sss($zipfile);
@@ -165,6 +174,11 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         foreach ($result as $success) {
             $this->assertTrue($success);
         }
+
+        $contenthash = $zipfile->get_contenthash();
+        $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
+        // Should have been pulled back to local when list_files called.
+        $this->assertEquals(SSS_FILE_LOCATION_DUPLICATED, $location);
     }
 
     public function test_sss_add_to_curl_request() {
@@ -180,7 +194,7 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
     }
 
     public function test_extract_to_storage() {
-        global $CFG;
+        global $CFG, $DB;
         $zipfile = $this->generate_zip_archive_file();
         $packer = get_file_packer('application/zip');
         $this->move_file_to_sss($zipfile);
@@ -198,6 +212,11 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         foreach ($result as $success) {
             $this->assertTrue($success);
         }
+
+        $contenthash = $zipfile->get_contenthash();
+        $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
+        // Should have been pulled back to local when list_files called.
+        $this->assertEquals(SSS_FILE_LOCATION_DUPLICATED, $location);
     }
 
     public function test_sss_get_imageinfo() {

@@ -27,6 +27,8 @@ namespace tool_sssfs;
 use core_files\filestorage\file_system;
 use core_files\filestorage\file_storage;
 use core_files\filestorage\stored_file;
+use core_files\filestorage\file_packer;
+use core_files\filestorage\file_progress;
 use core_files\filestorage\file_exception;
 use tool_sssfs\sss_client;
 
@@ -456,5 +458,97 @@ class sss_file_system extends file_system {
         }
 
         return $mimetype;
+    }
+
+    /**
+     * Certain operations cannot be performed on s3 files.
+     * use this to pull the file back as the before the operation is called.
+     * It will be set back to duplicated and returned back to s3 later.
+     *
+     * @param  stored_file $file [description]
+     *
+     * @return [type]            [description]
+     */
+    protected function pull_file_back_to_local_if_in_sss(stored_file $file) {
+        $path = $this->get_fullpath_from_storedfile($file, true);
+        $islocal = $this->sssclient->path_is_local($path);
+
+        if ($islocal) {
+            return;
+        }
+
+        $contenthash = $file->get_contenthash();
+        $timeout = 600; // 10 minutes before giving up.
+        $locktype = 'tool_sssfs_file_manipulation';
+        $resource = "contenthash: $contenthash";
+        $lockfactory = \core\lock\lock_config::get_lock_factory($locktype);
+
+        // We use a lock here incase this function is called twice in parallel.
+        $lock = $lockfactory->get_lock($resource, $timeout);
+        $localpath = $this->get_local_fullpath_from_hash($contenthash);
+
+        $islocalreadable = is_readable($localpath); // Check its not local now.
+
+        if (!$islocalreadable) {
+            copy($path, $localpath);
+            log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
+        }
+
+        $lock->release();
+
+    }
+
+    /**
+     * List contents of archive.
+     *
+     * @param stored_file $file The archive to inspect
+     * @param file_packer $packer file packer instance
+     * @return array of file infos
+     */
+    public function list_files($file, file_packer $packer) {
+        $this->ensure_readable($file);
+        $this->pull_file_back_to_local_if_in_sss($file);
+        $archivefile = $this->get_fullpath_from_storedfile($file, true);
+        return $packer->list_files($archivefile);
+    }
+
+    /**
+     * Extract file to given file path (real OS filesystem), existing files are overwritten.
+     *
+     * @param stored_file $file The archive to inspect
+     * @param file_packer $packer File packer instance
+     * @param string $pathname Target directory
+     * @param file_progress $progress progress indicator callback or null if not required
+     * @return array|bool List of processed files; false if error
+     */
+    public function extract_to_pathname(stored_file $file, file_packer $packer, $pathname, file_progress $progress = null) {
+        $this->pull_file_back_to_local_if_in_sss($file);
+        $archivefile = $this->get_fullpath_from_storedfile($file, true);
+        return $packer->extract_to_pathname($archivefile, $pathname, null, $progress);
+    }
+
+    /**
+     * Extract file to given file path (real OS filesystem), existing files are overwritten.
+     *
+     * @param stored_file $file The archive to inspect
+     * @param file_packer $packer file packer instance
+     * @param int $contextid context ID
+     * @param string $component component
+     * @param string $filearea file area
+     * @param int $itemid item ID
+     * @param string $pathbase path base
+     * @param int $userid user ID
+     * @param file_progress $progress Progress indicator callback or null if not required
+     * @return array|bool list of processed files; false if error
+     */
+    public function extract_to_storage(stored_file $file, file_packer $packer, $contextid,
+            $component, $filearea, $itemid, $pathbase, $userid = null, file_progress $progress = null) {
+
+        // The extract_to_storage function needs the file to exist on disk.
+        $this->ensure_readable($file);
+        $this->pull_file_back_to_local_if_in_sss($file);
+        $archivefile = $this->get_fullpath_from_storedfile($file, true);
+        return $packer->extract_to_storage($archivefile, $contextid,
+                $component, $filearea, $itemid, $pathbase, $userid, $progress);
     }
 }

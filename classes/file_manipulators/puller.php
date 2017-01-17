@@ -85,6 +85,12 @@ class puller extends manipulator {
      */
     private function copy_sss_file_to_local($contenthash) {
         $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
+
+        // Already there.
+        if (is_readable($localfilepath)) {
+            return true;
+        }
+
         $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
         return copy($sssfilepath, $localfilepath);
     }
