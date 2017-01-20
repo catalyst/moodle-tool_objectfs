@@ -70,9 +70,9 @@ class pusher extends manipulator {
      *
      * @return array candidate contenthashes
      */
-    public function get_candidate_content_hashes() {
+    public function get_candidate_files() {
         global $DB;
-        $sql = 'SELECT F.contenthash
+        $sql = 'SELECT F.contenthash, MAX(F.filesize) as filesize
                 FROM {files} F
                 LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
                 GROUP BY F.contenthash, F.filesize, SF.location
@@ -84,9 +84,14 @@ class pusher extends manipulator {
 
         $params = array($maxcreatedtimestamp, $this->sizethreshold, SSS_FILE_LOCATION_LOCAL);
 
-        $contenthashes = $DB->get_fieldset_sql($sql, $params);
+        $starttime = time();
+        $files = $DB->get_records_sql($sql, $params);
+        $duration = time() - $starttime;
+        $count = count($files);
 
-        return $contenthashes;
+        $logstring = "File pusher query took $duration seconds to find $count files \n";
+        mtrace($logstring);
+        return $files;
     }
 
     /**
@@ -100,9 +105,8 @@ class pusher extends manipulator {
         $localfilepath = $filepath = $this->get_local_fullpath_from_hash($contenthash);
         $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
 
-        // If already there.
         if (is_readable($sssfilepath)) {
-            return true;
+            return true; // Already there.
         }
 
         $this->ensure_path_is_readable($localfilepath);
@@ -127,19 +131,25 @@ class pusher extends manipulator {
      *
      * @param  array $candidatehashes content hashes to push
      */
-    public function execute($candidatehashes) {
+    public function execute($files) {
         global $DB;
 
-        foreach ($candidatehashes as $contenthash) {
+        $starttime = time();
+        $filecount = 0;
+        $totalfilesize = 0;
+
+        foreach ($files as $file) {
             if (time() >= $this->finishtime) {
                 break;
             }
 
             try {
-                $success = $this->copy_local_file_to_sss($contenthash);
+                $success = $this->copy_local_file_to_sss($file->contenthash);
                 if ($success) {
-                    $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
-                    log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
+                    $filemd5 = $this->get_local_md5_from_contenthash($file->contenthash);
+                    log_file_state($file->contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
+                    $filecount++;
+                    $totalfilesize += $file->filesize;
                 }
             } catch (file_exception $e) {
                 mtrace($e);
@@ -149,6 +159,11 @@ class pusher extends manipulator {
                 continue;
             }
         }
+        $duration = time() - $starttime;
+
+        $totalfilesize = display_size($totalfilesize);
+        $logstring = "File pusher pushed $filecount files, $totalfilesize to S3 in $duration seconds \n";
+        mtrace($logstring);
     }
 }
 

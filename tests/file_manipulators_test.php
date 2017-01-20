@@ -39,10 +39,11 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $this->resetAfterTest(true);
         $this->config = $this->generate_config();
         $this->client = $this->get_test_client();
+        ob_start();
     }
 
     protected function tearDown() {
-
+        ob_end_clean();
     }
 
     public function test_cleaner_can_clean_file() {
@@ -51,12 +52,12 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filecontenthash = $file->get_contenthash();
         $this->move_file_to_sss($file, SSS_FILE_LOCATION_DUPLICATED);
         $filecleaner = new cleaner($this->config, $this->client);
-        $candidatehashes = $filecleaner->get_candidate_content_hashes();
+        $candidatefiles = $filecleaner->get_candidate_files();
         $recors = $DB->get_records('tool_sssfs_filestate');
-        $this->assertEquals(1, count($candidatehashes));
-        reset($candidatehashes); // Reset array so key fives us key of first value.
-        $this->assertEquals($filecontenthash, key($candidatehashes));
-        $filecleaner->execute($candidatehashes);
+        $this->assertEquals(1, count($candidatefiles));
+        $candidatefile = reset($candidatefiles); // Reset array so key fives us key of first value.
+        $this->assertEquals($filecontenthash, $candidatefile->contenthash);
+        $filecleaner->execute($candidatefiles);
         $fullpath = $this->get_local_fullpath_from_hash($filecontenthash);
         $isreadable = is_readable($fullpath);
         $this->assertFalse($isreadable);
@@ -68,7 +69,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
         log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
-        $candidatehashes = $filecleaner->get_candidate_content_hashes();
+        $candidatehashes = $filecleaner->get_candidate_files();
         $filecleaner->execute($candidatehashes); // Should not delete the file.
         $fullpath = $this->get_local_fullpath_from_hash($filecontenthash);
         $isreadable = is_readable($fullpath);
@@ -77,18 +78,12 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
 
     public function test_pusher_can_push_file() {
         global $DB;
-
         $filepusher = new pusher($this->config, $this->client);
         $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
-        $prepushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
-
-        $this->assertEquals(0, $prepushcount); // Assert table does not contain items.
-
-        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
-
         $this->assertEquals(1, $postpushcount); // Assert table has item.
     }
 
@@ -100,7 +95,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filepusher = new pusher($this->config, $this->client);
         $file = $this->save_file_to_local_storage_from_string(100); // Set file size to 100.
         $filecontenthash = $file->get_contenthash();
-        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -116,7 +111,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filepusher = new pusher($this->config, $this->client);
         $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
-        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -127,13 +122,12 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
 
     public function test_pusher_sss_client_wont_push_file_that_is_not_there () {
         global $DB;
-        ob_start();
         $filepusher = new pusher($this->config, $this->client);
-        $filecontenthash = 'not_a_hash';
-        $filepusher->execute(array($filecontenthash));
-        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+        $file = new stdClass();
+        $file->contenthash = 'not_a_hash';
+        $filepusher->execute(array($file));
+        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $file->contenthash));
         $this->assertEquals(0, $postpushcount); // Assert table still does not contain entry.
-        ob_end_clean();
     }
 
     public function test_pusher_max_task_runtime () {
@@ -145,7 +139,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filepusher = new pusher($this->config, $this->client);
         $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
-        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
         $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
 
@@ -162,10 +156,23 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $file = $this->save_file_to_local_storage_from_string(100, 'testfile.txt', $expectedcontent);
         $filecontenthash = $file->get_contenthash();
         $expectedmd5 = md5($expectedcontent);
-        $contenthashes = $filepusher->get_candidate_content_hashes();
+        $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
         $savedrecord = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
         $this->assertEquals($expectedmd5, $savedrecord->md5);
+    }
+
+    public function test_puller_can_pull_file() {
+        global $DB;
+        $this->config = $this->generate_config(999999); // It will be pulled back.
+        $filepuller = new puller($this->config, $this->client);
+        $file = $this->save_file_to_local_storage_from_string();
+        $filecontenthash = $file->get_contenthash();
+        $this->move_file_to_sss($file);
+        $files = $filepuller->get_candidate_files();
+        $filepuller->execute($files);
+        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash, 'location' => SSS_FILE_LOCATION_DUPLICATED));
+        $this->assertEquals(1, $postpushcount); // Assert table has item.
     }
 
 }

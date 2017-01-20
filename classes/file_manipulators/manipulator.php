@@ -108,7 +108,7 @@ abstract class manipulator {
      *
      * @return [type] [description]
      */
-    abstract public function get_candidate_content_hashes();
+    abstract public function get_candidate_files();
 
     /**
      * execute file manipulation.

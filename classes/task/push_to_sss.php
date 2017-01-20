@@ -51,7 +51,7 @@ class push_to_sss extends \core\task\scheduled_task {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
             $filepusher = new pusher($config, $client);
-            $contenthashes = $filepusher->get_candidate_content_hashes();
+            $contenthashes = $filepusher->get_candidate_files();
             $filepusher->execute($contenthashes);
         } else {
             mtrace(get_string('not_enabled', 'tool_sssfs'));

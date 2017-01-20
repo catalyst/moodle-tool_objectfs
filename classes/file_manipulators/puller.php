@@ -60,9 +60,9 @@ class puller extends manipulator {
      *
      * @return array candidate contenthashes
      */
-    public function get_candidate_content_hashes() {
+    public function get_candidate_files() {
         global $DB;
-        $sql = 'SELECT F.contenthash
+        $sql = 'SELECT F.contenthash, MAX(F.filesize) as filesize
                 FROM {files} F
                 LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
                 GROUP BY F.contenthash, F.filesize, SF.location
@@ -71,9 +71,15 @@ class puller extends manipulator {
 
         $params = array($this->sizethreshold, SSS_FILE_LOCATION_EXTERNAL);
 
-        $contenthashes = $DB->get_fieldset_sql($sql, $params);
+        $starttime = time();
+        $files = $DB->get_records_sql($sql, $params);
+        $duration = time() - $starttime;
+        $count = count($files);
 
-        return $contenthashes;
+        $logstring = "File puller query took $duration seconds to find $count files \n";
+        mtrace($logstring);
+
+        return $files;
     }
 
     /**
@@ -100,18 +106,24 @@ class puller extends manipulator {
      *
      * @param  array $candidatehashes content hashes to push
      */
-    public function execute($candidatehashes) {
+    public function execute($files) {
         global $DB;
 
-        foreach ($candidatehashes as $contenthash) {
+        $starttime = time();
+        $filecount = 0;
+        $totalfilesize = 0;
+
+        foreach ($files as $file) {
             if (time() >= $this->finishtime) {
                 break;
             }
 
             try {
-                $success = $this->copy_sss_file_to_local($contenthash);
+                $success = $this->copy_sss_file_to_local($file->contenthash);
                 if ($success) {
-                    log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
+                    log_file_state($file->contenthash, SSS_FILE_LOCATION_DUPLICATED);
+                    $filecount++;
+                    $totalfilesize += $file->filesize;
                 }
             } catch (file_exception $e) {
                 mtrace($e);
@@ -121,6 +133,11 @@ class puller extends manipulator {
                 continue;
             }
         }
+        $duration = time() - $starttime;
+
+        $totalfilesize = display_size($totalfilesize);
+        $logstring = "File puller pulled $filecount files, $totalfilesize to S3 in $duration seconds \n";
+        mtrace($logstring);
     }
 }
 

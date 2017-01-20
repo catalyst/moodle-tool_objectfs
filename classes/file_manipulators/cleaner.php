@@ -70,21 +70,32 @@ class cleaner extends manipulator {
      *
      * @return array candidate contenthashes
      */
-    public function get_candidate_content_hashes() {
+    public function get_candidate_files() {
         global $DB;
 
         if ($this->deletelocal == 0) {
+            mtrace("Delete local disabled, not running query \n");
             return array();
         }
 
-        $sql = 'SELECT SF.contenthash, SF.md5
-                FROM {tool_sssfs_filestate} SF
-                WHERE SF.timeduplicated <= ? and SF.location = ?';
+        $sql = 'SELECT F.contenthash, MAX(F.filesize) as filesize, SF.md5
+                FROM {files} F
+                LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
+                WHERE SF.timeduplicated <= ? and SF.location = ?
+                GROUP BY F.contenthash, F.filesize, SF.location, SF.md5';
 
         $consistancythrehold = time() - $this->consistencydelay;
         $params = array($consistancythrehold, SSS_FILE_LOCATION_DUPLICATED);
-        $contenthashes = $DB->get_records_sql_menu($sql, $params);
-        return $contenthashes;
+
+        $starttime = time();
+        $files = $DB->get_records_sql($sql, $params);
+        $duration = time() - $starttime;
+        $count = count($files);
+
+        $logstring = "File cleaner query took $duration seconds to find $count files \n";
+        mtrace($logstring);
+
+        return $files;
     }
 
     /**
@@ -104,30 +115,37 @@ class cleaner extends manipulator {
      *
      * @param  array $candidatehashes content hashes to delete
      */
-    public function execute($candidatehashes) {
+    public function execute($files) {
         global $DB;
 
+        $starttime = time();
+        $filecount = 0;
+        $totalfilesize = 0;
+
         if ($this->deletelocal == 0) {
+            mtrace("Delete local disabled, not deleting \n");
             return;
         }
 
-        foreach ($candidatehashes as $contenthash => $md5) {
+        foreach ($files as $file) {
 
             if (time() >= $this->finishtime) {
                 break;
             }
 
             try {
-                $sssfilepath = $this->client->get_sss_filepath_from_hash($contenthash);
-                $fileinsss = $this->client->check_file($sssfilepath, $md5);
+                $sssfilepath = $this->client->get_sss_filepath_from_hash($file->contenthash);
+                $fileinsss = $this->client->check_file($sssfilepath, $file->md5);
                 if ($fileinsss) {
-                    $success = $this->delete_local_file_from_contenthash($contenthash);
+                    $success = $this->delete_local_file_from_contenthash($file->contenthash);
                     if ($success) {
-                        log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL);
+                        log_file_state($file->contenthash, SSS_FILE_LOCATION_EXTERNAL);
+                        $filecount++;
+                        $totalfilesize += $file->filesize;
                     }
                 } else {
                     mtrace("File not in sss: $sssfilepath. Setting state back to local\n");
-                    log_file_state($contenthash, SSS_FILE_LOCATION_LOCAL);
+                    log_file_state($file->contenthash, SSS_FILE_LOCATION_LOCAL);
                 }
             } catch (file_exception $e) {
                 mtrace($e);
@@ -137,5 +155,10 @@ class cleaner extends manipulator {
                 continue;
             }
         }
+        $duration = time() - $starttime;
+
+        $totalfilesize = display_size($totalfilesize);
+        $logstring = "File cleaner cleaned $filecount files, $totalfilesize in $duration seconds \n";
+        mtrace($logstring);
     }
 }

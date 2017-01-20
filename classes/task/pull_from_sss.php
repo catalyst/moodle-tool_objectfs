@@ -51,7 +51,7 @@ class pull_from_sss extends \core\task\scheduled_task {
             $client = new sss_client($config);
             $filesystem = sss_file_system::instance();
             $filepuller = new puller($config, $client);
-            $contenthashes = $filepuller->get_candidate_content_hashes();
+            $contenthashes = $filepuller->get_candidate_files();
             $filepuller->execute($contenthashes);
         } else {
             mtrace(get_string('not_enabled', 'tool_sssfs'));
