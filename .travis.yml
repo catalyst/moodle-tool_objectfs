@@ -44,12 +44,10 @@ matrix:
 before_install:
   - phpenv config-rm xdebug.ini
   - cd ../..
-  - git clone https://github.com/kenneth-hendricks/moodle-plugin-ci.git ci
-  - cd ci
   - composer selfupdate
-  - composer install --no-dev
-  - cd ..
+  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci dev-master
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
 
 install:
   - moodle-plugin-ci install
