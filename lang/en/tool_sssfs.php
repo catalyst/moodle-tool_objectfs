@@ -36,10 +36,12 @@ $string['file_status:page'] = 'S3 file status';
 $string['file_status:location'] = 'File location';
 $string['file_status:files'] = 'Files';
 $string['file_status:size'] = 'Total size';
-$string['file_status:state:duplicated'] = 'Duplicated';
-$string['file_status:state:local'] = 'Local';
-$string['file_status:state:external'] = 'External';
-$string['file_status:state:unknown'] = 'Unknown';
+
+$string['file_status:state:error'] = 'Missing from filedir';
+$string['file_status:state:duplicated'] = 'Duplicated in S3 and filedir';
+$string['file_status:state:local'] = 'Only in filedir';
+$string['file_status:state:external'] = 'Only in S3';
+$string['file_status:state:unknown'] = 'Unknown file state';
 $string['file_status:last_run'] = 'This report was generated on {$a}';
 $string['file_status:never_run'] = 'The task to generate this report has not been run.';
 

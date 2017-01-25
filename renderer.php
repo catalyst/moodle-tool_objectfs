@@ -125,6 +125,8 @@ class tool_sssfs_renderer extends plugin_renderer_base {
 
     private function get_file_state_string($filestate) {
         switch ($filestate){
+            case SSS_FILE_LOCATION_ERROR:
+                return get_string('file_status:state:error', 'tool_sssfs');
             case SSS_FILE_LOCATION_LOCAL:
                 return get_string('file_status:state:local', 'tool_sssfs');
             case SSS_FILE_LOCATION_DUPLICATED:
