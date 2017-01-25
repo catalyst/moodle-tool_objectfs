@@ -25,6 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+define('SSS_FILE_LOCATION_ERROR', -1);
 define('SSS_FILE_LOCATION_LOCAL', 0);
 define('SSS_FILE_LOCATION_DUPLICATED', 1);
 define('SSS_FILE_LOCATION_EXTERNAL', 2);
@@ -47,14 +48,11 @@ function log_file_state($contenthash, $location, $md5 = null) {
         $logrecord->md5 = $md5;
     } else if ($existing) {
         $logrecord->md5 = $existing->md5;
-    } else {
-        throw new coding_exception('No existing record and md5 not supplied for file state');
     }
 
     if ($existing) {
         $logrecord->id = $existing->id;
         $DB->update_record('tool_sssfs_filestate', $logrecord);
-
     } else {
         $DB->insert_record('tool_sssfs_filestate', $logrecord);
     }

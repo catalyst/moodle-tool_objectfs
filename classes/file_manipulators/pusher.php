@@ -156,7 +156,8 @@ class pusher extends manipulator {
                     $totalfilesize += $file->filesize;
                 }
             } catch (file_exception $e) {
-                mtrace($e);
+                mtrace($e->getMessage());
+                log_file_state($file->contenthash, SSS_FILE_LOCATION_ERROR);
                 continue;
             } catch (S3Exception $e) {
                 mtrace($e->getMessage());

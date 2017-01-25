@@ -120,14 +120,18 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
     }
 
 
-    public function test_pusher_sss_client_wont_push_file_that_is_not_there () {
+    public function test_pusher_wont_push_file_that_is_not_there () {
         global $DB;
         $filepusher = new pusher($this->config, $this->client);
         $file = new stdClass();
         $file->contenthash = 'not_a_hash';
         $filepusher->execute(array($file));
-        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $file->contenthash));
-        $this->assertEquals(0, $postpushcount); // Assert table still does not contain entry.
+        $dupecount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $file->contenthash,
+                                                                          'location' => SSS_FILE_LOCATION_DUPLICATED));
+        $this->assertEquals(0, $dupecount);
+        $errorcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $file->contenthash,
+                                                                          'location' => SSS_FILE_LOCATION_ERROR));
+        $this->assertEquals(1, $errorcount);
     }
 
     public function test_pusher_max_task_runtime () {
