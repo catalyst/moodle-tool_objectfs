@@ -70,8 +70,10 @@ class tool_sssfs_file_status_testcase extends tool_sssfs_testcase {
             $this->save_file_to_local_storage_from_string(1024 * 100, "test-{$i}.txt", "test-{$i} content"); // 100 mb files.
         }
 
+        ob_start();
         $contenthashes = $pusher->get_candidate_files();
         $pusher->execute($contenthashes);
+        ob_end_clean();
 
         $data = $report->calculate_report_data();
 
