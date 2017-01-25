@@ -46,6 +46,11 @@ class file_location_report extends sss_report {
                           HAVING sf.location = ?) AS sub
                  WHERE sub.filesize != 0';
 
+        $error = $DB->get_records_sql($sql, array(SSS_FILE_LOCATION_ERROR));
+        $error = reset($error);
+        $error = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_ERROR, $error->filecount, $error->filesum);
+        $data[SSS_FILE_LOCATION_ERROR] = $error;
+
         $duplicate = $DB->get_records_sql($sql, array(SSS_FILE_LOCATION_DUPLICATED));
         $duplicate = reset($duplicate);
         $duplicate = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_DUPLICATED, $duplicate->filecount, $duplicate->filesum);
@@ -68,8 +73,8 @@ class file_location_report extends sss_report {
         $local = $DB->get_records_sql($sql);
         $local = reset($local);
 
-        $local->filecount -= $duplicate->filecount + $external->filecount;
-        $local->filesum -= $duplicate->filesum + $external->filesum;
+        $local->filecount -= $error->filecount + $duplicate->filecount + $external->filecount;
+        $local->filesum -= $error->filesum + $duplicate->filesum + $external->filesum;
 
         $local = $this->create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_LOCAL, $local->filecount, $local->filesum);
         $data[SSS_FILE_LOCATION_LOCAL] = $local;
