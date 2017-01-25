@@ -37,16 +37,14 @@ class file_location_report extends sss_report {
         global $DB;
         $data = array();
 
-        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) as filecount,
-                COALESCE(SUM(sub.filesize) ,0) as filesum
-                FROM (
-                    SELECT F.contenthash, MAX(F.filesize) as filesize
-                    FROM {files} F
-                    JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
-                    GROUP BY F.contenthash, F.filesize, SF.location
-                    HAVING SF.location = ?
-                ) as sub
-                WHERE sub.filesize != 0';
+        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) AS filecount,
+                       COALESCE(SUM(sub.filesize) ,0) AS filesum
+                  FROM (SELECT f.contenthash, MAX(f.filesize) AS filesize
+                          FROM {files} f
+                          JOIN {tool_sssfs_filestate} sf on f.contenthash = sf.contenthash
+                          GROUP BY f.contenthash, f.filesize, sf.location
+                          HAVING sf.location = ?) AS sub
+                 WHERE sub.filesize != 0';
 
         $duplicate = $DB->get_records_sql($sql, array(SSS_FILE_LOCATION_DUPLICATED));
         $duplicate = reset($duplicate);

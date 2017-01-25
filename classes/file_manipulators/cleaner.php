@@ -78,11 +78,17 @@ class cleaner extends manipulator {
             return array();
         }
 
-        $sql = 'SELECT F.contenthash, MAX(F.filesize) as filesize, SF.md5
-                FROM {files} F
-                LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
-                WHERE SF.timeduplicated <= ? and SF.location = ?
-                GROUP BY F.contenthash, F.filesize, SF.location, SF.md5';
+        $sql = 'SELECT f.contenthash,
+                       MAX(f.filesize) AS filesize,
+                       sf.md5
+                  FROM {files} f
+             LEFT JOIN {tool_sssfs_filestate} sf ON f.contenthash = sf.contenthash
+                 WHERE sf.timeduplicated <= ?
+                       AND sf.location = ?
+              GROUP BY f.contenthash,
+                       f.filesize,
+                       sf.location,
+                       sf.md5';
 
         $consistancythrehold = time() - $this->consistencydelay;
         $params = array($consistancythrehold, SSS_FILE_LOCATION_DUPLICATED);

@@ -62,12 +62,15 @@ class puller extends manipulator {
      */
     public function get_candidate_files() {
         global $DB;
-        $sql = 'SELECT F.contenthash, MAX(F.filesize) as filesize
-                FROM {files} F
-                LEFT JOIN {tool_sssfs_filestate} SF on F.contenthash = SF.contenthash
-                GROUP BY F.contenthash, F.filesize, SF.location
-                HAVING MAX(F.filesize) <= ?
-                AND (SF.location = ?)';
+        $sql = 'SELECT f.contenthash,
+                       MAX(f.filesize) AS filesize
+                  FROM {files} f
+             LEFT JOIN {tool_sssfs_filestate} sf ON f.contenthash = sf.contenthash
+              GROUP BY f.contenthash,
+                       f.filesize,
+                       sf.location
+                HAVING MAX(f.filesize) <= ?
+                       AND (sf.location = ?)';
 
         $params = array($this->sizethreshold, SSS_FILE_LOCATION_EXTERNAL);
 

@@ -73,16 +73,16 @@ class pusher extends manipulator {
     public function get_candidate_files() {
         global $DB;
         $sql = 'SELECT f.contenthash,
-                       MAX(f.filesize) as filesize
+                       MAX(f.filesize) AS filesize
                   FROM {files} f
              LEFT JOIN {tool_sssfs_filestate} sf ON f.contenthash = sf.contenthash
               GROUP BY f.contenthash,
                        f.filesize,
                        sf.location
                 HAVING MIN(f.timecreated) < ?
-                   AND MAX(f.filesize) > ?
-                   AND MAX(f.filesize) < 5000000000
-                   AND (sf.location IS NULL OR sf.location = ?)';
+                       AND MAX(f.filesize) > ?
+                       AND MAX(f.filesize) < 5000000000
+                       AND (sf.location IS NULL OR sf.location = ?)';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
 

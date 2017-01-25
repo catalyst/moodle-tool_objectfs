@@ -38,12 +38,13 @@ class log_size_report extends sss_report {
 
         $data = array();
 
-        $sql = 'SELECT log logindex, sum(filesize) filesum, count(*) filecount from
-                    (SELECT distinct contenthash, filesize, floor(log(2,filesize) * 4) as log
-                        from {files}
-                        where filesize != 0
-                    ) d
-                group by log order by log';
+        $sql = 'SELECT log logindex,
+                       sum(filesize) filesum,
+                       count(*) filecount
+                  FROM (SELECT DISTINCT contenthash, filesize, floor(log(2,filesize) * 4) AS log
+                            FROM {files}
+                            WHERE filesize != 0) d
+              GROUP BY log ORDER BY log';
 
         $logdata = $DB->get_records_sql($sql);
 
