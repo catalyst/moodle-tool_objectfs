@@ -38,7 +38,6 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         if (!isset($config->enabled) || !$config->enabled) {
             $labeltext = get_string('not_enabled', 'tool_sssfs');
             $output .= html_writer::label($labeltext, null);
-            return $output;
         }
 
         // Could refactor this to have less duplication, but requirements may change for data.
