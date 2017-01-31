@@ -103,6 +103,10 @@ abstract class manipulator {
         return true;
     }
 
+    protected function log_error($error, $contenthash) {
+        mtrace($error->getMessage()  . "File hash: $contenthash");
+    }
+
     /**
      * get candidate content hashes for execution.
      *

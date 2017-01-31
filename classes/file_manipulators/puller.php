@@ -129,10 +129,10 @@ class puller extends manipulator {
                     $totalfilesize += $file->filesize;
                 }
             } catch (file_exception $e) {
-                mtrace($e->getMessage());
+                $this->log_error($e, $file->contenthash);
                 continue;
             } catch (S3Exception $e) {
-                mtrace($e->getMessage());
+                $this->log_error($e, $file->contenthash);
                 continue;
             }
         }

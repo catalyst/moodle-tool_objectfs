@@ -154,10 +154,10 @@ class cleaner extends manipulator {
                     log_file_state($file->contenthash, SSS_FILE_LOCATION_LOCAL);
                 }
             } catch (file_exception $e) {
-                mtrace($e->getMessage());
+                $this->log_error($e, $file->contenthash);
                 continue;
             } catch (S3Exception $e) {
-                mtrace($e->getMessage());
+                $this->log_error($e, $file->contenthash);
                 continue;
             }
         }
