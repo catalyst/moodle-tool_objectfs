@@ -52,6 +52,8 @@ class settings_form extends \moodleform {
 
         if ($connection) {
             $permissions = $client->permissions_check();
+        } else {
+            $permissions = false;
         }
 
         if (isset($config->sizethreshold)) {
