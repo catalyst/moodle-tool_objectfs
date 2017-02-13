@@ -496,13 +496,15 @@ class sss_file_system extends file_system {
 
         $islocalreadable = is_readable($localpath); // Check its not local now.
 
-        if (!$islocalreadable) {
-            copy($path, $localpath);
-            log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
+        if ($islocalreadable) {
+            return;
         }
 
-        $lock->release();
-
+        if ($lock) {
+            copy($path, $localpath);
+            log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
+            $lock->release();
+        }
     }
 
     /**
