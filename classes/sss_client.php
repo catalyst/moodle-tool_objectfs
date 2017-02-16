@@ -71,22 +71,26 @@ class sss_client {
      * @throws S3Exceptions.
      */
     public function check_file($filekey, $expectedmd5) {
+        $md5 = $this->get_object_md5_from_key($filekey);
 
+        if ($md5 == $expectedmd5) {
+            return true;
+        }
+        return false;
+    }
+
+    public function get_object_md5_from_key($objectkey) {
         try {
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => $filekey));
+                            'Key' => $objectkey));
         } catch (S3Exception $e) {
             return false;
         }
 
-        $awsmd5 = trim($result['ETag'], '"'); // Strip quotation marks.
+        $md5 = trim($result['ETag'], '"'); // Strip quotation marks.
 
-        if ($awsmd5 == $expectedmd5) {
-            return true;
-        }
-
-        return false;
+        return $md5;
     }
 
     /**
