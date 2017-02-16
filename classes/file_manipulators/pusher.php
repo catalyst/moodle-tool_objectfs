@@ -110,12 +110,24 @@ class pusher extends manipulator {
         $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
 
         if (is_readable($sssfilepath)) {
-            return true; // Already there.
+            if (is_readable($localfilepath)) {
+                $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
+                log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
+            } else {
+                $filemd5 = $this->client->get_object_md5_from_key($contenthash);
+                log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL, $filemd5);
+            }
+        } else {
+            if (is_readable($localfilepath)) {
+                $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
+                copy($localfilepath, $sssfilepath);
+                log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
+            } else {
+                log_file_state($contenthash, SSS_FILE_LOCATION_ERROR);
+            }
         }
-
-        $this->ensure_path_is_readable($localfilepath);
-        return copy($localfilepath, $sssfilepath);
     }
+
 
     /**
      * Calculated md5 of file.
@@ -147,21 +159,11 @@ class pusher extends manipulator {
                 break;
             }
 
-            try {
-                $success = $this->copy_local_file_to_sss($file->contenthash);
-                if ($success) {
-                    $filemd5 = $this->get_local_md5_from_contenthash($file->contenthash);
-                    log_file_state($file->contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
-                    $filecount++;
-                    $totalfilesize += $file->filesize;
-                }
-            } catch (file_exception $e) {
-                $this->log_error($e, $file->contenthash);
-                log_file_state($file->contenthash, SSS_FILE_LOCATION_ERROR);
-                continue;
-            } catch (S3Exception $e) {
-                $this->log_error($e, $file->contenthash);
-                continue;
+            $success = $this->copy_local_file_to_sss($file->contenthash);
+
+            if ($success) {
+                $filecount++;
+                $totalfilesize += $file->filesize;
             }
         }
         $duration = time() - $starttime;

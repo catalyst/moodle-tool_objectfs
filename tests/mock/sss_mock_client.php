@@ -71,6 +71,10 @@ class sss_mock_client extends sss_client {
         return true;
     }
 
+    public function get_object_md5_from_key($objectkey) {
+        return 'mockmd5';
+    }
+
     // Returns s3 fullpath to use with php file functions.
     public function get_sss_fullpath_from_hash($contenthash) {
         global $CFG;

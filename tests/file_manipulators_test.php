@@ -134,6 +134,20 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $this->assertEquals(1, $errorcount);
     }
 
+    public function test_pusher_will_find_remote_only_file_and_retreive_md5 () {
+        global $DB;
+        $filepusher = new pusher($this->config, $this->client);
+        $file = $this->save_file_to_local_storage_from_string();
+        $file->contenthash = $file->get_contenthash();
+        $this->move_file_to_sss($file);
+        $filepusher->execute(array($file));
+        $count = $DB->count_records('tool_sssfs_filestate');
+        $this->assertEquals(1, $count);
+        $object = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $file->contenthash));
+        $this->assertNotNull($object->md5);
+        $this->assertEquals(SSS_FILE_LOCATION_EXTERNAL, $object->location);
+    }
+
     public function test_pusher_max_task_runtime () {
         global $DB;
 
