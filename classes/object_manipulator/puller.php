@@ -17,19 +17,18 @@
 /**
  * Pushes files to s3 if they meet the configured criterea.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\file_manipulators;
+namespace tool_objectfs\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-use core_files\filestorage\file_exception;
 use Aws\S3\Exception\S3Exception;
 
 class puller extends manipulator {
@@ -45,7 +44,7 @@ class puller extends manipulator {
      * Puller constructor.
      *
      * @param sss_client $client S3 client
-     * @param sss_file_system $filesystem S3 file system
+     * @param object_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
     public function __construct($config, $client) {
@@ -65,14 +64,14 @@ class puller extends manipulator {
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
-             LEFT JOIN {tool_sssfs_filestate} sf ON f.contenthash = sf.contenthash
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
               GROUP BY f.contenthash,
                        f.filesize,
-                       sf.location
+                       o.location
                 HAVING MAX(f.filesize) <= ?
-                       AND (sf.location = ?)';
+                       AND (o.location = ?)';
 
-        $params = array($this->sizethreshold, SSS_FILE_LOCATION_EXTERNAL);
+        $params = array($this->sizethreshold, OBJECT_LOCATION_REMOTE);
 
         $starttime = time();
         $files = $DB->get_records_sql($sql, $params);
@@ -113,7 +112,7 @@ class puller extends manipulator {
         global $DB;
 
         $starttime = time();
-        $filecount = 0;
+        $objectcount = 0;
         $totalfilesize = 0;
 
         foreach ($files as $file) {
@@ -124,11 +123,11 @@ class puller extends manipulator {
             try {
                 $success = $this->copy_sss_file_to_local($file->contenthash);
                 if ($success) {
-                    log_file_state($file->contenthash, SSS_FILE_LOCATION_DUPLICATED);
-                    $filecount++;
+                    log_file_location($file->contenthash, OBJECT_LOCATION_DUPLICATED);
+                    $objectcount++;
                     $totalfilesize += $file->filesize;
                 }
-            } catch (file_exception $e) {
+            } catch (\file_exception $e) {
                 $this->log_error($e, $file->contenthash);
                 continue;
             } catch (S3Exception $e) {
@@ -139,7 +138,7 @@ class puller extends manipulator {
         $duration = time() - $starttime;
 
         $totalfilesize = display_size($totalfilesize);
-        $logstring = "File puller pulled $filecount files, $totalfilesize to S3 in $duration seconds \n";
+        $logstring = "File puller pulled $objectcount files, $totalfilesize to S3 in $duration seconds \n";
         mtrace($logstring);
     }
 }

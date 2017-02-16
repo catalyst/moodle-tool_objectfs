@@ -16,36 +16,28 @@
 
 /**
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs;
-
-use core_files\filestorage\file_system;
-use core_files\filestorage\file_storage;
-use core_files\filestorage\stored_file;
-use core_files\filestorage\file_packer;
-use core_files\filestorage\file_progress;
-use core_files\filestorage\file_exception;
-use tool_sssfs\sss_client;
+namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-class sss_file_system extends file_system {
+class object_file_system extends \file_system_filedir {
 
     private $sssclient;
     private $prefersss;
     private $enabled;
 
     /**
-     * sss_file_system Constructor.
+     * object_file_system Constructor.
      *
-     * Calls file_system contructor and sets S3 client.
+     * Calls object_file_system contructor and sets S3 client.
      *
      * @param string $filedir The path to the local filedir.
      * @param string $trashdir The path to the trashdir.
@@ -55,7 +47,7 @@ class sss_file_system extends file_system {
      */
     public function __construct($filedir, $trashdir, $dirpermissions, $filepermissions, file_storage $fs = null) {
         parent::__construct($filedir, $trashdir, $dirpermissions, $filepermissions, $fs);
-        $config = get_config('tool_sssfs');
+        $config = get_config('tool_objectfs');
         if (isset($config->enabled) && $config->enabled) {
             $sssclient = new sss_client($config);
             $this->set_sss_client($sssclient);
@@ -79,7 +71,7 @@ class sss_file_system extends file_system {
 
     /**
      * get location of contenthash file from the
-     * tool_sssfs_filestate table. if content hash is not in the table,
+     * tool_objectfs_objects table. if content hash is not in the table,
      * we assume it is stored locally or is to be stored locally.
      *
      * @param  string $contenthash files contenthash
@@ -88,24 +80,24 @@ class sss_file_system extends file_system {
      */
     protected function get_hash_location($contenthash) {
         global $DB;
-        $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $contenthash));
 
         if ($location) {
             return $location;
         }
 
-        return SSS_FILE_LOCATION_LOCAL;
+        return OBJECT_LOCATION_LOCAL;
     }
 
     /**
      * Returns path to the file if it was in s3.
      * Does not check if it actually is there.
      *
-     * @param  stored_file $file stored file record
+     * @param  \\stored_file $file stored file record
      *
      * @return string s3 file path
      */
-    protected function get_sss_fullpath_from_file(stored_file $file) {
+    protected function get_sss_fullpath_from_file(\stored_file $file) {
         return $this->get_sss_fullpath_from_hash($file->get_contenthash());
     }
 
@@ -128,12 +120,12 @@ class sss_file_system extends file_system {
      *
      * Taken from get_fullpath_from_storedfile in parent class.
      *
-     * @param  stored_file $file stored file record
+     * @param  \stored_file $file stored file record
      * @param  boolean     $sync sync external files.
      *
      * @return string local file path
      */
-    protected function get_local_fullpath_from_file(stored_file $file, $sync = false) {
+    protected function get_local_fullpath_from_file(\stored_file $file, $sync = false) {
         if ($sync) {
             $file->sync_external_file();
         }
@@ -160,11 +152,11 @@ class sss_file_system extends file_system {
      *
      * Taken from is_readable in parent class.
      *
-     * @param  stored_file $file stored file record
+     * @param  \stored_file $file stored file record
      *
      * @return boolean true if readable, false if not
      */
-    protected function is_local_readable(stored_file $file) {
+    protected function is_local_readable(\stored_file $file) {
         $path = $this->get_local_fullpath_from_file($file, true);
         if (!is_readable($path)) {
             if (!$this->try_content_recovery($file) or !is_readable($path)) {
@@ -177,7 +169,7 @@ class sss_file_system extends file_system {
     /**
      * Whether a file is readable in s3.
      *
-     * @param  stored_file $file stored file record
+     * @param  \stored_file $file stored file record
      *
      * @return boolean true if readable, false if not
      */
@@ -195,11 +187,11 @@ class sss_file_system extends file_system {
      * precedent set by parent, we try content recovery for local
      * files here.
      *
-     * @param  stored_file $file stored file record
+     * @param  \stored_file $file stored file record
      *
      * @return boolean true if readable, false if not
      */
-    public function is_readable(stored_file $file) {
+    public function is_readable(\stored_file $file) {
         // Must go at the start of every overridden method.
         if (!$this->enabled) {
             return parent::is_readable($file);
@@ -214,12 +206,12 @@ class sss_file_system extends file_system {
     /**
      * Checks if a file is readable if it's path is local.
      *
-     * @param  stored_file $file stored file record
+     * @param  \stored_file $file stored file record
      * @param  string $path file path
      *
      * @throws file_exception When the file could not be read locally.
      */
-    protected function ensure_file_readable_if_local(stored_file $file, $path) {
+    protected function ensure_file_readable_if_local(\stored_file $file, $path) {
         if ($this->sssclient->path_is_local($path) && !$this->is_local_readable($file)) {
             throw new file_exception('storedfilecannotread', '', $this->get_fullpath_from_storedfile($file));
         }
@@ -288,22 +280,22 @@ class sss_file_system extends file_system {
         $filelocation  = $this->get_hash_location($contenthash);
 
         switch ($filelocation) {
-            case SSS_FILE_LOCATION_LOCAL:
+            case OBJECT_LOCATION_LOCAL:
                 return $this->get_local_fullpath_from_hash($contenthash);
-            case SSS_FILE_LOCATION_DUPLICATED:
+            case OBJECT_LOCATION_DUPLICATED:
                 if ($this->prefersss) {
                     return $this->get_sss_fullpath_from_hash($contenthash);
                 } else {
                     return $this->get_local_fullpath_from_hash($contenthash);
                 }
-            case SSS_FILE_LOCATION_EXTERNAL:
+            case OBJECT_LOCATION_REMOTE:
                 return $this->get_sss_fullpath_from_hash($contenthash);
             default:
                 return $this->get_local_fullpath_from_hash($contenthash);
         }
     }
 
-    public function readfile(stored_file $file) {
+    public function readfile(\stored_file $file) {
         // Must go at the start of every overridden method.
         if (!$this->enabled) {
             return parent::readfile($file);
@@ -315,7 +307,7 @@ class sss_file_system extends file_system {
     }
 
 
-    public function get_content(stored_file $file) {
+    public function get_content(\stored_file $file) {
         // Must go at the start of every overridden method.
         if (!$this->enabled) {
             return parent::get_content($file);
@@ -327,13 +319,13 @@ class sss_file_system extends file_system {
 
     }
 
-    public function get_content_file_handle($file, $type = stored_file::FILE_HANDLE_FOPEN) {
+    public function get_content_file_handle($file, $type = \stored_file::FILE_HANDLE_FOPEN) {
         // Must go at the start of every overridden method.
         if (!$this->enabled) {
             return parent::get_content_file_handle($file, $type);
         }
 
-        if ($type == stored_file::FILE_HANDLE_GZOPEN) {
+        if ($type == \stored_file::FILE_HANDLE_GZOPEN) {
             $this->pull_file_back_to_local_if_in_sss($file);
             $this->ensure_local_readable($file);
             // If prefersss is enabled we need to still read from local if duplicated.
@@ -449,10 +441,10 @@ class sss_file_system extends file_system {
     /**
      * Retrieve the mime information for the specified stored file.
      *
-     * @param stored_file $file The stored file to retrieve mime information for
+     * @param \stored_file $file The stored file to retrieve mime information for
      * @return string The MIME type.
      */
-    public function mimetype_from_storedfile(stored_file $file) {
+    public function mimetype_from_storedfile(\stored_file $file) {
         $pathname = $this->get_fullpath_from_storedfile($file);
         $mimetype = self::mimetype($pathname, $file->get_filename());
 
@@ -472,11 +464,11 @@ class sss_file_system extends file_system {
      * use this to pull the file back as the before the operation is called.
      * It will be set back to duplicated and returned back to s3 later.
      *
-     * @param  stored_file $file [description]
+     * @param  \stored_file $file [description]
      *
      * @return [type]            [description]
      */
-    protected function pull_file_back_to_local_if_in_sss(stored_file $file) {
+    protected function pull_file_back_to_local_if_in_sss(\stored_file $file) {
         $path = $this->get_fullpath_from_storedfile($file, true);
         $islocal = $this->sssclient->path_is_local($path);
 
@@ -486,7 +478,7 @@ class sss_file_system extends file_system {
 
         $contenthash = $file->get_contenthash();
         $timeout = 600; // 10 minutes before giving up.
-        $locktype = 'tool_sssfs_file_manipulation';
+        $locktype = 'tool_objectfs_file_manipulation';
         $resource = "contenthash: $contenthash";
         $lockfactory = \core\lock\lock_config::get_lock_factory($locktype);
 
@@ -502,7 +494,7 @@ class sss_file_system extends file_system {
 
         if ($lock) {
             copy($path, $localpath);
-            log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED);
+            log_file_location($contenthash, OBJECT_LOCATION_DUPLICATED);
             $lock->release();
         }
     }
@@ -510,7 +502,7 @@ class sss_file_system extends file_system {
     /**
      * List contents of archive.
      *
-     * @param stored_file $file The archive to inspect
+     * @param \stored_file $file The archive to inspect
      * @param file_packer $packer file packer instance
      * @return array of file infos
      */
@@ -525,13 +517,13 @@ class sss_file_system extends file_system {
     /**
      * Extract file to given file path (real OS filesystem), existing files are overwritten.
      *
-     * @param stored_file $file The archive to inspect
+     * @param \stored_file $file The archive to inspect
      * @param file_packer $packer File packer instance
      * @param string $pathname Target directory
      * @param file_progress $progress progress indicator callback or null if not required
      * @return array|bool List of processed files; false if error
      */
-    public function extract_to_pathname(stored_file $file, file_packer $packer, $pathname, file_progress $progress = null) {
+    public function extract_to_pathname(\stored_file $file, file_packer $packer, $pathname, file_progress $progress = null) {
         $this->pull_file_back_to_local_if_in_sss($file);
         $this->ensure_local_readable($file);
         // If prefersss is enabled we need to still read from local if duplicated.
@@ -542,7 +534,7 @@ class sss_file_system extends file_system {
     /**
      * Extract file to given file path (real OS filesystem), existing files are overwritten.
      *
-     * @param stored_file $file The archive to inspect
+     * @param \stored_file $file The archive to inspect
      * @param file_packer $packer file packer instance
      * @param int $contextid context ID
      * @param string $component component
@@ -553,7 +545,7 @@ class sss_file_system extends file_system {
      * @param file_progress $progress Progress indicator callback or null if not required
      * @return array|bool list of processed files; false if error
      */
-    public function extract_to_storage(stored_file $file, file_packer $packer, $contextid,
+    public function extract_to_storage(\stored_file $file, file_packer $packer, $contextid,
             $component, $filearea, $itemid, $pathbase, $userid = null, file_progress $progress = null) {
 
         $this->pull_file_back_to_local_if_in_sss($file);

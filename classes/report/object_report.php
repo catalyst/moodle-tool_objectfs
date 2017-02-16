@@ -17,17 +17,17 @@
 /**
  * sss report abstract class.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\report;
+namespace tool_objectfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-abstract class sss_report {
+abstract class object_report {
     protected $reporttype;
 
     public function __construct() {
@@ -36,28 +36,28 @@ abstract class sss_report {
 
     public static function get_last_task_runtime() {
         global $DB;
-        $lastruntime = $DB->get_field('task_scheduled', 'lastruntime', array('classname' => '\tool_sssfs\task\generate_status_report'));
+        $lastruntime = $DB->get_field('task_scheduled', 'lastruntime', array('classname' => '\tool_objectfs\task\generate_status_report'));
         return $lastruntime;
     }
 
-    protected function create_report_data_record($reporttype, $datakey, $filecount, $filesum) {
+    protected function create_report_data_record($reporttype, $datakey, $objectcount, $objectsum) {
         $record = new \stdClass();
-        $record->report = $reporttype;
+        $record->reporttype = $reporttype;
         $record->datakey = $datakey;
-        $record->filecount = $filecount;
-        $record->filesum = $filesum;
+        $record->objectcount = $objectcount;
+        $record->objectsum = $objectsum;
         return $record;
     }
 
     public function save_report_data($reportdata) {
         global $DB;
-        $DB->delete_records('tool_sssfs_report_data', array('report' => $this->reporttype)); // Clear out old records.
-        $DB->insert_records('tool_sssfs_report_data', $reportdata);
+        $DB->delete_records('tool_objectfs_report_data', array('reporttype' => $this->reporttype)); // Clear out old records.
+        $DB->insert_records('tool_objectfs_report_data', $reportdata);
     }
 
     public function get_report_data() {
         global $DB;
-        $data = $DB->get_records('tool_sssfs_report_data', array('report' => $this->reporttype));
+        $data = $DB->get_records('tool_objectfs_report_data', array('reporttype' => $this->reporttype));
         return $data;
     }
 

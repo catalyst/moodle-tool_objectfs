@@ -17,52 +17,52 @@
 /**
  * File location report.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\report;
+namespace tool_objectfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class file_location_report extends sss_report {
+class object_location_report extends object_report {
 
     public function __construct() {
-        $this->reporttype = SSSFS_REPORT_FILE_LOCATION;
+        $this->reporttype = OBJECTFS_REPORT_OBJECT_LOCATION;
     }
 
     public function calculate_report_data() {
         global $DB;
         $data = array();
 
-        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) AS filecount,
-                       COALESCE(SUM(sub.filesize) ,0) AS filesum
+        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) AS objectcount,
+                       COALESCE(SUM(sub.filesize) ,0) AS objectsum
                   FROM (SELECT f.contenthash, MAX(f.filesize) AS filesize
                           FROM {files} f
-                          JOIN {tool_sssfs_filestate} sf on f.contenthash = sf.contenthash
+                          JOIN {tool_objectfs_objects} sf on f.contenthash = sf.contenthash
                           GROUP BY f.contenthash, f.filesize, sf.location
                           HAVING sf.location = ?) AS sub
                  WHERE sub.filesize != 0';
 
-        $error = $DB->get_records_sql($sql, array(SSS_FILE_LOCATION_ERROR));
+        $error = $DB->get_records_sql($sql, array(OBJECT_LOCATION_ERROR));
         $error = reset($error);
-        $error = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_ERROR, $error->filecount, $error->filesum);
-        $data[SSS_FILE_LOCATION_ERROR] = $error;
+        $error = self::create_report_data_record(OBJECTFS_REPORT_OBJECT_LOCATION, OBJECT_LOCATION_ERROR, $error->objectcount, $error->objectsum);
+        $data[OBJECT_LOCATION_ERROR] = $error;
 
-        $duplicate = $DB->get_records_sql($sql, array(SSS_FILE_LOCATION_DUPLICATED));
+        $duplicate = $DB->get_records_sql($sql, array(OBJECT_LOCATION_DUPLICATED));
         $duplicate = reset($duplicate);
-        $duplicate = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_DUPLICATED, $duplicate->filecount, $duplicate->filesum);
-        $data[SSS_FILE_LOCATION_DUPLICATED] = $duplicate;
+        $duplicate = self::create_report_data_record(OBJECTFS_REPORT_OBJECT_LOCATION, OBJECT_LOCATION_DUPLICATED, $duplicate->objectcount, $duplicate->objectsum);
+        $data[OBJECT_LOCATION_DUPLICATED] = $duplicate;
 
-        $external = $DB->get_records_sql($sql, array(SSS_FILE_LOCATION_EXTERNAL));
+        $external = $DB->get_records_sql($sql, array(OBJECT_LOCATION_REMOTE));
         $external = reset($external);
-        $external = self::create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_EXTERNAL, $external->filecount, $external->filesum);
-        $data[SSS_FILE_LOCATION_EXTERNAL] = $external;
+        $external = self::create_report_data_record(OBJECTFS_REPORT_OBJECT_LOCATION, OBJECT_LOCATION_REMOTE, $external->objectcount, $external->objectsum);
+        $data[OBJECT_LOCATION_REMOTE] = $external;
 
-        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) as filecount,
-                       COALESCE(SUM(sub.filesize) ,0) as filesum
+        $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) as objectcount,
+                       COALESCE(SUM(sub.filesize) ,0) as objectsum
                         FROM (
                             SELECT F.contenthash, MAX(F.filesize) as filesize
                             FROM {files} F
@@ -73,11 +73,11 @@ class file_location_report extends sss_report {
         $local = $DB->get_records_sql($sql);
         $local = reset($local);
 
-        $local->filecount -= $error->filecount + $duplicate->filecount + $external->filecount;
-        $local->filesum -= $error->filesum + $duplicate->filesum + $external->filesum;
+        $local->objectcount -= $error->objectcount + $duplicate->objectcount + $external->objectcount;
+        $local->objectsum -= $error->objectsum + $duplicate->objectsum + $external->objectsum;
 
-        $local = $this->create_report_data_record(SSSFS_REPORT_FILE_LOCATION, SSS_FILE_LOCATION_LOCAL, $local->filecount, $local->filesum);
-        $data[SSS_FILE_LOCATION_LOCAL] = $local;
+        $local = $this->create_report_data_record(OBJECTFS_REPORT_OBJECT_LOCATION, OBJECT_LOCATION_LOCAL, $local->objectcount, $local->objectsum);
+        $data[OBJECT_LOCATION_LOCAL] = $local;
 
         return $data;
     }

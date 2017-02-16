@@ -15,41 +15,31 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File status renderable object.
+ * File status page - stats on where files are b/w local file system and s3
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\renderables;
+require_once(__DIR__ . '/../../../config.php');
+require_once( __DIR__ . '/lib.php');
+require_once($CFG->libdir.'/adminlib.php');
 
-defined('MOODLE_INTERNAL') || die();
+admin_externalpage_setup('tool_objectfs');
 
-class sss_file_status implements \renderable {
+$output = $PAGE->get_renderer('tool_objectfs');
 
-    private $reports;
-    private $reportclasses;
+echo $output->header();
 
-    public function __construct () {
-        $reportclasses = array('file_location_report',
-                               'log_size_report',
-                               'mime_type_report');
+echo $output->heading(get_string('object_status:page', 'tool_objectfs'));
 
-        foreach ($reportclasses as $reportclass) {
-            $reportclass = "tool_sssfs\\report\\{$reportclass}";
-            $report = new $reportclass();
-            $reporttype = $report->get_type();
-            $this->reports[$reporttype] = $report->get_report_data();
-        }
-    }
+$filestatus = new \tool_objectfs\renderable\object_status();
 
-    public function get_report($reporttype) {
-        return $this->reports[$reporttype];
-    }
+echo $output->render($filestatus);
+
+echo $output->footer();
 
 
 
-
-}

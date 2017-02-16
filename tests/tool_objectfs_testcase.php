@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * tool_sssfs test base abstract class.
+ * tool_objectfs test base abstract class.
  * @package   local_catdeleter
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
@@ -25,10 +25,10 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once( __DIR__ . '/../lib.php');
-require_once( __DIR__ . '/mock/sss_mock_client.php');
+require_once( __DIR__ . '/mock/mock_client.php');
 require_once( __DIR__ . '/mock/sss_integration_test_client.php');
 
-abstract class tool_sssfs_testcase extends advanced_testcase {
+abstract class tool_objectfs_testcase extends advanced_testcase {
 
     protected function save_file_to_local_storage_from_string($filesize = 10, $filename = 'test.txt', $filecontent = 'test') {
         global $DB;
@@ -69,21 +69,21 @@ abstract class tool_sssfs_testcase extends advanced_testcase {
             $integrationconfig = include('mock/integration_test_config.php');
             $client = new sss_integration_test_client($integrationconfig);
         } else {
-            $client = new sss_mock_client();
+            $client = new mock_client();
         }
         return $client;
     }
 
-    protected function move_file_to_sss($file, $state = SSS_FILE_LOCATION_EXTERNAL) {
+    protected function move_file_to_sss($file, $location = OBJECT_LOCATION_REMOTE) {
         $contenthash = $file->get_contenthash();
         $localpath = $this->get_local_fullpath_from_hash($contenthash);
         $md5 = md5_file($localpath);
         $ssspath = $this->client->get_sss_fullpath_from_hash($contenthash);
         copy($localpath, $ssspath);
-        if ($state == SSS_FILE_LOCATION_EXTERNAL) {
+        if ($location == OBJECT_LOCATION_REMOTE) {
             unlink($localpath);
         }
-        log_file_state($contenthash, $state, $md5);
+        log_file_location($contenthash, $location, $md5);
     }
 
     protected function save_file_to_local_storage_from_pathname($pathname) {

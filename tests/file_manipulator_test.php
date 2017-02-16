@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * tool_sssfs file manipulator tests.
+ * tool_objectfs file manipulator tests.
  *
  * @package   local_catdeleter
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -25,14 +25,14 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once( __DIR__ . '/tool_sssfs_testcase.php');
+require_once( __DIR__ . '/tool_objectfs_testcase.php');
 
-use tool_sssfs\file_manipulators\cleaner;
-use tool_sssfs\file_manipulators\puller;
-use tool_sssfs\file_manipulators\pusher;
+use tool_objectfs\object_manipulator\deleter;
+use tool_objectfs\object_manipulator\puller;
+use tool_objectfs\object_manipulator\pusher;
 
 
-class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
+class tool_objectfs_object_manipulator_testcase extends tool_objectfs_testcase {
 
     protected function setUp() {
         global $CFG;
@@ -46,31 +46,31 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         ob_end_clean();
     }
 
-    public function test_cleaner_can_clean_file() {
+    public function test_deleter_can_delete_file() {
         global $DB;
         $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
-        $this->move_file_to_sss($file, SSS_FILE_LOCATION_DUPLICATED);
-        $filecleaner = new cleaner($this->config, $this->client);
-        $candidatefiles = $filecleaner->get_candidate_files();
-        $recors = $DB->get_records('tool_sssfs_filestate');
+        $this->move_file_to_sss($file, OBJECT_LOCATION_DUPLICATED);
+        $filedeleter = new deleter($this->config, $this->client);
+        $candidatefiles = $filedeleter->get_candidate_files();
+        $recors = $DB->get_records('tool_objectfs_objects');
         $this->assertEquals(1, count($candidatefiles));
         $candidatefile = reset($candidatefiles); // Reset array so key fives us key of first value.
         $this->assertEquals($filecontenthash, $candidatefile->contenthash);
-        $filecleaner->execute($candidatefiles);
+        $filedeleter->execute($candidatefiles);
         $fullpath = $this->get_local_fullpath_from_hash($filecontenthash);
         $isreadable = is_readable($fullpath);
         $this->assertFalse($isreadable);
     }
 
-    public function test_cleaner_consisency_delay() {
+    public function test_deleter_consisency_delay() {
         $this->config = $this->generate_config(0, -10, 60, 0); // Set deletelocal to 0.
-        $filecleaner = new cleaner($this->config, $this->client);
+        $filedeleter = new deleter($this->config, $this->client);
         $file = $this->save_file_to_local_storage_from_string();
         $filecontenthash = $file->get_contenthash();
-        log_file_state($filecontenthash, SSS_FILE_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
-        $candidatehashes = $filecleaner->get_candidate_files();
-        $filecleaner->execute($candidatehashes); // Should not delete the file.
+        log_file_location($filecontenthash, OBJECT_LOCATION_DUPLICATED, 'bogusmd5'); // Save file as already duplicated.
+        $candidatehashes = $filedeleter->get_candidate_files();
+        $filedeleter->execute($candidatehashes); // Should not delete the file.
         $fullpath = $this->get_local_fullpath_from_hash($filecontenthash);
         $isreadable = is_readable($fullpath);
         $this->assertTrue($isreadable);
@@ -83,7 +83,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filecontenthash = $file->get_contenthash();
         $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
-        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+        $postpushcount = $DB->count_records('tool_objectfs_objects', array('contenthash' => $filecontenthash));
         $this->assertEquals(1, $postpushcount); // Assert table has item.
     }
 
@@ -97,7 +97,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filecontenthash = $file->get_contenthash();
         $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
-        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+        $postpushcount = $DB->count_records('tool_objectfs_objects', array('contenthash' => $filecontenthash));
 
         // Assert table still does not contain entry.
         $this->assertEquals(0, $postpushcount);
@@ -113,7 +113,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filecontenthash = $file->get_contenthash();
         $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
-        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+        $postpushcount = $DB->count_records('tool_objectfs_objects', array('contenthash' => $filecontenthash));
 
         // Assert table still does not contain entry.
         $this->assertEquals(0, $postpushcount);
@@ -126,11 +126,11 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $file = new stdClass();
         $file->contenthash = 'not_a_hash';
         $filepusher->execute(array($file));
-        $dupecount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $file->contenthash,
-                                                                          'location' => SSS_FILE_LOCATION_DUPLICATED));
+        $dupecount = $DB->count_records('tool_objectfs_objects', array('contenthash' => $file->contenthash,
+                                                                          'location' => OBJECT_LOCATION_DUPLICATED));
         $this->assertEquals(0, $dupecount);
-        $errorcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $file->contenthash,
-                                                                          'location' => SSS_FILE_LOCATION_ERROR));
+        $errorcount = $DB->count_records('tool_objectfs_objects', array('contenthash' => $file->contenthash,
+                                                                          'location' => OBJECT_LOCATION_ERROR));
         $this->assertEquals(1, $errorcount);
     }
 
@@ -159,7 +159,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $filecontenthash = $file->get_contenthash();
         $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
-        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+        $postpushcount = $DB->count_records('tool_objectfs_objects', array('contenthash' => $filecontenthash));
 
         // Assert table does not contain entry.
         $this->assertEquals(0, $postpushcount);
@@ -176,7 +176,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $expectedmd5 = md5($expectedcontent);
         $contenthashes = $filepusher->get_candidate_files();
         $filepusher->execute($contenthashes);
-        $savedrecord = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $filecontenthash));
+        $savedrecord = $DB->get_record('tool_objectfs_objects', array('contenthash' => $filecontenthash));
         $this->assertEquals($expectedmd5, $savedrecord->md5);
     }
 
@@ -189,7 +189,7 @@ class tool_sssfs_file_manipulators_testcase extends tool_sssfs_testcase {
         $this->move_file_to_sss($file);
         $files = $filepuller->get_candidate_files();
         $filepuller->execute($files);
-        $postpushcount = $DB->count_records('tool_sssfs_filestate', array('contenthash' => $filecontenthash, 'location' => SSS_FILE_LOCATION_DUPLICATED));
+        $postpushcount = $DB->count_records('tool_objectfs_objects', array('contenthash' => $filecontenthash, 'location' => OBJECT_LOCATION_DUPLICATED));
         $this->assertEquals(1, $postpushcount); // Assert table has item.
     }
 

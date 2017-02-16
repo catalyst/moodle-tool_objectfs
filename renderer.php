@@ -17,38 +17,38 @@
 /**
  * File status renderer.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_sssfs\renderables\sss_file_status;
-use tool_sssfs\report\sss_report;
+use tool_objectfs\renderable\object_status;
+use tool_objectfs\report\object_report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class tool_sssfs_renderer extends plugin_renderer_base {
+class tool_objectfs_renderer extends plugin_renderer_base {
 
-    protected function render_sss_file_status(sss_file_status $filestatus) {
+    protected function render_object_status(object_status $filestatus) {
         $output = '';
 
-        $config = get_config('tool_sssfs');
+        $config = get_config('tool_objectfs');
 
         if (!isset($config->enabled) || !$config->enabled) {
-            $labeltext = get_string('not_enabled', 'tool_sssfs');
+            $labeltext = get_string('not_enabled', 'tool_objectfs');
             $output .= html_writer::label($labeltext, null);
         }
 
         // Could refactor this to have less duplication, but requirements may change for data.
-        $locationreport = $filestatus->get_report(SSSFS_REPORT_FILE_LOCATION);
-        $logsizereport = $filestatus->get_report(SSSFS_REPORT_LOG_SIZE);
-        $mimetypereport = $filestatus->get_report(SSSFS_REPORT_MIME_TYPE);
+        $locationreport = $filestatus->get_report(OBJECTFS_REPORT_OBJECT_LOCATION);
+        $logsizereport = $filestatus->get_report(OBJECTFS_REPORT_LOG_SIZE);
+        $mimetypereport = $filestatus->get_report(OBJECTFS_REPORT_MIME_TYPE);
 
-        $lastrun = sss_report::get_last_task_runtime();
+        $lastrun = object_report::get_last_task_runtime();
 
         if ($locationreport) {
-            $output .= $this->render_file_location_report($locationreport, $output);
+            $output .= $this->render_object_location_report($locationreport, $output);
         }
 
         if ($logsizereport) {
@@ -60,9 +60,9 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         }
 
         if ($lastrun) {
-            $labeltext = get_string('file_status:last_run', 'tool_sssfs', userdate($lastrun));
+            $labeltext = get_string('object_status:last_run', 'tool_objectfs', userdate($lastrun));
         } else {
-            $labeltext = get_string('file_status:never_run', 'tool_sssfs');
+            $labeltext = get_string('object_status:never_run', 'tool_objectfs');
         }
 
         $output .= html_writer::label($labeltext, null);
@@ -74,12 +74,12 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         $table = new html_table();
 
         $table->head = array('mimetype',
-                             get_string('file_status:files', 'tool_sssfs'),
-                             get_string('file_status:size', 'tool_sssfs'));
+                             get_string('object_status:files', 'tool_objectfs'),
+                             get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($mimetypereport as $record) {
-            $filesum = display_size($record->filesum);
-            $table->data[] = array($record->datakey, $record->filecount, $filesum);
+            $objectsum = display_size($record->objectsum);
+            $table->data[] = array($record->datakey, $record->objectcount, $objectsum);
         }
 
         $output = html_writer::table($table);
@@ -91,12 +91,12 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         $table = new html_table();
 
         $table->head = array('logsize',
-                             get_string('file_status:files', 'tool_sssfs'),
-                             get_string('file_status:size', 'tool_sssfs'));
+                             get_string('object_status:files', 'tool_objectfs'),
+                             get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($logsizereport as $record) {
-            $filesum = display_size($record->filesum);
-            $table->data[] = array($record->datakey, $record->filecount, $filesum);
+            $objectsum = display_size($record->objectsum);
+            $table->data[] = array($record->datakey, $record->objectcount, $objectsum);
         }
 
         $output = html_writer::table($table);
@@ -104,17 +104,17 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    private function render_file_location_report($locationreport) {
+    private function render_object_location_report($locationreport) {
         $table = new html_table();
 
-        $table->head = array(get_string('file_status:location', 'tool_sssfs'),
-                             get_string('file_status:files', 'tool_sssfs'),
-                             get_string('file_status:size', 'tool_sssfs'));
+        $table->head = array(get_string('object_status:location', 'tool_objectfs'),
+                             get_string('object_status:files', 'tool_objectfs'),
+                             get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($locationreport as $record) {
-            $filesum = display_size($record->filesum);
-            $filestate = $this->get_file_state_string($record->datakey);
-            $table->data[] = array($filestate, $record->filecount, $filesum);
+            $objectsum = display_size($record->objectsum);
+            $filelocation = $this->get_file_location_string($record->datakey);
+            $table->data[] = array($filelocation, $record->objectcount, $objectsum);
         }
 
         $output = html_writer::table($table);
@@ -122,18 +122,18 @@ class tool_sssfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    private function get_file_state_string($filestate) {
-        switch ($filestate){
-            case SSS_FILE_LOCATION_ERROR:
-                return get_string('file_status:state:error', 'tool_sssfs');
-            case SSS_FILE_LOCATION_LOCAL:
-                return get_string('file_status:state:local', 'tool_sssfs');
-            case SSS_FILE_LOCATION_DUPLICATED:
-                return get_string('file_status:state:duplicated', 'tool_sssfs');
-            case SSS_FILE_LOCATION_EXTERNAL:
-                return get_string('file_status:state:external', 'tool_sssfs');
+    private function get_file_location_string($filelocation) {
+        switch ($filelocation){
+            case OBJECT_LOCATION_ERROR:
+                return get_string('object_status:location:error', 'tool_objectfs');
+            case OBJECT_LOCATION_LOCAL:
+                return get_string('object_status:location:local', 'tool_objectfs');
+            case OBJECT_LOCATION_DUPLICATED:
+                return get_string('object_status:location:duplicated', 'tool_objectfs');
+            case OBJECT_LOCATION_REMOTE:
+                return get_string('object_status:location:external', 'tool_objectfs');
             default;
-                return get_string('file_status:state:unknown', 'tool_sssfs');
+                return get_string('object_status:location:unknown', 'tool_objectfs');
         }
     }
 }

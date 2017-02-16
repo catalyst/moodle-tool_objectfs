@@ -17,19 +17,18 @@
 /**
  * File manipulator abstract class.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\file_manipulators;
+namespace tool_objectfs\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-use core_files\filestorage\file_exception;
 use Aws\S3\Exception\S3Exception;
 
 abstract class manipulator {
@@ -44,7 +43,7 @@ abstract class manipulator {
     /**
      * S3 file system
      *
-     * @var sss_file_system
+     * @var object_file_system
      */
     protected $filesystem;
 
@@ -59,7 +58,7 @@ abstract class manipulator {
      * Manipulator constructor
      *
      * @param sss_client $client S3 client
-     * @param sss_file_system $filesystem S3 file system
+     * @param object_file_system $filesystem S3 file system
      * @param int $maxruntime What time the file manipulator should finish execution by
      */
     public function __construct($client, $maxruntime) {
@@ -98,7 +97,7 @@ abstract class manipulator {
      */
     protected function ensure_path_is_readable($path) {
         if (!is_readable($path)) {
-            throw new file_exception('storedfilecannotread', '', $path);
+            throw new \file_exception('storedfilecannotread', '', $path);
         }
         return true;
     }

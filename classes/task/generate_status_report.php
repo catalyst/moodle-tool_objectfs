@@ -17,15 +17,15 @@
 /**
  * Task that pushes files to S3.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
+namespace tool_objectfs\task;
 
-use tool_sssfs\renderables\sss_file_status;
+use tool_objectfs\renderable\object_status;
 require_once( __DIR__ . '/../../lib.php');
 
 defined('MOODLE_INTERNAL') || die();
@@ -36,7 +36,7 @@ class generate_status_report extends \core\task\scheduled_task {
      * Get task name
      */
     public function get_name() {
-        return get_string('generate_status_report_task', 'tool_sssfs');
+        return get_string('generate_status_report_task', 'tool_objectfs');
     }
 
     /**
@@ -44,21 +44,21 @@ class generate_status_report extends \core\task\scheduled_task {
      */
     public function execute() {
 
-        $config = get_config('tool_sssfs');
+        $config = get_config('tool_objectfs');
 
-        $reportclasses = array('file_location_report',
+        $reportclasses = array('object_location_report',
                                'log_size_report',
                                'mime_type_report');
 
         if (isset($config->enabled) && $config->enabled) {
             foreach ($reportclasses as $reportclass) {
-                $reportclass = "tool_sssfs\\report\\{$reportclass}";
+                $reportclass = "tool_objectfs\\report\\{$reportclass}";
                 $report = new $reportclass();
                 $data = $report->calculate_report_data();
                 $report->save_report_data($data);
             }
         } else {
-            mtrace(get_string('not_enabled', 'tool_sssfs'));
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
         }
     }
 }

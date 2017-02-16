@@ -24,26 +24,26 @@
    * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
    */
 
-$string['pluginname'] = 'S3 File System';
-$string['push_to_sss_task'] = 'S3 file system upload task';
-$string['clean_up_files_task'] = 'S3 file system delete local files task';
-$string['pull_from_sss_task'] = 'S3 file system download files task';
+$string['pluginname'] = 'Object storage file System';
+$string['push_to_storage_task'] = 'S3 file system upload task';
+$string['delete_files_task'] = 'S3 file system delete local files task';
+$string['pull_from_storage_task'] = 'S3 file system download files task';
 
 
 $string['generate_status_report_task'] = 'S3 file status report generator task';
 $string['not_enabled'] = 'The S3 file system is not enabled';
-$string['file_status:page'] = 'S3 file status';
-$string['file_status:location'] = 'File location';
-$string['file_status:files'] = 'Files';
-$string['file_status:size'] = 'Total size';
+$string['object_status:page'] = 'S3 file status';
+$string['object_status:location'] = 'File location';
+$string['object_status:files'] = 'Files';
+$string['object_status:size'] = 'Total size';
 
-$string['file_status:state:error'] = 'Missing from filedir';
-$string['file_status:state:duplicated'] = 'Duplicated in S3 and filedir';
-$string['file_status:state:local'] = 'Only in filedir';
-$string['file_status:state:external'] = 'Only in S3';
-$string['file_status:state:unknown'] = 'Unknown file state';
-$string['file_status:last_run'] = 'This report was generated on {$a}';
-$string['file_status:never_run'] = 'The task to generate this report has not been run.';
+$string['object_status:location:error'] = 'Missing from filedir';
+$string['object_status:location:duplicated'] = 'Duplicated in S3 and filedir';
+$string['object_status:location:local'] = 'Only in filedir';
+$string['object_status:location:external'] = 'Only in S3';
+$string['object_status:location:unknown'] = 'Unknown file location';
+$string['object_status:last_run'] = 'This report was generated on {$a}';
+$string['object_status:never_run'] = 'The task to generate this report has not been run.';
 
 $string['settings:enabled'] = 'Enable S3 file system';
 $string['settings:enabled_help'] = 'Enable or disable the S3 file system.';

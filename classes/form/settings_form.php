@@ -15,19 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * S3 settings form
+ * Objectfs settings form
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\form;
+namespace tool_objectfs\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_sssfs\sss_client;
+use tool_objectfs\client\sss_client;
 
 require_once($CFG->libdir . "/formslib.php");
 
@@ -84,91 +84,91 @@ class settings_form extends \moodleform {
                                 'logging'           => 0,
                                 'prefersss'         => 0);
 
-        $mform->addElement('advcheckbox', 'enabled', get_string('settings:enabled', 'tool_sssfs'));
-        $mform->addHelpButton('enabled', 'settings:enabled', 'tool_sssfs');
+        $mform->addElement('advcheckbox', 'enabled', get_string('settings:enabled', 'tool_objectfs'));
+        $mform->addHelpButton('enabled', 'settings:enabled', 'tool_objectfs');
 
         global $CFG;
-        if (!isset($CFG->filesystem_handler_class) || $CFG->filesystem_handler_class !== '\tool_sssfs\sss_file_system') {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:handlernotset', 'tool_sssfs'), 'notifyproblem'));
+        if (!isset($CFG->filesystem_handler_class) || $CFG->filesystem_handler_class !== '\tool_objectfs\object_file_system') {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:handlernotset', 'tool_objectfs'), 'notifyproblem'));
         }
 
-        $mform->addElement('header', 'awsheader', get_string('settings:awsheader', 'tool_sssfs'));
+        $mform->addElement('header', 'awsheader', get_string('settings:awsheader', 'tool_objectfs'));
 
-        $mform->addElement('text', 'key', get_string('settings:key', 'tool_sssfs'));
-        $mform->addHelpButton('key', 'settings:key', 'tool_sssfs');
+        $mform->addElement('text', 'key', get_string('settings:key', 'tool_objectfs'));
+        $mform->addHelpButton('key', 'settings:key', 'tool_objectfs');
         $mform->setType("key", PARAM_TEXT);
 
-        $mform->addElement('passwordunmask', 'secret', get_string('settings:secret', 'tool_sssfs'), array('size' => 40));
-        $mform->addHelpButton('secret', 'settings:secret', 'tool_sssfs');
+        $mform->addElement('passwordunmask', 'secret', get_string('settings:secret', 'tool_objectfs'), array('size' => 40));
+        $mform->addHelpButton('secret', 'settings:secret', 'tool_objectfs');
         $mform->setType("secret", PARAM_TEXT);
 
-        $mform->addElement('text', 'bucket', get_string('settings:bucket', 'tool_sssfs'));
-        $mform->addHelpButton('bucket', 'settings:bucket', 'tool_sssfs');
+        $mform->addElement('text', 'bucket', get_string('settings:bucket', 'tool_objectfs'));
+        $mform->addHelpButton('bucket', 'settings:bucket', 'tool_objectfs');
         $mform->setType("bucket", PARAM_TEXT);
 
-        $mform->addElement('select', 'region', get_string('settings:region', 'tool_sssfs'), $regionoptions);
-        $mform->addHelpButton('region', 'settings:region', 'tool_sssfs');
+        $mform->addElement('select', 'region', get_string('settings:region', 'tool_objectfs'), $regionoptions);
+        $mform->addHelpButton('region', 'settings:region', 'tool_objectfs');
 
         if ($connection) {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_sssfs'), 'notifysuccess'));
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_objectfs'), 'notifysuccess'));
         } else {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_sssfs'), 'notifyproblem'));
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_objectfs'), 'notifyproblem'));
         }
 
         if ($permissions) {
             $errormsg = '';
             if (!$permissions[AWS_CAN_WRITE_OBJECT]) {
-                $errormsg .= get_string('settings:writefailure', 'tool_sssfs');
+                $errormsg .= get_string('settings:writefailure', 'tool_objectfs');
             }
 
             if (!$permissions[AWS_CAN_READ_OBJECT]) {
-                $errormsg .= get_string('settings:readfailure', 'tool_sssfs');
+                $errormsg .= get_string('settings:readfailure', 'tool_objectfs');
             }
 
             if ($permissions[AWS_CAN_DELETE_OBJECT]) {
-                $errormsg .= get_string('settings:deletesuccess', 'tool_sssfs');
+                $errormsg .= get_string('settings:deletesuccess', 'tool_objectfs');
             }
 
             if (strlen($errormsg) > 0) {
                 $mform->addElement('html', $OUTPUT->notification($errormsg, 'notifyproblem'));
             } else {
-                $mform->addElement('html', $OUTPUT->notification(get_string('settings:permissioncheckpassed', 'tool_sssfs'), 'notifysuccess'));
+                $mform->addElement('html', $OUTPUT->notification(get_string('settings:permissioncheckpassed', 'tool_objectfs'), 'notifysuccess'));
             }
         }
 
-        $mform->addElement('header', 'filetransferheader', get_string('settings:filetransferheader', 'tool_sssfs'));
+        $mform->addElement('header', 'filetransferheader', get_string('settings:filetransferheader', 'tool_objectfs'));
         $mform->setExpanded('filetransferheader');
 
-        $mform->addElement('text', 'sizethreshold', get_string('settings:sizethreshold', 'tool_sssfs'));
-        $mform->addHelpButton('sizethreshold', 'settings:sizethreshold', 'tool_sssfs');
+        $mform->addElement('text', 'sizethreshold', get_string('settings:sizethreshold', 'tool_objectfs'));
+        $mform->addHelpButton('sizethreshold', 'settings:sizethreshold', 'tool_objectfs');
         $mform->setType("sizethreshold", PARAM_INT);
 
-        $mform->addElement('duration', 'minimumage', get_string('settings:minimumage', 'tool_sssfs'));
-        $mform->addHelpButton('minimumage', 'settings:minimumage', 'tool_sssfs');
+        $mform->addElement('duration', 'minimumage', get_string('settings:minimumage', 'tool_objectfs'));
+        $mform->addHelpButton('minimumage', 'settings:minimumage', 'tool_objectfs');
         $mform->setType("minimumage", PARAM_INT);
 
-        $mform->addElement('duration', 'maxtaskruntime', get_string('settings:maxtaskruntime', 'tool_sssfs'));
-        $mform->addHelpButton('maxtaskruntime', 'settings:maxtaskruntime', 'tool_sssfs');
+        $mform->addElement('duration', 'maxtaskruntime', get_string('settings:maxtaskruntime', 'tool_objectfs'));
+        $mform->addHelpButton('maxtaskruntime', 'settings:maxtaskruntime', 'tool_objectfs');
         $mform->setType("maxtaskruntime", PARAM_INT);
 
-        $mform->addElement('advcheckbox', 'deletelocal', get_string('settings:deletelocal', 'tool_sssfs'));
-        $mform->addHelpButton('deletelocal', 'settings:deletelocal', 'tool_sssfs');
+        $mform->addElement('advcheckbox', 'deletelocal', get_string('settings:deletelocal', 'tool_objectfs'));
+        $mform->addHelpButton('deletelocal', 'settings:deletelocal', 'tool_objectfs');
         $mform->setType("deletelocal", PARAM_INT);
 
-        $mform->addElement('duration', 'consistencydelay', get_string('settings:consistencydelay', 'tool_sssfs'));
-        $mform->addHelpButton('consistencydelay', 'settings:consistencydelay', 'tool_sssfs');
+        $mform->addElement('duration', 'consistencydelay', get_string('settings:consistencydelay', 'tool_objectfs'));
+        $mform->addHelpButton('consistencydelay', 'settings:consistencydelay', 'tool_objectfs');
         $mform->disabledIf('consistencydelay', 'deletelocal');
         $mform->setType("consistencydelay", PARAM_INT);
 
-        $mform->addElement('advcheckbox', 'prefersss', get_string('settings:prefersss', 'tool_sssfs'));
-        $mform->addHelpButton('prefersss', 'settings:prefersss', 'tool_sssfs');
+        $mform->addElement('advcheckbox', 'prefersss', get_string('settings:prefersss', 'tool_objectfs'));
+        $mform->addHelpButton('prefersss', 'settings:prefersss', 'tool_objectfs');
         $mform->setType("prefersss", PARAM_INT);
 
-        $mform->addElement('header', 'loggingheader', get_string('settings:loggingheader', 'tool_sssfs'));
+        $mform->addElement('header', 'loggingheader', get_string('settings:loggingheader', 'tool_objectfs'));
         $mform->setExpanded('loggingheader');
 
-        $mform->addElement('advcheckbox', 'logging', get_string('settings:logging', 'tool_sssfs'));
-        $mform->addHelpButton('logging', 'settings:logging', 'tool_sssfs');
+        $mform->addElement('advcheckbox', 'logging', get_string('settings:logging', 'tool_objectfs'));
+        $mform->addHelpButton('logging', 'settings:logging', 'tool_objectfs');
         $mform->setType("logging", PARAM_INT);
 
         foreach ($defaults as $key => $value) {

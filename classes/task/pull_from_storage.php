@@ -17,27 +17,27 @@
 /**
  * Task that pulls files from S3.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
+namespace tool_objectfs\task;
 
-use tool_sssfs\file_manipulators\puller;
-use tool_sssfs\sss_client;
-use tool_sssfs\sss_file_system;
+use tool_objectfs\object_manipulator\puller;
+use tool_objectfs\client\sss_client;
+use tool_objectfs\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
-class pull_from_sss extends \core\task\scheduled_task {
+class pull_from_storage extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('pull_from_sss_task', 'tool_sssfs');
+        return get_string('pull_from_storage_task', 'tool_objectfs');
     }
 
     /**
@@ -45,16 +45,16 @@ class pull_from_sss extends \core\task\scheduled_task {
      */
     public function execute() {
 
-        $config = get_config('tool_sssfs');
+        $config = get_config('tool_objectfs');
 
         if (isset($config->enabled) && $config->enabled) {
             $client = new sss_client($config);
-            $filesystem = sss_file_system::instance();
+            $filesystem = object_file_system::instance();
             $filepuller = new puller($config, $client);
             $contenthashes = $filepuller->get_candidate_files();
             $filepuller->execute($contenthashes);
         } else {
-            mtrace(get_string('not_enabled', 'tool_sssfs'));
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
         }
     }
 }

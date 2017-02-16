@@ -17,7 +17,7 @@
 /**
  * S3 client.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@ require_once(__DIR__ . '/../../sdk/aws-autoloader.php');
 
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
-use tool_sssfs\sss_client;
+use tool_objectfs\client\sss_client;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -46,7 +46,7 @@ class sss_integration_test_client extends sss_client {
                 'version' => AWS_API_VERSION
         ));
 
-        $config = get_config('tool_sssfs');
+        $config = get_config('tool_objectfs');
 
         // Registers 's3://bucket' as a prefix for file actions.
         $this->client->registerStreamWrapper();

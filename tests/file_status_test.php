@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * tool_sssfs file status tests.
+ * tool_objectfs file status tests.
  *
  * @package   local_catdeleter
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -25,19 +25,19 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once( __DIR__ . '/tool_sssfs_testcase.php');
+require_once( __DIR__ . '/tool_objectfs_testcase.php');
 
-use tool_sssfs\report\file_location_report;
-use tool_sssfs\report\log_size_report;
-use tool_sssfs\report\mime_type_report;
-use tool_sssfs\file_manipulators\pusher;
+use tool_objectfs\report\object_location_report;
+use tool_objectfs\report\log_size_report;
+use tool_objectfs\report\mime_type_report;
+use tool_objectfs\object_manipulator\pusher;
 
-class tool_sssfs_file_status_testcase extends tool_sssfs_testcase {
+class tool_objectfs_object_status_testcase extends tool_objectfs_testcase {
 
     protected function setUp() {
         global $CFG;
         $this->resetAfterTest(true);
-        $CFG->filesystem_handler_class = '\tool_sssfs\sss_file_system';
+        $CFG->filesystem_handler_class = '\tool_objectfs\object_file_system';
         $this->config = $this->generate_config();
         $this->client = $this->get_test_client();
     }
@@ -47,20 +47,20 @@ class tool_sssfs_file_status_testcase extends tool_sssfs_testcase {
     }
 
     private function check_file_location_record($record, $expectedcount, $expectedsum) {
-        $this->assertEquals($expectedcount, $record->filecount);
-        $this->assertEquals($expectedsum, $record->filesum);
+        $this->assertEquals($expectedcount, $record->objectcount);
+        $this->assertEquals($expectedsum, $record->objectsum);
     }
 
 
     public function test_calculate_file_location_data () {
 
-        $report = new file_location_report();
+        $report = new object_location_report();
 
         $data = $report->calculate_report_data();
 
-        // Duplicated and external states should be 0 for sum and count.
-        $this->check_file_location_record($data[SSS_FILE_LOCATION_DUPLICATED], 0, 0);
-        $this->check_file_location_record($data[SSS_FILE_LOCATION_EXTERNAL], 0, 0);
+        // Duplicated and external locations should be 0 for sum and count.
+        $this->check_file_location_record($data[OBJECT_LOCATION_DUPLICATED], 0, 0);
+        $this->check_file_location_record($data[OBJECT_LOCATION_REMOTE], 0, 0);
 
         $this->config = $this->generate_config(10); // 10 MB size threshold.
         $pusher = new pusher($this->config, $this->client);
@@ -77,7 +77,7 @@ class tool_sssfs_file_status_testcase extends tool_sssfs_testcase {
 
         $data = $report->calculate_report_data();
 
-        $this->check_file_location_record($data[SSS_FILE_LOCATION_DUPLICATED], 10, $singlefilesize * 10);
+        $this->check_file_location_record($data[OBJECT_LOCATION_DUPLICATED], 10, $singlefilesize * 10);
 
         $report->save_report_data($data);
     }

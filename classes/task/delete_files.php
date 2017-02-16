@@ -17,27 +17,27 @@
 /**
  * Task that pushes files to S3.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
+namespace tool_objectfs\task;
 
-use tool_sssfs\file_manipulators\cleaner;
-use tool_sssfs\sss_client;
-use tool_sssfs\sss_file_system;
+use tool_objectfs\object_manipulator\deleter;
+use tool_objectfs\client\sss_client;
+use tool_objectfs\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
-class clean_up_files extends \core\task\scheduled_task {
+class delete_files extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('clean_up_files_task', 'tool_sssfs');
+        return get_string('delete_files_task', 'tool_objectfs');
     }
 
     /**
@@ -45,16 +45,16 @@ class clean_up_files extends \core\task\scheduled_task {
      */
     public function execute() {
 
-        $config = get_config('tool_sssfs');
+        $config = get_config('tool_objectfs');
 
         if (isset($config->enabled) && $config->enabled) {
             $client = new sss_client($config);
-            $filesystem = sss_file_system::instance();
-            $cleaner = new cleaner($config, $client);
-            $candidatehashes = $cleaner->get_candidate_files();
-            $cleaner->execute($candidatehashes);
+            $filesystem = object_file_system::instance();
+            $deleter = new deleter($config, $client);
+            $candidatehashes = $deleter->get_candidate_files();
+            $deleter->execute($candidatehashes);
         } else {
-            mtrace(get_string('not_enabled', 'tool_sssfs'));
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
         }
     }
 }

@@ -17,19 +17,18 @@
 /**
  * Pushes files to s3 if they meet the configured criterea.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\file_manipulators;
+namespace tool_objectfs\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-use core_files\filestorage\file_exception;
 use Aws\S3\Exception\S3Exception;
 
 class pusher extends manipulator {
@@ -52,7 +51,7 @@ class pusher extends manipulator {
      * Pusher constructor.
      *
      * @param sss_client $client S3 client
-     * @param sss_file_system $filesystem S3 file system
+     * @param object_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
     public function __construct($config, $client) {
@@ -75,18 +74,18 @@ class pusher extends manipulator {
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
-             LEFT JOIN {tool_sssfs_filestate} sf ON f.contenthash = sf.contenthash
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
               GROUP BY f.contenthash,
                        f.filesize,
-                       sf.location
+                       o.location
                 HAVING MIN(f.timecreated) < ?
                        AND MAX(f.filesize) > ?
                        AND MAX(f.filesize) < 5000000000
-                       AND (sf.location IS NULL OR sf.location = ?)';
+                       AND (o.location IS NULL OR o.location = ?)';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
 
-        $params = array($maxcreatedtimestamp, $this->sizethreshold, SSS_FILE_LOCATION_LOCAL);
+        $params = array($maxcreatedtimestamp, $this->sizethreshold, OBJECT_LOCATION_LOCAL);
 
         $starttime = time();
         $files = $DB->get_records_sql($sql, $params);
@@ -112,18 +111,18 @@ class pusher extends manipulator {
         if (is_readable($sssfilepath)) {
             if (is_readable($localfilepath)) {
                 $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
-                log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
+                log_file_state($contenthash, OBJECT_LOCATION_DUPLICATED, $filemd5);
             } else {
                 $filemd5 = $this->client->get_object_md5_from_key($contenthash);
-                log_file_state($contenthash, SSS_FILE_LOCATION_EXTERNAL, $filemd5);
+                log_file_state($contenthash, OBJECT_LOCATION_REMOTE, $filemd5);
             }
         } else {
             if (is_readable($localfilepath)) {
                 $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
                 copy($localfilepath, $sssfilepath);
-                log_file_state($contenthash, SSS_FILE_LOCATION_DUPLICATED, $filemd5);
+                log_file_state($contenthash, OBJECT_LOCATION_DUPLICATED, $filemd5);
             } else {
-                log_file_state($contenthash, SSS_FILE_LOCATION_ERROR);
+                log_file_state($contenthash, OBJECT_LOCATION_ERROR);
             }
         }
     }
@@ -151,7 +150,7 @@ class pusher extends manipulator {
         global $DB;
 
         $starttime = time();
-        $filecount = 0;
+        $objectcount = 0;
         $totalfilesize = 0;
 
         foreach ($files as $file) {
@@ -169,7 +168,7 @@ class pusher extends manipulator {
         $duration = time() - $starttime;
 
         $totalfilesize = display_size($totalfilesize);
-        $logstring = "File pusher pushed $filecount files, $totalfilesize to S3 in $duration seconds \n";
+        $logstring = "File pusher pushed $objectcount files, $totalfilesize to S3 in $duration seconds \n";
         mtrace($logstring);
     }
 }

@@ -25,11 +25,11 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-use tool_sssfs\sss_client;
+use tool_objectfs\client\sss_client;
 use core_files\filestorage\file_exception;
 use Aws\S3\Exception\S3Exception;
 
-class sss_mock_client extends sss_client {
+class mock_client extends sss_client {
 
     private $return;
     private $throwexception;

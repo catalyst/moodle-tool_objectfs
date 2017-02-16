@@ -17,7 +17,7 @@
 /**
  * S3 file system lib
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,16 +25,16 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-define('SSS_FILE_LOCATION_ERROR', -1);
-define('SSS_FILE_LOCATION_LOCAL', 0);
-define('SSS_FILE_LOCATION_DUPLICATED', 1);
-define('SSS_FILE_LOCATION_EXTERNAL', 2);
+define('OBJECT_LOCATION_ERROR', -1);
+define('OBJECT_LOCATION_LOCAL', 0);
+define('OBJECT_LOCATION_DUPLICATED', 1);
+define('OBJECT_LOCATION_REMOTE', 2);
 
-define('SSSFS_REPORT_FILE_LOCATION', 0);
-define('SSSFS_REPORT_LOG_SIZE', 1);
-define('SSSFS_REPORT_MIME_TYPE', 2);
+define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
+define('OBJECTFS_REPORT_LOG_SIZE', 1);
+define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
-function log_file_state($contenthash, $location, $md5 = null) {
+function log_file_location($contenthash, $location, $md5 = null) {
     global $DB;
 
     $logrecord = new \stdClass();
@@ -42,7 +42,7 @@ function log_file_state($contenthash, $location, $md5 = null) {
     $logrecord->timeduplicated = time();
     $logrecord->location = $location;
 
-    $existing = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $contenthash));
+    $existing = $DB->get_record('tool_objectfs_objects', array('contenthash' => $contenthash));
 
     if ($md5) {
         $logrecord->md5 = $md5;
@@ -52,9 +52,9 @@ function log_file_state($contenthash, $location, $md5 = null) {
 
     if ($existing) {
         $logrecord->id = $existing->id;
-        $DB->update_record('tool_sssfs_filestate', $logrecord);
+        $DB->update_record('tool_objectfs_objects', $logrecord);
     } else {
-        $DB->insert_record('tool_sssfs_filestate', $logrecord);
+        $DB->insert_record('tool_objectfs_objects', $logrecord);
     }
 }
 
@@ -74,6 +74,6 @@ function save_sss_config_data($data) {
     $config->prefersss = $data->prefersss;
 
     foreach (get_object_vars($config) as $key => $value) {
-        set_config($key, $value, 'tool_sssfs');
+        set_config($key, $value, 'tool_objectfs');
     }
 }

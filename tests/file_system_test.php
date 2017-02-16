@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * tool_sssfs file system tests.
+ * tool_objectfs file system tests.
  *
  * @package   local_catdeleter
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -25,19 +25,18 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once( __DIR__ . '/tool_sssfs_testcase.php');
+require_once( __DIR__ . '/tool_objectfs_testcase.php');
 
-use tool_sssfs\sss_file_system;
+use tool_objectfs\object_file_system;
 
-class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
+class tool_objectfs_object_file_system_testcase extends tool_objectfs_testcase {
 
     protected function setUp() {
         global $CFG;
         $this->resetAfterTest();
-        $CFG->filesystem_handler_class = '\tool_sssfs\sss_file_system';
+        $CFG->filesystem_handler_class = '\tool_objectfs\object_file_system';
         $this->config = $this->generate_config();
-        sss_file_system::reset(); // Remove old FS if still active.
-        $this->filesystem = sss_file_system::instance();
+        $this->filesystem = object_file_system::instance();
         $this->client = $this->get_test_client();
         $this->filesystem->set_sss_client($this->client);
     }
@@ -139,9 +138,9 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         $this->assertEquals('filetwo', $result[1]->pathname);
         $this->assertEquals('filethree', $result[2]->pathname);
         $contenthash = $zipfile->get_contenthash();
-        $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $contenthash));
         // Should have been pulled back to local when list_files called.
-        $this->assertEquals(SSS_FILE_LOCATION_DUPLICATED, $location);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
     private function generate_zip_archive_file() {
@@ -176,9 +175,9 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         }
 
         $contenthash = $zipfile->get_contenthash();
-        $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $contenthash));
         // Should have been pulled back to local when list_files called.
-        $this->assertEquals(SSS_FILE_LOCATION_DUPLICATED, $location);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
     public function test_sss_add_to_curl_request() {
@@ -214,9 +213,9 @@ class tool_sssfs_file_system_testcase extends tool_sssfs_testcase {
         }
 
         $contenthash = $zipfile->get_contenthash();
-        $location = $DB->get_field('tool_sssfs_filestate', 'location', array('contenthash' => $contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $contenthash));
         // Should have been pulled back to local when list_files called.
-        $this->assertEquals(SSS_FILE_LOCATION_DUPLICATED, $location);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
     public function test_sss_get_imageinfo() {

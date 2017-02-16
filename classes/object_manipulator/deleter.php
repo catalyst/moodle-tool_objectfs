@@ -17,22 +17,21 @@
 /**
  * Deletes files that are old enough and are in S3.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\file_manipulators;
+namespace tool_objectfs\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-use core_files\filestorage\file_exception;
 use Aws\S3\Exception\S3Exception;
 
-class cleaner extends manipulator {
+class deleter extends manipulator {
 
     /**
      * How long file must exist after
@@ -51,10 +50,10 @@ class cleaner extends manipulator {
     private $deletelocal;
 
     /**
-     * Cleaner constructor.
+     * deleter constructor.
      *
      * @param sss_client $client S3 client
-     * @param sss_file_system $filesystem S3 file system
+     * @param object_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
     public function __construct($config, $client) {
@@ -80,25 +79,25 @@ class cleaner extends manipulator {
 
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize,
-                       sf.md5
+                       o.md5
                   FROM {files} f
-             LEFT JOIN {tool_sssfs_filestate} sf ON f.contenthash = sf.contenthash
-                 WHERE sf.timeduplicated <= ?
-                       AND sf.location = ?
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                 WHERE o.timeduplicated <= ?
+                       AND o.location = ?
               GROUP BY f.contenthash,
                        f.filesize,
-                       sf.location,
-                       sf.md5';
+                       o.location,
+                       o.md5';
 
         $consistancythrehold = time() - $this->consistencydelay;
-        $params = array($consistancythrehold, SSS_FILE_LOCATION_DUPLICATED);
+        $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED);
 
         $starttime = time();
         $files = $DB->get_records_sql($sql, $params);
         $duration = time() - $starttime;
         $count = count($files);
 
-        $logstring = "File cleaner query took $duration seconds to find $count files \n";
+        $logstring = "File deleter query took $duration seconds to find $count files \n";
         mtrace($logstring);
 
         return $files;
@@ -125,7 +124,7 @@ class cleaner extends manipulator {
         global $DB;
 
         $starttime = time();
-        $filecount = 0;
+        $objectcount = 0;
         $totalfilesize = 0;
 
         if ($this->deletelocal == 0) {
@@ -145,15 +144,15 @@ class cleaner extends manipulator {
                 if ($fileinsss) {
                     $success = $this->delete_local_file_from_contenthash($file->contenthash);
                     if ($success) {
-                        log_file_state($file->contenthash, SSS_FILE_LOCATION_EXTERNAL);
-                        $filecount++;
+                        log_file_location($file->contenthash, OBJECT_LOCATION_REMOTE);
+                        $objectcount++;
                         $totalfilesize += $file->filesize;
                     }
                 } else {
-                    mtrace("File not in sss: $sssfilepath. Setting state back to local\n");
-                    log_file_state($file->contenthash, SSS_FILE_LOCATION_LOCAL);
+                    mtrace("File not in sss: $sssfilepath. Setting location back to local\n");
+                    log_file_location($file->contenthash, OBJECT_LOCATION_LOCAL);
                 }
-            } catch (file_exception $e) {
+            } catch (\file_exception $e) {
                 $this->log_error($e, $file->contenthash);
                 continue;
             } catch (S3Exception $e) {
@@ -164,7 +163,7 @@ class cleaner extends manipulator {
         $duration = time() - $starttime;
 
         $totalfilesize = display_size($totalfilesize);
-        $logstring = "File cleaner cleaned $filecount files, $totalfilesize in $duration seconds \n";
+        $logstring = "File deleter cleaned $objectcount files, $totalfilesize in $duration seconds \n";
         mtrace($logstring);
     }
 }

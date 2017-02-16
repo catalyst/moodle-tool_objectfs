@@ -17,15 +17,15 @@
 /**
  * S3 client.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs;
+namespace tool_objectfs\client;
 
-require_once(__DIR__ . '/../sdk/aws-autoloader.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/sdk/aws-autoloader.php');
 
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
