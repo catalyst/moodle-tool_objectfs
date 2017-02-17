@@ -14,7 +14,7 @@ An AWS S3 file system for Moodle. This plugin implements the file system as well
 2. Install the plugin throught the moodle GUI.
 3. Place the following line inside your moodle config.php:
 <pre>
-$CFG->filesystem_handler_class = '\tool_objectfs\object_file_system';
+$CFG->alternative_file_system_class = '\tool_objectfs\object_file_system';
 </pre>
 
 ## Moodle Configuration

@@ -34,7 +34,7 @@ define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
 define('OBJECTFS_REPORT_LOG_SIZE', 1);
 define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
-function log_file_location($contenthash, $location, $md5 = null) {
+function log_object_location($contenthash, $location, $md5 = null) {
     global $DB;
 
     $logrecord = new \stdClass();
@@ -76,4 +76,33 @@ function save_sss_config_data($data) {
     foreach (get_object_vars($config) as $key => $value) {
         set_config($key, $value, 'tool_objectfs');
     }
+}
+
+function get_objectfs_config() {
+    $config = array(  'enabled'           => 0,
+                      'key'               => '',
+                      'secret'            => '',
+                      'bucket'            => '',
+                      'region'            => 'us-east-1',
+                      'sizethreshold'     => 1024 * 10,
+                      'minimumage'        => 7 * 24 * 60 * 60,
+                      'deletelocal'       => 0,
+                      'consistencydelay'  => 10 * 60,
+                      'maxtaskruntime'    => 60,
+                      'logging'           => 0,
+                      'preferremote'         => 0);
+
+    $storedconfig = get_config('tool_objectfs');
+
+    //Override defaults if set.
+    foreach($storedconfig as $key => $value) {
+        $config[$key] = $value;
+    }
+    return $config;
+}
+
+function get_object_location_from_hash($contenthash) {
+    global $DB;
+    $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $contenthash));
+    return $location;
 }

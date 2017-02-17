@@ -123,7 +123,7 @@ class puller extends manipulator {
             try {
                 $success = $this->copy_sss_file_to_local($file->contenthash);
                 if ($success) {
-                    log_file_location($file->contenthash, OBJECT_LOCATION_DUPLICATED);
+                    log_object_location($file->contenthash, OBJECT_LOCATION_DUPLICATED);
                     $objectcount++;
                     $totalfilesize += $file->filesize;
                 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="../../../lib/phpunit/phpunit.xsd"
+        xsi:noNamespaceSchemaLocation="lib/phpunit/phpunit.xsd"
         bootstrap="../../../lib/phpunit/bootstrap.php"
         convertErrorsToExceptions="true"
         convertNoticesToExceptions="true"
@@ -13,12 +13,13 @@
         stopOnFailure="false"
         stopOnIncomplete="false"
         stopOnSkipped="false"
+        printerClass="Hint_ResultPrinter"
         testSuiteLoaderClass="phpunit_autoloader"
         >
 
     <php>
         <!--<const name="PHPUNIT_LONGTEST" value="1"/> uncomment to execute also slow or otherwise expensive tests-->
-        <const name="PHPUNIT_SEQUENCE_START" value="179000"/>
+        <const name="PHPUNIT_SEQUENCE_START" value="132000"/>
 
         <!--Following constants instruct tests to fetch external test files from alternative location or skip tests if empty, clone https://github.com/moodlehq/moodle-exttests to local web server-->
         <!--<const name="TEST_EXTERNAL_FILES_HTTP_URL" value="http://download.moodle.org/unittest"/> uncomment and alter to fetch external test files from alternative location-->
@@ -28,11 +29,8 @@
 <!--All core suites need to be manually added here-->
 
     <testsuites>
-        <testsuite name="tool_sssfs_testsuite">
+        <testsuite name="tool_objectfs_testsuite">
             <directory suffix="_test.php">tests</directory>
-        </testsuite>
-        <testsuite name="core_files_testsuite">
-            <directory suffix="_test.php">../../../files/tests</directory>
         </testsuite>
     </testsuites>
 

@@ -14,89 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * tool_objectfs test base abstract class.
- * @package   local_catdeleter
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace tool_objectfs\tests;
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
-require_once( __DIR__ . '/../lib.php');
-require_once( __DIR__ . '/mock/mock_client.php');
-require_once( __DIR__ . '/mock/sss_integration_test_client.php');
+use tool_objectfs\object_file_system;
 
-abstract class tool_objectfs_testcase extends advanced_testcase {
+require_once(__DIR__ . '/test_client.php');
 
-    protected function save_file_to_local_storage_from_string($filesize = 10, $filename = 'test.txt', $filecontent = 'test') {
+abstract class tool_objectfs_testcase extends \advanced_testcase {
+
+    protected function setUp() {
+        global $CFG;
+        $CFG->objectfs_remote_client_class = '\tool_objectfs_test_client';
+        $this->filesystem = new object_file_system();
+        $this->resetAfterTest(true);
+    }
+
+    protected function reset_file_system() {
+        $this->filesystem = new object_file_system();
+    }
+
+    protected function create_local_file_from_path($pathname) {
         global $DB;
         $fs = get_file_storage();
-
-        $syscontext = context_system::instance();
+        $syscontext = \context_system::instance();
         $component = 'core';
         $filearea  = 'unittest';
         $itemid    = 0;
         $filepath  = '/';
         $sourcefield = 'Copyright stuff';
-
-        $filerecord = array(
-            'contextid' => $syscontext->id,
-            'component' => $component,
-            'filearea'  => $filearea,
-            'itemid'    => $itemid,
-            'filepath'  => $filepath,
-            'filename'  => $filename,
-            'source'    => $sourcefield,
-        );
-        $file = $fs->create_file_from_string($filerecord, $filecontent);
-
-        // Above method does not set a file size, we do this so we do and have control over it.
-        $DB->set_field('files', 'filesize', $filesize, array('contenthash' => $file->get_contenthash()));
-
-        return $file;
-    }
-
-    /**
-     * If integration_test_config.php is set, we use the integration test client.
-     * Else we use the mock client.
-     *
-     * @return object sss test client.
-     */
-    protected function get_test_client() {
-        if (file_exists(__DIR__ . '/mock/integration_test_config.php')) {
-            $integrationconfig = include('mock/integration_test_config.php');
-            $client = new sss_integration_test_client($integrationconfig);
-        } else {
-            $client = new mock_client();
-        }
-        return $client;
-    }
-
-    protected function move_file_to_sss($file, $location = OBJECT_LOCATION_REMOTE) {
-        $contenthash = $file->get_contenthash();
-        $localpath = $this->get_local_fullpath_from_hash($contenthash);
-        $md5 = md5_file($localpath);
-        $ssspath = $this->client->get_sss_fullpath_from_hash($contenthash);
-        copy($localpath, $ssspath);
-        if ($location == OBJECT_LOCATION_REMOTE) {
-            unlink($localpath);
-        }
-        log_file_location($contenthash, $location, $md5);
-    }
-
-    protected function save_file_to_local_storage_from_pathname($pathname) {
-        global $DB;
-        $fs = get_file_storage();
-
-        $syscontext = context_system::instance();
-        $component = 'core';
-        $filearea  = 'unittest';
-        $itemid    = 0;
-        $filepath  = '/';
-        $sourcefield = 'Copyright stuff';
-
         $filerecord = array(
             'contextid' => $syscontext->id,
             'component' => $component,
@@ -110,42 +57,68 @@ abstract class tool_objectfs_testcase extends advanced_testcase {
         return $file;
     }
 
-    protected function generate_config($sizethreshold = 0, $minimumage = -10, $maxtaskruntime = 60, $deletelocal = 1, $consistencydelay = 0) {
-        $config = new stdClass();
-        $config->enabled = 1;
-        $config->key = 123;
-        $config->secret = 123;
-        $config->bucket = 'test-bucket';
-        $config->region = 'ap-southeast-2';
-        $config->sizethreshold = $sizethreshold * 1024; // Convert from kb.
-        $config->minimumage = $minimumage;
-        $config->consistencydelay = $consistencydelay;
-        $config->logging = 1;
-        $config->maxtaskruntime = $maxtaskruntime;
-        $config->deletelocal = $deletelocal;
-        $config->prefersss = 0;
-        save_sss_config_data($config);
-        return $config;
+    protected function create_local_file($content = 'test content') {
+        global $DB;
+        $fs = get_file_storage();
+        $syscontext = \context_system::instance();
+        $component = 'core';
+        $filearea  = 'unittest';
+        $itemid    = 0;
+        $filepath  = '/';
+        $sourcefield = 'Copyright stuff';
+        $filerecord = array(
+            'contextid' => $syscontext->id,
+            'component' => $component,
+            'filearea'  => $filearea,
+            'itemid'    => $itemid,
+            'filepath'  => $filepath,
+            'filename'  => 'testfile',
+            'source'    => $sourcefield,
+        );
+        $file = $fs->create_file_from_string($filerecord, $content);
+
+        log_object_location($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
+        return $file;
     }
 
-    /**
-     * Returns local fullpath. We redifine this function here so
-     * that our file moving functions can exist outside of the fsapi.
-     * Which means filesystem_handler_class does not need to be set for them
-     * to function.
-     *
-     * @param  string $contenthash contenthash
-     * @return string fullpath to local object.
-     */
-    protected function get_local_fullpath_from_hash($contenthash) {
+    protected function create_duplicated_file($content = 'test content') {
+        $file = $this->create_local_file($content);
+        $contenthash = $file->get_contenthash();
+        $this->filesystem->copy_object_from_local_to_remote_by_hash($contenthash);
+        log_object_location($contenthash, OBJECT_LOCATION_DUPLICATED);
+        return $file;
+    }
+
+    protected function create_remote_file($content = 'test content') {
+        $file = $this->create_duplicated_file($content);
+        $contenthash = $file->get_contenthash();
+        $this->filesystem->delete_object_from_local_by_hash($contenthash);
+        log_object_location($contenthash, OBJECT_LOCATION_REMOTE);
+        return $file;
+    }
+
+    protected function get_remote_path_from_hash($contenthash) {
         global $CFG;
-        if (isset($CFG->filedir)) {
-            $filedir = $CFG->filedir;
-        } else {
-            $filedir = $CFG->dataroot.'/filedir';
-        }
-        $l1 = $contenthash[0] . $contenthash[1];
-        $l2 = $contenthash[2] . $contenthash[3];
-        return "$filedir/$l1/$l2/$contenthash";
+        $config = get_objectfs_config();
+        $remoteclientclass = $CFG->objectfs_remote_client_class;
+        $client = new $remoteclientclass($config);
+        return $client->get_object_fullpath_from_hash($contenthash);
+    }
+
+    protected function get_remote_path_from_storedfile($file) {
+        $contenthash = $file->get_contenthash();
+        return $this->get_remote_path_from_hash($contenthash);
+    }
+
+    protected function get_local_path_from_hash($contenthash) {
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_local_path_from_hash');
+        $reflection->setAccessible(true);
+        return $reflection->invokeArgs($this->filesystem, [$contenthash]);
+    }
+
+    protected function get_local_path_from_storedfile($file) {
+        $contenthash = $file->get_contenthash();
+        return $this->get_local_path_from_hash($contenthash);
     }
 }
+

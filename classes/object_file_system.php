@@ -27,312 +27,205 @@ namespace tool_objectfs;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
 
 class object_file_system extends \file_system_filedir {
 
-    private $sssclient;
-    private $prefersss;
-    private $enabled;
+    private $remoteclient;
+    private $preferremote;
 
-    /**
-     * object_file_system Constructor.
-     *
-     * Calls object_file_system contructor and sets S3 client.
-     *
-     * @param string $filedir The path to the local filedir.
-     * @param string $trashdir The path to the trashdir.
-     * @param int $dirpermissions The directory permissions when creating new directories
-     * @param int $filepermissions The file permissions when creating new files
-     * @param file_storage $fs The instance of file_storage to instantiate the class with.
-     */
-    public function __construct($filedir, $trashdir, $dirpermissions, $filepermissions, file_storage $fs = null) {
-        parent::__construct($filedir, $trashdir, $dirpermissions, $filepermissions, $fs);
-        $config = get_config('tool_objectfs');
-        if (isset($config->enabled) && $config->enabled) {
-            $sssclient = new sss_client($config);
-            $this->set_sss_client($sssclient);
-            $this->prefersss = $config->prefersss;
-            $this->enabled = $config->enabled;
+    public function __construct() {
+        parent::__construct(); // Setup fildir.
+
+        $config = get_objectfs_config();
+
+        $this->remoteclient = $this->get_remote_client($config);
+        $this->remoteclient->register_stream_wrapper();
+
+        $this->preferremote = $config['preferremote'];
+    }
+
+    private function get_remote_client($config) {
+        global $CFG;
+        if (isset($CFG->objectfs_remote_client_class)) {
+            $clientclass = $CFG->objectfs_remote_client_class;
         } else {
-            $this->enabled = false;
-        }
-    }
-
-    /**
-     * Sets s3 client.
-     *
-     * We have this so we can inject a mocked one for unit testing.
-     *
-     * @param object $client s3 client
-     */
-    public function set_sss_client($client) {
-        $this->sssclient = $client;
-    }
-
-    /**
-     * get location of contenthash file from the
-     * tool_objectfs_objects table. if content hash is not in the table,
-     * we assume it is stored locally or is to be stored locally.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return int contenthash file location.
-     */
-    protected function get_hash_location($contenthash) {
-        global $DB;
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $contenthash));
-
-        if ($location) {
-            return $location;
+            $clientclass = '\tool_objectfs\client\s3_client';
         }
 
-        return OBJECT_LOCATION_LOCAL;
+        $remoteclient = new $clientclass($config);
+
+        return $remoteclient;
     }
 
-    /**
-     * Returns path to the file if it was in s3.
-     * Does not check if it actually is there.
-     *
-     * @param  \\stored_file $file stored file record
-     *
-     * @return string s3 file path
-     */
-    protected function get_sss_fullpath_from_file(\stored_file $file) {
-        return $this->get_sss_fullpath_from_hash($file->get_contenthash());
-    }
+    protected function get_object_path_from_storedfile($file) {
+        if ($this->preferremote) {
+            $location = get_object_location_from_hash($file->get_contenthash());
+            if ($location == OBJECT_LOCATION_DUPLICATED) {
+                return $this->get_remote_path_from_storedfile($file);
+            }
+        }
 
-    /**
-     * Returns path to the file if it was in s3 based on conenthash.
-     * Does not check if it actually is there.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return string s3 file path
-     */
-    protected function get_sss_fullpath_from_hash($contenthash) {
-        $path = $this->sssclient->get_sss_fullpath_from_hash($contenthash);
+        if ($this->is_file_readable_locally_by_storedfile($file)) {
+            $path = $this->get_local_path_from_storedfile($file);
+        } else {
+            // We assume it is remote, not checking if it's readable.
+            $path = $this->get_remote_path_from_storedfile($file);
+        }
+
         return $path;
     }
 
     /**
-     * Returns path to the file as if it was stored locally.
-     * Does not check if it actually is there.
+     * Get the full path for the specified hash, including the path to the filedir.
      *
-     * Taken from get_fullpath_from_storedfile in parent class.
+     * Note: This must return a consistent path for the file's contenthash
+     * and the path _will_ be in a standard local format.
+     * Streamable paths will not work.
+     * A local copy of the file _will_ be fetched if $fetchifnotfound is tree.
      *
-     * @param  \stored_file $file stored file record
-     * @param  boolean     $sync sync external files.
+     * The $fetchifnotfound allows you to determine the expected path of the file.
      *
-     * @return string local file path
+     * @param string $contenthash The content hash
+     * @param bool $fetchifnotfound Whether to attempt to fetch from the remote path if not found.
+     * @return string The full path to the content file
      */
-    protected function get_local_fullpath_from_file(\stored_file $file, $sync = false) {
-        if ($sync) {
-            $file->sync_external_file();
-        }
-        return $this->get_local_fullpath_from_hash($file->get_contenthash());
-    }
+    protected function get_local_path_from_hash($contenthash, $fetchifnotfound = false) {
+        $path = parent::get_local_path_from_hash($contenthash, $fetchifnotfound);
 
-    /**
-     * Returns path to the file as if it was stored locally from hash.
-     * Does not check if it actually is there.
-     *
-     * Taken from get_fullpath_from_hash in parent class.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return string local file path
-     */
-    protected function get_local_fullpath_from_hash($contenthash) {
-        return $this->filedir . DIRECTORY_SEPARATOR . $this->get_contentpath_from_hash($contenthash);
-    }
-
-    /**
-     * Whether a file is readable locally. Will
-     * try content recovery if not.
-     *
-     * Taken from is_readable in parent class.
-     *
-     * @param  \stored_file $file stored file record
-     *
-     * @return boolean true if readable, false if not
-     */
-    protected function is_local_readable(\stored_file $file) {
-        $path = $this->get_local_fullpath_from_file($file, true);
-        if (!is_readable($path)) {
-            if (!$this->try_content_recovery($file) or !is_readable($path)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Whether a file is readable in s3.
-     *
-     * @param  \stored_file $file stored file record
-     *
-     * @return boolean true if readable, false if not
-     */
-    protected function is_sss_readable($file) {
-        $path = $this->get_sss_fullpath_from_file($file);
-        return is_readable($path);
-    }
-
-    /**
-     * Whether a file is readable anywhere.
-     * Will check if it can read local, and if it cant,
-     * it will try to read from s3.
-     *
-     * We dont just call is_readable_by_hash because following
-     * precedent set by parent, we try content recovery for local
-     * files here.
-     *
-     * @param  \stored_file $file stored file record
-     *
-     * @return boolean true if readable, false if not
-     */
-    public function is_readable(\stored_file $file) {
-        // Must go at the start of every overridden method.
-        if (!$this->enabled) {
-            return parent::is_readable($file);
+        if ($fetchifnotfound && !is_readable($path)) {
+            $this->copy_object_from_remote_to_local_by_hash($contenthash);
         }
 
-        if ($this->is_local_readable($file) || $this->is_sss_readable($file)) {
-            return true;
+        return $path;
+    }
+
+    /**
+     * Get a remote filepath for the specified stored file.
+     *
+     * This is typically either the same as the local filepath, or it is a streamable resource.
+     *
+     * See https://secure.php.net/manual/en/wrappers.php for further information on valid wrappers.
+     *
+     * @param stored_file $file The file to serve.
+     * @return string full path to pool file with file content
+     */
+    protected function get_remote_path_from_storedfile(\stored_file $file) {
+        return $this->get_remote_path_from_hash($file->get_contenthash());
+    }
+
+    /**
+     * Get the full path for the specified hash, including the path to the filedir.
+     *
+     * This is typically either the same as the local filepath, or it is a streamable resource.
+     *
+     * See https://secure.php.net/manual/en/wrappers.php for further information on valid wrappers.
+     *
+     * @param string $contenthash The content hash
+     * @return string The full path to the content file
+     */
+    protected function get_remote_path_from_hash($contenthash) {
+        return $this->remoteclient->get_object_fullpath_from_hash($contenthash);
+    }
+
+
+    public function copy_object_from_remote_to_local_by_hash($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $remotepath = $this->get_remote_path_from_hash($contenthash);
+        if (is_readable($remotepath) && !is_readable($localpath)) {
+            //TODO: lock this up.
+            return copy($remotepath, $localpath);
+        }
+        return false;
+    }
+
+    public function copy_object_from_local_to_remote_by_hash($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $remotepath = $this->get_remote_path_from_hash($contenthash);
+        if (is_readable($localpath) && !is_readable($remotepath)) {
+            //TODO: lock this up.
+            return copy($localpath, $remotepath);
+        }
+        return false;
+    }
+
+    public function delete_object_from_local_by_hash($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $remotepath = $this->get_remote_path_from_hash($contenthash);
+
+        // We want to be very sure it is remote if we're deleting objects.
+        // There is no going back.
+        if (is_readable($localpath) && is_readable($remotepath)) {
+            return unlink($localpath);
         }
         return false;
     }
 
     /**
-     * Checks if a file is readable if it's path is local.
+     * Output the content of the specified stored file.
      *
-     * @param  \stored_file $file stored file record
-     * @param  string $path file path
+     * Note, this is different to get_content() as it uses the built-in php
+     * readfile function which is more efficient.
      *
-     * @throws file_exception When the file could not be read locally.
+     * @param stored_file $file The file to serve.
+     * @return void
      */
-    protected function ensure_file_readable_if_local(\stored_file $file, $path) {
-        if ($this->sssclient->path_is_local($path) && !$this->is_local_readable($file)) {
-            throw new file_exception('storedfilecannotread', '', $this->get_fullpath_from_storedfile($file));
-        }
-    }
-
-    /**
-     * Whether a file is readable anywhere by hash.
-     * Will check if it can read local, and if it cant,
-     * it will try to read from s3.
-     *
-     * Does not attempt content recovery if local.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return boolean true if readable, false if not
-     */
-    public function is_readable_by_hash($contenthash) {
-        // Must go at the start of every overridden method.
-        if (!$this->enabled) {
-            return parent::is_readable_by_hash($file);
-        }
-
-        $isreadable = ($this->is_local_readable_by_hash($contenthash) || $this->is_sss_readable_by_hash($contenthash));
-        return $isreadable;
-    }
-
-    /**
-     * Checks if file is readable locally by hash.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return boolean true if readable, false if not
-     */
-    protected function is_local_readable_by_hash($contenthash) {
-        $localpath  = $this->get_local_fullpath_from_hash($contenthash);
-        return is_readable($localpath);
-    }
-
-    /**
-     * Checks if file is readable in s3 by hash.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return boolean true if readable, false if not
-     */
-    protected function is_sss_readable_by_hash($contenthash) {
-        $ssspath = $this->get_sss_fullpath_from_hash($contenthash);
-        return is_readable($ssspath);
-    }
-
-    /**
-     * Returns the fullpath for a given contenthash.
-     * Queries the DB to determine file location and
-     * then uses appropriate path function.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return string file path
-     */
-    protected function get_fullpath_from_hash($contenthash) {
-        // Must go at the start of every overridden method.
-        if (!$this->enabled) {
-            return parent::get_fullpath_from_hash($contenthash);
-        }
-
-        $filelocation  = $this->get_hash_location($contenthash);
-
-        switch ($filelocation) {
-            case OBJECT_LOCATION_LOCAL:
-                return $this->get_local_fullpath_from_hash($contenthash);
-            case OBJECT_LOCATION_DUPLICATED:
-                if ($this->prefersss) {
-                    return $this->get_sss_fullpath_from_hash($contenthash);
-                } else {
-                    return $this->get_local_fullpath_from_hash($contenthash);
-                }
-            case OBJECT_LOCATION_REMOTE:
-                return $this->get_sss_fullpath_from_hash($contenthash);
-            default:
-                return $this->get_local_fullpath_from_hash($contenthash);
-        }
-    }
-
     public function readfile(\stored_file $file) {
-        // Must go at the start of every overridden method.
-        if (!$this->enabled) {
-            return parent::readfile($file);
-        }
-
-        $path = $this->get_fullpath_from_storedfile($file, true);
-        $this->ensure_file_readable_if_local($file, $path);
+        $path = $this->get_object_path_from_storedfile($file);
         readfile_allow_large($path, $file->get_filesize());
     }
 
-
+    /**
+     * Get the content of the specified stored file.
+     *
+     * Generally you will probably want to use readfile() to serve content,
+     * and where possible you should see if you can use
+     * get_content_file_handle and work with the file stream instead.
+     *
+     * @param stored_file $file The file to retrieve
+     * @return string The full file content
+     */
     public function get_content(\stored_file $file) {
-        // Must go at the start of every overridden method.
-        if (!$this->enabled) {
-            return parent::get_content($file);
+        if (!$file->get_filesize()) {
+            // Directories are empty. Empty files are not worth fetching.
+            return '';
         }
 
-        $path = $this->get_fullpath_from_storedfile($file, true);
-        $this->ensure_file_readable_if_local($file, $path);
+        $path = $this->get_object_path_from_storedfile($file);
         return file_get_contents($path);
-
     }
 
-    public function get_content_file_handle($file, $type = \stored_file::FILE_HANDLE_FOPEN) {
-        // Must go at the start of every overridden method.
-        if (!$this->enabled) {
-            return parent::get_content_file_handle($file, $type);
-        }
+    /**
+     * Serve file content using X-Sendfile header.
+     * Please make sure that all headers are already sent and the all
+     * access control checks passed.
+     *
+     * @param string $contenthash The content hash of the file to be served
+     * @return bool success
+     */
+    public function xsendfile($contenthash) {
+        global $CFG;
+        require_once($CFG->libdir . "/xsendfilelib.php");
 
+        $path = $this->get_object_path_from_storedfile($file);
+        return xsendfile($path);
+    }
+
+    /**
+     * Returns file handle - read only mode, no writing allowed into pool files!
+     *
+     * When you want to modify a file, create a new file and delete the old one.
+     *
+     * @param stored_file $file The file to retrieve a handle for
+     * @param int $type Type of file handle (FILE_HANDLE_xx constant)
+     * @return resource file handle
+     */
+    public function get_content_file_handle(\stored_file $file, $type = \stored_file::FILE_HANDLE_FOPEN) {
+        // Most object repo streams do not support gzopen.
         if ($type == \stored_file::FILE_HANDLE_GZOPEN) {
-            $this->pull_file_back_to_local_if_in_sss($file);
-            $this->ensure_local_readable($file);
-            // If prefersss is enabled we need to still read from local if duplicated.
-            $path = $this->get_local_fullpath_from_file($file, true);
+            $path = $this->get_local_path_from_storedfile($file, true);
         } else {
-            $path = $this->get_fullpath_from_storedfile($file, true);
-            $this->ensure_file_readable_if_local($file, $path);
+            $path = $this->get_object_path_from_storedfile($file);
         }
         return self::get_file_handle_for_path($path, $type);
     }
@@ -340,27 +233,29 @@ class object_file_system extends \file_system_filedir {
     /**
      * Marks pool file as candidate for deleting.
      *
-     * DO NOT call directly - reserved for core!!
-     *
-     * We dont delete S3 files.
+     * We adjust this method from the parent to never delete remote objects
      *
      * @param string $contenthash
      */
-    public function deleted_file_cleanup($contenthash) {
-        // Must go at the start of every overridden method.
-        if (!$this->enabled) {
-            return parent::deleted_file_cleanup($contenthash);
+    public function remove_file($contenthash) {
+        if (!self::is_file_removable($contenthash)) {
+            // Don't remove the file - it's still in use.
+            return;
         }
 
-        $localreadable = $this->is_local_readable_by_hash($contenthash);
+        if ($this->is_file_readable_remotely_by_hash($contenthash)) {
+            // We never delete remote objects.
+            return;
+        }
 
-        if (!$localreadable) {
-            return; // Already deleted or in s3 which we dont want to delete.
+        if (!$this->is_file_readable_locally_by_hash($contenthash)) {
+            // The file wasn't found in the first place. Just ignore it.
+            return;
         }
 
         $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
         $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
-        $contentfile = $this->get_local_fullpath_from_hash($contenthash);
+        $contentfile = $this->get_local_path_from_hash($contenthash);
 
         if (!is_dir($trashpath)) {
             mkdir($trashpath, $this->dirpermissions, true);
@@ -375,193 +270,12 @@ class object_file_system extends \file_system_filedir {
 
         // Move the contentfile to the trash, and fix permissions as required.
         rename($contentfile, $trashfile);
-        chmod($trashfile, $this->filepermissions);
-    }
 
-    /**
-     * Return mimetype by given file pathname.
-     *
-     * If file has a known extension, we return the mimetype based on extension.
-     * Otherwise (when possible) we try to get the mimetype from file contents.
-     *
-     * @param string $fullpath Full path to the file on disk
-     * @param string $filename Correct file name with extension, if omitted will be taken from $path
-     * @return string
-     */
-    public static function mimetype($fullpath, $filename = null) {
-        if (empty($filename)) {
-            $filename = $fullpath;
+        // Fix permissions, only if needed.
+        $currentperms = octdec(substr(decoct(fileperms($trashfile)), -4));
+        if ((int)$this->filepermissions !== $currentperms) {
+            chmod($trashfile, $this->filepermissions);
         }
-
-        // The mimeinfo function determines the mimetype purely based on the file extension.
-        $type = mimeinfo('type', $filename);
-
-        if ($type === 'document/unknown') {
-            // The type is unknown. Inspect the file now.
-            $type = self::mimetype_from_path($fullpath);
-        }
-        return $type;
-    }
-
-    /**
-     * Inspect a file on disk for it's mimetype.
-     * If it's in S3 we return document/unknown as finfo will not work.
-     * Mimetype should be calculated on file creation, this is just a precaution.
-     *
-     * @param string $fullpath Path to file on disk
-     * @param string $default The default mimetype to use if the file was not found.
-     * @return string The mimetype
-     */
-    public static function mimetype_from_path($fullpath, $default = 'document/unknown') {
-        $type = $default;
-
-        $islocalpath = sss_client::path_is_local($fullpath);
-
-        if ($islocalpath && file_exists($fullpath) && class_exists('finfo')) {
-            // The type is unknown. Attempt to look up the file type now.
-            $finfo = new \finfo(FILEINFO_MIME_TYPE);
-            return mimeinfo_from_type('type', $finfo->file($fullpath));
-        }
-
-        return 'document/unknown';
-    }
-
-    /**
-     * Inspect a file on disk for it's mimetype.
-     *
-     * @param string $contenthash The content hash of the file to query
-     * @param string $default The default mimetype to use if the file was not found.
-     * @return string The mimetype
-     */
-    public function mimetype_from_hash($contenthash, $filename) {
-        $fullpath = $this->get_fullpath_from_hash($contenthash);
-        return self::mimetype($fullpath, $filename);
-    }
-
-    /**
-     * Retrieve the mime information for the specified stored file.
-     *
-     * @param \stored_file $file The stored file to retrieve mime information for
-     * @return string The MIME type.
-     */
-    public function mimetype_from_storedfile(\stored_file $file) {
-        $pathname = $this->get_fullpath_from_storedfile($file);
-        $mimetype = self::mimetype($pathname, $file->get_filename());
-
-        if (!$this->is_readable($file) && $mimetype === 'document/unknown') {
-            // The type is unknown, but the full checks weren't completed because the file isn't locally available.
-            // Ensure we have a local copy and try again.
-            $this->ensure_readable($file);
-
-            $mimetype = self::mimetype_from_path($pathname);
-        }
-
-        return $mimetype;
-    }
-
-    /**
-     * Certain operations cannot be performed on s3 files.
-     * use this to pull the file back as the before the operation is called.
-     * It will be set back to duplicated and returned back to s3 later.
-     *
-     * @param  \stored_file $file [description]
-     *
-     * @return [type]            [description]
-     */
-    protected function pull_file_back_to_local_if_in_sss(\stored_file $file) {
-        $path = $this->get_fullpath_from_storedfile($file, true);
-        $islocal = $this->sssclient->path_is_local($path);
-
-        if ($islocal) {
-            return;
-        }
-
-        $contenthash = $file->get_contenthash();
-        $timeout = 600; // 10 minutes before giving up.
-        $locktype = 'tool_objectfs_file_manipulation';
-        $resource = "contenthash: $contenthash";
-        $lockfactory = \core\lock\lock_config::get_lock_factory($locktype);
-
-        // We use a lock here incase this function is called twice in parallel.
-        $lock = $lockfactory->get_lock($resource, $timeout);
-        $localpath = $this->get_local_fullpath_from_hash($contenthash);
-
-        $islocalreadable = is_readable($localpath); // Check its not local now.
-
-        if ($islocalreadable) {
-            return;
-        }
-
-        if ($lock) {
-            copy($path, $localpath);
-            log_file_location($contenthash, OBJECT_LOCATION_DUPLICATED);
-            $lock->release();
-        }
-    }
-
-    /**
-     * List contents of archive.
-     *
-     * @param \stored_file $file The archive to inspect
-     * @param file_packer $packer file packer instance
-     * @return array of file infos
-     */
-    public function list_files($file, file_packer $packer) {
-        $this->pull_file_back_to_local_if_in_sss($file);
-        $this->ensure_local_readable($file);
-        // If prefersss is enabled we need to still read from local if duplicated.
-        $archivefile = $this->get_local_fullpath_from_file($file, true);
-        return $packer->list_files($archivefile);
-    }
-
-    /**
-     * Extract file to given file path (real OS filesystem), existing files are overwritten.
-     *
-     * @param \stored_file $file The archive to inspect
-     * @param file_packer $packer File packer instance
-     * @param string $pathname Target directory
-     * @param file_progress $progress progress indicator callback or null if not required
-     * @return array|bool List of processed files; false if error
-     */
-    public function extract_to_pathname(\stored_file $file, file_packer $packer, $pathname, file_progress $progress = null) {
-        $this->pull_file_back_to_local_if_in_sss($file);
-        $this->ensure_local_readable($file);
-        // If prefersss is enabled we need to still read from local if duplicated.
-        $archivefile = $this->get_local_fullpath_from_file($file, true);
-        return $packer->extract_to_pathname($archivefile, $pathname, null, $progress);
-    }
-
-    /**
-     * Extract file to given file path (real OS filesystem), existing files are overwritten.
-     *
-     * @param \stored_file $file The archive to inspect
-     * @param file_packer $packer file packer instance
-     * @param int $contextid context ID
-     * @param string $component component
-     * @param string $filearea file area
-     * @param int $itemid item ID
-     * @param string $pathbase path base
-     * @param int $userid user ID
-     * @param file_progress $progress Progress indicator callback or null if not required
-     * @return array|bool list of processed files; false if error
-     */
-    public function extract_to_storage(\stored_file $file, file_packer $packer, $contextid,
-            $component, $filearea, $itemid, $pathbase, $userid = null, file_progress $progress = null) {
-
-        $this->pull_file_back_to_local_if_in_sss($file);
-        // The extract_to_storage function needs the file to exist on disk.
-        $this->ensure_local_readable($file);
-        // If prefersss is enabled we need to still read from local if duplicated.
-        $archivefile = $this->get_local_fullpath_from_file($file, true);
-        return $packer->extract_to_storage($archivefile, $contextid,
-                $component, $filearea, $itemid, $pathbase, $userid, $progress);
-    }
-
-    protected function ensure_local_readable($file) {
-        if (!$this->is_local_readable($file)) {
-            throw new file_exception('storedfilecannotread', '', $this->get_fullpath_from_storedfile($file));
-        }
-        return true;
     }
 
 }

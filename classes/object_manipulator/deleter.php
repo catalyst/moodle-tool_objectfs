@@ -144,13 +144,13 @@ class deleter extends manipulator {
                 if ($fileinsss) {
                     $success = $this->delete_local_file_from_contenthash($file->contenthash);
                     if ($success) {
-                        log_file_location($file->contenthash, OBJECT_LOCATION_REMOTE);
+                        log_object_location($file->contenthash, OBJECT_LOCATION_REMOTE);
                         $objectcount++;
                         $totalfilesize += $file->filesize;
                     }
                 } else {
                     mtrace("File not in sss: $sssfilepath. Setting location back to local\n");
-                    log_file_location($file->contenthash, OBJECT_LOCATION_LOCAL);
+                    log_object_location($file->contenthash, OBJECT_LOCATION_LOCAL);
                 }
             } catch (\file_exception $e) {
                 $this->log_error($e, $file->contenthash);
