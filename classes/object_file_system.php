@@ -60,7 +60,7 @@ class object_file_system extends \file_system_filedir {
 
     protected function get_object_path_from_storedfile($file) {
         if ($this->preferremote) {
-            $location = get_object_location_from_hash($file->get_contenthash());
+            $location = $this->get_actual_object_location_by_hash($file->get_contenthash());
             if ($location == OBJECT_LOCATION_DUPLICATED) {
                 return $this->get_remote_path_from_storedfile($file);
             }
@@ -128,6 +128,35 @@ class object_file_system extends \file_system_filedir {
         return $this->remoteclient->get_object_fullpath_from_hash($contenthash);
     }
 
+    public function get_md5_from_contenthash($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $remotepath = $this->get_remote_path_from_hash($contenthash);
+
+        if (is_readable($localpath)) {
+            $md5 = md5_file($localpath);
+        } else {
+            $md5 = $this->remoteclient->get_object_md5_from_key($contenthash);
+        }
+        return $md5;
+    }
+
+    public function get_actual_object_location_by_hash($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $remotepath = $this->get_remote_path_from_hash($contenthash);
+
+        $localreadable = is_readable($localpath);
+        $remotereadable = is_readable($remotepath);
+
+        if ($localreadable && $remotereadable) {
+            return OBJECT_LOCATION_DUPLICATED;
+        } else if ($localreadable && !$remotereadable) {
+            return OBJECT_LOCATION_LOCAL;
+        } else if (!$localreadable && $remotereadable) {
+            return OBJECT_LOCATION_REMOTE;
+        } else {
+            return OBJECT_LOCATION_ERROR;
+        }
+    }
 
     public function copy_object_from_remote_to_local_by_hash($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);

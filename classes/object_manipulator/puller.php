@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Pushes files to s3 if they meet the configured criterea.
+ * Pulls files from remote storage if they meet the configured criterea.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -34,7 +34,7 @@ use Aws\S3\Exception\S3Exception;
 class puller extends manipulator {
 
     /**
-     * Size threshold for pulling files from S3 in bytes.
+     * Size threshold for pulling files from remote in bytes.
      *
      * @var int
      */
@@ -43,13 +43,13 @@ class puller extends manipulator {
     /**
      * Puller constructor.
      *
-     * @param sss_client $client S3 client
-     * @param object_file_system $filesystem S3 file system
-     * @param object $config sssfs config.
+     * @param object_client $client object client
+     * @param object_file_system $filesystem object file system
+     * @param object $config objectfs config.
      */
-    public function __construct($config, $client) {
-        parent::__construct($client, $config->maxtaskruntime);
-        $this->sizethreshold = $config->sizethreshold;
+    public function __construct($filesystem, $config) {
+        parent::__construct($filesystem, $config);
+        $this->sizethreshold = $config['sizethreshold'];
     }
 
     /**
@@ -59,7 +59,7 @@ class puller extends manipulator {
      *
      * @return array candidate contenthashes
      */
-    public function get_candidate_files() {
+    public function get_candidate_objects() {
         global $DB;
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
@@ -84,24 +84,6 @@ class puller extends manipulator {
         return $files;
     }
 
-    /**
-     * Copy file from s3 to local storage.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return bool success of operation
-     */
-    private function copy_sss_file_to_local($contenthash) {
-        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
-
-        // Already there.
-        if (is_readable($localfilepath)) {
-            return true;
-        }
-
-        $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
-        return copy($sssfilepath, $localfilepath);
-    }
 
     /**
      * Pushes files from local file system to S3.
@@ -109,8 +91,6 @@ class puller extends manipulator {
      * @param  array $candidatehashes content hashes to push
      */
     public function execute($files) {
-        global $DB;
-
         $starttime = time();
         $objectcount = 0;
         $totalfilesize = 0;
@@ -120,25 +100,23 @@ class puller extends manipulator {
                 break;
             }
 
-            try {
-                $success = $this->copy_sss_file_to_local($file->contenthash);
-                if ($success) {
-                    log_object_location($file->contenthash, OBJECT_LOCATION_DUPLICATED);
-                    $objectcount++;
-                    $totalfilesize += $file->filesize;
-                }
-            } catch (\file_exception $e) {
-                $this->log_error($e, $file->contenthash);
-                continue;
-            } catch (S3Exception $e) {
-                $this->log_error($e, $file->contenthash);
-                continue;
-            }
-        }
-        $duration = time() - $starttime;
+            $success = $this->filesystem->copy_object_from_remote_to_local_by_hash($file->contenthash);
 
+            if ($success) {
+                $location = OBJECT_LOCATION_DUPLICATED;
+            } else {
+                $location = $this->filesystem->get_actual_object_location_by_hash($file->contenthash);
+            }
+
+            update_object_record($file->contenthash, $location);
+
+            $objectcount++;
+            $totalfilesize += $file->filesize;
+        }
+
+        $duration = time() - $starttime;
         $totalfilesize = display_size($totalfilesize);
-        $logstring = "File puller pulled $objectcount files, $totalfilesize to S3 in $duration seconds \n";
+        $logstring = "File puller processed $objectcount files, total size: $totalfilesize in $duration seconds \n";
         mtrace($logstring);
     }
 }

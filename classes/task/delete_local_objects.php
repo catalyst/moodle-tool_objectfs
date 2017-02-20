@@ -25,38 +25,33 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\object_manipulator\pusher;
-use tool_objectfs\client\sss_client;
+use tool_objectfs\object_manipulator\deleter;
 use tool_objectfs\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
-class push_to_storage extends \core\task\scheduled_task {
+class delete_local_objects extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('push_to_storage_task', 'tool_objectfs');
+        return get_string('delete_local_objects_task', 'tool_objectfs');
     }
 
     /**
      * Execute task
      */
     public function execute() {
-
-        $config = get_config('tool_objectfs');
+        $config = set_objectfs_config();
 
         if (isset($config->enabled) && $config->enabled) {
-            $client = new sss_client($config);
-            $filesystem = object_file_system::instance();
-            $filepusher = new pusher($config, $client);
-            $contenthashes = $filepusher->get_candidate_files();
-            $filepusher->execute($contenthashes);
+            $filesystem = new object_file_system();
+            $deleter = new deleter($filesystem, $config);
+            $candidatehashes = $deleter->get_candidate_objects();
+            $deleter->execute($candidatehashes);
         } else {
             mtrace(get_string('not_enabled', 'tool_objectfs'));
         }
     }
 }
-
-

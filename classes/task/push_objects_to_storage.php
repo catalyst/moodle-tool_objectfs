@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pulls files from S3.
+ * Task that pushes files to S3.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -25,34 +25,31 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\object_manipulator\puller;
-use tool_objectfs\client\sss_client;
+use tool_objectfs\object_manipulator\pusher;
 use tool_objectfs\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
-class pull_from_storage extends \core\task\scheduled_task {
+class push_objects_to_storage extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('pull_from_storage_task', 'tool_objectfs');
+        return get_string('push_objects_to_storage_task', 'tool_objectfs');
     }
 
     /**
      * Execute task
      */
     public function execute() {
-
-        $config = get_config('tool_objectfs');
+        $config = set_objectfs_config();
 
         if (isset($config->enabled) && $config->enabled) {
-            $client = new sss_client($config);
-            $filesystem = object_file_system::instance();
-            $filepuller = new puller($config, $client);
-            $contenthashes = $filepuller->get_candidate_files();
-            $filepuller->execute($contenthashes);
+            $filesystem = new object_file_system();
+            $pusher = new pusher($filesystem, $config);
+            $candidatehashes = $pusher->get_candidate_objects();
+            $pusher->execute($candidatehashes);
         } else {
             mtrace(get_string('not_enabled', 'tool_objectfs'));
         }

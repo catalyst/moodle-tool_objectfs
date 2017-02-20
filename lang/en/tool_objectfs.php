@@ -25,9 +25,9 @@
    */
 
 $string['pluginname'] = 'Object storage file System';
-$string['push_to_storage_task'] = 'S3 file system upload task';
-$string['delete_files_task'] = 'S3 file system delete local files task';
-$string['pull_from_storage_task'] = 'S3 file system download files task';
+$string['push_objects_to_storage_task'] = 'S3 file system upload task';
+$string['delete_local_objects_task'] = 'S3 file system delete local files task';
+$string['pull_objects_from_storage_task'] = 'S3 file system download files task';
 
 
 $string['generate_status_report_task'] = 'S3 file status report generator task';

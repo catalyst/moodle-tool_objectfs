@@ -34,7 +34,7 @@ define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
 define('OBJECTFS_REPORT_LOG_SIZE', 1);
 define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
-function log_object_location($contenthash, $location, $md5 = null) {
+function update_object_record($contenthash, $location, $md5 = false) {
     global $DB;
 
     $logrecord = new \stdClass();
@@ -58,22 +58,8 @@ function log_object_location($contenthash, $location, $md5 = null) {
     }
 }
 
-function save_sss_config_data($data) {
-    $config = new stdClass();
-    $config->enabled = $data->enabled;
-    $config->key = $data->key;
-    $config->secret = $data->secret;
-    $config->bucket = $data->bucket;
-    $config->region = $data->region;
-    $config->sizethreshold = $data->sizethreshold * 1024; // Convert from kb.
-    $config->minimumage = $data->minimumage;
-    $config->consistencydelay = $data->consistencydelay;
-    $config->logging = $data->logging;
-    $config->maxtaskruntime = $data->maxtaskruntime;
-    $config->deletelocal = $data->deletelocal;
-    $config->prefersss = $data->prefersss;
-
-    foreach (get_object_vars($config) as $key => $value) {
+function set_objectfs_config($config) {
+    foreach ($config as $key => $value) {
         set_config($key, $value, 'tool_objectfs');
     }
 }
@@ -94,8 +80,8 @@ function get_objectfs_config() {
 
     $storedconfig = get_config('tool_objectfs');
 
-    //Override defaults if set.
-    foreach($storedconfig as $key => $value) {
+    // Override defaults if set.
+    foreach ($storedconfig as $key => $value) {
         $config[$key] = $value;
     }
     return $config;

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Pushes files to s3 if they meet the configured criterea.
+ * Pushes files to remote storage if they meet the configured criterea.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -34,14 +34,14 @@ use Aws\S3\Exception\S3Exception;
 class pusher extends manipulator {
 
     /**
-     * Size threshold for pushing files to S3 in bytes.
+     * Size threshold for pushing files to remote in bytes.
      *
      * @var int
      */
     private $sizethreshold;
 
     /**
-     * Minimum age of a file to be pushed to S3 in seconds.
+     * Minimum age of a file to be pushed to remote in seconds.
      *
      * @var int
      */
@@ -50,14 +50,14 @@ class pusher extends manipulator {
     /**
      * Pusher constructor.
      *
-     * @param sss_client $client S3 client
-     * @param object_file_system $filesystem S3 file system
-     * @param object $config sssfs config.
+     * @param object_client $client remote object client
+     * @param object_file_system $filesystem objectfs file system
+     * @param object $config objectfs config.
      */
-    public function __construct($config, $client) {
-        parent::__construct($client, $config->maxtaskruntime);
-        $this->sizethreshold = $config->sizethreshold;
-        $this->minimumage = $config->minimumage;
+    public function __construct($filesystem, $config) {
+        parent::__construct($filesystem, $config);
+        $this->sizethreshold = $config['sizethreshold'];
+        $this->minimumage = $config['minimumage'];
     }
 
     /**
@@ -69,7 +69,7 @@ class pusher extends manipulator {
      *
      * @return array candidate contenthashes
      */
-    public function get_candidate_files() {
+    public function get_candidate_objects() {
         global $DB;
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
@@ -78,7 +78,7 @@ class pusher extends manipulator {
               GROUP BY f.contenthash,
                        f.filesize,
                        o.location
-                HAVING MIN(f.timecreated) < ?
+                HAVING MIN(f.timecreated) <= ?
                        AND MAX(f.filesize) > ?
                        AND MAX(f.filesize) < 5000000000
                        AND (o.location IS NULL OR o.location = ?)';
@@ -97,58 +97,13 @@ class pusher extends manipulator {
         return $files;
     }
 
-    /**
-     * Copy file from local to s3 storage.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return bool success of operation
-     */
-    private function copy_local_file_to_sss($contenthash) {
-        $localfilepath = $filepath = $this->get_local_fullpath_from_hash($contenthash);
-        $sssfilepath = $this->client->get_sss_fullpath_from_hash($contenthash);
-
-        if (is_readable($sssfilepath)) {
-            if (is_readable($localfilepath)) {
-                $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
-                log_file_state($contenthash, OBJECT_LOCATION_DUPLICATED, $filemd5);
-            } else {
-                $filemd5 = $this->client->get_object_md5_from_key($contenthash);
-                log_file_state($contenthash, OBJECT_LOCATION_REMOTE, $filemd5);
-            }
-        } else {
-            if (is_readable($localfilepath)) {
-                $filemd5 = $this->get_local_md5_from_contenthash($contenthash);
-                copy($localfilepath, $sssfilepath);
-                log_file_state($contenthash, OBJECT_LOCATION_DUPLICATED, $filemd5);
-            } else {
-                log_file_state($contenthash, OBJECT_LOCATION_ERROR);
-            }
-        }
-    }
-
 
     /**
-     * Calculated md5 of file.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return string md5 hash of file
-     */
-    private function get_local_md5_from_contenthash($contenthash) {
-        $localfilepath = $this->get_local_fullpath_from_hash($contenthash);
-        $md5 = md5_file($localfilepath);
-        return $md5;
-    }
-
-    /**
-     * Pushes files from local file system to S3.
+     * Pushes files from local file system to remote.
      *
      * @param  array $candidatehashes content hashes to push
      */
     public function execute($files) {
-        global $DB;
-
         $starttime = time();
         $objectcount = 0;
         $totalfilesize = 0;
@@ -158,17 +113,24 @@ class pusher extends manipulator {
                 break;
             }
 
-            $success = $this->copy_local_file_to_sss($file->contenthash);
+            $success = $this->filesystem->copy_object_from_local_to_remote_by_hash($file->contenthash);
 
             if ($success) {
-                $filecount++;
-                $totalfilesize += $file->filesize;
+                $location = OBJECT_LOCATION_DUPLICATED;
+            } else {
+                $location = $this->filesystem->get_actual_object_location_by_hash($file->contenthash);
             }
-        }
-        $duration = time() - $starttime;
 
+            $md5 = $this->filesystem->get_md5_from_contenthash($file->contenthash);
+            update_object_record($file->contenthash, $location, $md5);
+
+            $objectcount++;
+            $totalfilesize += $file->filesize;
+        }
+
+        $duration = time() - $starttime;
         $totalfilesize = display_size($totalfilesize);
-        $logstring = "File pusher pushed $objectcount files, $totalfilesize to S3 in $duration seconds \n";
+        $logstring = "File pusher processed $objectcount files, total size: $totalfilesize in $duration seconds \n";
         mtrace($logstring);
     }
 }
