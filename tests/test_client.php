@@ -31,7 +31,7 @@ class tool_objectfs_test_client implements object_client {
         }
     }
     public function register_stream_wrapper() {
-        //Do nothing - we are using standard file paths.
+        // Do nothing - we are using standard file paths.
     }
 
     public function check_object_md5($filekey, $expectedmd5) {

@@ -25,12 +25,12 @@
 
 namespace tool_objectfs\client;
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot . '/admin/tool/objectfs/sdk/aws-autoloader.php');
 
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
-
-defined('MOODLE_INTERNAL') || die();
 
 define('AWS_API_VERSION', '2006-03-01');
 

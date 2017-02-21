@@ -162,7 +162,7 @@ class object_file_system extends \file_system_filedir {
         $localpath = $this->get_local_path_from_hash($contenthash);
         $remotepath = $this->get_remote_path_from_hash($contenthash);
         if (is_readable($remotepath) && !is_readable($localpath)) {
-            //TODO: lock this up.
+            // TODO: lock this up.
             return copy($remotepath, $localpath);
         }
         return false;
@@ -172,7 +172,7 @@ class object_file_system extends \file_system_filedir {
         $localpath = $this->get_local_path_from_hash($contenthash);
         $remotepath = $this->get_remote_path_from_hash($contenthash);
         if (is_readable($localpath) && !is_readable($remotepath)) {
-            //TODO: lock this up.
+            // TODO: lock this up.
             return copy($localpath, $remotepath);
         }
         return false;

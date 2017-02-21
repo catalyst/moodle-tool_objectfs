@@ -76,7 +76,7 @@ function get_objectfs_config() {
                       'consistencydelay'  => 10 * 60,
                       'maxtaskruntime'    => 60,
                       'logging'           => 0,
-                      'preferremote'         => 0);
+                      'preferremote'      => 0);
 
     $storedconfig = get_config('tool_objectfs');
 
@@ -85,10 +85,4 @@ function get_objectfs_config() {
         $config[$key] = $value;
     }
     return $config;
-}
-
-function get_object_location_from_hash($contenthash) {
-    global $DB;
-    $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $contenthash));
-    return $location;
 }
