@@ -158,22 +158,68 @@ class object_file_system extends \file_system_filedir {
         }
     }
 
+    protected function acquire_object_lock($contenthash) {
+        $timeout = 600; // 10 minutes before giving up.
+        $resource = "object: $contenthash";
+        $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_object');
+        $lock = $lockfactory->get_lock($resource, $timeout);
+        return $lock;
+    }
+
     public function copy_object_from_remote_to_local_by_hash($contenthash) {
-        $localpath = $this->get_local_path_from_hash($contenthash);
-        $remotepath = $this->get_remote_path_from_hash($contenthash);
-        if (is_readable($remotepath) && !is_readable($localpath)) {
-            // TODO: lock this up.
-            return copy($remotepath, $localpath);
+        $location = $this->get_actual_object_location_by_hash($contenthash);
+        if ($location === OBJECT_LOCATION_REMOTE) {
+
+            $localpath = $this->get_local_path_from_hash($contenthash);
+            $remotepath = $this->get_remote_path_from_hash($contenthash);
+
+            $objectlock = $this->acquire_object_lock($contenthash);
+
+            // Lock is still held by something.
+            if (!$objectlock) {
+                return false;
+            }
+
+            // While waiting for lock, file was moved.
+            if (is_readable($localpath)) {
+                $objectlock->release();
+                return true;
+            }
+
+            $result = copy($remotepath, $localpath);
+
+            $objectlock->release();
+
+            return $result;
         }
         return false;
     }
 
     public function copy_object_from_local_to_remote_by_hash($contenthash) {
-        $localpath = $this->get_local_path_from_hash($contenthash);
-        $remotepath = $this->get_remote_path_from_hash($contenthash);
-        if (is_readable($localpath) && !is_readable($remotepath)) {
-            // TODO: lock this up.
-            return copy($localpath, $remotepath);
+        $location = $this->get_actual_object_location_by_hash($contenthash);
+        if ($location === OBJECT_LOCATION_LOCAL) {
+
+            $localpath = $this->get_local_path_from_hash($contenthash);
+            $remotepath = $this->get_remote_path_from_hash($contenthash);
+
+            $objectlock = $this->acquire_object_lock($contenthash);
+
+            // Lock is still held by something.
+            if (!$objectlock) {
+                return false;
+            }
+
+            // While waiting for lock, file was moved.
+            if (is_readable($remotepath)) {
+                $objectlock->release();
+                return true;
+            }
+
+            $result = copy($localpath, $remotepath);
+
+            $objectlock->release();
+
+            return $result;
         }
         return false;
     }
