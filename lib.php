@@ -17,7 +17,7 @@
 /**
  * S3 file system lib
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,16 +25,16 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-define('SSS_FILE_LOCATION_ERROR', -1);
-define('SSS_FILE_LOCATION_LOCAL', 0);
-define('SSS_FILE_LOCATION_DUPLICATED', 1);
-define('SSS_FILE_LOCATION_EXTERNAL', 2);
+define('OBJECT_LOCATION_ERROR', -1);
+define('OBJECT_LOCATION_LOCAL', 0);
+define('OBJECT_LOCATION_DUPLICATED', 1);
+define('OBJECT_LOCATION_REMOTE', 2);
 
-define('SSSFS_REPORT_FILE_LOCATION', 0);
-define('SSSFS_REPORT_LOG_SIZE', 1);
-define('SSSFS_REPORT_MIME_TYPE', 2);
+define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
+define('OBJECTFS_REPORT_LOG_SIZE', 1);
+define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
-function log_file_state($contenthash, $location, $md5 = null) {
+function update_object_record($contenthash, $location, $md5 = false) {
     global $DB;
 
     $logrecord = new \stdClass();
@@ -42,7 +42,7 @@ function log_file_state($contenthash, $location, $md5 = null) {
     $logrecord->timeduplicated = time();
     $logrecord->location = $location;
 
-    $existing = $DB->get_record('tool_sssfs_filestate', array('contenthash' => $contenthash));
+    $existing = $DB->get_record('tool_objectfs_objects', array('contenthash' => $contenthash));
 
     if ($md5) {
         $logrecord->md5 = $md5;
@@ -52,28 +52,38 @@ function log_file_state($contenthash, $location, $md5 = null) {
 
     if ($existing) {
         $logrecord->id = $existing->id;
-        $DB->update_record('tool_sssfs_filestate', $logrecord);
+        $DB->update_record('tool_objectfs_objects', $logrecord);
     } else {
-        $DB->insert_record('tool_sssfs_filestate', $logrecord);
+        $DB->insert_record('tool_objectfs_objects', $logrecord);
     }
 }
 
-function save_sss_config_data($data) {
-    $config = new stdClass();
-    $config->enabled = $data->enabled;
-    $config->key = $data->key;
-    $config->secret = $data->secret;
-    $config->bucket = $data->bucket;
-    $config->region = $data->region;
-    $config->sizethreshold = $data->sizethreshold * 1024; // Convert from kb.
-    $config->minimumage = $data->minimumage;
-    $config->consistencydelay = $data->consistencydelay;
-    $config->logging = $data->logging;
-    $config->maxtaskruntime = $data->maxtaskruntime;
-    $config->deletelocal = $data->deletelocal;
-    $config->prefersss = $data->prefersss;
-
-    foreach (get_object_vars($config) as $key => $value) {
-        set_config($key, $value, 'tool_sssfs');
+function set_objectfs_config($config) {
+    foreach ($config as $key => $value) {
+        set_config($key, $value, 'tool_objectfs');
     }
+}
+
+function get_objectfs_config() {
+    $config = new stdClass;
+    $config->enabled = 0;
+    $config->key = '';
+    $config->secret = '';
+    $config->bucket = '';
+    $config->region = 'us-east-1';
+    $config->sizethreshold = 1024 * 10;
+    $config->minimumage = 7 * 24 * 60 * 60;
+    $config->deletelocal = 0;
+    $config->consistencydelay = 10 * 60;
+    $config->maxtaskruntime = 60;
+    $config->logging = 0;
+    $config->preferremote = 0;
+
+    $storedconfig = get_config('tool_objectfs');
+
+    // Override defaults if set.
+    foreach ($storedconfig as $key => $value) {
+        $config->$key = $value;
+    }
+    return $config;
 }

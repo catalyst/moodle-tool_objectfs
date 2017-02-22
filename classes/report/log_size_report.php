@@ -17,20 +17,20 @@
 /**
  * Log size report
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\report;
+namespace tool_objectfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class log_size_report extends sss_report {
+class log_size_report extends object_report {
 
     public function __construct() {
-        $this->reporttype = SSSFS_REPORT_LOG_SIZE;
+        $this->reporttype = OBJECTFS_REPORT_LOG_SIZE;
     }
 
     public function calculate_report_data() {
@@ -39,8 +39,8 @@ class log_size_report extends sss_report {
         $data = array();
 
         $sql = 'SELECT log logindex,
-                       sum(filesize) filesum,
-                       count(*) filecount
+                       sum(filesize) objectsum,
+                       count(*) objectcount
                   FROM (SELECT DISTINCT contenthash, filesize, floor(log(2,filesize) * 4) AS log
                             FROM {files}
                             WHERE filesize != 0) d
@@ -49,7 +49,7 @@ class log_size_report extends sss_report {
         $logdata = $DB->get_records_sql($sql);
 
         foreach ($logdata as $record) {
-            $data[$record->logindex] = $this->create_report_data_record(SSSFS_REPORT_LOG_SIZE, $record->logindex, $record->filecount, $record->filesum);
+            $data[$record->logindex] = $this->create_report_data_record(OBJECTFS_REPORT_LOG_SIZE, $record->logindex, $record->objectcount, $record->objectsum);
         }
 
         return $data;

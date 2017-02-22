@@ -15,48 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * object_file_system abstract class.
  *
- * @package   tool_sssfs
+ * Remote object storage providers extent this class.
+ * At minimum you need to impletment get_remote_client.
+ *
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
-
-use tool_sssfs\file_manipulators\pusher;
-use tool_sssfs\sss_client;
-use tool_sssfs\sss_file_system;
+namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-class push_to_sss extends \core\task\scheduled_task {
+use tool_objectfs\object_file_system;
+require_once(__DIR__ . '/test_client.php');
+require_once(__DIR__ . '/integration_test_client.php');
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('push_to_sss_task', 'tool_sssfs');
-    }
+class test_file_system extends object_file_system {
 
-    /**
-     * Execute task
-     */
-    public function execute() {
-
-        $config = get_config('tool_sssfs');
-
-        if (isset($config->enabled) && $config->enabled) {
-            $client = new sss_client($config);
-            $filesystem = sss_file_system::instance();
-            $filepusher = new pusher($config, $client);
-            $contenthashes = $filepusher->get_candidate_files();
-            $filepusher->execute($contenthashes);
+    protected function get_remote_client($config) {
+        if (file_exists(__DIR__ . '/integration_test_config.php')) {
+            $integrationconfig = include('integration_test_config.php');
+            $integrationconfig = (object) $integrationconfig; // Cast to object from array.
+            $client = new integration_test_client($integrationconfig);
         } else {
-            mtrace(get_string('not_enabled', 'tool_sssfs'));
+            $client = new test_client($config);
         }
+        return $client;
     }
+
 }
-
-

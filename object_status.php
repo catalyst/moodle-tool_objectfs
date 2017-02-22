@@ -17,7 +17,7 @@
 /**
  * File status page - stats on where files are b/w local file system and s3
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,15 +27,15 @@ require_once(__DIR__ . '/../../../config.php');
 require_once( __DIR__ . '/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-admin_externalpage_setup('tool_sssfs');
+admin_externalpage_setup('tool_objectfs');
 
-$output = $PAGE->get_renderer('tool_sssfs');
+$output = $PAGE->get_renderer('tool_objectfs');
 
 echo $output->header();
 
-echo $output->heading(get_string('file_status:page', 'tool_sssfs'));
+echo $output->heading(get_string('object_status:page', 'tool_objectfs'));
 
-$filestatus = new \tool_sssfs\renderables\sss_file_status();
+$filestatus = new \tool_objectfs\renderable\object_status();
 
 echo $output->render($filestatus);
 

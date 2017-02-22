@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Object client interface.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,11 +23,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_objectfs\client;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2016122000;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2016122000;      // Same as version
-$plugin->requires  = 2014051217;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
-
+interface object_client {
+    public function __construct($config);
+    public function register_stream_wrapper();
+    public function get_remote_md5_from_hash($contenthash);
+    public function get_remote_fullpath_from_hash($contenthash);
+    public function test_connection();
+    public function permissions_check();
+}

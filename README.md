@@ -1,8 +1,8 @@
-<a href="https://travis-ci.org/catalyst/moodle-tool_sssfs">
-<img src="https://travis-ci.org/catalyst/moodle-tool_sssfs.svg?branch=master">
+<a href="https://travis-ci.org/catalyst/moodle-tool_objectfs">
+<img src="https://travis-ci.org/catalyst/moodle-tool_objectfs.svg?branch=master">
 </a>
 
-# moodle-tool_sssfs
+# moodle-tool_objectfs
 
 An AWS S3 file system for Moodle. This plugin implements the file system as well as the background tasks which pushes files to and from S3.
 
@@ -10,11 +10,11 @@ An AWS S3 file system for Moodle. This plugin implements the file system as well
 - Moodle version 31 with this patch applied from this tracker: https://tracker.moodle.org/browse/MDL-46375
 
 ## Installation
-1. Clone this repository into admin/tool/sssfs
+1. Clone this repository into admin/tool/objectfs
 2. Install the plugin throught the moodle GUI.
 3. Place the following line inside your moodle config.php:
 <pre>
-$CFG->filesystem_handler_class = '\tool_sssfs\sss_file_system';
+$CFG->alternative_file_system_class = '\tool_objectfs\object_file_system';
 </pre>
 
 ## Moodle Configuration

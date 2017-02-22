@@ -15,41 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File status renderable object.
+ * object_file_system abstract class.
  *
- * @package   tool_sssfs
+ * Remote object storage providers extent this class.
+ * At minimum you need to impletment get_remote_client.
+ *
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\renderables;
+namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-class sss_file_status implements \renderable {
+use tool_objectfs\object_file_system;
+use tool_objectfs\client\s3_client;
 
-    private $reports;
-    private $reportclasses;
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-    public function __construct () {
-        $reportclasses = array('file_location_report',
-                               'log_size_report',
-                               'mime_type_report');
+class s3_file_system extends object_file_system {
 
-        foreach ($reportclasses as $reportclass) {
-            $reportclass = "tool_sssfs\\report\\{$reportclass}";
-            $report = new $reportclass();
-            $reporttype = $report->get_type();
-            $this->reports[$reporttype] = $report->get_report_data();
-        }
+    protected function get_remote_client($config) {
+        $s3client = new s3_client($config);
+        return $s3client;
     }
-
-    public function get_report($reporttype) {
-        return $this->reports[$reporttype];
-    }
-
-
-
-
 }

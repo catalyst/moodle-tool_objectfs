@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * tool_sssfs tasks
+ * tool_objectfs tasks
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,36 +27,36 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = array(
     array(
-        'classname' => 'tool_sssfs\task\push_to_sss',
+        'classname' => 'tool_objectfs\task\push_objects_to_storage',
         'blocking'  => 0,
-        'minute'    => '*',
+        'minute'    => '*/5',
         'hour '     => '*',
         'day'       => '*',
         'dayofweek' => '*',
         'month'     => '*'
     ),
     array(
-        'classname' => 'tool_sssfs\task\generate_status_report',
+        'classname' => 'tool_objectfs\task\generate_status_report',
         'blocking'  => 0,
-        'minute'    => '7',
+        'minute'    => '17',
         'hour '     => '*',
         'day'       => '*',
         'dayofweek' => '*',
         'month'     => '*'
     ),
     array(
-        'classname' => 'tool_sssfs\task\clean_up_files',
+        'classname' => 'tool_objectfs\task\delete_local_objects',
         'blocking'  => 0,
-        'minute'    => '7',
+        'minute'    => '*/5',
         'hour '     => '*',
         'day'       => '*',
         'dayofweek' => '*',
         'month'     => '*'
     ),
     array(
-        'classname' => 'tool_sssfs\task\pull_from_sss',
+        'classname' => 'tool_objectfs\task\pull_objects_from_storage',
         'blocking'  => 0,
-        'minute'    => '*',
+        'minute'    => '*/5',
         'hour '     => '*',
         'day'       => '*',
         'dayofweek' => '*',

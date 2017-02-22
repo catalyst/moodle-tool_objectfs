@@ -17,20 +17,20 @@
 /**
  * S3 client.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs;
+namespace tool_objectfs\client;
 
-require_once(__DIR__ . '/../sdk/aws-autoloader.php');
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/admin/tool/objectfs/sdk/aws-autoloader.php');
 
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
-
-defined('MOODLE_INTERNAL') || die();
 
 define('AWS_API_VERSION', '2006-03-01');
 
@@ -38,16 +38,11 @@ define('AWS_CAN_READ_OBJECT', 0);
 define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
-class sss_client {
+class s3_client implements object_client {
 
     protected $client;
     protected $bucket;
 
-    /**
-     * Initialises s3 client to use.
-     *
-     * @param object $config sssfs config
-     */
     public function __construct($config) {
         $this->bucket = $config->bucket;
         $this->client = S3Client::factory(array(
@@ -55,35 +50,18 @@ class sss_client {
                 'region' => $config->region,
                 'version' => AWS_API_VERSION
         ));
+    }
 
+    public function register_stream_wrapper() {
         // Registers 's3://bucket' as a prefix for file actions.
         $this->client->registerStreamWrapper();
     }
 
-    /**
-     * Checks file is in s3 and its size matches expeted.
-     * We could hash the contents and compare, but we
-     * do this to keep executions speed low.
-     *
-     * @param  string $filekey contenthash used as key in s3.
-     * @param  int $expectedsize expected size of the file.
-     * @return boolean true on success, false on failure
-     * @throws S3Exceptions.
-     */
-    public function check_file($filekey, $expectedmd5) {
-        $md5 = $this->get_object_md5_from_key($filekey);
-
-        if ($md5 == $expectedmd5) {
-            return true;
-        }
-        return false;
-    }
-
-    public function get_object_md5_from_key($objectkey) {
+    public function get_remote_md5_from_hash($contenthash) {
         try {
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => $objectkey));
+                            'Key' => $contenthash));
         } catch (S3Exception $e) {
             return false;
         }
@@ -99,26 +77,15 @@ class sss_client {
      * @param  string $contenthash contenthash used as key in s3.
      * @return string fullpath to s3 object.
      */
-    public function get_sss_fullpath_from_hash($contenthash) {
-        $l1 = $contenthash[0] . $contenthash[1];
-        $l2 = $contenthash[2] . $contenthash[3];
-        $filepath = $this->get_sss_filepath_from_hash($contenthash);
+    public function get_remote_fullpath_from_hash($contenthash) {
+        $filepath = $this->get_remote_filepath_from_hash($contenthash);
         return "s3://$this->bucket/$filepath";
     }
 
-    public function get_sss_filepath_from_hash($contenthash) {
+    protected function get_remote_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
         return "$l1/$l2/$contenthash";
-    }
-
-    public static function path_is_local($path) {
-        $sssprefix = 's3://';
-        $pathprefix = substr($path, 0, 5);
-        if ($sssprefix === $pathprefix) {
-            return false;
-        }
-        return true;
     }
 
     /**

@@ -17,33 +17,33 @@
 /**
  * File status page - stats on where files are b/w local file system and s3
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \tool_sssfs\form\settings_form;
+use tool_objectfs\form\settings_form;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once( __DIR__ . '/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-admin_externalpage_setup('tool_sssfs_settings');
+admin_externalpage_setup('tool_objectfs_settings');
 
-$output = $PAGE->get_renderer('tool_sssfs');
+$output = $PAGE->get_renderer('tool_objectfs');
 
-$config = get_config('tool_sssfs');
+$config = get_config('tool_objectfs');
 
 $form = new settings_form(null, array('config' => $config));
 
 if ($data = $form->get_data()) {
-    save_sss_config_data($data);
-    redirect(new moodle_url('/admin/tool/sssfs/index.php'));
+    set_objectfs_config($data);
+    redirect(new moodle_url('/admin/tool/objectfs/index.php'));
 }
 
 echo $output->header();
-echo $output->heading(get_string('pluginname', 'tool_sssfs'));
+echo $output->heading(get_string('pluginname', 'tool_objectfs'));
 $form->display();
 echo $output->footer();
 

@@ -17,20 +17,20 @@
 /**
  * Mime type report
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\report;
+namespace tool_objectfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class mime_type_report extends sss_report {
+class mime_type_report extends object_report {
 
     public function __construct() {
-        $this->reporttype = SSSFS_REPORT_MIME_TYPE;
+        $this->reporttype = OBJECTFS_REPORT_MIME_TYPE;
     }
 
     public function calculate_report_data() {
@@ -38,7 +38,7 @@ class mime_type_report extends sss_report {
 
         $data = array();
 
-        $sql = "SELECT sum(filesize) as filesum, filetype as mimetype, count(*) as filecount
+        $sql = "SELECT sum(filesize) as objectsum, filetype as mimetype, count(*) as objectcount
                 FROM (SELECT distinct filesize,
                         CASE
                             WHEN mimetype = 'application/pdf'                                   THEN 'pdf'
@@ -68,7 +68,7 @@ class mime_type_report extends sss_report {
         $mimedata = $DB->get_records_sql($sql);
 
         foreach ($mimedata as $record) {
-            $data[$record->mimetype] = $this->create_report_data_record(SSSFS_REPORT_MIME_TYPE, $record->mimetype, $record->filecount, $record->filesum);
+            $data[$record->mimetype] = $this->create_report_data_record(OBJECTFS_REPORT_MIME_TYPE, $record->mimetype, $record->objectcount, $record->objectsum);
         }
 
         return $data;

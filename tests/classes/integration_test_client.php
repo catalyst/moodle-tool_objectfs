@@ -14,20 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version information.
- *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2016122000;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2016122000;      // Same as version
-$plugin->requires  = 2014051217;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+use tool_objectfs\object_file_system;
+use tool_objectfs\client\s3_client;
 
+class integration_test_client extends s3_client {
+
+    /**
+     * Returns s3 fullpath to use with php file functions.
+     *
+     * @param  string $contenthash contenthash used as key in s3.
+     * @return string fullpath to s3 object.
+     */
+    public function get_remote_fullpath_from_hash($contenthash) {
+        $filepath = $this->get_remote_filepath_from_hash($contenthash);
+        return "s3://$this->bucket/test/$filepath";
+    }
+}

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * Task that pulls files from S3.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -25,41 +25,41 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\renderable\object_status;
+use tool_objectfs\object_manipulator\puller;
+use tool_objectfs\object_file_system;
+use tool_objectfs\s3_file_system;
 
-require_once( __DIR__ . '/../../lib.php');
 
 defined('MOODLE_INTERNAL') || die();
 
-class generate_status_report extends \core\task\scheduled_task {
+require_once( __DIR__ . '/../../lib.php');
+require_once(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
+
+class pull_objects_from_storage extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('generate_status_report_task', 'tool_objectfs');
+        return get_string('pull_objects_from_storage_task', 'tool_objectfs');
     }
 
     /**
      * Execute task
      */
     public function execute() {
-
         $config = get_objectfs_config();
 
-        $reportclasses = array('object_location_report',
-                               'log_size_report',
-                               'mime_type_report');
-
         if (isset($config->enabled) && $config->enabled) {
-            foreach ($reportclasses as $reportclass) {
-                $reportclass = "tool_objectfs\\report\\{$reportclass}";
-                $report = new $reportclass();
-                $data = $report->calculate_report_data();
-                $report->save_report_data($data);
-            }
+            $filesystem = new s3_file_system();
+            $puller = new puller($filesystem, $config);
+            $candidatehashes = $puller->get_candidate_objects();
+            $puller->execute($candidatehashes);
         } else {
             mtrace(get_string('not_enabled', 'tool_objectfs'));
         }
     }
 }
+
+

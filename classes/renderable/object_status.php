@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * File status renderable object.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,11 +23,33 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_objectfs\renderable;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2016122000;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2016122000;      // Same as version
-$plugin->requires  = 2014051217;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+class object_status implements \renderable {
 
+    private $reports;
+    private $reportclasses;
+
+    public function __construct () {
+        $reportclasses = array('object_location_report',
+                               'log_size_report',
+                               'mime_type_report');
+
+        foreach ($reportclasses as $reportclass) {
+            $reportclass = "tool_objectfs\\report\\{$reportclass}";
+            $report = new $reportclass();
+            $reporttype = $report->get_type();
+            $this->reports[$reporttype] = $report->get_report_data();
+        }
+    }
+
+    public function get_report($reporttype) {
+        return $this->reports[$reporttype];
+    }
+
+
+
+
+}

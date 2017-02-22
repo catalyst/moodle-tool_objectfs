@@ -17,22 +17,21 @@
 /**
  * Deletes files that are old enough and are in S3.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\file_manipulators;
+namespace tool_objectfs\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/sssfs/lib.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-use core_files\filestorage\file_exception;
 use Aws\S3\Exception\S3Exception;
 
-class cleaner extends manipulator {
+class deleter extends manipulator {
 
     /**
      * How long file must exist after
@@ -44,21 +43,21 @@ class cleaner extends manipulator {
 
     /**
      * Whether to delete local files
-     * once they are in s3.
+     * once they are in remote.
      *
      * @var bool
      */
     private $deletelocal;
 
     /**
-     * Cleaner constructor.
+     * deleter constructor.
      *
      * @param sss_client $client S3 client
-     * @param sss_file_system $filesystem S3 file system
+     * @param object_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
-    public function __construct($config, $client) {
-        parent::__construct($client, $config->maxtaskruntime);
+    public function __construct($filesystem, $config) {
+        parent::__construct($filesystem, $config);
         $this->consistencydelay = $config->consistencydelay;
         $this->deletelocal = $config->deletelocal;
     }
@@ -70,7 +69,7 @@ class cleaner extends manipulator {
      *
      * @return array candidate contenthashes
      */
-    public function get_candidate_files() {
+    public function get_candidate_objects() {
         global $DB;
 
         if ($this->deletelocal == 0) {
@@ -80,41 +79,30 @@ class cleaner extends manipulator {
 
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize,
-                       sf.md5
+                       o.md5
                   FROM {files} f
-             LEFT JOIN {tool_sssfs_filestate} sf ON f.contenthash = sf.contenthash
-                 WHERE sf.timeduplicated <= ?
-                       AND sf.location = ?
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                 WHERE o.timeduplicated <= ?
+                       AND o.location = ?
               GROUP BY f.contenthash,
                        f.filesize,
-                       sf.location,
-                       sf.md5';
+                       o.location,
+                       o.md5';
 
         $consistancythrehold = time() - $this->consistencydelay;
-        $params = array($consistancythrehold, SSS_FILE_LOCATION_DUPLICATED);
+        $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED);
 
         $starttime = time();
         $files = $DB->get_records_sql($sql, $params);
         $duration = time() - $starttime;
         $count = count($files);
 
-        $logstring = "File cleaner query took $duration seconds to find $count files \n";
+        $logstring = "File deleter query took $duration seconds to find $count files \n";
         mtrace($logstring);
 
         return $files;
     }
 
-    /**
-     * Deletes local file based on it's content hash.
-     *
-     * @param  string $contenthash files contenthash
-     *
-     * @return bool success of operation
-     */
-    private function delete_local_file_from_contenthash($contenthash) {
-        $filepath = $this->get_local_fullpath_from_hash($contenthash);
-        return unlink($filepath);
-    }
 
     /**
      * Cleans local file system of candidate hash files.
@@ -125,7 +113,7 @@ class cleaner extends manipulator {
         global $DB;
 
         $starttime = time();
-        $filecount = 0;
+        $objectcount = 0;
         $totalfilesize = 0;
 
         if ($this->deletelocal == 0) {
@@ -134,37 +122,28 @@ class cleaner extends manipulator {
         }
 
         foreach ($files as $file) {
-
             if (time() >= $this->finishtime) {
                 break;
             }
 
-            try {
-                $sssfilepath = $this->client->get_sss_filepath_from_hash($file->contenthash);
-                $fileinsss = $this->client->check_file($sssfilepath, $file->md5);
-                if ($fileinsss) {
-                    $success = $this->delete_local_file_from_contenthash($file->contenthash);
-                    if ($success) {
-                        log_file_state($file->contenthash, SSS_FILE_LOCATION_EXTERNAL);
-                        $filecount++;
-                        $totalfilesize += $file->filesize;
-                    }
-                } else {
-                    mtrace("File not in sss: $sssfilepath. Setting state back to local\n");
-                    log_file_state($file->contenthash, SSS_FILE_LOCATION_LOCAL);
-                }
-            } catch (file_exception $e) {
-                $this->log_error($e, $file->contenthash);
-                continue;
-            } catch (S3Exception $e) {
-                $this->log_error($e, $file->contenthash);
-                continue;
+            $success = $this->filesystem->delete_object_from_local_by_hash($file->contenthash);
+
+            if ($success) {
+                $location = OBJECT_LOCATION_REMOTE;
+            } else {
+                $location = $this->filesystem->get_actual_object_location_by_hash($file->contenthash);
             }
+
+            update_object_record($file->contenthash, $location);
+
+            $objectcount++;
+            $totalfilesize += $file->filesize;
         }
+
         $duration = time() - $starttime;
 
         $totalfilesize = display_size($totalfilesize);
-        $logstring = "File cleaner cleaned $filecount files, $totalfilesize in $duration seconds \n";
+        $logstring = "File deleter processed $objectcount files, total size: $totalfilesize in $duration seconds \n";
         mtrace($logstring);
     }
 }

@@ -15,46 +15,49 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pulls files from S3.
+ * Task that pushes files to S3.
  *
- * @package   tool_sssfs
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_sssfs\task;
+namespace tool_objectfs\task;
 
-use tool_sssfs\file_manipulators\puller;
-use tool_sssfs\sss_client;
-use tool_sssfs\sss_file_system;
+use tool_objectfs\object_manipulator\pusher;
+use tool_objectfs\object_file_system;
+use tool_objectfs\s3_file_system;
+
 
 defined('MOODLE_INTERNAL') || die();
 
-class pull_from_sss extends \core\task\scheduled_task {
+require_once( __DIR__ . '/../../lib.php');
+require_once(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
+
+class push_objects_to_storage extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('pull_from_sss_task', 'tool_sssfs');
+        return get_string('push_objects_to_storage_task', 'tool_objectfs');
     }
 
     /**
      * Execute task
      */
     public function execute() {
-
-        $config = get_config('tool_sssfs');
+        $config = get_objectfs_config();
 
         if (isset($config->enabled) && $config->enabled) {
-            $client = new sss_client($config);
-            $filesystem = sss_file_system::instance();
-            $filepuller = new puller($config, $client);
-            $contenthashes = $filepuller->get_candidate_files();
-            $filepuller->execute($contenthashes);
+            $filesystem = new s3_file_system();
+            $pusher = new pusher($filesystem, $config);
+            $candidatehashes = $pusher->get_candidate_objects();
+            $pusher->execute($candidatehashes);
         } else {
-            mtrace(get_string('not_enabled', 'tool_sssfs'));
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
         }
     }
 }
