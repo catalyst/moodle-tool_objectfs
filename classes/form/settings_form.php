@@ -88,7 +88,7 @@ class settings_form extends \moodleform {
         $mform->addHelpButton('enabled', 'settings:enabled', 'tool_objectfs');
 
         global $CFG;
-        if (!isset($CFG->filesystem_handler_class) || $CFG->filesystem_handler_class !== '\tool_objectfs\object_file_system') {
+        if (!isset($CFG->alternative_file_system_class) || $CFG->alternative_file_system_class !== '\tool_objectfs\s3_file_system') {
             $mform->addElement('html', $OUTPUT->notification(get_string('settings:handlernotset', 'tool_objectfs'), 'notifyproblem'));
         }
 
