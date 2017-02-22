@@ -44,7 +44,7 @@ class generate_status_report extends \core\task\scheduled_task {
      */
     public function execute() {
 
-        $config = get_config('tool_objectfs');
+        $config = get_objectfs_config();
 
         $reportclasses = array('object_location_report',
                                'log_size_report',

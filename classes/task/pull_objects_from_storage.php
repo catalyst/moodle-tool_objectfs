@@ -43,7 +43,7 @@ class pull_objects_from_storage extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        $config = set_objectfs_config();
+        $config = get_objectfs_config();
 
         if (isset($config->enabled) && $config->enabled) {
             $filesystem = new object_file_system();
