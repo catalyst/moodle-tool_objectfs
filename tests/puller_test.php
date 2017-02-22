@@ -21,7 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 use tool_objectfs\object_file_system;
 use tool_objectfs\object_manipulator\puller;
 
-require_once(__DIR__ . '/test_client.php');
+require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class puller_testcase extends tool_objectfs_testcase {

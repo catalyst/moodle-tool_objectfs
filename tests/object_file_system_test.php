@@ -20,7 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\object_file_system;
 
-require_once(__DIR__ . '/test_client.php');
+require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class object_file_system_testcase extends tool_objectfs_testcase {

@@ -15,6 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * object_file_system abstract class.
+ *
+ * Remote object storage providers extent this class.
+ * At minimum you need to impletment get_remote_client.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -29,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
 
-class object_file_system extends \file_system_filedir {
+abstract class object_file_system extends \file_system_filedir {
 
     private $remoteclient;
     private $preferremote;
@@ -45,18 +49,7 @@ class object_file_system extends \file_system_filedir {
         $this->preferremote = $config['preferremote'];
     }
 
-    private function get_remote_client($config) {
-        global $CFG;
-        if (isset($CFG->objectfs_remote_client_class)) {
-            $clientclass = $CFG->objectfs_remote_client_class;
-        } else {
-            $clientclass = '\tool_objectfs\client\s3_client';
-        }
-
-        $remoteclient = new $clientclass($config);
-
-        return $remoteclient;
-    }
+    protected abstract function get_remote_client($config);
 
     protected function get_object_path_from_storedfile($file) {
         if ($this->preferremote) {

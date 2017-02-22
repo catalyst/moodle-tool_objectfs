@@ -14,12 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_objectfs\tests;
+
 defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\object_file_system;
 use tool_objectfs\client\object_client;
 
-class tool_objectfs_test_client implements object_client {
+class test_client implements object_client {
 
     private $bucketpath;
 

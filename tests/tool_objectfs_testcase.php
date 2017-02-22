@@ -20,19 +20,19 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\object_file_system;
 
-require_once(__DIR__ . '/test_client.php');
+require_once(__DIR__ . '/classes/test_client.php');
+require_once(__DIR__ . '/classes/test_file_system.php');
 
 abstract class tool_objectfs_testcase extends \advanced_testcase {
 
     protected function setUp() {
         global $CFG;
-        $CFG->objectfs_remote_client_class = '\tool_objectfs_test_client';
-        $this->filesystem = new object_file_system();
+        $this->filesystem = new test_file_system();
         $this->resetAfterTest(true);
     }
 
     protected function reset_file_system() {
-        $this->filesystem = new object_file_system();
+        $this->filesystem = new test_file_system();
     }
 
     protected function create_local_file_from_path($pathname) {
@@ -105,11 +105,9 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     }
 
     protected function get_remote_path_from_hash($contenthash) {
-        global $CFG;
-        $config = get_objectfs_config();
-        $remoteclientclass = $CFG->objectfs_remote_client_class;
-        $client = new $remoteclientclass($config);
-        return $client->get_object_fullpath_from_hash($contenthash);
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_remote_path_from_hash');
+        $reflection->setAccessible(true);
+        return $reflection->invokeArgs($this->filesystem, [$contenthash]);
     }
 
     protected function get_remote_path_from_storedfile($file) {

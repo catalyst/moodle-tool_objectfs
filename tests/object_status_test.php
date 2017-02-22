@@ -32,7 +32,7 @@
  use tool_objectfs\report\log_size_report;
  use tool_objectfs\report\mime_type_report;
 
- require_once(__DIR__ . '/test_client.php');
+ require_once(__DIR__ . '/classes/test_client.php');
  require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 
