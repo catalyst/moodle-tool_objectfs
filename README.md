@@ -13,9 +13,10 @@ An AWS S3 file system for Moodle. This plugin implements the file system as well
 1. Clone this repository into admin/tool/objectfs
 2. Install the plugin throught the moodle GUI.
 3. Place the following line inside your moodle config.php:
-<pre>
+
+```php
 $CFG->alternative_file_system_class = '\tool_objectfs\object_file_system';
-</pre>
+```
 
 ## Moodle Configuration
 Go to Site Administration -> Plugins -> Admin tools -> S3 File System. Descriptions for the various settings are as follows:
@@ -36,7 +37,7 @@ Go to Site Administration -> Plugins -> Admin tools -> S3 File System. Descripti
 - Replace 'bucketname' with the name of your S3 bucket.
 - The moodle config page for sssfs will test for these permissions.
 
-<pre>
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -56,10 +57,4 @@ Go to Site Administration -> Plugins -> Admin tools -> S3 File System. Descripti
     }
   ]
 }
-</pre>
-
-
-
-
-
-
+```
