@@ -57,21 +57,11 @@ class s3_client implements object_client {
         $this->client->registerStreamWrapper();
     }
 
-
-    public function check_object_md5($filekey, $expectedmd5) {
-        $md5 = $this->get_object_md5_from_key($filekey);
-
-        if ($md5 == $expectedmd5) {
-            return true;
-        }
-        return false;
-    }
-
-    public function get_object_md5_from_key($objectkey) {
+    public function get_remote_md5_from_hash($contenthash) {
         try {
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => $objectkey));
+                            'Key' => $contenthash));
         } catch (S3Exception $e) {
             return false;
         }
@@ -87,14 +77,14 @@ class s3_client implements object_client {
      * @param  string $contenthash contenthash used as key in s3.
      * @return string fullpath to s3 object.
      */
-    public function get_object_fullpath_from_hash($contenthash) {
+    public function get_remote_fullpath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
-        $filepath = $this->get_object_filepath_from_hash($contenthash);
+        $filepath = $this->get_remote_filepath_from_hash($contenthash);
         return "s3://$this->bucket/$filepath";
     }
 
-    protected function get_object_filepath_from_hash($contenthash) {
+    protected function get_remote_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
         return "$l1/$l2/$contenthash";

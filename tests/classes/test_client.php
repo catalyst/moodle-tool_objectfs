@@ -36,15 +36,11 @@ class test_client implements object_client {
         // Do nothing - we are using standard file paths.
     }
 
-    public function check_object_md5($filekey, $expectedmd5) {
-        return true;
-    }
-
-    public function get_object_md5_from_key($objectkey) {
+    public function get_remote_md5_from_hash($contenthash) {
         return 'mockmd5';
     }
 
-    public function get_object_fullpath_from_hash($contenthash) {
+    public function get_remote_fullpath_from_hash($contenthash) {
         return "$this->bucketpath/{$contenthash}";
     }
     public function test_connection() {

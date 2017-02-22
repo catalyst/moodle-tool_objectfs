@@ -118,7 +118,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return string The full path to the content file
      */
     protected function get_remote_path_from_hash($contenthash) {
-        return $this->remoteclient->get_object_fullpath_from_hash($contenthash);
+        return $this->remoteclient->get_remote_fullpath_from_hash($contenthash);
     }
 
     public function get_md5_from_contenthash($contenthash) {
@@ -128,7 +128,7 @@ abstract class object_file_system extends \file_system_filedir {
         if (is_readable($localpath)) {
             $md5 = md5_file($localpath);
         } else {
-            $md5 = $this->remoteclient->get_object_md5_from_key($contenthash);
+            $md5 = $this->remoteclient->get_remote_md5_from_hash($contenthash);
         }
         return $md5;
     }
