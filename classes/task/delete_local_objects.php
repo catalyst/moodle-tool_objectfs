@@ -27,8 +27,14 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\object_manipulator\deleter;
 use tool_objectfs\object_file_system;
+use tool_objectfs\s3_file_system;
+
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once( __DIR__ . '/../../lib.php');
+require_once(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
 
 class delete_local_objects extends \core\task\scheduled_task {
 
@@ -46,7 +52,7 @@ class delete_local_objects extends \core\task\scheduled_task {
         $config = get_objectfs_config();
 
         if (isset($config->enabled) && $config->enabled) {
-            $filesystem = new object_file_system();
+            $filesystem = new s3_file_system();
             $deleter = new deleter($filesystem, $config);
             $candidatehashes = $deleter->get_candidate_objects();
             $deleter->execute($candidatehashes);

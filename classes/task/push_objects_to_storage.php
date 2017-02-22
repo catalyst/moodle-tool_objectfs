@@ -27,8 +27,14 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\object_manipulator\pusher;
 use tool_objectfs\object_file_system;
+use tool_objectfs\s3_file_system;
+
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once( __DIR__ . '/../../lib.php');
+require_once(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
 
 class push_objects_to_storage extends \core\task\scheduled_task {
 
@@ -46,7 +52,7 @@ class push_objects_to_storage extends \core\task\scheduled_task {
         $config = get_objectfs_config();
 
         if (isset($config->enabled) && $config->enabled) {
-            $filesystem = new object_file_system();
+            $filesystem = new s3_file_system();
             $pusher = new pusher($filesystem, $config);
             $candidatehashes = $pusher->get_candidate_objects();
             $pusher->execute($candidatehashes);

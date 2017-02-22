@@ -26,6 +26,7 @@
 namespace tool_objectfs\task;
 
 use tool_objectfs\renderable\object_status;
+
 require_once( __DIR__ . '/../../lib.php');
 
 defined('MOODLE_INTERNAL') || die();

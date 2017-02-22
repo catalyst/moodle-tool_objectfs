@@ -27,8 +27,14 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\object_manipulator\puller;
 use tool_objectfs\object_file_system;
+use tool_objectfs\s3_file_system;
+
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once( __DIR__ . '/../../lib.php');
+require_once(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
 
 class pull_objects_from_storage extends \core\task\scheduled_task {
 
@@ -46,7 +52,7 @@ class pull_objects_from_storage extends \core\task\scheduled_task {
         $config = get_objectfs_config();
 
         if (isset($config->enabled) && $config->enabled) {
-            $filesystem = new object_file_system();
+            $filesystem = new s3_file_system();
             $puller = new puller($filesystem, $config);
             $candidatehashes = $puller->get_candidate_objects();
             $puller->execute($candidatehashes);
