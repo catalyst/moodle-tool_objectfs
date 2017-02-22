@@ -29,8 +29,8 @@ class deleter_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
-        $config['deletelocal'] = true;
-        $config['consistencydelay'] = 0;
+        $config->deletelocal = true;
+        $config->consistencydelay = 0;
         set_objectfs_config($config);
         $this->deleter = new deleter($this->filesystem, $config);
         ob_start();
@@ -42,7 +42,7 @@ class deleter_testcase extends tool_objectfs_testcase {
 
     protected function set_deleter_config($key, $value) {
         $config = get_objectfs_config();
-        $config[$key] = $value;
+        $config->$key = $value;
         $this->deleter = new deleter($this->filesystem, $config);
     }
 

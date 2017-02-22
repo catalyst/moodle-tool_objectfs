@@ -65,24 +65,25 @@ function set_objectfs_config($config) {
 }
 
 function get_objectfs_config() {
-    $config = array(  'enabled'           => 0,
-                      'key'               => '',
-                      'secret'            => '',
-                      'bucket'            => '',
-                      'region'            => 'us-east-1',
-                      'sizethreshold'     => 1024 * 10,
-                      'minimumage'        => 7 * 24 * 60 * 60,
-                      'deletelocal'       => 0,
-                      'consistencydelay'  => 10 * 60,
-                      'maxtaskruntime'    => 60,
-                      'logging'           => 0,
-                      'preferremote'      => 0);
+    $config = new stdClass;
+    $config->enabled = 0;
+    $config->key = '';
+    $config->secret = '';
+    $config->bucket = '';
+    $config->region = 'us-east-1';
+    $config->sizethreshold = 1024 * 10;
+    $config->minimumage = 7 * 24 * 60 * 60;
+    $config->deletelocal = 0;
+    $config->consistencydelay = 10 * 60;
+    $config->maxtaskruntime = 60;
+    $config->logging = 0;
+    $config->preferremote = 0;
 
     $storedconfig = get_config('tool_objectfs');
 
     // Override defaults if set.
     foreach ($storedconfig as $key => $value) {
-        $config[$key] = $value;
+        $config->$key = $value;
     }
     return $config;
 }

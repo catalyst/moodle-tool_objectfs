@@ -78,8 +78,6 @@ class s3_client implements object_client {
      * @return string fullpath to s3 object.
      */
     public function get_remote_fullpath_from_hash($contenthash) {
-        $l1 = $contenthash[0] . $contenthash[1];
-        $l2 = $contenthash[2] . $contenthash[3];
         $filepath = $this->get_remote_filepath_from_hash($contenthash);
         return "s3://$this->bucket/$filepath";
     }

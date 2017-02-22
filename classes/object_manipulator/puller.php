@@ -49,7 +49,7 @@ class puller extends manipulator {
      */
     public function __construct($filesystem, $config) {
         parent::__construct($filesystem, $config);
-        $this->sizethreshold = $config['sizethreshold'];
+        $this->sizethreshold = $config->sizethreshold;
     }
 
     /**

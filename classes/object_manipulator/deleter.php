@@ -58,8 +58,8 @@ class deleter extends manipulator {
      */
     public function __construct($filesystem, $config) {
         parent::__construct($filesystem, $config);
-        $this->consistencydelay = $config['consistencydelay'];
-        $this->deletelocal = $config['deletelocal'];
+        $this->consistencydelay = $config->consistencydelay;
+        $this->deletelocal = $config->deletelocal;
     }
 
     /**

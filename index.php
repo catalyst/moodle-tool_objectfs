@@ -38,7 +38,7 @@ $config = get_config('tool_objectfs');
 $form = new settings_form(null, array('config' => $config));
 
 if ($data = $form->get_data()) {
-    save_sss_config_data($data);
+    set_objectfs_config($data);
     redirect(new moodle_url('/admin/tool/objectfs/index.php'));
 }
 

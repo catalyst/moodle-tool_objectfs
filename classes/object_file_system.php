@@ -46,7 +46,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->remoteclient = $this->get_remote_client($config);
         $this->remoteclient->register_stream_wrapper();
 
-        $this->preferremote = $config['preferremote'];
+        $this->preferremote = $config->preferremote;
     }
 
     protected abstract function get_remote_client($config);

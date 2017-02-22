@@ -29,8 +29,8 @@ class pusher_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
-        $config['sizethreshold'] = 0;
-        $config['minimumage'] = 0;
+        $config->sizethreshold = 0;
+        $config->minimumage = 0;
         set_objectfs_config($config);
         $this->pusher = new pusher($this->filesystem, $config);
         ob_start();
@@ -42,7 +42,7 @@ class pusher_testcase extends tool_objectfs_testcase {
 
     protected function set_pusher_config($key, $value) {
         $config = get_objectfs_config();
-        $config[$key] = $value;
+        $config->$key = $value;
         $this->pusher = new pusher($this->filesystem, $config);
     }
 
@@ -146,7 +146,7 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_pusher_will_use_remote_md5_if_not_local() {
         global $DB;
         $object = $this->create_remote_object();
-        $expectedmd5 = 'mockmd5'; // Will be provided by mock client get_md5 function.
+        $expectedmd5 = $this->filesystem->get_md5_from_contenthash($object->contenthash);
 
         $this->pusher->execute(array($object));
 

@@ -52,7 +52,7 @@ abstract class manipulator {
      * @param int $maxruntime What time the file manipulator should finish execution by
      */
     public function __construct($filesystem, $config) {
-         $this->finishtime = time() + $config['maxtaskruntime'];
+         $this->finishtime = time() + $config->maxtaskruntime;
          $this->filesystem = $filesystem;
     }
 

@@ -29,7 +29,7 @@ class puller_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
-        $config['sizethreshold'] = 100;
+        $config->sizethreshold = 100;
         set_objectfs_config($config);
         $this->puller = new puller($this->filesystem, $config);
         ob_start();
@@ -41,7 +41,7 @@ class puller_testcase extends tool_objectfs_testcase {
 
     protected function set_puller_config($key, $value) {
         $config = get_objectfs_config();
-        $config[$key] = $value;
+        $config->$key = $value;
         $this->puller = new puller($this->filesystem, $config);
     }
 

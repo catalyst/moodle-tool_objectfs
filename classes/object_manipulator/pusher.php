@@ -56,8 +56,8 @@ class pusher extends manipulator {
      */
     public function __construct($filesystem, $config) {
         parent::__construct($filesystem, $config);
-        $this->sizethreshold = $config['sizethreshold'];
-        $this->minimumage = $config['minimumage'];
+        $this->sizethreshold = $config->sizethreshold;
+        $this->minimumage = $config->minimumage;
     }
 
     /**

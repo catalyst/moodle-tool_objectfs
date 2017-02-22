@@ -27,7 +27,7 @@ namespace tool_objectfs\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\client\sss_client;
+use tool_objectfs\client\s3_client;
 
 require_once($CFG->libdir . "/formslib.php");
 
@@ -46,7 +46,7 @@ class settings_form extends \moodleform {
 
         $connection = false;
         if (isset($config->key) && isset($config->secret) && isset($config->bucket)) {
-            $client = new sss_client($config);
+            $client = new s3_client($config);
             $connection = $client->test_connection();
         }
 
