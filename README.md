@@ -9,13 +9,25 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
 ## Use cases
 There are a number of different ways you can use this plug in. See [Recommended use case settings](#recommended-use-case-settings) for recommended settings for each one.
 
-#### Hybrid file system
-Files over a certain size threshold are synced up to remote storage and then removed locally. If they can't be read locally they will be read from remote storage. This will impact site performance.
+### Offloading large and old files to save money
 
-#### Production master
-A production server will sync all of it's files to remote storage but not remove them locally. All other supporting environments, E.g. staging and development, read from this remote storage.
+Disk can be expensive, so a simple use case is we simply want to move some of the largest and oldest files off local disk to somewhere cheaper. But we still want the convenience and performance of having the majority of files local, especially if you are hosting on-prem where the latency or bandwidth to the remote filesystem may not be great.
 
+### Sharing files across moodles to save disk
 
+Many of our clients have multiple moodle instances, and there is much duplicated content across instances. By pointing multiple moodles at the same remote filesystem, and not allowing deletes, then large amounts of content can be de-duplicated.
+
+### Sharing files across environments to save time
+
+Some of our clients moodles are truly massive. We also have multiple environments for various types of testing, and often have ad hoc environments created on demand. Not only do we not want to have to store duplicated files, but we also want refreshing data to new environments to be as fast as possible.
+
+Using this plugin we can configure production to have full read write to the remote filesystem and store the vast bulk of content remotely. In this setup the latency and bandwidth isn't an issue as they are colocated. The local filedir on disk would only consist of small or fast churning files such as course backups. A refresh of the production data back to a staging environment can be much quicker now as we skip the sitedir clone completely and stage is simple configured with readonly access to the production filesystem. Any files it creates would only be writen to it's local filesystem which can then be discarded when next refreshed.
+
+### Sharing files with data washed environments
+
+Often you want a sanitised version of the data for giving to developers or other 3rd parties to remove or obfuscate sensitive content. This plugin is designed to work in this scenario too where the 3rd party gets a 'cleaned' DB, and can still point to the production remote filesystem with readonly credentials. As they cannot query the filesystem directly and must know the content hash of any content in order to access a file, there is very low risk of them accessing sensitive content.
+
+https://github.com/catalyst/moodle-local_datacleaner
 
 
 ## Currently supported object storage
