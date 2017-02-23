@@ -42,6 +42,10 @@ class settings_form extends \moodleform {
         $mform = $this->_form;
         $config = $this->_customdata['config'];
 
+        $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/object_status.php'), get_string('object_status:page', 'tool_objectfs'));
+
+        $mform->addElement('html', $OUTPUT->heading($link, 5));
+
         $mform = $this->define_cfg_check($mform, $config);
         $mform = $this->define_general_section($mform, $config);
         $mform = $this->define_file_transfer_section($mform, $config);
