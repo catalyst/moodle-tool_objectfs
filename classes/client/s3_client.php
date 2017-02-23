@@ -59,9 +59,10 @@ class s3_client implements object_client {
 
     public function get_remote_md5_from_hash($contenthash) {
         try {
+            $key = $this->get_remote_filepath_from_hash($contenthash);
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => $contenthash));
+                            'Key' => $key));
         } catch (S3Exception $e) {
             return false;
         }
