@@ -51,7 +51,7 @@ class generate_status_report extends \core\task\scheduled_task {
                                'log_size_report',
                                'mime_type_report');
 
-        if (isset($config->enabled) && $config->enabled) {
+        if (isset($config->enabletasks) && $config->enabletasks) {
             foreach ($reportclasses as $reportclass) {
                 $reportclass = "tool_objectfs\\report\\{$reportclass}";
                 $report = new $reportclass();

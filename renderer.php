@@ -33,9 +33,9 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     protected function render_object_status(object_status $filestatus) {
         $output = '';
 
-        $config = get_config('tool_objectfs');
+        $config = get_objectfs_config();
 
-        if (!isset($config->enabled) || !$config->enabled) {
+        if (!isset($config->enabletasks) || !$config->enabletasks) {
             $labeltext = get_string('not_enabled', 'tool_objectfs');
             $output .= html_writer::label($labeltext, null);
         }

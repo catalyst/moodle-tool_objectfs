@@ -51,7 +51,7 @@ class pull_objects_from_storage extends \core\task\scheduled_task {
     public function execute() {
         $config = get_objectfs_config();
 
-        if (isset($config->enabled) && $config->enabled) {
+        if (isset($config->enabletasks) && $config->enabletasks) {
             $filesystem = new s3_file_system();
             $puller = new puller($filesystem, $config);
             $candidatehashes = $puller->get_candidate_objects();

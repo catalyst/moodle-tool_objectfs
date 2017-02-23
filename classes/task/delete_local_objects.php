@@ -51,7 +51,7 @@ class delete_local_objects extends \core\task\scheduled_task {
     public function execute() {
         $config = get_objectfs_config();
 
-        if (isset($config->enabled) && $config->enabled) {
+        if (isset($config->enabletasks) && $config->enabletasks) {
             $filesystem = new s3_file_system();
             $deleter = new deleter($filesystem, $config);
             $candidatehashes = $deleter->get_candidate_objects();
