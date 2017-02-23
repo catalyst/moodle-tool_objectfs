@@ -87,7 +87,12 @@ abstract class object_file_system extends \file_system_filedir {
         $path = parent::get_local_path_from_hash($contenthash, $fetchifnotfound);
 
         if ($fetchifnotfound && !is_readable($path)) {
-            $this->copy_object_from_remote_to_local_by_hash($contenthash);
+            $fetched = $this->copy_object_from_remote_to_local_by_hash($contenthash);
+
+            if ($fetched) {
+                // We want this file to be deleted again later.
+                update_object_record($contenthash, OBJECT_LOCATION_DUPLICATED);
+            }
         }
 
         return $path;
@@ -121,18 +126,6 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->remoteclient->get_remote_fullpath_from_hash($contenthash);
     }
 
-    public function get_md5_from_contenthash($contenthash) {
-        $localpath = $this->get_local_path_from_hash($contenthash);
-        $remotepath = $this->get_remote_path_from_hash($contenthash);
-
-        if (is_readable($localpath)) {
-            $md5 = md5_file($localpath);
-        } else {
-            $md5 = $this->remoteclient->get_remote_md5_from_hash($contenthash);
-        }
-        return $md5;
-    }
-
     public function get_actual_object_location_by_hash($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
         $remotepath = $this->get_remote_path_from_hash($contenthash);
@@ -161,6 +154,12 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function copy_object_from_remote_to_local_by_hash($contenthash) {
         $location = $this->get_actual_object_location_by_hash($contenthash);
+
+        // Already duplicated.
+        if ($location === OBJECT_LOCATION_DUPLICATED) {
+            return true;
+        }
+
         if ($location === OBJECT_LOCATION_REMOTE) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
@@ -190,6 +189,12 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function copy_object_from_local_to_remote_by_hash($contenthash) {
         $location = $this->get_actual_object_location_by_hash($contenthash);
+
+        // Already duplicated.
+        if ($location === OBJECT_LOCATION_DUPLICATED) {
+            return true;
+        }
+
         if ($location === OBJECT_LOCATION_LOCAL) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
@@ -218,14 +223,23 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     public function delete_object_from_local_by_hash($contenthash) {
-        $localpath = $this->get_local_path_from_hash($contenthash);
-        $remotepath = $this->get_remote_path_from_hash($contenthash);
+        $location = $this->get_actual_object_location_by_hash($contenthash);
+
+        // Already deleted.
+        if ($location === OBJECT_LOCATION_REMOTE) {
+            return true;
+        }
 
         // We want to be very sure it is remote if we're deleting objects.
         // There is no going back.
-        if (is_readable($localpath) && is_readable($remotepath)) {
-            return unlink($localpath);
+        if ($location === OBJECT_LOCATION_DUPLICATED) {
+            $localpath = $this->get_local_path_from_hash($contenthash);
+            $objectvalid = $this->remoteclient->verify_remote_object($contenthash, $localpath);
+            if ($objectvalid) {
+                return unlink($localpath);
+            }
         }
+
         return false;
     }
 

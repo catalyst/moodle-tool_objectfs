@@ -71,6 +71,15 @@ class s3_client implements object_client {
         return $md5;
     }
 
+    public function verify_remote_object($contenthash, $localpath) {
+        $localmd5 = md5_file($localpath);
+        $remotemd5 = $this->get_remote_md5_from_hash($contenthash);
+        if ($localmd5 === $remotemd5) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Returns s3 fullpath to use with php file functions.
      *

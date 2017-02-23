@@ -93,13 +93,13 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertFalse($result);
     }
 
-    public function test_copy_object_from_remote_to_local_by_hash_fails_if_duplicated() {
+    public function test_copy_object_from_remote_to_local_by_hash_succeeds_if_already_duplicated() {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
         $result = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
 
-        $this->assertFalse($result);
+        $this->assertTrue($result);
     }
 
     public function test_copy_object_from_remote_to_local_by_hash_fails_if_not_local_and_not_remote() {
@@ -131,13 +131,13 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     }
 
-    public function test_copy_object_from_local_to_remote_by_hash_fails_if_duplicated() {
+    public function test_copy_object_from_local_to_remote_by_hash_succeeds_if_already_duplicated() {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
         $result = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
 
-        $this->assertFalse($result);
+        $this->assertTrue($result);
     }
 
     public function test_copy_object_from_local_to_remote_by_hash_fails_if_not_local_and_not_remote() {
@@ -177,6 +177,21 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $result = $this->filesystem->delete_object_from_local_by_hash($fakehash);
 
         $this->assertFalse($result);
+    }
+
+    public function test_delete_object_from_local_by_hash_fails_if_verify_remote_object_fails() {
+        $file = $this->create_duplicated_file();
+        $remotepath = $this->get_remote_path_from_hash($file->get_contenthash());
+        $localpath = $this->get_local_path_from_storedfile($file);
+
+        unlink($remotepath);
+        $differentfilepath = __DIR__ . '/fixtures/test.txt';
+        copy($differentfilepath, $remotepath);
+
+        $result = $this->filesystem->delete_object_from_local_by_hash($file->get_contenthash());
+
+        $this->assertFalse($result);
+        $this->assertTrue(is_readable($localpath));
     }
 
     public function test_readfile_if_object_is_local() {

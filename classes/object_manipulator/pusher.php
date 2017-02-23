@@ -121,8 +121,7 @@ class pusher extends manipulator {
                 $location = $this->filesystem->get_actual_object_location_by_hash($file->contenthash);
             }
 
-            $md5 = $this->filesystem->get_md5_from_contenthash($file->contenthash);
-            update_object_record($file->contenthash, $location, $md5);
+            update_object_record($file->contenthash, $location);
 
             $objectcount++;
             $totalfilesize += $file->filesize;

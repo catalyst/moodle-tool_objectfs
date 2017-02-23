@@ -34,7 +34,7 @@ define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
 define('OBJECTFS_REPORT_LOG_SIZE', 1);
 define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
-function update_object_record($contenthash, $location, $md5 = false) {
+function update_object_record($contenthash, $location) {
     global $DB;
 
     $logrecord = new \stdClass();
@@ -43,12 +43,6 @@ function update_object_record($contenthash, $location, $md5 = false) {
     $logrecord->location = $location;
 
     $existing = $DB->get_record('tool_objectfs_objects', array('contenthash' => $contenthash));
-
-    if ($md5) {
-        $logrecord->md5 = $md5;
-    } else if ($existing) {
-        $logrecord->md5 = $existing->md5;
-    }
 
     if ($existing) {
         $logrecord->id = $existing->id;

@@ -131,29 +131,6 @@ class pusher_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->is_remotely_readable_by_hash($object->contenthash));
     }
 
-    public function test_pusher_will_calculate_md5() {
-        global $DB;
-        $object = $this->create_local_object();
-        $localpath = $this->get_local_path_from_hash($object->contenthash);
-        $expectedmd5 = md5_file($localpath);
-
-        $this->pusher->execute(array($object));
-
-        $actualmd5 = $DB->get_field('tool_objectfs_objects', 'md5', array('contenthash' => $object->contenthash));
-        $this->assertEquals($expectedmd5, $actualmd5);
-    }
-
-    public function test_pusher_will_use_remote_md5_if_not_local() {
-        global $DB;
-        $object = $this->create_remote_object();
-        $expectedmd5 = $this->filesystem->get_md5_from_contenthash($object->contenthash);
-
-        $this->pusher->execute(array($object));
-
-        $actualmd5 = $DB->get_field('tool_objectfs_objects', 'md5', array('contenthash' => $object->contenthash));
-        $this->assertEquals($expectedmd5, $actualmd5);
-    }
-
     public function test_pusher_can_push_multiple_objects() {
         global $DB;
         $objects = array();

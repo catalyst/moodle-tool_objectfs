@@ -24,6 +24,7 @@ use tool_objectfs\client\object_client;
 class test_client implements object_client {
 
     private $bucketpath;
+    private $verifyfails;
 
     public function __construct($config) {
         global $CFG;
@@ -31,13 +32,24 @@ class test_client implements object_client {
         if (!is_dir($this->bucketpath)) {
             mkdir($this->bucketpath);
         }
+        $this->verifyfails = false;
     }
     public function register_stream_wrapper() {
         // Do nothing - we are using standard file paths.
     }
 
     public function get_remote_md5_from_hash($contenthash) {
-        return 'mockmd5';
+        $path = $this->get_remote_fullpath_from_hash($contenthash);
+        return md5_file($path);
+    }
+
+    public function verify_remote_object($contenthash, $localpath) {
+        $localmd5 = md5_file($localpath);
+        $remotemd5 = $this->get_remote_md5_from_hash($contenthash);
+        if ($localmd5 === $remotemd5) {
+            return true;
+        }
+        return false;
     }
 
     public function get_remote_fullpath_from_hash($contenthash) {
