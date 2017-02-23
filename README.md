@@ -4,38 +4,41 @@
 
 # moodle-tool_objectfs
 
-An AWS S3 file system for Moodle. This plugin implements the file system as well as the background tasks which pushes files to and from S3.
+A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution.
 
-## Requirements
-- Moodle version 31 with this patch applied from this tracker: https://tracker.moodle.org/browse/MDL-46375
+## Use cases
+There are a number of different ways you can use this plug in. See [Recommended use case settings](#recommended-use-case-settings) for recommended settings for each one.
+
+#### Hybrid file system
+Files over a certain size threshold are synced up to remote storage and then removed locally. If they can't be read locally they will be read from remote storage. This will impact site performance.
+
+#### Production master
+A production server will sync all of it's files to remote storage but not remove them locally. All other supporting environments, E.g. staging and development, read from this remote storage.
+
+
+
+
+## Currently supported object storage
+- Amazon S3
 
 ## Installation
+1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
+1. Setup your remote object storage. See [Remote object storage setup](#remote-object-storage-setup)
 1. Clone this repository into admin/tool/objectfs
-2. Install the plugin throught the moodle GUI.
-3. Place the following line inside your moodle config.php:
+2. Install the plugin through the moodle GUI.
+3. Configure the plugin. See [Moodle configuration](#moodle-configuration)
+4. Place the following line inside your Moodle config.php:
 
 ```php
-$CFG->alternative_file_system_class = '\tool_objectfs\object_file_system';
+$CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 ```
 
-## Moodle Configuration
-Go to Site Administration -> Plugins -> Admin tools -> S3 File System. Descriptions for the various settings are as follows:
+## Remote object storage setup
 
-- **Key**: AWS credential key
-- **Secret**: AWS credential secret
-- **Bucket**: S3 bucket name to store files in
-- **AWS region**: AWS API endpoint region to use.
-- **Minimum size threshold (KB)**: Minimum size threshold for transferring files to S3. If files are over this size they will be transfered to S3.
-- **Minimum age**: Minimum age that a file must exist on the local file system before it will be considered for transfer.
-- **Maximum task runtime**: Maximum runtime for all S3 related tasks; pushing to S3, pulling from S3 and cleaning files that are in S3 from the local file system.
-- **Delete local files**: Delete local files once they are in S3 after the consistency delay.
-- **Consistency delay**: How long a file must existed after being transfered to S3 before they are a candidate for deletion locally.
-- **Enable logging**: Log file access to the php log.
-
-## AWS Configuration
+### Amazon S3 bucket setup
+- Create an Amazon S3 bucket.
 - The AWS Users access policy should mirror the policy listed below.
 - Replace 'bucketname' with the name of your S3 bucket.
-- The moodle config page for sssfs will test for these permissions.
 
 ```json
 {
@@ -58,3 +61,78 @@ Go to Site Administration -> Plugins -> Admin tools -> S3 File System. Descripti
   ]
 }
 ```
+
+## Moodle configuration
+Go to Site Administration -> Plugins -> Admin tools -> Object storage file system. Descriptions for the various settings are as follows:
+
+### General Settings
+- **Enable file transfer tasks**: Enable or disable the object file system tasks which move files between the filedir and remote object storage.
+- **Maximum task runtime**: Background tasks handle the transfer of objects to and from remote object storage. This setting controls the maximum runtime for all object transfer related tasks.
+- **Prefer remote objects**: If a file is stored both locally and in remote object storage, read from remote. This is setting is mainly for testing purposes and introduces overhead to check the location.
+
+### File Transfer settings
+These settings control the movement of files to and from object storage.
+
+- **Minimum size threshold (KB)**: Minimum size threshold for transferring objects to remote object storage. If objects are over this size they will be transfered.
+- **Minimum age**: Minimum age that a object must exist on the local filedir before it will be considered for transfer.
+- **Delete local objects**: Delete local objects once they are in remote object storage after the consistency delay.
+- **Consistency delay**: How long an object must have existed after being transfered to remote object storage before they are a candidate for deletion locally.
+
+### Amazon S3 settings
+S3 specific settings
+- **Key**: AWS credential key
+- **Secret**: AWS credential secret
+- **Bucket**: S3 bucket name to store files in
+- **AWS region**: AWS API endpoint region to use.
+
+## Recommended use case settings
+
+#### Hybrid file system
+
+#### Production master
+
+## Backporting
+Warning this is unsupported!
+
+#### Moodle 2.7 only
+1. Cherry pick [MDL-49627](https://tracker.moodle.org/browse/MDL-49627):
+[MDL-49627 - part 1](https://github.com/moodle/moodle/commit/b7067f065e6ce8d7587039094259ace3e0804663),
+[MDL-49627 - part 2](https://github.com/moodle/moodle/commit/2b53b13ff7b7cb98f81d5ef98214a91dedc124af)
+
+2. Follow steps in section below.
+
+
+#### Moodle 2.7, 2.8. 2.9. 3.0, 3.1, 3.2, 3.3
+1. Cherry pick the file system API patch: [MDL-46375](https://tracker.moodle.org/browse/MDL-46375):
+[MDL-46375 - part 1](https://github.com/moodle/moodle/commit/16a34ae1892014a6ca3055a95ac7310442529a6c),
+[MDL-46375 - part 2](https://github.com/moodle/moodle/commit/0c03db6a32fb217756e091b691f1e885b608781b)
+2. If you need tests to pass see [Test compatibility](test-compatibility)
+
+
+#### Test compatibility
+The file system API patch introduces tests that use:
+- setExpectedExceptionRegExp() which needs phpunit 4.3
+- setExpectedException() which needs phpunit 5.2 which needs needs php 5.6 (Ubuntu 14.04 runs 5.5.9)
+
+But different core versions of Moodle may require lower versions or you may be on 14.04.
+
+By applying a combination of patches to the new file system API tests and tweaking versions of Phphunit, you can make all tests pass.
+
+- Patch A converts setExpectedExceptionRegExp calls to setExpectedException
+- Patch B converts expectException calls to setExpectedException
+
+Here are known working configurations:
+
+| Moodle version | patch A | patch B | phpunit version | dbUnit version |
+|----------------|---------|---------|-----------------|----------------|
+| 2.7            |         |         |                 |                |
+| 2.8            |         |         |                 |                |
+| 2.9            |         |         |                 |                |
+| 3.0            |         |         |                 |                |
+| 3.1            |         |         |                 |                |
+| 3.2            |         |         |                 |                |
+| 3.3            |         |         |                 |                ||
+
+
+
+
