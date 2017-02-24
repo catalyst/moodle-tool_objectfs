@@ -36,7 +36,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= \html_writer::link(new \moodle_url('/admin/tool/objectfs/index.php'), get_string('settings', 'tool_objectfs'));
         $output .= \html_writer::start_tag('br');
 
-
         $config = get_objectfs_config();
 
         if (!isset($config->enabletasks) || !$config->enabletasks) {
