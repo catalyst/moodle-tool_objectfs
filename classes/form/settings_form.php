@@ -75,6 +75,7 @@ class settings_form extends \moodleform {
 
         $mform->addElement('duration', 'maxtaskruntime', get_string('settings:maxtaskruntime', 'tool_objectfs'));
         $mform->addHelpButton('maxtaskruntime', 'settings:maxtaskruntime', 'tool_objectfs');
+        $mform->disabledIf('maxtaskruntime', 'enabletasks');
         $mform->setType("maxtaskruntime", PARAM_INT);
 
         $mform->addElement('advcheckbox', 'preferremote', get_string('settings:preferremote', 'tool_objectfs'));
