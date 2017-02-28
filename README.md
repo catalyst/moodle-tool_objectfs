@@ -7,6 +7,14 @@
 A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution.
 
 * [Use cases](#use-cases)
+  * [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
+  * [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
+  * [Sharing files across environments to save time](#sharing-files-across-environments-to-save-time)
+  * [Sharing files with data washed environments](#sharing-files-with-data-washed-environments)
+* [Installation](#installation)
+* [Currently supported object stores]
+* [Moodle configuration](#moodle-configuration)
+* [Backporting](#backporting)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 
 ## Use cases
@@ -32,10 +40,6 @@ Often you want a sanitised version of the data for giving to developers or other
 
 https://github.com/catalyst/moodle-local_datacleaner
 
-
-## Currently supported object storage
-- Amazon S3
-
 ## Installation
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
 1. Setup your remote object storage. See [Remote object storage setup](#remote-object-storage-setup)
@@ -47,6 +51,9 @@ https://github.com/catalyst/moodle-local_datacleaner
 ```php
 $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 ```
+## Currently supported object stores
+
+### Amazon S3
 
 ## Remote object storage setup
 
