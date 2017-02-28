@@ -35,6 +35,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         $output .= \html_writer::link(new \moodle_url('/admin/tool/objectfs/index.php'), get_string('settings', 'tool_objectfs'));
         $output .= \html_writer::start_tag('br');
+        $output .= "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
 
         $config = get_objectfs_config();
 
@@ -74,6 +75,29 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    private function augment_barchart(&$table) {
+
+        // This assumes 2 columns, the first is a number and the second
+        // is a file size.
+
+        foreach (array(1,2) as $col) {
+
+            $max = 0;
+            foreach ($table->data as $row) {
+                if ($row[$col] > $max) {
+                    $max = $row[$col];
+                }
+            }
+
+            foreach ($table->data as $i => $row) {
+                $table->data[$i][$col] = sprintf('<div class="ofs-bar" style="width:%.1f%%">%s</div>',
+                    100 * $row[$col] / $max,
+                    $col == 1 ? $row[$col] : display_size($row[$col])
+                );
+            }
+        }
+    }
+
     private function render_mime_type_report($mimetypereport) {
         $table = new html_table();
 
@@ -82,9 +106,9 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                              get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($mimetypereport as $record) {
-            $objectsum = display_size($record->objectsum);
-            $table->data[] = array($record->datakey, $record->objectcount, $objectsum);
+            $table->data[] = array($record->datakey, $record->objectcount, $record->objectsum);
         }
+        $this->augment_barchart($table);
 
         $output = html_writer::table($table);
 
@@ -99,9 +123,9 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                              get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($logsizereport as $record) {
-            $objectsum = display_size($record->objectsum);
-            $table->data[] = array($record->datakey, $record->objectcount, $objectsum);
+            $table->data[] = array($record->datakey, $record->objectcount, $record->objectsum);
         }
+        $this->augment_barchart($table);
 
         $output = html_writer::table($table);
 
@@ -116,10 +140,10 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                              get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($locationreport as $record) {
-            $objectsum = display_size($record->objectsum);
             $filelocation = $this->get_file_location_string($record->datakey);
-            $table->data[] = array($filelocation, $record->objectcount, $objectsum);
+            $table->data[] = array($filelocation, $record->objectcount, $record->objectsum);
         }
+        $this->augment_barchart($table);
 
         $output = html_writer::table($table);
 
