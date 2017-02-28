@@ -6,6 +6,9 @@
 
 A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution.
 
+* [Use cases](#use-cases)
+* [Crafted by Catalyst IT](#crafted-by-catalyst-it)
+
 ## Use cases
 There are a number of different ways you can use this plug in. See [Recommended use case settings](#recommended-use-case-settings) for recommended settings for each one.
 
@@ -97,14 +100,10 @@ S3 specific settings
 - **Bucket**: S3 bucket name to store files in
 - **AWS region**: AWS API endpoint region to use.
 
-## Recommended use case settings
-
-#### Hybrid file system
-
-#### Production master
 
 ## Backporting
-Warning this is unsupported!
+
+If you are on an older moodle then you can backport the nessesary API's in order to support this plugin. Use with caution!
 
 #### Moodle 2.7 only
 1. Cherry pick [MDL-49627](https://tracker.moodle.org/browse/MDL-49627):
@@ -114,14 +113,14 @@ Warning this is unsupported!
 2. Follow steps in section below.
 
 
-#### Moodle 2.7, 2.8. 2.9. 3.0, 3.1, 3.2, 3.3
+#### Moodle 2.7 - 3.3
 1. Cherry pick the file system API patch: [MDL-46375](https://tracker.moodle.org/browse/MDL-46375):
 [MDL-46375 - part 1](https://github.com/moodle/moodle/commit/16a34ae1892014a6ca3055a95ac7310442529a6c),
 [MDL-46375 - part 2](https://github.com/moodle/moodle/commit/0c03db6a32fb217756e091b691f1e885b608781b)
 2. If you need tests to pass see [Test compatibility](test-compatibility)
 
 
-#### Test compatibility
+#### PHPUnit test compatibility
 The file system API patch introduces tests that use:
 - setExpectedExceptionRegExp() which needs phpunit 4.3
 - setExpectedException() which needs phpunit 5.2 which needs needs php 5.6 (Ubuntu 14.04 runs 5.5.9)
@@ -145,6 +144,12 @@ Here are known working configurations:
 | 3.2            |         |         |                 |                |
 | 3.3            |         |         |                 |                ||
 
+Crafted by Catalyst IT
+----------------------
 
+This plugin was developed by Catalyst IT Australia:
 
+https://www.catalyst-au.net/
+
+![Catalyst IT](/pix/catalyst-logo.png?raw=true)
 
