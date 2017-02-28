@@ -168,3 +168,15 @@ https://www.catalyst-au.net/
 
 ![Catalyst IT](/pix/catalyst-logo.png?raw=true)
 
+
+Contributing and support
+------------------------
+
+Issues, and pull requests using github are welcome and encouraged! 
+
+https://github.com/catalyst/moodle-tool_objectfs/issues
+
+If you would like commercial support or would like to sponsor additional improvements
+to this plugin please contact us:
+
+https://www.catalyst-au.net/contact-us
