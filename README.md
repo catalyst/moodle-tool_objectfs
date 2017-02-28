@@ -12,8 +12,13 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   * [Sharing files across environments to save time](#sharing-files-across-environments-to-save-time)
   * [Sharing files with data washed environments](#sharing-files-with-data-washed-environments)
 * [Installation](#installation)
-* [Currently supported object stores]
+* [Currently supported object stores](#currently-supported-object-stores)
+  * [Roadmap](#roadmap)
+  * [Amazon S3](#amazon-s3)
 * [Moodle configuration](#moodle-configuration)
+  * [General Settings](#general-settings)
+  * [File Transfer settings](#file-transfer-settings)
+  * [Amazon S3 settings](#amazon-s3-settings)
 * [Backporting](#backporting)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 
@@ -53,11 +58,14 @@ $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 ```
 ## Currently supported object stores
 
+### Roadmap
+
+There is support for more object stores planed, in particular enabling Openstack deployments.
+
 ### Amazon S3
 
-## Remote object storage setup
+*Amazon S3 bucket setup*
 
-### Amazon S3 bucket setup
 - Create an Amazon S3 bucket.
 - The AWS Users access policy should mirror the policy listed below.
 - Replace 'bucketname' with the name of your S3 bucket.
