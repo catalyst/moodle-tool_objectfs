@@ -27,7 +27,7 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/sdk/aws-autoloader.php');
+require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
 
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
