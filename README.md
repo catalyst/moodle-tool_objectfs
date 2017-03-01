@@ -21,6 +21,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   * [Amazon S3 settings](#amazon-s3-settings)
 * [Backporting](#backporting)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
+* [Contributing and support](#contributing-and-support)
 
 ## Use cases
 There are a number of different ways you can use this plug in. See [Recommended use case settings](#recommended-use-case-settings) for recommended settings for each one.
