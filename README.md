@@ -121,45 +121,68 @@ S3 specific settings
 
 If you are on an older moodle then you can backport the nessesary API's in order to support this plugin. Use with caution!
 
-#### Moodle 2.7 only
+#### Moodle 2.7 and 2.8 only
 1. Cherry pick [MDL-49627](https://tracker.moodle.org/browse/MDL-49627):
-[MDL-49627 - part 1](https://github.com/moodle/moodle/commit/b7067f065e6ce8d7587039094259ace3e0804663),
-[MDL-49627 - part 2](https://github.com/moodle/moodle/commit/2b53b13ff7b7cb98f81d5ef98214a91dedc124af)
+<pre>
+git remote add upstream git@github.com:moodle/moodle.git
+git fetch upstream
+git cherry-pick 47d3338..2b53b13
+// Solve conflicts and git cherry-pick --continue as needed.
+</pre>
 
 2. Follow steps in section below.
 
 
-#### Moodle 2.7 - 3.3
+#### Moodle 2.7 - 3.2
 1. Cherry pick the file system API patch: [MDL-46375](https://tracker.moodle.org/browse/MDL-46375):
-[MDL-46375 - part 1](https://github.com/moodle/moodle/commit/16a34ae1892014a6ca3055a95ac7310442529a6c),
-[MDL-46375 - part 2](https://github.com/moodle/moodle/commit/0c03db6a32fb217756e091b691f1e885b608781b)
-2. If you need tests to pass see [Test compatibility](test-compatibility)
+<pre>
+git remote add upstream git@github.com:moodle/moodle.git
+git fetch upstream
+git cherry-pick 846d899..0c03db6
+// Solve conflicts and git cherry-pick --continue as needed.
+</pre>
+2. If you need tests to pass see PHPUnit test compatibility below .
 
 
 #### PHPUnit test compatibility
 The file system API patch introduces tests that use:
 - setExpectedExceptionRegExp() which needs phpunit 4.3
 - setExpectedException() which needs phpunit 5.2 which needs needs php 5.6 (Ubuntu 14.04 runs 5.5.9)
+- exception strings that have have changed between Moodle versions.
 
-But different core versions of Moodle may require lower versions or you may be on 14.04.
 
-By applying a combination of patches to the new file system API tests and tweaking versions of Phphunit, you can make all tests pass.
+By cherry-picking combination of patches to the new file system API tests and tweaking versions of Phphunit in composer.json, you can make all tests pass.
 
-- Patch A converts setExpectedExceptionRegExp calls to setExpectedException
-- Patch B converts expectException calls to setExpectedException
+- [Patch A](https://github.com/kenneth-hendricks/moodle-fs-api/commit/175bd1fd01a0fbf11ac6370e04347c05bcbba62f) converts setExpectedExceptionRegExp calls to setExpectedException
+- [Patch B](https://github.com/kenneth-hendricks/moodle-fs-api/commit/b2c75c4a3c167cb6e9fa802025e77e87458ed32b) converts expectException calls to setExpectedException
+- [Patch C](https://github.com/kenneth-hendricks/moodle-fs-api/commit/314486b3379fad4617937495ddf29240cdc7a069) Modifies an expected exception message
+
+Apply them as follows:
+<pre>
+git remote add fsapi git@github.com:kenneth-hendricks/moodle-fs-api.git
+git fetch fsapi
+
+//Patch A
+git cherry-pick 175bd1fd01a0fbf11ac6370e04347c05bcbba62f
+
+//Patch B
+git cherry-pick b2c75c4a3c167cb6e9fa802025e77e87458ed32b
+
+//Patch C
+git cherry-pick 314486b3379fad4617937495ddf29240cdc7a069
+
+</pre>
 
 Here are known working configurations:
 
-| Moodle version | patch A | patch B | phpunit version | dbUnit version |
-|----------------|---------|---------|-----------------|----------------|
-| 2.7            |         |         |                 |                |
-| 2.8            |         |         |                 |                |
-| 2.9            |         |         |                 |                |
-| 3.0            |         |         |                 |                |
-| 3.1            |         |         |                 |                |
-| 3.2            |         |         |                 |                |
-| 3.3            |         |         |                 |                ||
-
+| Moodle version | Patch A | Patch B | Patch C | composer.json  |
+|----------------|---------|---------|---------|----------------|
+| [2.7](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_27_STABLE_FSAPI)            |    Yes     |   Yes      |      Yes   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_27_STABLE_FSAPI/composer.json)           |
+| [2.8](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_28_STABLE_FSAPI)            |    Yes     |   Yes      |      Yes   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_28_STABLE_FSAPI/composer.json)           |
+| [2.9](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_29_STABLE_FSAPI)            |    Yes     |   Yes      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_29_STABLE_FSAPI/composer.json)           |
+| [3.0](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_30_STABLE_FSAPI)            |    No     |   Yes      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_30_STABLE_FSAPI/composer.json)           |
+| [3.1](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_31_STABLE_FSAPI)            |    No     |   Yes      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_31_STABLE_FSAPI/composer.json)           |
+| [3.2](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_32_STABLE_FSAPI)            |    No     |   No      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_32_STABLE_FSAPI/composer.json)           |
 Crafted by Catalyst IT
 ----------------------
 
@@ -173,7 +196,7 @@ https://www.catalyst-au.net/
 Contributing and support
 ------------------------
 
-Issues, and pull requests using github are welcome and encouraged! 
+Issues, and pull requests using github are welcome and encouraged!
 
 https://github.com/catalyst/moodle-tool_objectfs/issues
 
