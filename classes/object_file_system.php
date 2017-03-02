@@ -178,6 +178,16 @@ abstract class object_file_system extends \file_system_filedir {
                 return true;
             }
 
+            $localdirpath = $this->get_fulldir_from_hash($contenthash);
+
+            // Folder may not exist yet if pulling a file that came from another environment.
+            if (!is_dir($localdirpath)) {
+                if (!mkdir($localdirpath, $this->dirpermissions, true)) {
+                    // Permission trouble.
+                    throw new file_exception('storedfilecannotcreatefiledirs');
+                }
+            }
+
             $result = copy($remotepath, $localpath);
 
             $objectlock->release();
