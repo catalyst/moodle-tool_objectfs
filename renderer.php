@@ -80,7 +80,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         // This assumes 2 columns, the first is a number and the second
         // is a file size.
 
-        foreach (array(1,2) as $col) {
+        foreach (array(1, 2) as $col) {
 
             $max = 0;
             foreach ($table->data as $row) {
