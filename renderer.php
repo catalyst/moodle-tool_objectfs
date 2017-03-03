@@ -90,7 +90,8 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $rows = $report->get_rows();
 
         foreach ($rows as $row) {
-            $table->data[] = array($row->datakey, $row->objectcount, $row->objectsum);
+            $sizerange = $this->get_size_range_from_logsize($row->datakey); // Turn logsize into a byte range.
+            $table->data[] = array($sizerange, $row->objectcount, $row->objectsum);
         }
 
         $this->augment_barchart($table);
@@ -98,6 +99,15 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output = html_writer::table($table);
 
         return $output;
+    }
+
+    private function get_size_range_from_logsize($logsize) {
+        $floor = pow(2, $logsize);
+        $roof = ($floor * 2);
+        $floor = display_size($floor);
+        $roof = display_size($roof);
+        $sizerange = "$floor - $roof";
+        return $sizerange;
     }
 
     private function render_mime_type_report($report) {

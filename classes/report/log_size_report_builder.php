@@ -37,7 +37,7 @@ class log_size_report_builder extends objectfs_report_builder {
         $sql = 'SELECT log as datakey,
                        sum(filesize) as objectsum,
                        count(*) as objectcount
-                  FROM (SELECT DISTINCT contenthash, filesize, floor(log(2,filesize) * 4) AS log
+                  FROM (SELECT DISTINCT contenthash, filesize, floor(log(2,filesize)) AS log
                             FROM {files}
                             WHERE filesize != 0) d
               GROUP BY log ORDER BY log';
