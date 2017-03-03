@@ -42,9 +42,23 @@ class log_size_report_builder extends objectfs_report_builder {
                             WHERE filesize != 0) d
               GROUP BY log ORDER BY log';
 
-        $result = $DB->get_records_sql($sql);
+        $results = $DB->get_records_sql($sql);
 
-        $report->add_rows($result);
+        $smallcount = 0;
+        $smallsum = 0;
+
+        foreach ($results as $key => $result) {
+            // Logsize means that files are smaller than 1 mb
+            if ($result->datakey <= 19) {
+                $smallcount += $result->objectcount;
+                $smallsum += $result->objectsum;
+                unset($results[$key]);
+            }
+        }
+
+        $report->add_row('small', $smallcount, $smallsum);
+
+        $report->add_rows($results);
 
         return $report;
     }

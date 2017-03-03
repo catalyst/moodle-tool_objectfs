@@ -102,6 +102,12 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     private function get_size_range_from_logsize($logsize) {
+
+        // Logsize before 1 MB.
+        if ($logsize == 'small') {
+            return '< 1MB';
+        }
+
         $floor = pow(2, $logsize);
         $roof = ($floor * 2);
         $floor = display_size($floor);
