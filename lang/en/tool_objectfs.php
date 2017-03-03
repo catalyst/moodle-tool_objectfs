@@ -43,6 +43,8 @@ $string['object_status:location:duplicated'] = 'Duplicated in filedir and remote
 $string['object_status:location:local'] = 'Only in filedir';
 $string['object_status:location:external'] = 'Only in remote storage';
 $string['object_status:location:unknown'] = 'Unknown object location';
+$string['object_status:location:total'] = 'Total';
+
 
 $string['object_status:last_run'] = 'This report was generated on {$a}';
 $string['object_status:never_run'] = 'The task to generate this report has not been run.';

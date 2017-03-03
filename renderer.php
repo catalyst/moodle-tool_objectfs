@@ -48,7 +48,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                              get_string('object_status:files', 'tool_objectfs'),
                              get_string('object_status:size', 'tool_objectfs'));
 
-
         $rows = $report->get_rows();
 
         foreach ($rows as $row) {
@@ -64,6 +63,9 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     private function get_file_location_string($filelocation) {
+        if ($filelocation == 'total') {
+            return get_string('object_status:location:total', 'tool_objectfs');
+        }
         switch ($filelocation){
             case OBJECT_LOCATION_ERROR:
                 return get_string('object_status:location:error', 'tool_objectfs');
@@ -73,7 +75,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                 return get_string('object_status:location:duplicated', 'tool_objectfs');
             case OBJECT_LOCATION_REMOTE:
                 return get_string('object_status:location:external', 'tool_objectfs');
-            default;
+            default:
                 return get_string('object_status:location:unknown', 'tool_objectfs');
         }
     }
@@ -106,7 +108,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                              get_string('object_status:size', 'tool_objectfs'));
 
         $rows = $report->get_rows();
-
 
         foreach ($rows as $row) {
             $table->data[] = array($row->datakey, $row->objectcount, $row->objectsum);

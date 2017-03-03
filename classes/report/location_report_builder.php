@@ -38,6 +38,9 @@ class location_report_builder extends objectfs_report_builder {
                            OBJECT_LOCATION_REMOTE,
                            OBJECT_LOCATION_ERROR);
 
+        $totalcount = 0;
+        $totalsum = 0;
+
         foreach ($locations as $location) {
 
             if ($location == OBJECT_LOCATION_LOCAL) {
@@ -60,7 +63,12 @@ class location_report_builder extends objectfs_report_builder {
             $result->datakey = $location;
 
             $report->add_row($result->datakey, $result->objectcount, $result->objectsum);
+
+            $totalcount += $result->objectcount;
+            $totalsum += $result->objectsum;
         }
+
+        $report->add_row('total', $totalcount, $totalsum);
 
         return $report;
     }

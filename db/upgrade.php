@@ -21,8 +21,6 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
     if ($oldversion < 2017030300) {
 
         $table = new xmldb_table('tool_objectfs_report_data');
-
-
         $dbman->rename_table($table, 'tool_objectfs_reports');
 
         $table = new xmldb_table('tool_objectfs_reports');
