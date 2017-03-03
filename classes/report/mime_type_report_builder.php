@@ -27,18 +27,14 @@ namespace tool_objectfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class mime_type_report extends object_report {
+class mime_type_report_builder extends objectfs_report_builder {
 
-    public function __construct() {
-        $this->reporttype = OBJECTFS_REPORT_MIME_TYPE;
-    }
-
-    public function calculate_report_data() {
+    public function build_report() {
         global $DB;
 
-        $data = array();
+        $report = new objectfs_report('mime_type');
 
-        $sql = "SELECT sum(filesize) as objectsum, filetype as mimetype, count(*) as objectcount
+        $sql = "SELECT sum(filesize) as objectsum, filetype as datakey, count(*) as objectcount
                 FROM (SELECT distinct filesize,
                         CASE
                             WHEN mimetype = 'application/pdf'                                   THEN 'pdf'
@@ -61,16 +57,14 @@ class mime_type_report extends object_report {
                         END AS filetype
                         FROM {files}
                         WHERE mimetype IS NOT NULL) stats
-                GROUP BY mimetype
+                GROUP BY datakey
                 ORDER BY
-                sum(filesize) / 1024, mimetype";
+                sum(filesize) / 1024, datakey";
 
-        $mimedata = $DB->get_records_sql($sql);
+        $result = $DB->get_records_sql($sql);
 
-        foreach ($mimedata as $record) {
-            $data[$record->mimetype] = $this->create_report_data_record(OBJECTFS_REPORT_MIME_TYPE, $record->mimetype, $record->objectcount, $record->objectsum);
-        }
+        $report->add_rows($result);
 
-        return $data;
+        return $report;
     }
 }

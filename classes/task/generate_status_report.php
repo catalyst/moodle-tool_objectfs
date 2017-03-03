@@ -25,7 +25,7 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\renderable\object_status;
+use tool_objectfs\report\objectfs_report_builder;
 
 require_once( __DIR__ . '/../../lib.php');
 
@@ -47,15 +47,13 @@ class generate_status_report extends \core\task\scheduled_task {
 
         $config = get_objectfs_config();
 
-        $reportclasses = array('object_location_report',
-                               'log_size_report',
-                               'mime_type_report');
+        $reporttypes = get_objectfs_report_types();
 
-        foreach ($reportclasses as $reportclass) {
-            $reportclass = "tool_objectfs\\report\\{$reportclass}";
-            $report = new $reportclass();
-            $data = $report->calculate_report_data();
-            $report->save_report_data($data);
+        foreach ($reporttypes as $reporttype) {
+            $reportbuilderclass = "tool_objectfs\\report\\{$reporttype}_report_builder";
+            $reportbuilder = new $reportbuilderclass();
+            $report = $reportbuilder->build_report();
+            objectfs_report_builder::save_report_to_database($report);
         }
     }
 }

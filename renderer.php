@@ -23,54 +23,98 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_objectfs\renderable\object_status;
-use tool_objectfs\report\object_report;
+use tool_objectfs\report\objectfs_report;
 
 defined('MOODLE_INTERNAL') || die();
 
 class tool_objectfs_renderer extends plugin_renderer_base {
 
-    protected function render_object_status(object_status $filestatus) {
+    protected function render_objectfs_report(objectfs_report $report) {
+        $reporttype = $report->get_report_type();
+
+        $renderfunction = "render_{$reporttype}_report";
+
         $output = '';
 
-        $output .= \html_writer::link(new \moodle_url('/admin/tool/objectfs/index.php'), get_string('settings', 'tool_objectfs'));
-        $output .= \html_writer::start_tag('br');
-        $output .= "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
+        $output .= $this->$renderfunction($report);
 
-        $config = get_objectfs_config();
+        return $output;
+    }
 
-        if (!isset($config->enabletasks) || !$config->enabletasks) {
-            $labeltext = get_string('not_enabled', 'tool_objectfs');
-            $output .= html_writer::label($labeltext, null);
-            $output .= \html_writer::start_tag('br');
+    private function render_location_report($report) {
+        $table = new html_table();
+
+        $table->head = array(get_string('object_status:location', 'tool_objectfs'),
+                             get_string('object_status:files', 'tool_objectfs'),
+                             get_string('object_status:size', 'tool_objectfs'));
+
+
+        $rows = $report->get_rows();
+
+        foreach ($rows as $row) {
+            $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
+            $table->data[] = array($filelocation, $row->objectcount, $row->objectsum);
         }
 
-        // Could refactor this to have less duplication, but requirements may change for data.
-        $locationreport = $filestatus->get_report(OBJECTFS_REPORT_OBJECT_LOCATION);
-        $logsizereport = $filestatus->get_report(OBJECTFS_REPORT_LOG_SIZE);
-        $mimetypereport = $filestatus->get_report(OBJECTFS_REPORT_MIME_TYPE);
+        $this->augment_barchart($table);
 
-        $lastrun = object_report::get_last_task_runtime();
+        $output = html_writer::table($table);
 
-        if ($locationreport) {
-            $output .= $this->render_object_location_report($locationreport, $output);
+        return $output;
+    }
+
+    private function get_file_location_string($filelocation) {
+        switch ($filelocation){
+            case OBJECT_LOCATION_ERROR:
+                return get_string('object_status:location:error', 'tool_objectfs');
+            case OBJECT_LOCATION_LOCAL:
+                return get_string('object_status:location:local', 'tool_objectfs');
+            case OBJECT_LOCATION_DUPLICATED:
+                return get_string('object_status:location:duplicated', 'tool_objectfs');
+            case OBJECT_LOCATION_REMOTE:
+                return get_string('object_status:location:external', 'tool_objectfs');
+            default;
+                return get_string('object_status:location:unknown', 'tool_objectfs');
+        }
+    }
+
+    private function render_log_size_report($report) {
+        $table = new html_table();
+
+        $table->head = array('logsize',
+                             get_string('object_status:files', 'tool_objectfs'),
+                             get_string('object_status:size', 'tool_objectfs'));
+
+        $rows = $report->get_rows();
+
+        foreach ($rows as $row) {
+            $table->data[] = array($row->datakey, $row->objectcount, $row->objectsum);
         }
 
-        if ($logsizereport) {
-            $output .= $this->render_log_size_report($logsizereport);
+        $this->augment_barchart($table);
+
+        $output = html_writer::table($table);
+
+        return $output;
+    }
+
+    private function render_mime_type_report($report) {
+        $table = new html_table();
+
+        $table->head = array('mimetype',
+                             get_string('object_status:files', 'tool_objectfs'),
+                             get_string('object_status:size', 'tool_objectfs'));
+
+        $rows = $report->get_rows();
+
+
+        foreach ($rows as $row) {
+            $table->data[] = array($row->datakey, $row->objectcount, $row->objectsum);
         }
 
-        if ($mimetypereport) {
-            $output .= $this->render_mime_type_report($mimetypereport);
-        }
+        $this->augment_barchart($table);
 
-        if ($lastrun) {
-            $labeltext = get_string('object_status:last_run', 'tool_objectfs', userdate($lastrun));
-        } else {
-            $labeltext = get_string('object_status:never_run', 'tool_objectfs');
-        }
-
-        $output .= html_writer::label($labeltext, null);
+        $output = html_writer::table($table);
 
         return $output;
     }
@@ -98,70 +142,29 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         }
     }
 
-    private function render_mime_type_report($mimetypereport) {
-        $table = new html_table();
+    public function object_status_page_intro() {
+        $output = '';
 
-        $table->head = array('mimetype',
-                             get_string('object_status:files', 'tool_objectfs'),
-                             get_string('object_status:size', 'tool_objectfs'));
+        $url = new \moodle_url('/admin/tool/objectfs/index.php');
+        $urltext = get_string('settings', 'tool_objectfs');
+        $output .= html_writer::tag('div', html_writer::link($url , $urltext));
 
-        foreach ($mimetypereport as $record) {
-            $table->data[] = array($record->datakey, $record->objectcount, $record->objectsum);
+        $config = get_objectfs_config();
+        if (!isset($config->enabletasks) || !$config->enabletasks) {
+            $output .= $this->box(get_string('not_enabled', 'tool_objectfs'));
         }
-        $this->augment_barchart($table);
 
-        $output = html_writer::table($table);
+        $lastrun = get_last_generate_status_report_runtime();
+        if ($lastrun) {
+            $lastruntext = get_string('object_status:last_run', 'tool_objectfs', userdate($lastrun));
+        } else {
+            $lastruntext = get_string('object_status:never_run', 'tool_objectfs');
+        }
+        $output .= $this->box($lastruntext);
+
+        // Adds bar chart styling for sizes and counts.
+        $output .= "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
 
         return $output;
-    }
-
-    private function render_log_size_report($logsizereport) {
-        $table = new html_table();
-
-        $table->head = array('logsize',
-                             get_string('object_status:files', 'tool_objectfs'),
-                             get_string('object_status:size', 'tool_objectfs'));
-
-        foreach ($logsizereport as $record) {
-            $table->data[] = array($record->datakey, $record->objectcount, $record->objectsum);
-        }
-        $this->augment_barchart($table);
-
-        $output = html_writer::table($table);
-
-        return $output;
-    }
-
-    private function render_object_location_report($locationreport) {
-        $table = new html_table();
-
-        $table->head = array(get_string('object_status:location', 'tool_objectfs'),
-                             get_string('object_status:files', 'tool_objectfs'),
-                             get_string('object_status:size', 'tool_objectfs'));
-
-        foreach ($locationreport as $record) {
-            $filelocation = $this->get_file_location_string($record->datakey);
-            $table->data[] = array($filelocation, $record->objectcount, $record->objectsum);
-        }
-        $this->augment_barchart($table);
-
-        $output = html_writer::table($table);
-
-        return $output;
-    }
-
-    private function get_file_location_string($filelocation) {
-        switch ($filelocation){
-            case OBJECT_LOCATION_ERROR:
-                return get_string('object_status:location:error', 'tool_objectfs');
-            case OBJECT_LOCATION_LOCAL:
-                return get_string('object_status:location:local', 'tool_objectfs');
-            case OBJECT_LOCATION_DUPLICATED:
-                return get_string('object_status:location:duplicated', 'tool_objectfs');
-            case OBJECT_LOCATION_REMOTE:
-                return get_string('object_status:location:external', 'tool_objectfs');
-            default;
-                return get_string('object_status:location:unknown', 'tool_objectfs');
-        }
     }
 }

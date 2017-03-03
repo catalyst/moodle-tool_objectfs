@@ -27,31 +27,25 @@ namespace tool_objectfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class log_size_report extends object_report {
+class log_size_report_builder extends objectfs_report_builder {
 
-    public function __construct() {
-        $this->reporttype = OBJECTFS_REPORT_LOG_SIZE;
-    }
-
-    public function calculate_report_data() {
+    public function build_report() {
         global $DB;
 
-        $data = array();
+        $report = new objectfs_report('log_size');
 
-        $sql = 'SELECT log logindex,
-                       sum(filesize) objectsum,
-                       count(*) objectcount
+        $sql = 'SELECT log as datakey,
+                       sum(filesize) as objectsum,
+                       count(*) as objectcount
                   FROM (SELECT DISTINCT contenthash, filesize, floor(log(2,filesize) * 4) AS log
                             FROM {files}
                             WHERE filesize != 0) d
               GROUP BY log ORDER BY log';
 
-        $logdata = $DB->get_records_sql($sql);
+        $result = $DB->get_records_sql($sql);
 
-        foreach ($logdata as $record) {
-            $data[$record->logindex] = $this->create_report_data_record(OBJECTFS_REPORT_LOG_SIZE, $record->logindex, $record->objectcount, $record->objectsum);
-        }
+        $report->add_rows($result);
 
-        return $data;
+        return $report;
     }
 }

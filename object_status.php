@@ -27,6 +27,10 @@ require_once(__DIR__ . '/../../../config.php');
 require_once( __DIR__ . '/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
+use tool_objectfs\report\objectfs_report;
+use tool_objectfs\report\objectfs_report_builder;
+
+
 admin_externalpage_setup('tool_objectfs');
 
 $output = $PAGE->get_renderer('tool_objectfs');
@@ -35,9 +39,14 @@ echo $output->header();
 
 echo $output->heading(get_string('object_status:page', 'tool_objectfs'));
 
-$filestatus = new \tool_objectfs\renderable\object_status();
+echo $output->object_status_page_intro();
 
-echo $output->render($filestatus);
+$reporttypes = get_objectfs_report_types();
+
+foreach ($reporttypes as $reporttype) {
+    $report = objectfs_report_builder::load_report_from_database($reporttype);
+    echo $output->render($report);
+}
 
 echo $output->footer();
 

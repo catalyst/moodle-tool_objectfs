@@ -28,31 +28,20 @@
  defined('MOODLE_INTERNAL') || die();
 
  use tool_objectfs\object_file_system;
- use tool_objectfs\report\object_location_report;
- use tool_objectfs\report\log_size_report;
- use tool_objectfs\report\mime_type_report;
+ use tool_objectfs\report\objectfs_report_builder;
 
  require_once(__DIR__ . '/classes/test_client.php');
  require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-
 class object_status_testcase extends tool_objectfs_testcase {
 
-    public function test_object_location_report () {
-        $report = new object_location_report();
-        $data = $report->calculate_report_data();
-        $report->save_report_data($data);
-    }
-
-    public function test_log_size_report () {
-        $report = new log_size_report();
-        $data = $report->calculate_report_data();
-        $report->save_report_data($data);
-    }
-
-    public function test_mime_type_report () {
-        $report = new mime_type_report();
-        $data = $report->calculate_report_data();
-        $report->save_report_data($data);
+    public function test_report_builders () {
+        $reporttypes = get_objectfs_report_types();
+        foreach ($reporttypes as $reporttype) {
+            $reportbuilderclass = "tool_objectfs\\report\\{$reporttype}_report_builder";
+            $reportbuilder = new $reportbuilderclass();
+            $report = $reportbuilder->build_report();
+            objectfs_report_builder::save_report_to_database($report);
+        }
     }
 }

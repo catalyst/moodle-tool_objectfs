@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File status renderable object.
+ * objectfs report class.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,33 +23,38 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\renderable;
+namespace tool_objectfs\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-class object_status implements \renderable {
+class objectfs_report implements \renderable {
+    protected $reporttype;
+    protected $rows;
 
-    private $reports;
-    private $reportclasses;
+    public function __construct($reporttype) {
+        $this->reporttype = $reporttype;
+        $rows = array();
+    }
 
-    public function __construct () {
-        $reportclasses = array('object_location_report',
-                               'log_size_report',
-                               'mime_type_report');
+    public function add_row($datakey, $objectcount, $objectsum) {
+        $row = new \stdClass();
+        $row->datakey = $datakey;
+        $row->objectcount = $objectcount;
+        $row->objectsum = $objectsum;
+        $this->rows[] = $row;
+    }
 
-        foreach ($reportclasses as $reportclass) {
-            $reportclass = "tool_objectfs\\report\\{$reportclass}";
-            $report = new $reportclass();
-            $reporttype = $report->get_type();
-            $this->reports[$reporttype] = $report->get_report_data();
+    public function add_rows($rows) {
+        foreach ($rows as $row) {
+            $this->add_row($row->datakey, $row->objectcount, $row->objectsum);
         }
     }
 
-    public function get_report($reporttype) {
-        return $this->reports[$reporttype];
+    public function get_rows() {
+        return $this->rows;
     }
 
-
-
-
+    public function get_report_type() {
+        return $this->reporttype;
+    }
 }

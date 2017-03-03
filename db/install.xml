@@ -15,10 +15,10 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="tool_objectfs_report_data" COMMENT="Object report data for objectfs">
+    <TABLE NAME="tool_objectfs_reports" COMMENT="Object report data for objectfs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="reporttype" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="reporttype" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="datakey" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="objectcount" TYPE="int" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="objectsum" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>

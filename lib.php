@@ -81,3 +81,17 @@ function get_objectfs_config() {
     }
     return $config;
 }
+
+function get_last_generate_status_report_runtime() {
+    global $DB;
+    $lastruntime = $DB->get_field('task_scheduled', 'lastruntime', array('classname' => '\tool_objectfs\task\generate_status_report'));
+    return $lastruntime;
+}
+
+function get_objectfs_report_types() {
+    $reporttypes = array('location',
+                          'log_size',
+                          'mime_type');
+
+    return $reporttypes;
+}
