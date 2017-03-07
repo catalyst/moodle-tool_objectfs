@@ -103,7 +103,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
     private function get_size_range_from_logsize($logsize) {
 
-        // Logsize before 1 MB.
+        // Small logsizes have been compressed.
         if ($logsize == 'small') {
             return '< 1MB';
         }

@@ -42,24 +42,32 @@ class log_size_report_builder extends objectfs_report_builder {
                             WHERE filesize != 0) d
               GROUP BY log ORDER BY log';
 
-        $results = $DB->get_records_sql($sql);
+        $stats = $DB->get_records_sql($sql);
 
-        $smallcount = 0;
-        $smallsum = 0;
+        $this->compress_small_log_sizes($stats);
 
-        foreach ($results as $key => $result) {
-            // Logsize means that files are smaller than 1 mb
-            if ($result->datakey <= 19) {
-                $smallcount += $result->objectcount;
-                $smallsum += $result->objectsum;
-                unset($results[$key]);
-            }
-        }
-
-        $report->add_row('small', $smallcount, $smallsum);
-
-        $report->add_rows($results);
+        $report->add_rows($stats);
 
         return $report;
+    }
+
+    protected function compress_small_log_sizes(&$stats) {
+        $smallstats = new \stdClass();
+        $smallstats->datakey = 'small';
+        $smallstats->objectsum = 0;
+        $smallstats->objectcount = 0;
+
+        foreach ($stats as $key => $stat) {
+
+            // Logsize of <= 19 means that files are smaller than 1 MB.
+            if ($stat->datakey <= 19) {
+                $smallstats->objectcount += $stat->objectcount;
+                $smallstats->objectsum += $stat->objectsum;
+                unset($stats[$key]);
+            }
+
+        }
+        // Add to the beginning of the array.
+        array_unshift($stats, $smallstats);
     }
 }
