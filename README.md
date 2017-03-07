@@ -4,7 +4,7 @@
 
 # moodle-tool_objectfs
 
-A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution.
+A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution. This plug-in requires [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) to function.
 
 * [Use cases](#use-cases)
   * [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
@@ -48,11 +48,12 @@ https://github.com/catalyst/moodle-local_datacleaner
 
 ## Installation
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
-1. Setup your remote object storage. See [Remote object storage setup](#remote-object-storage-setup)
-1. Clone this repository into admin/tool/objectfs
-2. Install the plugin through the moodle GUI.
-3. Configure the plugin. See [Moodle configuration](#moodle-configuration)
-4. Place the following line inside your Moodle config.php:
+2. Setup your remote object storage. See [Remote object storage setup](#remote-object-storage-setup)
+3. Clone this repository into admin/tool/objectfs
+4. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws
+4. Install the plugins through the moodle GUI.
+5. Configure the plugin. See [Moodle configuration](#moodle-configuration)
+6. Place the following line inside your Moodle config.php:
 
 ```php
 $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
