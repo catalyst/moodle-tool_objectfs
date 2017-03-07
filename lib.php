@@ -45,6 +45,12 @@ function update_object_record($contenthash, $location) {
     $existing = $DB->get_record('tool_objectfs_objects', array('contenthash' => $contenthash));
 
     if ($existing) {
+
+        // If state change is not to duplicated we do not update timeduplicated.
+        if ($location !== OBJECT_LOCATION_DUPLICATED) {
+            $logrecord->timeduplicated = $existing->timeduplicated;
+        }
+
         $logrecord->id = $existing->id;
         $DB->update_record('tool_objectfs_objects', $logrecord);
     } else {
