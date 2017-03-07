@@ -34,5 +34,5 @@ interface object_client {
     public function get_remote_fullpath_from_hash($contenthash);
     public function verify_remote_object($contenthash, $localpath);
     public function test_connection();
-    public function permissions_check();
+    public function test_permissions();
 }

@@ -106,13 +106,21 @@ class s3_client implements object_client {
      * @return boolean true on success, false on failure.
      */
     public function test_connection() {
+        $connection = new \stdClass();
+        $connection->success = true;
+        $connection->message = '';
+
         try {
             $result = $this->client->headBucket(array(
                             'Bucket' => $this->bucket));
-            return true;
+
+            $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
         } catch (S3Exception $e) {
-            return false;
+            $connection->success = false;
+            $details = $this->get_exception_details($e);
+            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
         }
+        return $connection;
     }
 
     /**
@@ -122,31 +130,33 @@ class s3_client implements object_client {
      *
      * @return boolean true on success, false on failure.
      */
-    public function permissions_check() {
-
-        $permissions = array();
+    public function test_permissions() {
+        $permissions = new \stdClass();
+        $permissions->success = true;
+        $permissions->messages = array();
 
         try {
             $result = $this->client->putObject(array(
                             'Bucket' => $this->bucket,
                             'Key' => 'permissions_check_file',
                             'Body' => 'test content'));
-            $permissions[AWS_CAN_WRITE_OBJECT] = true;
         } catch (S3Exception $e) {
-            $permissions[AWS_CAN_WRITE_OBJECT] = false;
+            $details = $this->get_exception_details($e);
+            $permissions->messages[] = get_string('settings:writefailure', 'tool_objectfs') . $details;
+            $permissions->success = false;
         }
 
         try {
             $result = $this->client->getObject(array(
                             'Bucket' => $this->bucket,
                             'Key' => 'permissions_check_file'));
-            $permissions[AWS_CAN_READ_OBJECT] = true;
         } catch (S3Exception $e) {
-            if ($e->getAwsErrorCode() === 'NoSuchKey') {
-                // Write could have failed.
-                $permissions[AWS_CAN_READ_OBJECT] = true;
-            } else {
-                $permissions[AWS_CAN_READ_OBJECT] = false;
+            $errorcode = $e->getAwsErrorCode();
+            // Write could have failed.
+            if ($errorcode !== 'NoSuchKey') {
+                $details = $this->get_exception_details($e);
+                $permissions->messages[] = get_string('settings:readfailure', 'tool_objectfs') . $details;
+                $permissions->success = false;
             }
         }
 
@@ -154,11 +164,38 @@ class s3_client implements object_client {
             $result = $this->client->deleteObject(array(
                             'Bucket' => $this->bucket,
                             'Key' => 'permissions_check_file'));
-            $permissions[AWS_CAN_DELETE_OBJECT] = true;
+            $permissions->messages[] = get_string('settings:deletesuccess', 'tool_objectfs');
+            $permissions->success = false;
         } catch (S3Exception $e) {
-            $permissions[AWS_CAN_DELETE_OBJECT] = false;
+            $errorcode = $e->getAwsErrorCode();
+            // Something else went wrong.
+            if ($errorcode !== 'AccessDenied') {
+                $details = $this->get_exception_details($e);
+                $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
+            }
+        }
+
+        if ($permissions->success) {
+            $permissions->messages[] = get_string('settings:permissioncheckpassed', 'tool_objectfs');
         }
 
         return $permissions;
+    }
+
+    public function get_exception_details($exception) {
+        $errorcode = $exception->getAwsErrorCode();
+        $message = $exception->getMessage();
+
+        $details = ' ';
+
+        if ($message) {
+            $details .= "ERROR MSG: " . $message . "\n";
+        }
+
+        if ($errorcode) {
+            $details .= "ERROR CODE: " . $errorcode . "\n";
+        }
+
+        return $details;
     }
 }

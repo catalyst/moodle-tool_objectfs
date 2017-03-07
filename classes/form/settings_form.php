@@ -114,37 +114,22 @@ class settings_form extends \moodleform {
         $client = new s3_client($config);
         $connection = $client->test_connection();
 
-        if ($connection) {
-            $permissions = $client->permissions_check();
-        } else {
-            $permissions = false;
-        }
+        if ($connection->success) {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
 
-        if ($connection) {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_objectfs'), 'notifysuccess'));
-        } else {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_objectfs'), 'notifyproblem'));
-        }
-
-        if ($permissions) {
-            $errormsg = '';
-            if (!$permissions[AWS_CAN_WRITE_OBJECT]) {
-                $errormsg .= get_string('settings:writefailure', 'tool_objectfs');
-            }
-
-            if (!$permissions[AWS_CAN_READ_OBJECT]) {
-                $errormsg .= get_string('settings:readfailure', 'tool_objectfs');
-            }
-
-            if ($permissions[AWS_CAN_DELETE_OBJECT]) {
-                $errormsg .= get_string('settings:deletesuccess', 'tool_objectfs');
-            }
-
-            if (strlen($errormsg) > 0) {
-                $mform->addElement('html', $OUTPUT->notification($errormsg, 'notifyproblem'));
+            // Check permissions if we can connect.
+            $permissions = $client->test_permissions();
+            if ($permissions->success) {
+                $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
             } else {
-                $mform->addElement('html', $OUTPUT->notification(get_string('settings:permissioncheckpassed', 'tool_objectfs'), 'notifysuccess'));
+                foreach ($permissions->messages as $message) {
+                    $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
+                }
             }
+
+        } else {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
+            $permissions = false;
         }
         return $mform;
     }

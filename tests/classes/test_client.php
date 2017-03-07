@@ -58,7 +58,7 @@ class test_client implements object_client {
     public function test_connection() {
         return true;
     }
-    public function permissions_check() {
+    public function test_permissions() {
         return true;
     }
 
