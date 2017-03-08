@@ -52,18 +52,23 @@ abstract class object_file_system extends \file_system_filedir {
     protected abstract function get_remote_client($config);
 
     protected function get_object_path_from_storedfile($file) {
+        $contenthash = $file->get_contenthash();
+        return $this->get_object_path_from_hash($contenthash);
+    }
+
+    protected function get_object_path_from_hash($contenthash) {
         if ($this->preferremote) {
-            $location = $this->get_actual_object_location_by_hash($file->get_contenthash());
+            $location = $this->get_actual_object_location_by_hash($contenthash);
             if ($location == OBJECT_LOCATION_DUPLICATED) {
-                return $this->get_remote_path_from_storedfile($file);
+                return $this->get_remote_path_from_hash($contenthash);
             }
         }
 
-        if ($this->is_file_readable_locally_by_storedfile($file)) {
-            $path = $this->get_local_path_from_storedfile($file);
+        if ($this->is_file_readable_locally_by_hash($contenthash)) {
+            $path = $this->get_local_path_from_hash($contenthash);
         } else {
             // We assume it is remote, not checking if it's readable.
-            $path = $this->get_remote_path_from_storedfile($file);
+            $path = $this->get_remote_path_from_hash($contenthash);
         }
 
         return $path;
@@ -127,11 +132,8 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     public function get_actual_object_location_by_hash($contenthash) {
-        $localpath = $this->get_local_path_from_hash($contenthash);
-        $remotepath = $this->get_remote_path_from_hash($contenthash);
-
-        $localreadable = is_readable($localpath);
-        $remotereadable = is_readable($remotepath);
+        $localreadable = $this->is_file_readable_locally_by_hash($contenthash);
+        $remotereadable = $this->is_file_readable_remotely_by_hash($contenthash);
 
         if ($localreadable && $remotereadable) {
             return OBJECT_LOCATION_DUPLICATED;
@@ -140,6 +142,8 @@ abstract class object_file_system extends \file_system_filedir {
         } else if (!$localreadable && $remotereadable) {
             return OBJECT_LOCATION_REMOTE;
         } else {
+            // Object is not anywhere - we toggle an error state in the DB.
+            update_object_record($contenthash, OBJECT_LOCATION_ERROR);
             return OBJECT_LOCATION_ERROR;
         }
     }
@@ -264,7 +268,12 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function readfile(\stored_file $file) {
         $path = $this->get_object_path_from_storedfile($file);
-        readfile_allow_large($path, $file->get_filesize());
+
+        $success = readfile_allow_large($path, $file->get_filesize());
+
+        if (!$success) {
+            update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+        }
     }
 
     /**
@@ -284,7 +293,14 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $path = $this->get_object_path_from_storedfile($file);
-        return file_get_contents($path);
+
+        $contents = file_get_contents($path);
+
+        if (!$contents) {
+            update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+        }
+
+        return $contents;
     }
 
     /**
@@ -299,8 +315,15 @@ abstract class object_file_system extends \file_system_filedir {
         global $CFG;
         require_once($CFG->libdir . "/xsendfilelib.php");
 
-        $path = $this->get_object_path_from_storedfile($file);
-        return xsendfile($path);
+        $path = $this->get_object_path_from_hash($contenthash);
+
+        $success = xsendfile($path);
+
+        if (!$success) {
+            update_object_record($contenthash, OBJECT_LOCATION_ERROR);
+        }
+
+        return $success;
     }
 
     /**
@@ -319,7 +342,14 @@ abstract class object_file_system extends \file_system_filedir {
         } else {
             $path = $this->get_object_path_from_storedfile($file);
         }
-        return self::get_file_handle_for_path($path, $type);
+
+        $filehandle = self::get_file_handle_for_path($path, $type);
+
+        if (!$filehandle) {
+            update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+        }
+
+        return $filehandle;
     }
 
     /**

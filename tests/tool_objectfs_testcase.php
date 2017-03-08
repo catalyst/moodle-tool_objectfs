@@ -62,6 +62,13 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         return $file;
     }
 
+    protected function create_fake_file() {
+        $file = $this->create_local_file();
+        $path = $this->get_local_path_from_storedfile($file);
+        unlink($path);
+        return $file;
+    }
+
     protected function create_local_file($content = 'test content') {
         global $DB;
         $fs = get_file_storage();

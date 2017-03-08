@@ -128,7 +128,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $result = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
 
         $this->assertFalse($result);
-
     }
 
     public function test_copy_object_from_local_to_remote_by_hash_succeeds_if_already_duplicated() {
@@ -168,7 +167,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $this->assertFalse($result);
         $this->assertTrue(is_readable($localpath));
-
     }
 
     public function test_delete_object_from_local_by_hash_fails_if_not_local() {
@@ -212,6 +210,20 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem->readfile($file);
     }
 
+    public function test_readfile_updates_object_with_error_location_on_fail() {
+        global $DB;
+        $fakefile = $this->create_fake_file();
+
+        // Phpunit will fail if PHP warning is thrown (which we want)
+        // so we surpress here.
+        set_error_handler(array($this, 'test_error_surpressor'));
+        $this->filesystem->readfile($fakefile);
+        restore_error_handler();
+
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+    }
+
     public function test_get_content_if_object_is_local() {
         $expectedcontent = 'expected content';
         $file = $this->create_local_file($expectedcontent);
@@ -228,6 +240,39 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $actualcontent = $this->filesystem->get_content($file);
 
         $this->assertEquals($expectedcontent, $actualcontent);
+    }
+
+    public function test_get_content_updates_object_with_error_location_on_fail() {
+        global $DB;
+        $fakefile = $this->create_fake_file();
+
+        // Phpunit will fail if PHP warning is thrown (which we want)
+        // so we surpress here.
+        set_error_handler(array($this, 'test_error_surpressor'));
+        $this->filesystem->get_content($fakefile);
+        restore_error_handler();
+
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+    }
+
+    public function test_error_surpressor() {
+        // We do nothing. We cant surpess warnings
+        // normally because phpunit will still fail.
+    }
+
+    public function test_xsendfile_updates_object_with_error_location_on_fail() {
+        global $DB;
+        $fakefile = $this->create_fake_file();
+
+        // Phpunit will fail if PHP warning is thrown (which we want)
+        // so we surpress here.
+        set_error_handler(array($this, 'test_error_surpressor'));
+        $this->filesystem->xsendfile($fakefile->get_contenthash());
+        restore_error_handler();
+
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
     public function test_get_content_file_handle_if_object_is_local() {
@@ -254,6 +299,20 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $this->assertTrue(is_resource($filehandle));
         $this->assertTrue(is_readable($localpath));
+    }
+
+    public function test_get_content_file_handle_updates_object_with_error_location_on_fail() {
+        global $DB;
+        $fakefile = $this->create_fake_file();
+
+        // Phpunit will fail if PHP warning is thrown (which we want)
+        // so we surpress here.
+        set_error_handler(array($this, 'test_error_surpressor'));
+        $filehandle = $this->filesystem->get_content_file_handle($fakefile);
+        restore_error_handler();
+
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
     public function test_remove_file_will_remove_local_file() {
