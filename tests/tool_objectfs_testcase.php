@@ -62,13 +62,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         return $file;
     }
 
-    protected function create_fake_file() {
-        $file = $this->create_local_file();
-        $path = $this->get_local_path_from_storedfile($file);
-        unlink($path);
-        return $file;
-    }
-
     protected function create_local_file($content = 'test content') {
         global $DB;
         $fs = get_file_storage();
@@ -108,6 +101,14 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $contenthash = $file->get_contenthash();
         $this->filesystem->delete_object_from_local_by_hash($contenthash);
         update_object_record($contenthash, OBJECT_LOCATION_REMOTE);
+        return $file;
+    }
+
+    protected function create_error_file() {
+        $file = $this->create_local_file();
+        $path = $this->get_local_path_from_storedfile($file);
+        unlink($path);
+        update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         return $file;
     }
 
@@ -162,10 +163,11 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     }
 
     protected function create_error_object($content = 'error object content') {
+        $file = $this->create_error_file($content);
         $objectrecord = new \stdClass();
-        $objectrecord->contenthash = 'error hash';
+        $objectrecord->contenthash = $file->get_contenthash();
         $objectrecord->location = OBJECT_LOCATION_ERROR;
-        $objectrecord->filesize = 100;
+        $objectrecord->filesize = $file->get_filesize();
         return $objectrecord;
     }
 

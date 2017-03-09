@@ -212,7 +212,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_readfile_updates_object_with_error_location_on_fail() {
         global $DB;
-        $fakefile = $this->create_fake_file();
+        $fakefile = $this->create_error_file();
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
@@ -244,7 +244,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_get_content_updates_object_with_error_location_on_fail() {
         global $DB;
-        $fakefile = $this->create_fake_file();
+        $fakefile = $this->create_error_file();
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
@@ -263,7 +263,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_xsendfile_updates_object_with_error_location_on_fail() {
         global $DB;
-        $fakefile = $this->create_fake_file();
+        $fakefile = $this->create_error_file();
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
@@ -303,7 +303,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_get_content_file_handle_updates_object_with_error_location_on_fail() {
         global $DB;
-        $fakefile = $this->create_fake_file();
+        $fakefile = $this->create_error_file();
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.

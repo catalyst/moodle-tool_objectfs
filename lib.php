@@ -56,6 +56,8 @@ function update_object_record($contenthash, $location) {
     } else {
         $DB->insert_record('tool_objectfs_objects', $logrecord);
     }
+
+    return $logrecord;
 }
 
 function set_objectfs_config($config) {

@@ -28,7 +28,7 @@ $string['pluginname'] = 'Object storage file system';
 $string['push_objects_to_storage_task'] = 'Object file system upload task';
 $string['delete_local_objects_task'] = 'Object file system delete local objects task';
 $string['pull_objects_from_storage_task'] = 'Object file system download objects task';
-
+$string['recover_error_objects_task'] = 'Object error recovery task';
 
 $string['generate_status_report_task'] = 'Object status report generator task';
 $string['not_enabled'] = 'The object file system background tasks are not enabled. No objects will move location until you do.';

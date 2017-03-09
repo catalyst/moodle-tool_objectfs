@@ -62,5 +62,14 @@ $tasks = array(
         'dayofweek' => '*',
         'month'     => '*'
     ),
+    array(
+        'classname' => 'tool_objectfs\task\recover_error_objects',
+        'blocking'  => 0,
+        'minute'    => '34',
+        'hour '     => '*/12',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*'
+    ),
 );
 
