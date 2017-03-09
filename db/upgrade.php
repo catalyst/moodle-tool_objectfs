@@ -31,7 +31,15 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         // Launch change of type for field reporttype.
         $dbman->change_field_type($table, $field);
 
-        upgrade_plugin_savepoint(true, 2017030300, 'error', 'objectfs');
+        upgrade_plugin_savepoint(true, 2017030300, 'tool', 'objectfs');
+    }
+
+    if ($oldversion < 2017031000) {
+        $table = new xmldb_table('tool_objectfs_objects');
+        $key = new xmldb_key('contenthash', XMLDB_KEY_UNIQUE, array('contenthash'));
+        $dbman->add_key($table, $key);
+
+        upgrade_plugin_savepoint(true, 2017031000, 'tool', 'objectfs');
     }
 
     return true;

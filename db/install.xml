@@ -12,6 +12,7 @@
         <FIELD NAME="location" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
+        <KEY NAME="contenthash" TYPE="unique" FIELDS="contenthash"/>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
