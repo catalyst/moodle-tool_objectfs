@@ -47,7 +47,7 @@ class generate_status_report extends \core\task\scheduled_task {
 
         $config = get_objectfs_config();
 
-        $reporttypes = get_objectfs_report_types();
+        $reporttypes = objectfs_report::get_report_types();
 
         foreach ($reporttypes as $reporttype) {
             $reportbuilderclass = "tool_objectfs\\report\\{$reporttype}_report_builder";

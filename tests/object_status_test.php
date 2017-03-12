@@ -36,7 +36,7 @@
 class object_status_testcase extends tool_objectfs_testcase {
 
     public function test_report_builders () {
-        $reporttypes = get_objectfs_report_types();
+        $reporttypes = objectfs_report::get_report_types();
         foreach ($reporttypes as $reporttype) {
             $reportbuilderclass = "tool_objectfs\\report\\{$reporttype}_report_builder";
             $reportbuilder = new $reportbuilderclass();

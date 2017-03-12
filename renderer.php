@@ -171,7 +171,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $output .= $this->box(get_string('not_enabled', 'tool_objectfs'));
         }
 
-        $lastrun = get_last_generate_status_report_runtime();
+        $lastrun = objectfs_report::get_last_generate_status_report_runtime();
         if ($lastrun) {
             $lastruntext = get_string('object_status:last_run', 'tool_objectfs', userdate($lastrun));
         } else {

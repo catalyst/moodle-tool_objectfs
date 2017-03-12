@@ -57,4 +57,18 @@ class objectfs_report implements \renderable {
     public function get_report_type() {
         return $this->reporttype;
     }
+
+    public static function get_last_generate_status_report_runtime() {
+        global $DB;
+        $lastruntime = $DB->get_field('task_scheduled', 'lastruntime', array('classname' => '\tool_objectfs\task\generate_status_report'));
+        return $lastruntime;
+    }
+
+    public static function get_report_types() {
+        $reporttypes = array('location',
+                              'log_size',
+                              'mime_type');
+
+        return $reporttypes;
+    }
 }

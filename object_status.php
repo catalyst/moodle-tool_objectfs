@@ -41,7 +41,7 @@ echo $output->heading(get_string('object_status:page', 'tool_objectfs'));
 
 echo $output->object_status_page_intro();
 
-$reporttypes = get_objectfs_report_types();
+$reporttypes = objectfs_report::get_report_types();
 
 foreach ($reporttypes as $reporttype) {
     $report = objectfs_report_builder::load_report_from_database($reporttype);
