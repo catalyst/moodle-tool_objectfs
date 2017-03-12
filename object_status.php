@@ -45,7 +45,8 @@ $reporttypes = objectfs_report::get_report_types();
 
 foreach ($reporttypes as $reporttype) {
     $report = objectfs_report_builder::load_report_from_database($reporttype);
-    echo $output->render($report);
+    // We call this render method directly cause 26 cant handle namespace classes.
+    echo $output->render_objectfs_report($report);
 }
 
 echo $output->footer();

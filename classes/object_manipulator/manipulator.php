@@ -69,4 +69,27 @@ abstract class manipulator {
      * @param  array $candidatehashes candidate content hashes
      */
     abstract public function execute($candidatehashes);
+
+    public static function get_all_manipulator_classnames() {
+        $manipulators = array('deleter',
+                              'puller',
+                              'pusher',
+                              'recoverer');
+
+        foreach ($manipulators as $key => $manipulator) {
+            $manipulators[$key] = '\\tool_objectfs\\object_manipulator\\' . $manipulator;
+        }
+
+        return $manipulators;
+    }
+
+    public static function setup_and_run_object_manipulator($manipulatorclassname) {
+        $config = get_objectfs_config();
+
+        $filesystem = new \tool_objectfs\s3_file_system();
+        $manipulator = new $manipulatorclassname($filesystem, $config);
+        $candidatehashes = $manipulator->get_candidate_objects();
+        $manipulator->execute($candidatehashes);
+
+    }
 }

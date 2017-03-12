@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 class tool_objectfs_renderer extends plugin_renderer_base {
 
-    protected function render_objectfs_report(objectfs_report $report) {
+    public function render_objectfs_report(objectfs_report $report) {
         $reporttype = $report->get_report_type();
 
         $renderfunction = "render_{$reporttype}_report";
@@ -42,13 +42,17 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     private function render_location_report($report) {
+        $rows = $report->get_rows();
+
+        if (empty($rows)) {
+            return '';
+        }
+
         $table = new html_table();
 
         $table->head = array(get_string('object_status:location', 'tool_objectfs'),
                              get_string('object_status:files', 'tool_objectfs'),
                              get_string('object_status:size', 'tool_objectfs'));
-
-        $rows = $report->get_rows();
 
         foreach ($rows as $row) {
             $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
@@ -81,13 +85,17 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     private function render_log_size_report($report) {
+        $rows = $report->get_rows();
+
+        if (empty($rows)) {
+            return '';
+        }
+
         $table = new html_table();
 
         $table->head = array('logsize',
                              get_string('object_status:files', 'tool_objectfs'),
                              get_string('object_status:size', 'tool_objectfs'));
-
-        $rows = $report->get_rows();
 
         foreach ($rows as $row) {
             $sizerange = $this->get_size_range_from_logsize($row->datakey); // Turn logsize into a byte range.
@@ -117,13 +125,17 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     private function render_mime_type_report($report) {
+        $rows = $report->get_rows();
+
+        if (empty($rows)) {
+            return '';
+        }
+
         $table = new html_table();
 
         $table->head = array('mimetype',
                              get_string('object_status:files', 'tool_objectfs'),
                              get_string('object_status:size', 'tool_objectfs'));
-
-        $rows = $report->get_rows();
 
         foreach ($rows as $row) {
             $table->data[] = array($row->datakey, $row->objectcount, $row->objectsum);

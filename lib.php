@@ -89,3 +89,39 @@ function get_objectfs_config() {
     }
     return $config;
 }
+
+function tool_objectfs_should_tasks_run() {
+    $config = get_objectfs_config();
+    if (isset($config->enabletasks) && $config->enabletasks) {
+        return true;
+    }
+
+    return false;
+}
+
+// Legacy cron function.
+function tool_objectfs_cron() {
+    mtrace('RUNNING legacy cron objectfs');
+    global $CFG;
+    if ($CFG->branch <= 26) {
+
+        $tasksshouldrun = tool_objectfs_should_tasks_run();
+
+        if (!$tasksshouldrun) {
+            mtrace('Objectfs tasks not configured to run, exiting');
+            return true;
+        }
+
+        $manipulators = \tool_objectfs\object_manipulator\manipulator::get_all_manipulator_classnames();
+
+        // Unlike the task system, we do not get fine grained control over
+        // when tasks/manipulators run. Every cron we just run all the manipulators.
+        foreach ($manipulators as $manipulator) {
+            mtrace("Executing objectfs $manipulator");
+            \tool_objectfs\object_manipulator\manipulator::setup_and_run_object_manipulator($manipulator);
+            mtrace("Objectfs $manipulator successfully executed");
+        }
+    }
+
+    return true;
+}

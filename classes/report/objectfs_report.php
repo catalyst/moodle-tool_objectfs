@@ -59,8 +59,14 @@ class objectfs_report implements \renderable {
     }
 
     public static function get_last_generate_status_report_runtime() {
-        global $DB;
-        $lastruntime = $DB->get_field('task_scheduled', 'lastruntime', array('classname' => '\tool_objectfs\task\generate_status_report'));
+        global $DB, $CFG;
+
+        if ($CFG->branch <= 26) {
+            $lastruntime = $DB->get_field('config_plugins', 'value', array('name' => 'lastcron', 'plugin' => 'tool_objectfs'));
+        } else {
+            $lastruntime = $DB->get_field('task_scheduled', 'lastruntime', array('classname' => '\tool_objectfs\task\generate_status_report'));
+        }
+
         return $lastruntime;
     }
 
