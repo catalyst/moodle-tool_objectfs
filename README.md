@@ -121,7 +121,33 @@ S3 specific settings
 
 If you are on an older moodle then you can backport the nessesary API's in order to support this plugin. Use with caution!
 
-#### Moodle 2.7 and 2.8 only
+The quickest way to do this is to rebase your moodle installation onto an already prepared fs-api branch that matches your version. Alternatively you can follow some step by step instructions.
+### Rebase method
+The fs-api repository can be found [here](moodle-fs-api).
+
+More instructions to come
+
+### Step by step method
+#### Moodle 2.6 only
+1. Cherry pick [MDL-44510](https://tracker.moodle.org/browse/MDL-44510):
+<pre>
+git remote add upstream git@github.com:moodle/moodle.git
+git fetch upstream
+git cherry-pick 54f1423ecc1f5372ca452ab14aeab16489ce1e6f
+// Solve conflicts as needed.
+</pre>
+
+2. Back port the Moodle lock API. A patch has been prepared. Note: this patch does not include installation of the lock tables - this is handled by the plugin itself to avoid hacking core update.php and version.
+<pre>
+git remote add fsapi git@github.com:kenneth-hendricks/moodle-fs-api.git
+git fetch fsapi
+git cherry-pick b66908597636a0389154aaa86172b63a2570dd31
+// Solve conflicts as needed.
+</pre>
+
+3. Follow steps in sections below.
+
+#### Moodle 2.6 - 2.8 only
 1. Cherry pick [MDL-49627](https://tracker.moodle.org/browse/MDL-49627):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
@@ -132,8 +158,7 @@ git cherry-pick 47d3338..2b53b13
 
 2. Follow steps in section below.
 
-
-#### Moodle 2.7 - 3.2
+#### Moodle 2.6 - 3.2
 1. Cherry pick the file system API patch: [MDL-46375](https://tracker.moodle.org/browse/MDL-46375):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
