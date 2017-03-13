@@ -28,29 +28,5 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-<?php
-        // We do this so when backporting the lock API for < mdl26 we dont have to mess with upgrade.php and version
-        // numbers, so we conditionally install the table for earlier versions of moodle. It will be removed with the
-        // plugin if no other xml files define the table.
-        global $CFG;
-        if ($CFG->branch <= 26){
-            echo '    <TABLE NAME="lock_db" COMMENT="Stores active and inactive lock types for db locking method.">
-                        <FIELDS>
-                            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-                            <FIELD NAME="resourcekey" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="String identifying the resource to be locked. Should use frankenstyle format."/>
-                            <FIELD NAME="expires" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Expiry time for an active lock."/>
-                            <FIELD NAME="owner" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="uuid indicating the owner of the lock."/>
-                        </FIELDS>
-                        <KEYS>
-                            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-                        </KEYS>
-                        <INDEXES>
-                            <INDEX NAME="resourcekey_uniq" UNIQUE="true" FIELDS="resourcekey" COMMENT="Unique index for resourcekey"/>
-                            <INDEX NAME="expires_idx" UNIQUE="false" FIELDS="expires" COMMENT="Index on expires column"/>
-                            <INDEX NAME="owner_idx" UNIQUE="false" FIELDS="owner" COMMENT="Index on owner"/>
-                        </INDEXES>
-                      </TABLE>';
-        }
-?>
   </TABLES>
 </XMLDB>
