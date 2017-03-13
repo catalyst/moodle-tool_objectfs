@@ -36,7 +36,7 @@ class logger {
     private $totalfilesize;
     private $totalfilecount;
 
-    public function __construct(){
+    public function __construct() {
         $this->totalfilecount = 0;
         $this->totalfilesize = 0;
     }
