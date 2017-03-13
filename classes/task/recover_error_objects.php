@@ -49,16 +49,7 @@ class recover_error_objects extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        $config = get_objectfs_config();
-
-        if (isset($config->enabletasks) && $config->enabletasks) {
-            $filesystem = new s3_file_system();
-            $recoverer = new recoverer($filesystem, $config);
-            $candidatehashes = $recoverer->get_candidate_objects();
-            $recoverer->execute($candidatehashes);
-        } else {
-            mtrace(get_string('not_enabled', 'tool_objectfs'));
-        }
+        setup_and_run_object_manipulator('recoverer');
     }
 }
 

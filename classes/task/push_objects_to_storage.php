@@ -49,16 +49,7 @@ class push_objects_to_storage extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        $config = get_objectfs_config();
-
-        if (isset($config->enabletasks) && $config->enabletasks) {
-            $filesystem = new s3_file_system();
-            $pusher = new pusher($filesystem, $config);
-            $candidatehashes = $pusher->get_candidate_objects();
-            $pusher->execute($candidatehashes);
-        } else {
-            mtrace(get_string('not_enabled', 'tool_objectfs'));
-        }
+        setup_and_run_object_manipulator('pusher');
     }
 }
 

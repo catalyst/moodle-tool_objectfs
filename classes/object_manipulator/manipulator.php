@@ -86,10 +86,13 @@ abstract class manipulator {
     public static function setup_and_run_object_manipulator($manipulatorclassname) {
         $config = get_objectfs_config();
 
-        $filesystem = new \tool_objectfs\s3_file_system();
-        $manipulator = new $manipulatorclassname($filesystem, $config);
-        $candidatehashes = $manipulator->get_candidate_objects();
-        $manipulator->execute($candidatehashes);
-
+        if (isset($config->enabletasks) && $config->enabletasks) {
+            $filesystem = new \tool_objectfs\s3_file_system();
+            $manipulator = new $manipulatorclassname($filesystem, $config);
+            $candidatehashes = $manipulator->get_candidate_objects();
+            $manipulator->execute($candidatehashes);
+        } else {
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
+        }
     }
 }
