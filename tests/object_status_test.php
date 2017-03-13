@@ -29,6 +29,7 @@
 
  use tool_objectfs\object_file_system;
  use tool_objectfs\report\objectfs_report_builder;
+ use tool_objectfs\report\objectfs_report;
 
  require_once(__DIR__ . '/classes/test_client.php');
  require_once(__DIR__ . '/tool_objectfs_testcase.php');
