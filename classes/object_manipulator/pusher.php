@@ -54,10 +54,13 @@ class pusher extends manipulator {
      * @param object_file_system $filesystem objectfs file system
      * @param object $config objectfs config.
      */
-    public function __construct($filesystem, $config) {
+    public function __construct($filesystem, $config, $logger) {
         parent::__construct($filesystem, $config);
         $this->sizethreshold = $config->sizethreshold;
         $this->minimumage = $config->minimumage;
+
+        $this->logger = $logger;
+        $this->logger->set_action('push');
     }
 
     /**
@@ -87,14 +90,15 @@ class pusher extends manipulator {
 
         $params = array($maxcreatedtimestamp, $this->sizethreshold, OBJECT_LOCATION_LOCAL);
 
-        $starttime = time();
-        $files = $DB->get_records_sql($sql, $params);
-        $duration = time() - $starttime;
-        $count = count($files);
+        $this->logger->start_timing();
+        $objects = $DB->get_records_sql($sql, $params);
+        $this->logger->end_timing();
 
-        $logstring = "File pusher query took $duration seconds to find $count files \n";
-        mtrace($logstring);
-        return $files;
+        $totalobjectsfound = count($objects);
+
+        $this->logger->log_object_manipulation_query($totalobjectsfound);
+
+        return $objects;
     }
 
 
@@ -104,9 +108,7 @@ class pusher extends manipulator {
      * @param  array $candidatehashes content hashes to push
      */
     public function execute($files) {
-        $starttime = time();
-        $objectcount = 0;
-        $totalfilesize = 0;
+        $this->logger->start_timing();
 
         foreach ($files as $file) {
             if (time() >= $this->finishtime) {
@@ -123,14 +125,11 @@ class pusher extends manipulator {
 
             update_object_record($file->contenthash, $location);
 
-            $objectcount++;
-            $totalfilesize += $file->filesize;
+            $this->logger->add_object_manipulation($file->filesize);
         }
 
-        $duration = time() - $starttime;
-        $totalfilesize = display_size($totalfilesize);
-        $logstring = "File pusher processed $objectcount files, total size: $totalfilesize in $duration seconds \n";
-        mtrace($logstring);
+        $this->logger->end_timing();
+        $this->logger->log_object_manipulation();
     }
 }
 

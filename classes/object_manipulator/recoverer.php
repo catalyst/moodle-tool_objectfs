@@ -40,8 +40,11 @@ class recoverer extends manipulator {
      * @param object_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
-    public function __construct($filesystem, $config) {
+    public function __construct($filesystem, $config, $logger) {
         parent::__construct($filesystem, $config);
+
+        $this->logger = $logger;
+        $this->logger->set_action('recover');
     }
 
     /**
@@ -65,13 +68,13 @@ class recoverer extends manipulator {
 
         $params = array(OBJECT_LOCATION_ERROR);
 
-        $starttime = time();
+        $this->logger->start_timing();
         $objects = $DB->get_records_sql($sql, $params);
-        $duration = time() - $starttime;
-        $count = count($objects);
+        $this->logger->end_timing();
 
-        $logstring = "Objects recoverer query took $duration seconds to find $count objects \n";
-        mtrace($logstring);
+        $totalobjectsfound = count($objects);
+
+        $this->logger->log_object_manipulation_query($totalobjectsfound);
 
         return $objects;
     }
@@ -83,11 +86,7 @@ class recoverer extends manipulator {
      * @param  array $candidatehashes content hashes to delete
      */
     public function execute($objects) {
-        global $DB;
-
-        $starttime = time();
-        $objectcount = 0;
-        $totalobjectsize = 0;
+        $this->logger->start_timing();
 
         foreach ($objects as $object) {
             if (time() >= $this->finishtime) {
@@ -101,14 +100,10 @@ class recoverer extends manipulator {
                 update_object_record($object->contenthash, $location);
             }
 
-            $objectcount++;
-            $totalobjectsize += $object->filesize;
+            $this->logger->add_object_manipulation($object->filesize);
         }
 
-        $duration = time() - $starttime;
-
-        $totalobjectsize = display_size($totalobjectsize);
-        $logstring = "Objects recoverer processed $objectcount objects, total size: $totalobjectsize in $duration seconds \n";
-        mtrace($logstring);
+        $this->logger->end_timing();
+        $this->logger->log_object_manipulation();
     }
 }

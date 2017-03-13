@@ -56,10 +56,13 @@ class deleter extends manipulator {
      * @param object_file_system $filesystem S3 file system
      * @param object $config sssfs config.
      */
-    public function __construct($filesystem, $config) {
+    public function __construct($filesystem, $config, $logger) {
         parent::__construct($filesystem, $config);
         $this->consistencydelay = $config->consistencydelay;
         $this->deletelocal = $config->deletelocal;
+
+        $this->logger = $logger;
+        $this->logger->set_action('delete');
     }
 
     /**
@@ -90,15 +93,15 @@ class deleter extends manipulator {
         $consistancythrehold = time() - $this->consistencydelay;
         $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED);
 
-        $starttime = time();
-        $files = $DB->get_records_sql($sql, $params);
-        $duration = time() - $starttime;
-        $count = count($files);
+        $this->logger->start_timing();
+        $objects = $DB->get_records_sql($sql, $params);
+        $this->logger->end_timing();
 
-        $logstring = "File deleter query took $duration seconds to find $count files \n";
-        mtrace($logstring);
+        $totalobjectsfound = count($objects);
 
-        return $files;
+        $this->logger->log_object_manipulation_query($totalobjectsfound);
+
+        return $objects;
     }
 
 
@@ -108,11 +111,7 @@ class deleter extends manipulator {
      * @param  array $candidatehashes content hashes to delete
      */
     public function execute($files) {
-        global $DB;
-
-        $starttime = time();
-        $objectcount = 0;
-        $totalfilesize = 0;
+        $this->logger->start_timing();
 
         if ($this->deletelocal == 0) {
             mtrace("Delete local disabled, not deleting \n");
@@ -134,14 +133,10 @@ class deleter extends manipulator {
 
             update_object_record($file->contenthash, $location);
 
-            $objectcount++;
-            $totalfilesize += $file->filesize;
+            $this->logger->add_object_manipulation($file->filesize);
         }
 
-        $duration = time() - $starttime;
-
-        $totalfilesize = display_size($totalfilesize);
-        $logstring = "File deleter processed $objectcount files, total size: $totalfilesize in $duration seconds \n";
-        mtrace($logstring);
+        $this->logger->end_timing();
+        $this->logger->log_object_manipulation();
     }
 }

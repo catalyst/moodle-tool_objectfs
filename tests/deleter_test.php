@@ -32,7 +32,7 @@ class deleter_testcase extends tool_objectfs_testcase {
         $config->deletelocal = true;
         $config->consistencydelay = 0;
         set_objectfs_config($config);
-        $this->deleter = new deleter($this->filesystem, $config);
+        $this->deleter = new deleter($this->filesystem, $config, $this->logger);
         ob_start();
     }
 
@@ -43,7 +43,7 @@ class deleter_testcase extends tool_objectfs_testcase {
     protected function set_deleter_config($key, $value) {
         $config = get_objectfs_config();
         $config->$key = $value;
-        $this->deleter = new deleter($this->filesystem, $config);
+        $this->deleter = new deleter($this->filesystem, $config, $this->logger);
     }
 
     public function test_deleter_get_candidate_objects_will_get_duplicated_objects() {

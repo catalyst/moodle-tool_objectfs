@@ -29,6 +29,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         global $CFG;
         $this->filesystem = new test_file_system();
         $this->resetAfterTest(true);
+        $this->logger = new \tool_objectfs\object_manipulator\logger();
     }
 
     protected function reset_file_system() {

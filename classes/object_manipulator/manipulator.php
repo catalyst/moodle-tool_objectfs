@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\object_manipulator;
 
+use tool_objectfs\object_manipulator\logger;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -44,6 +46,8 @@ abstract class manipulator {
      * @var int
      */
     protected $finishtime;
+
+    protected $logger;
 
     /**
      * Manipulator constructor
@@ -87,8 +91,9 @@ abstract class manipulator {
         $config = get_objectfs_config();
 
         if (isset($config->enabletasks) && $config->enabletasks) {
+            $logger = new logger();
             $filesystem = new \tool_objectfs\s3_file_system();
-            $manipulator = new $manipulatorclassname($filesystem, $config);
+            $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
             $candidatehashes = $manipulator->get_candidate_objects();
             $manipulator->execute($candidatehashes);
         } else {

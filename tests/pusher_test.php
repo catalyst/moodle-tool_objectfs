@@ -32,7 +32,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $config->sizethreshold = 0;
         $config->minimumage = 0;
         set_objectfs_config($config);
-        $this->pusher = new pusher($this->filesystem, $config);
+        $this->pusher = new pusher($this->filesystem, $config, $this->logger);
         ob_start();
     }
 
@@ -43,7 +43,7 @@ class pusher_testcase extends tool_objectfs_testcase {
     protected function set_pusher_config($key, $value) {
         $config = get_objectfs_config();
         $config->$key = $value;
-        $this->pusher = new pusher($this->filesystem, $config);
+        $this->pusher = new pusher($this->filesystem, $config, $this->logger);
     }
 
     public function test_pusher_get_candidate_objects_will_get_local_objects() {

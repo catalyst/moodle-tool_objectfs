@@ -47,9 +47,12 @@ class puller extends manipulator {
      * @param object_file_system $filesystem object file system
      * @param object $config objectfs config.
      */
-    public function __construct($filesystem, $config) {
+    public function __construct($filesystem, $config, $logger) {
         parent::__construct($filesystem, $config);
         $this->sizethreshold = $config->sizethreshold;
+
+        $this->logger = $logger;
+        $this->logger->set_action('pull');
     }
 
     /**
@@ -73,15 +76,15 @@ class puller extends manipulator {
 
         $params = array($this->sizethreshold, OBJECT_LOCATION_REMOTE);
 
-        $starttime = time();
-        $files = $DB->get_records_sql($sql, $params);
-        $duration = time() - $starttime;
-        $count = count($files);
+        $this->logger->start_timing();
+        $objects = $DB->get_records_sql($sql, $params);
+        $this->logger->end_timing();
 
-        $logstring = "File puller query took $duration seconds to find $count files \n";
-        mtrace($logstring);
+        $totalobjectsfound = count($objects);
 
-        return $files;
+        $this->logger->log_object_manipulation_query($totalobjectsfound);
+
+        return $objects;
     }
 
 
@@ -91,9 +94,7 @@ class puller extends manipulator {
      * @param  array $candidatehashes content hashes to push
      */
     public function execute($files) {
-        $starttime = time();
-        $objectcount = 0;
-        $totalfilesize = 0;
+        $this->logger->start_timing();
 
         foreach ($files as $file) {
             if (time() >= $this->finishtime) {
@@ -110,14 +111,11 @@ class puller extends manipulator {
 
             update_object_record($file->contenthash, $location);
 
-            $objectcount++;
-            $totalfilesize += $file->filesize;
+            $this->logger->add_object_manipulation($file->filesize);
         }
 
-        $duration = time() - $starttime;
-        $totalfilesize = display_size($totalfilesize);
-        $logstring = "File puller processed $objectcount files, total size: $totalfilesize in $duration seconds \n";
-        mtrace($logstring);
+        $this->logger->end_timing();
+        $this->logger->log_object_manipulation();
     }
 }
 
