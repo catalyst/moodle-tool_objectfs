@@ -36,14 +36,15 @@ abstract class objectfs_report_builder {
         $reporttype = $report->get_report_type();
         $reportrows = $report->get_rows();
 
+        // Remove old records.
+        $DB->delete_records('tool_objectfs_reports', array('reporttype' => $reporttype));
+
         // Add report type to each row.
         foreach ($reportrows as $row) {
             $row->reporttype = $reporttype;
+            // We dont use insert_records because of 26 compatibility.
+            $DB->insert_record('tool_objectfs_reports', $row);
         }
-
-        // Remove old records.
-        $DB->delete_records('tool_objectfs_reports', array('reporttype' => $reporttype));
-        $DB->insert_records('tool_objectfs_reports', $reportrows);
     }
 
     public static function load_report_from_database($reporttype) {

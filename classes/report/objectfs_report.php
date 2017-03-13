@@ -70,6 +70,17 @@ class objectfs_report implements \renderable {
         return $lastruntime;
     }
 
+    public static function generate_status_report() {
+        $reporttypes = self::get_report_types();
+
+        foreach ($reporttypes as $reporttype) {
+            $reportbuilderclass = "tool_objectfs\\report\\{$reporttype}_report_builder";
+            $reportbuilder = new $reportbuilderclass();
+            $report = $reportbuilder->build_report();
+            objectfs_report_builder::save_report_to_database($report);
+        }
+    }
+
     public static function get_report_types() {
         $reporttypes = array('location',
                               'log_size',

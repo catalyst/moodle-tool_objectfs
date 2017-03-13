@@ -121,6 +121,8 @@ function tool_objectfs_cron() {
             \tool_objectfs\object_manipulator\manipulator::setup_and_run_object_manipulator($manipulator);
             mtrace("Objectfs $manipulator successfully executed");
         }
+
+        \tool_objectfs\report\objectfs_report::generate_status_report();
     }
 
     return true;
