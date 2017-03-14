@@ -123,7 +123,7 @@ If you are on an older moodle then you can backport the nessesary API's in order
 
 The quickest way to do this is to rebase your moodle installation onto an already prepared fs-api branch that matches your version. Alternatively you can follow some step by step instructions.
 ### Rebase method
-The fs-api repository can be found [here](moodle-fs-api).
+The fs-api repository can be found [here](https://github.com/kenneth-hendricks/moodle-fs-api).
 
 More instructions to come
 
