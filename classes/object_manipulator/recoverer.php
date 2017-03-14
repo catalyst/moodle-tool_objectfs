@@ -44,7 +44,8 @@ class recoverer extends manipulator {
         parent::__construct($filesystem, $config);
 
         $this->logger = $logger;
-        $this->logger->set_action('recover');
+        // Inject our logger into the filesystem.
+        $this->filesystem->set_logger($this->logger);
     }
 
     /**
@@ -74,14 +75,13 @@ class recoverer extends manipulator {
 
         $totalobjectsfound = count($objects);
 
-        $this->logger->log_object_manipulation_query($totalobjectsfound);
-
+        $this->logger->log_object_query('get_recover_candidates', $totalobjectsfound);
         return $objects;
     }
 
     protected function manipulate_object($objectrecord) {
-        $location = $this->filesystem->get_actual_object_location_by_hash($objectrecord->contenthash);
-        return $location;
+        $newlocation = $this->filesystem->get_actual_object_location_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        return $newlocation;
     }
 
 }

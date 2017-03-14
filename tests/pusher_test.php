@@ -32,6 +32,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $config->sizethreshold = 0;
         $config->minimumage = 0;
         set_objectfs_config($config);
+        $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->pusher = new pusher($this->filesystem, $config, $this->logger);
         ob_start();
     }

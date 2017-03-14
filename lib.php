@@ -75,6 +75,7 @@ function set_objectfs_config($config) {
 function get_objectfs_config() {
     $config = new stdClass;
     $config->enabletasks = 0;
+    $config->enablelogging = 0;
     $config->key = '';
     $config->secret = '';
     $config->bucket = '';

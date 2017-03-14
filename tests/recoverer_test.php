@@ -30,6 +30,7 @@ class recoverer_testcase extends tool_objectfs_testcase {
         parent::setUp();
         $config = get_objectfs_config();
         set_objectfs_config($config);
+        $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->recoverer = new recoverer($this->filesystem, $config, $this->logger);
         ob_start();
     }

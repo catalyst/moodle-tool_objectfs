@@ -31,6 +31,7 @@ class puller_testcase extends tool_objectfs_testcase {
         $config = get_objectfs_config();
         $config->sizethreshold = 100;
         set_objectfs_config($config);
+        $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->puller = new puller($this->filesystem, $config, $this->logger);
         ob_start();
     }

@@ -37,6 +37,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     private $remoteclient;
     private $preferremote;
+    private $logger;
 
     public function __construct() {
         parent::__construct(); // Setup fildir.
@@ -45,8 +46,17 @@ abstract class object_file_system extends \file_system_filedir {
 
         $this->remoteclient = $this->get_remote_client($config);
         $this->remoteclient->register_stream_wrapper();
-
         $this->preferremote = $config->preferremote;
+
+        if ($config->enablelogging) {
+            $this->logger = new \tool_objectfs\log\real_time_logger();
+        } else {
+            $this->logger = new \tool_objectfs\log\null_logger();
+        }
+    }
+
+    public function set_logger(\tool_objectfs\log\objectfs_logger $logger) {
+        $this->logger = $logger;
     }
 
     protected abstract function get_remote_client($config);
@@ -98,11 +108,10 @@ abstract class object_file_system extends \file_system_filedir {
 
             // While gaining lock object might have been moved locally so we recheck.
             if ($objectlock && !is_readable($path)) {
-                $fetched = $this->copy_object_from_remote_to_local_by_hash($contenthash);
-                if ($fetched) {
-                    // We want this file to be deleted again later.
-                    update_object_record($contenthash, OBJECT_LOCATION_DUPLICATED);
-                }
+                $location = $this->copy_object_from_remote_to_local_by_hash($contenthash);
+                // We want this file to be deleted again later.
+                update_object_record($contenthash, $location);
+
                 $objectlock->release();
             }
         }
@@ -164,15 +173,11 @@ abstract class object_file_system extends \file_system_filedir {
         return $lock;
     }
 
-    public function copy_object_from_remote_to_local_by_hash($contenthash) {
-        $location = $this->get_actual_object_location_by_hash($contenthash);
+    public function copy_object_from_remote_to_local_by_hash($contenthash, $objectsize = 0) {
+        $initiallocation = $this->get_actual_object_location_by_hash($contenthash);
+        $finallocation = $initiallocation;
 
-        // Already duplicated.
-        if ($location === OBJECT_LOCATION_DUPLICATED) {
-            return true;
-        }
-
-        if ($location === OBJECT_LOCATION_REMOTE) {
+        if ($initiallocation === OBJECT_LOCATION_REMOTE) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
             $remotepath = $this->get_remote_path_from_hash($contenthash);
@@ -187,30 +192,43 @@ abstract class object_file_system extends \file_system_filedir {
                 }
             }
 
-            $result = copy($remotepath, $localpath);
+            $success = copy($remotepath, $localpath);
 
-            return $result;
+            if ($success) {
+                $finallocation = OBJECT_LOCATION_DUPLICATED;
+            }
+
         }
-        return false;
+        $this->logger->log_object_move('copy_object_from_remote_to_local',
+                                        $initiallocation,
+                                        $finallocation,
+                                        $contenthash,
+                                        $objectsize);
+        return $finallocation;
     }
 
-    public function copy_object_from_local_to_remote_by_hash($contenthash) {
-        $location = $this->get_actual_object_location_by_hash($contenthash);
+    public function copy_object_from_local_to_remote_by_hash($contenthash, $objectsize = 0) {
+        $initiallocation = $this->get_actual_object_location_by_hash($contenthash);
+        $finallocation = $initiallocation;
 
-        // Already duplicated.
-        if ($location === OBJECT_LOCATION_DUPLICATED) {
-            return true;
-        }
-
-        if ($location === OBJECT_LOCATION_LOCAL) {
+        if ($initiallocation === OBJECT_LOCATION_LOCAL) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
             $remotepath = $this->get_remote_path_from_hash($contenthash);
 
-            $result = copy($localpath, $remotepath);
-            return $result;
+            $success = copy($localpath, $remotepath);
+
+            if ($success) {
+                $finallocation = OBJECT_LOCATION_DUPLICATED;
+            }
         }
-        return false;
+
+        $this->logger->log_object_move('copy_object_from_local_to_remote',
+                                        $initiallocation,
+                                        $finallocation,
+                                        $contenthash,
+                                        $objectsize);
+        return $finallocation;
     }
 
     public function verify_remote_object_from_hash($contenthash) {
@@ -219,23 +237,28 @@ abstract class object_file_system extends \file_system_filedir {
         return $objectisvalid;
     }
 
-    public function delete_object_from_local_by_hash($contenthash) {
-        $location = $this->get_actual_object_location_by_hash($contenthash);
+    public function delete_object_from_local_by_hash($contenthash, $objectsize = 0) {
+        $initiallocation = $this->get_actual_object_location_by_hash($contenthash);
+        $finallocation = $initiallocation;
 
-        // Already deleted.
-        if ($location === OBJECT_LOCATION_REMOTE) {
-            return true;
-        }
-
-        if ($location === OBJECT_LOCATION_DUPLICATED) {
+        if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {
             $localpath = $this->get_local_path_from_hash($contenthash);
 
             if ($this->verify_remote_object_from_hash($contenthash)) {
-                return unlink($localpath);
+                $success = unlink($localpath);
+
+                if ($success) {
+                    $finallocation = OBJECT_LOCATION_REMOTE;
+                }
             }
         }
 
-        return false;
+        $this->logger->log_object_move('copy_object_from_local_to_remote',
+                                        $initiallocation,
+                                        $finallocation,
+                                        $contenthash,
+                                        $objectsize);
+        return $finallocation;
     }
 
     /**
@@ -250,7 +273,11 @@ abstract class object_file_system extends \file_system_filedir {
     public function readfile(\stored_file $file) {
         $path = $this->get_object_path_from_storedfile($file);
 
+        $this->logger->start_timing();
         $success = readfile_allow_large($path, $file->get_filesize());
+        $this->logger->end_timing();
+
+        $this->logger->log_object_read('readfile', $path, $file->get_filesize());
 
         if (!$success) {
             update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
@@ -275,7 +302,11 @@ abstract class object_file_system extends \file_system_filedir {
 
         $path = $this->get_object_path_from_storedfile($file);
 
+        $this->logger->start_timing();
         $contents = file_get_contents($path);
+        $this->logger->end_timing();
+
+        $this->logger->log_object_read('file_get_contents', $path, $file->get_filesize());
 
         if (!$contents) {
             update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
@@ -298,7 +329,11 @@ abstract class object_file_system extends \file_system_filedir {
 
         $path = $this->get_object_path_from_hash($contenthash);
 
+        $this->logger->start_timing();
         $success = xsendfile($path);
+        $this->logger->end_timing();
+
+        $this->logger->log_object_read('xsendfile', $path);
 
         if (!$success) {
             update_object_record($contenthash, OBJECT_LOCATION_ERROR);
@@ -324,7 +359,11 @@ abstract class object_file_system extends \file_system_filedir {
             $path = $this->get_object_path_from_storedfile($file);
         }
 
+        $this->logger->start_timing();
         $filehandle = self::get_file_handle_for_path($path, $type);
+        $this->logger->end_timing();
+
+        $this->logger->log_object_read('get_file_handle_for_path', $path, $file->get_filesize());
 
         if (!$filehandle) {
             update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);

@@ -78,36 +78,36 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $filehash = $file->get_contenthash();
         $localpath = $this->get_local_path_from_storedfile($file);
 
-        $result = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
 
-        $this->assertTrue($result);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue(is_readable($localpath));
     }
 
-    public function test_copy_object_from_remote_to_local_by_hash_fails_if_local() {
+    public function test_copy_object_from_remote_to_local_by_hash_if_local() {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
 
-        $result = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
 
-        $this->assertFalse($result);
+        $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
     public function test_copy_object_from_remote_to_local_by_hash_succeeds_if_already_duplicated() {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
-        $result = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
 
-        $this->assertTrue($result);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_copy_object_from_remote_to_local_by_hash_fails_if_not_local_and_not_remote() {
+    public function test_copy_object_from_remote_to_local_by_hash_if_not_local_and_not_remote() {
         $fakehash = 'this is a fake hash';
 
-        $result = $this->filesystem->copy_object_from_remote_to_local_by_hash($fakehash);
+        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($fakehash);
 
-        $this->assertFalse($result);
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
     public function test_copy_object_from_local_to_remote_by_hash() {
@@ -115,36 +115,36 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $filehash = $file->get_contenthash();
         $remotepath = $this->get_remote_path_from_storedfile($file);
 
-        $result = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
 
-        $this->assertTrue($result);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue(is_readable($remotepath));
     }
 
-    public function test_copy_object_from_local_to_remote_by_hash_fails_if_remote() {
+    public function test_copy_object_from_local_to_remote_by_hash_if_remote() {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
 
-        $result = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
 
-        $this->assertFalse($result);
+        $this->assertEquals(OBJECT_LOCATION_REMOTE, $location);
     }
 
     public function test_copy_object_from_local_to_remote_by_hash_succeeds_if_already_duplicated() {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
-        $result = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
 
-        $this->assertTrue($result);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_copy_object_from_local_to_remote_by_hash_fails_if_not_local_and_not_remote() {
+    public function test_copy_object_from_local_to_remote_by_hash_if_not_local_and_not_remote() {
         $fakehash = 'this is a fake hash';
 
-        $result = $this->filesystem->copy_object_from_local_to_remote_by_hash($fakehash);
+        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($fakehash);
 
-        $this->assertFalse($result);
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
     public function test_delete_object_from_local_by_hash() {
@@ -152,32 +152,32 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $filehash = $file->get_contenthash();
         $localpath = $this->get_local_path_from_storedfile($file);
 
-        $result = $this->filesystem->delete_object_from_local_by_hash($filehash);
+        $location = $this->filesystem->delete_object_from_local_by_hash($filehash);
 
-        $this->assertTrue($result);
+        $this->assertEquals(OBJECT_LOCATION_REMOTE, $location);
         $this->assertFalse(is_readable($localpath));
     }
 
-    public function test_delete_object_from_local_by_hash_fails_if_not_remote() {
+    public function test_delete_object_from_local_by_hash_if_not_remote() {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
         $localpath = $this->get_local_path_from_storedfile($file);
 
-        $result = $this->filesystem->delete_object_from_local_by_hash($filehash);
+        $location = $this->filesystem->delete_object_from_local_by_hash($filehash);
 
-        $this->assertFalse($result);
+        $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
         $this->assertTrue(is_readable($localpath));
     }
 
-    public function test_delete_object_from_local_by_hash_fails_if_not_local() {
+    public function test_delete_object_from_local_by_hash_if_not_local() {
         $fakehash = 'this is a fake hash';
 
-        $result = $this->filesystem->delete_object_from_local_by_hash($fakehash);
+        $location = $this->filesystem->delete_object_from_local_by_hash($fakehash);
 
-        $this->assertFalse($result);
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_delete_object_from_local_by_hash_fails_if_verify_remote_object_fails() {
+    public function test_delete_object_from_local_by_hash_if_verify_remote_object() {
         $file = $this->create_duplicated_file();
         $remotepath = $this->get_remote_path_from_hash($file->get_contenthash());
         $localpath = $this->get_local_path_from_storedfile($file);
@@ -186,9 +186,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $differentfilepath = __DIR__ . '/fixtures/test.txt';
         copy($differentfilepath, $remotepath);
 
-        $result = $this->filesystem->delete_object_from_local_by_hash($file->get_contenthash());
+        $location = $this->filesystem->delete_object_from_local_by_hash($file->get_contenthash());
 
-        $this->assertFalse($result);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue(is_readable($localpath));
     }
 

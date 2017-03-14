@@ -52,7 +52,8 @@ class puller extends manipulator {
         $this->sizethreshold = $config->sizethreshold;
 
         $this->logger = $logger;
-        $this->logger->set_action('pull');
+        // Inject our logger into the filesystem.
+        $this->filesystem->set_logger($this->logger);
     }
 
     /**
@@ -82,21 +83,14 @@ class puller extends manipulator {
 
         $totalobjectsfound = count($objects);
 
-        $this->logger->log_object_manipulation_query($totalobjectsfound);
+        $this->logger->log_object_query('get_pull_candidates', $totalobjectsfound);
 
         return $objects;
     }
 
     protected function manipulate_object($objectrecord) {
-        $success = $this->filesystem->copy_object_from_remote_to_local_by_hash($objectrecord->contenthash);
-
-        if ($success) {
-            $location = OBJECT_LOCATION_DUPLICATED;
-        } else {
-            $location = $this->filesystem->get_actual_object_location_by_hash($objectrecord->contenthash);
-        }
-
-        return $location;
+        $newlocation = $this->filesystem->copy_object_from_remote_to_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        return $newlocation;
     }
 
 }

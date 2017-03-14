@@ -81,6 +81,10 @@ class settings_form extends \moodleform {
         $mform->addElement('advcheckbox', 'preferremote', get_string('settings:preferremote', 'tool_objectfs'));
         $mform->addHelpButton('preferremote', 'settings:preferremote', 'tool_objectfs');
         $mform->setType("preferremote", PARAM_INT);
+
+        $mform->addElement('advcheckbox', 'enablelogging', get_string('settings:enablelogging', 'tool_objectfs'));
+        $mform->addHelpButton('enablelogging', 'settings:enablelogging', 'tool_objectfs');
+
         return $mform;
     }
 

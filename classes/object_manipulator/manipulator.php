@@ -101,7 +101,7 @@ abstract class manipulator {
         }
 
         $this->logger->end_timing();
-        $this->logger->log_object_manipulation();
+        $this->logger->output_move_statistics();
     }
 
     protected function manipulator_can_execute() {
@@ -129,7 +129,7 @@ abstract class manipulator {
         $shouldtaskrun = tool_objectfs_should_tasks_run();
 
         if ($shouldtaskrun) {
-            $logger = new logger();
+            $logger = new \tool_objectfs\log\aggregate_logger();
             $filesystem = new \tool_objectfs\s3_file_system();
             $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
             $candidatehashes = $manipulator->get_candidate_objects();

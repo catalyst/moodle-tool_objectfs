@@ -60,9 +60,9 @@ class deleter extends manipulator {
         parent::__construct($filesystem, $config);
         $this->consistencydelay = $config->consistencydelay;
         $this->deletelocal = $config->deletelocal;
-
         $this->logger = $logger;
-        $this->logger->set_action('delete');
+        // Inject our logger into the filesystem.
+        $this->filesystem->set_logger($this->logger);
     }
 
     /**
@@ -99,21 +99,15 @@ class deleter extends manipulator {
 
         $totalobjectsfound = count($objects);
 
-        $this->logger->log_object_manipulation_query($totalobjectsfound);
+        $this->logger->log_object_query('get_delete_candidates', $totalobjectsfound);
 
         return $objects;
     }
 
 
     protected function manipulate_object($objectrecord) {
-        $success = $this->filesystem->delete_object_from_local_by_hash($objectrecord->contenthash);
-
-        if ($success) {
-            $location = OBJECT_LOCATION_REMOTE;
-        } else {
-            $location = $this->filesystem->get_actual_object_location_by_hash($objectrecord->contenthash);
-        }
-        return $location;
+        $newlocation = $this->filesystem->delete_object_from_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        return $newlocation;
     }
 
     protected function manipulator_can_execute() {

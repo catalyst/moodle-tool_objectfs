@@ -60,7 +60,8 @@ class pusher extends manipulator {
         $this->minimumage = $config->minimumage;
 
         $this->logger = $logger;
-        $this->logger->set_action('push');
+        // Inject our logger into the filesystem.
+        $this->filesystem->set_logger($this->logger);
     }
 
     /**
@@ -96,21 +97,14 @@ class pusher extends manipulator {
 
         $totalobjectsfound = count($objects);
 
-        $this->logger->log_object_manipulation_query($totalobjectsfound);
+        $this->logger->log_object_query('get_push_candidates', $totalobjectsfound);
 
         return $objects;
     }
 
     protected function manipulate_object($objectrecord) {
-        $success = $this->filesystem->copy_object_from_local_to_remote_by_hash($objectrecord->contenthash);
-
-        if ($success) {
-            $location = OBJECT_LOCATION_DUPLICATED;
-        } else {
-            $location = $this->filesystem->get_actual_object_location_by_hash($objectrecord->contenthash);
-        }
-
-        return $location;
+        $newlocation = $this->filesystem->copy_object_from_local_to_remote_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        return $newlocation;
     }
 
 }
