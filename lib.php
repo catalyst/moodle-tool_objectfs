@@ -105,13 +105,6 @@ function tool_objectfs_cron() {
     global $CFG;
     if ($CFG->branch <= 26) {
 
-        $tasksshouldrun = tool_objectfs_should_tasks_run();
-
-        if (!$tasksshouldrun) {
-            mtrace('Objectfs tasks not configured to run, exiting');
-            return true;
-        }
-
         $manipulators = \tool_objectfs\object_manipulator\manipulator::get_all_manipulator_classnames();
 
         // Unlike the task system, we do not get fine grained control over

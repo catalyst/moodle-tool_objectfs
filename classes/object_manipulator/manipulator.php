@@ -90,7 +90,9 @@ abstract class manipulator {
     public static function setup_and_run_object_manipulator($manipulatorclassname) {
         $config = get_objectfs_config();
 
-        if (isset($config->enabletasks) && $config->enabletasks) {
+        $shouldtaskrun = tool_objectfs_should_tasks_run();
+
+        if ($shouldtaskrun) {
             $logger = new logger();
             $filesystem = new \tool_objectfs\s3_file_system();
             $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
