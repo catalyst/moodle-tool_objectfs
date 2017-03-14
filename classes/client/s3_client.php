@@ -183,13 +183,13 @@ class s3_client implements object_client {
     }
 
     protected function get_exception_details($exception) {
+        $message = $exception->getMessage();
 
         if (get_class($exception) !== 'S3Exception') {
-            return 'Not an S3 exception.';
+            return "Not a S3 exception : $message";
         }
 
         $errorcode = $exception->getAwsErrorCode();
-        $message = $exception->getMessage();
 
         $details = ' ';
 
