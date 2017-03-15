@@ -79,31 +79,9 @@ class recoverer extends manipulator {
         return $objects;
     }
 
-
-    /**
-     * CRecovers objects that are in the error state if it can.
-     *
-     * @param  array $candidatehashes content hashes to delete
-     */
-    public function execute($objects) {
-        $this->logger->start_timing();
-
-        foreach ($objects as $object) {
-            if (time() >= $this->finishtime) {
-                break;
-            }
-
-            $location = $this->filesystem->get_actual_object_location_by_hash($object->contenthash);
-
-            // Then the location error has been fixed.
-            if ($location !== OBJECT_LOCATION_ERROR) {
-                update_object_record($object->contenthash, $location);
-            }
-
-            $this->logger->add_object_manipulation($object->filesize);
-        }
-
-        $this->logger->end_timing();
-        $this->logger->log_object_manipulation();
+    protected function manipulate_object($objectrecord) {
+        $location = $this->filesystem->get_actual_object_location_by_hash($objectrecord->contenthash);
+        return $location;
     }
+
 }

@@ -68,11 +68,39 @@ abstract class manipulator {
     abstract public function get_candidate_objects();
 
     /**
-     * execute file manipulation.
+     * Pushes files from local file system to remote.
      *
-     * @param  array $candidatehashes candidate content hashes
+     * @param  array $candidatehashes content hashes to push
      */
-    abstract public function execute($candidatehashes);
+    public function execute($objectrecords) {
+
+        if (!$this->manipulator_can_execute()) {
+            mtrace('Objectfs manipulator exiting early');
+            return;
+        }
+
+        $this->logger->start_timing();
+
+        foreach ($objectrecords as $objectrecord) {
+            if (time() >= $this->finishtime) {
+                break;
+            }
+
+            $newlocation = $this->manipulate_object($objectrecord);
+
+            update_object_record($objectrecord->contenthash, $newlocation);
+
+        }
+
+        $this->logger->end_timing();
+        $this->logger->log_object_manipulation();
+    }
+
+    protected function manipulator_can_execute() {
+        return true;
+    }
+
+
 
     public static function get_all_manipulator_classnames() {
         $manipulators = array('deleter',

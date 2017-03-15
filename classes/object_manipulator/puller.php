@@ -87,36 +87,18 @@ class puller extends manipulator {
         return $objects;
     }
 
+    protected function manipulate_object($objectrecord) {
+        $success = $this->filesystem->copy_object_from_remote_to_local_by_hash($objectrecord->contenthash);
 
-    /**
-     * Pushes files from local file system to S3.
-     *
-     * @param  array $candidatehashes content hashes to push
-     */
-    public function execute($files) {
-        $this->logger->start_timing();
-
-        foreach ($files as $file) {
-            if (time() >= $this->finishtime) {
-                break;
-            }
-
-            $success = $this->filesystem->copy_object_from_remote_to_local_by_hash($file->contenthash);
-
-            if ($success) {
-                $location = OBJECT_LOCATION_DUPLICATED;
-            } else {
-                $location = $this->filesystem->get_actual_object_location_by_hash($file->contenthash);
-            }
-
-            update_object_record($file->contenthash, $location);
-
-            $this->logger->add_object_manipulation($file->filesize);
+        if ($success) {
+            $location = OBJECT_LOCATION_DUPLICATED;
+        } else {
+            $location = $this->filesystem->get_actual_object_location_by_hash($objectrecord->contenthash);
         }
 
-        $this->logger->end_timing();
-        $this->logger->log_object_manipulation();
+        return $location;
     }
+
 }
 
 
