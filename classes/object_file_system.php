@@ -213,6 +213,12 @@ abstract class object_file_system extends \file_system_filedir {
         return false;
     }
 
+    public function verify_remote_object_from_hash($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $objectisvalid = $this->remoteclient->verify_remote_object($contenthash, $localpath);
+        return $objectisvalid;
+    }
+
     public function delete_object_from_local_by_hash($contenthash) {
         $location = $this->get_actual_object_location_by_hash($contenthash);
 
@@ -221,12 +227,10 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
-        // We want to be very sure it is remote if we're deleting objects.
-        // There is no going back.
         if ($location === OBJECT_LOCATION_DUPLICATED) {
             $localpath = $this->get_local_path_from_hash($contenthash);
-            $objectvalid = $this->remoteclient->verify_remote_object($contenthash, $localpath);
-            if ($objectvalid) {
+
+            if ($this->verify_remote_object_from_hash($contenthash)) {
                 return unlink($localpath);
             }
         }
