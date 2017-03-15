@@ -67,7 +67,7 @@ class logger {
     }
 
     public function log_object_manipulation_query($totalobjectsfound) {
-        $duration = $this->timestart - $this->timeend;
+        $duration = $this->timeend - $this->timestart;
         $logstring = "Objectsfs $this->action manipulator took $duration seconds to find $totalobjectsfound potential $this->action objects. ";
         $logstring .= "Total time: $duration seconds";
         mtrace($logstring);
