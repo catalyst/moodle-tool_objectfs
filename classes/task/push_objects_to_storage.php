@@ -25,7 +25,7 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\object_manipulator\pusher;
+use tool_objectfs\object_manipulator\manipulator;
 use tool_objectfs\object_file_system;
 use tool_objectfs\s3_file_system;
 
@@ -49,7 +49,7 @@ class push_objects_to_storage extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        setup_and_run_object_manipulator('pusher');
+        manipulator::setup_and_run_object_manipulator('pusher');
     }
 }
 

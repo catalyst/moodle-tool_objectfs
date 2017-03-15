@@ -25,7 +25,7 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\object_manipulator\puller;
+use tool_objectfs\object_manipulator\manipulator;
 use tool_objectfs\object_file_system;
 use tool_objectfs\s3_file_system;
 
@@ -49,7 +49,7 @@ class pull_objects_from_storage extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        setup_and_run_object_manipulator('puller');
+        manipulator::setup_and_run_object_manipulator('puller');
     }
 }
 
