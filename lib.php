@@ -110,23 +110,8 @@ function tool_objectfs_cron() {
         // Unlike the task system, we do not get fine grained control over
         // when tasks/manipulators run. Every cron we just run all the manipulators.
         foreach ($manipulators as $manipulator) {
-
-            // We lock the manimulation to solve issues with race conditions.
-            $resource = "manipulator: $manipulator";
-            $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_object');
-            $lock = $lockfactory->get_lock($resource, 0);
-
-            if (!$lock) {
-                mtrace("Skipping objectfs $manipulator as cannot acquire lock");
-                continue;
-            }
-
             mtrace("Executing objectfs $manipulator");
-
             \tool_objectfs\object_manipulator\manipulator::setup_and_run_object_manipulator($manipulator);
-
-            $lock->release();
-
             mtrace("Objectfs $manipulator successfully executed");
         }
 

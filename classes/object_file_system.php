@@ -92,11 +92,18 @@ abstract class object_file_system extends \file_system_filedir {
         $path = parent::get_local_path_from_hash($contenthash, $fetchifnotfound);
 
         if ($fetchifnotfound && !is_readable($path)) {
-            $fetched = $this->copy_object_from_remote_to_local_by_hash($contenthash);
 
-            if ($fetched) {
-                // We want this file to be deleted again later.
-                update_object_record($contenthash, OBJECT_LOCATION_DUPLICATED);
+            // Try and pull from remote.
+            $objectlock = $this->acquire_object_lock($contenthash);
+
+            // While gaining lock object might have been moved locally so we recheck.
+            if ($objectlock && !is_readable($path)) {
+                $fetched = $this->copy_object_from_remote_to_local_by_hash($contenthash);
+                if ($fetched) {
+                    // We want this file to be deleted again later.
+                    update_object_record($contenthash, OBJECT_LOCATION_DUPLICATED);
+                }
+                $objectlock->release();
             }
         }
 
@@ -148,7 +155,8 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
-    protected function acquire_object_lock($contenthash) {
+    // Acquire the obect lock any time you are moving an object between locations.
+    public function acquire_object_lock($contenthash) {
         $timeout = 600; // 10 minutes before giving up.
         $resource = "object: $contenthash";
         $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_object');
@@ -169,19 +177,6 @@ abstract class object_file_system extends \file_system_filedir {
             $localpath = $this->get_local_path_from_hash($contenthash);
             $remotepath = $this->get_remote_path_from_hash($contenthash);
 
-            $objectlock = $this->acquire_object_lock($contenthash);
-
-            // Lock is still held by something.
-            if (!$objectlock) {
-                return false;
-            }
-
-            // While waiting for lock, file was moved.
-            if (is_readable($localpath)) {
-                $objectlock->release();
-                return true;
-            }
-
             $localdirpath = $this->get_fulldir_from_hash($contenthash);
 
             // Folder may not exist yet if pulling a file that came from another environment.
@@ -193,8 +188,6 @@ abstract class object_file_system extends \file_system_filedir {
             }
 
             $result = copy($remotepath, $localpath);
-
-            $objectlock->release();
 
             return $result;
         }
@@ -214,23 +207,7 @@ abstract class object_file_system extends \file_system_filedir {
             $localpath = $this->get_local_path_from_hash($contenthash);
             $remotepath = $this->get_remote_path_from_hash($contenthash);
 
-            $objectlock = $this->acquire_object_lock($contenthash);
-
-            // Lock is still held by something.
-            if (!$objectlock) {
-                return false;
-            }
-
-            // While waiting for lock, file was moved.
-            if (is_readable($remotepath)) {
-                $objectlock->release();
-                return true;
-            }
-
             $result = copy($localpath, $remotepath);
-
-            $objectlock->release();
-
             return $result;
         }
         return false;

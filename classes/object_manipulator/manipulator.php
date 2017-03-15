@@ -86,10 +86,18 @@ abstract class manipulator {
                 break;
             }
 
+            $objectlock = $this->filesystem->acquire_object_lock($objectrecord->contenthash);
+
+            // Object is currently being manipulated elsewhere.
+            if (!$objectlock) {
+                continue;
+            }
+
             $newlocation = $this->manipulate_object($objectrecord);
 
             update_object_record($objectrecord->contenthash, $newlocation);
 
+            $objectlock->release();
         }
 
         $this->logger->end_timing();
