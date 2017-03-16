@@ -37,27 +37,33 @@ define('OBJECTFS_REPORT_MIME_TYPE', 2);
 function update_object_record($contenthash, $location) {
     global $DB;
 
-    $logrecord = new \stdClass();
-    $logrecord->contenthash = $contenthash;
-    $logrecord->timeduplicated = time();
-    $logrecord->location = $location;
+    $newobject = new \stdClass();
+    $newobject->contenthash = $contenthash;
+    $newobject->timeduplicated = time();
+    $newobject->location = $location;
 
-    $existing = $DB->get_record('tool_objectfs_objects', array('contenthash' => $contenthash));
+    $oldobject = $DB->get_record('tool_objectfs_objects', array('contenthash' => $contenthash));
 
-    if ($existing) {
+    if ($oldobject) {
 
-        // If state change is not to duplicated we do not update timeduplicated.
-        if ($location !== OBJECT_LOCATION_DUPLICATED) {
-            $logrecord->timeduplicated = $existing->timeduplicated;
+        // If location hasn't changed we do not need to update.
+        if ($oldobject->location === $newobject->location) {
+            return $oldobject;
         }
 
-        $logrecord->id = $existing->id;
-        $DB->update_record('tool_objectfs_objects', $logrecord);
+        // If location change is not to duplicated we do not update timeduplicated.
+        if ($newobject->location !== OBJECT_LOCATION_DUPLICATED) {
+            $newobject->timeduplicated = $oldobject->timeduplicated;
+        }
+
+        $newobject->id = $oldobject->id;
+
+        $DB->update_record('tool_objectfs_objects', $newobject);
     } else {
-        $DB->insert_record('tool_objectfs_objects', $logrecord);
+        $DB->insert_record('tool_objectfs_objects', $newobject);
     }
 
-    return $logrecord;
+    return $newobject;
 }
 
 function set_objectfs_config($config) {
