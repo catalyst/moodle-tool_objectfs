@@ -253,7 +253,7 @@ abstract class object_file_system extends \file_system_filedir {
             }
         }
 
-        $this->logger->log_object_move('copy_object_from_local_to_remote',
+        $this->logger->log_object_move('delete_local_object',
                                         $initiallocation,
                                         $finallocation,
                                         $contenthash,
