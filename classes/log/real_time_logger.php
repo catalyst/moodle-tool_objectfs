@@ -42,7 +42,7 @@ class real_time_logger extends objectfs_logger {
     protected function append_timing_string(&$logstring) {
         $timetaken = $this->get_timing();
         if ($timetaken > 0) {
-            $logstring .= "Time taken was: $timetaken microseconds. ";
+            $logstring .= "Time taken was: $timetaken seconds. ";
         }
 
     }
