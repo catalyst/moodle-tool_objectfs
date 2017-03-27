@@ -78,7 +78,7 @@ class aggregate_logger extends objectfs_logger {
 
     public function output_move_statistics() {
         $totaltime = $this->get_timing();
-        mtrace("$this->movement. Total time taken: $totaltime. location change summary: ");
+        mtrace("$this->movement. Total time taken: $totaltime. Location change summary:");
         foreach ($this->movestatistics as $iniloc => $finlocarr) {
             foreach ($finlocarr as $finloc => $movestat) {
                 $this->output_move_statistic($movestat, $iniloc, $finloc);

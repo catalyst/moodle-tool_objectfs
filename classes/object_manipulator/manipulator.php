@@ -79,6 +79,11 @@ abstract class manipulator {
             return;
         }
 
+        if (count($objectrecords) == 0) {
+            mtrace('No candidate objects found.');
+            return;
+        }
+
         $this->logger->start_timing();
 
         foreach ($objectrecords as $objectrecord) {
