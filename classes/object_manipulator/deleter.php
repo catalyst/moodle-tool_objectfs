@@ -50,6 +50,13 @@ class deleter extends manipulator {
     private $deletelocal;
 
     /**
+     * Size threshold for pushing files to remote in bytes.
+     *
+     * @var int
+     */
+    private $sizethreshold;
+
+    /**
      * deleter constructor.
      *
      * @param sss_client $client S3 client
@@ -60,6 +67,7 @@ class deleter extends manipulator {
         parent::__construct($filesystem, $config);
         $this->consistencydelay = $config->consistencydelay;
         $this->deletelocal = $config->deletelocal;
+        $this->sizethreshold = $config->sizethreshold;
         $this->logger = $logger;
         // Inject our logger into the filesystem.
         $this->filesystem->set_logger($this->logger);
@@ -88,10 +96,11 @@ class deleter extends manipulator {
                        AND o.location = ?
               GROUP BY f.contenthash,
                        f.filesize,
-                       o.location';
+                       o.location
+                HAVING MAX(f.filesize) > ?';
 
         $consistancythrehold = time() - $this->consistencydelay;
-        $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED);
+        $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED, $this->sizethreshold);
 
         $this->logger->start_timing();
         $objects = $DB->get_records_sql($sql, $params);
