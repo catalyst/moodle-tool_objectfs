@@ -31,6 +31,7 @@ class deleter_testcase extends tool_objectfs_testcase {
         $config = get_objectfs_config();
         $config->deletelocal = true;
         $config->consistencydelay = 0;
+        $config->sizethreshold = 0;
         set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->deleter = new deleter($this->filesystem, $config, $this->logger);
