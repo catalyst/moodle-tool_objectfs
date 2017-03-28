@@ -73,6 +73,20 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue(is_readable($actualpath));
     }
 
+    public function test_get_local_path_from_hash_fetch_remote_will_restore_file_permissions() {
+        global $CFG;
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_local_path_from_hash');
+        $reflection->setAccessible(true);
+        $localpath = $reflection->invokeArgs($this->filesystem, [$filehash, true]);
+
+        $fileperms = substr(sprintf('%o', fileperms($localpath)), -4);
+        $cfgperms = substr(sprintf('%o', $CFG->filepermissions), -4);
+        $this->assertEquals($cfgperms, $fileperms);
+    }
+
     public function test_copy_object_from_remote_to_local() {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();

@@ -40,6 +40,7 @@ abstract class object_file_system extends \file_system_filedir {
     private $logger;
 
     public function __construct() {
+        global $CFG;
         parent::__construct(); // Setup fildir.
 
         $config = get_objectfs_config();
@@ -47,6 +48,8 @@ abstract class object_file_system extends \file_system_filedir {
         $this->remoteclient = $this->get_remote_client($config);
         $this->remoteclient->register_stream_wrapper();
         $this->preferremote = $config->preferremote;
+        $this->filepermissions = $CFG->filepermissions;
+        $this->dirpermissions = $CFG->directorypermissions;
 
         if ($config->enablelogging) {
             $this->logger = new \tool_objectfs\log\real_time_logger();
@@ -195,6 +198,7 @@ abstract class object_file_system extends \file_system_filedir {
             $success = copy($remotepath, $localpath);
 
             if ($success) {
+                chmod($localpath, $this->filepermissions);
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
             }
 
