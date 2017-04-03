@@ -125,7 +125,17 @@ The quickest way to do this is to rebase your moodle installation onto an alread
 ### Rebase method
 The fs-api repository can be found [here](https://github.com/kenneth-hendricks/moodle-fs-api).
 
-More instructions to come
+{{moodle_version}} = the target moodle core version. e.g. 27, 31
+{{original_branch}} = the branch you would like to merge the fsapi into
+
+<pre>
+git remote add fsapi git@github.com:kenneth-hendricks/moodle-fs-api.git
+git fetch fsapi
+git checkout MOODLE_{{moodle_version}}_STABLE_FSAPI
+git rebase {{original_branch}}
+git checkout {{original_branch}}
+git merge --no-ff MOODLE_{{moodle_version}}_STABLE_FSAPI
+</pre>
 
 ### Step by step method
 #### Moodle 2.6 only
