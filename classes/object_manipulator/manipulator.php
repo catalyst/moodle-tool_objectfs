@@ -136,6 +136,7 @@ abstract class manipulator {
         if ($shouldtaskrun) {
             $logger = new \tool_objectfs\log\aggregate_logger();
             $filesystem = new \tool_objectfs\s3_file_system();
+            $manipulatorclassname = '\\tool_objectfs\\object_manipulator\\' . $manipulatorclassname;
             $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
             $candidatehashes = $manipulator->get_candidate_objects();
             $manipulator->execute($candidatehashes);
