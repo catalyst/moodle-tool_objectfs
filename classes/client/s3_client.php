@@ -45,10 +45,25 @@ class s3_client implements object_client {
 
     public function __construct($config) {
         $this->bucket = $config->bucket;
+        $this->set_client($config);
+    }
+
+    public function __sleep() {
+        return array('bucket');
+    }
+
+    public function __wakeup() {
+        // We dont want to store credentials in the client itself as
+        // it will be serialised, so re-retrive them now.
+        $config = get_objectfs_config();
+        $this->set_client($config);
+    }
+
+    public function set_client($config) {
         $this->client = S3Client::factory(array(
-                'credentials' => array('key' => $config->key, 'secret' => $config->secret),
-                'region' => $config->region,
-                'version' => AWS_API_VERSION
+        'credentials' => array('key' => $config->key, 'secret' => $config->secret),
+        'region' => $config->region,
+        'version' => AWS_API_VERSION
         ));
     }
 
