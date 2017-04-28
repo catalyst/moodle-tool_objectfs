@@ -74,7 +74,7 @@ class s3_client implements object_client {
 
     private function get_md5_from_hash($contenthash) {
         try {
-            $key = $this->get_remote_filepath_from_hash($contenthash);
+            $key = $this->get_fullpath_from_hash($contenthash);
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
                             'Key' => $key));
