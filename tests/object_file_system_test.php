@@ -25,35 +25,35 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class object_file_system_testcase extends tool_objectfs_testcase {
 
-    public function test_get_object_path_from_storedfile_returns_local_path_if_local() {
+    public function test_get_remote_path_from_storedfile_returns_local_path_if_local() {
         $file = $this->create_local_file();
         $expectedpath = $this->get_local_path_from_storedfile($file);
 
-        $reflection = new \ReflectionMethod(object_file_system::class, 'get_object_path_from_storedfile');
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_remote_path_from_storedfile');
         $reflection->setAccessible(true);
         $actualpath = $reflection->invokeArgs($this->filesystem, [$file]);
 
         $this->assertEquals($expectedpath, $actualpath);
     }
 
-    public function test_get_object_path_from_storedfile_returns_remote_path_if_not_local() {
+    public function test_get_remote_path_from_storedfile_returns_external_path_if_not_local() {
         $file = $this->create_remote_file();
-        $expectedpath = $this->get_remote_path_from_storedfile($file);
+        $expectedpath = $this->get_external_path_from_storedfile($file);
 
-        $reflection = new \ReflectionMethod(object_file_system::class, 'get_object_path_from_storedfile');
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_remote_path_from_storedfile');
         $reflection->setAccessible(true);
         $actualpath = $reflection->invokeArgs($this->filesystem, [$file]);
 
         $this->assertEquals($expectedpath, $actualpath);
     }
 
-    public function test_get_object_path_from_storedfile_returns_remote_path_if_duplicated_and_preferexternal() {
+    public function test_get_remote_path_from_storedfile_returns_external_path_if_duplicated_and_preferexternal() {
         set_config('preferexternal', true, 'tool_objectfs');
         $this->reset_file_system(); // Needed to load new config.
         $file = $this->create_duplicated_file();
-        $expectedpath = $this->get_remote_path_from_storedfile($file);
+        $expectedpath = $this->get_external_path_from_storedfile($file);
 
-        $reflection = new \ReflectionMethod(object_file_system::class, 'get_object_path_from_storedfile');
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_remote_path_from_storedfile');
         $reflection->setAccessible(true);
         $actualpath = $reflection->invokeArgs($this->filesystem, [$file]);
 
@@ -127,12 +127,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_copy_object_from_local_to_external_by_hash() {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
-        $remotepath = $this->get_remote_path_from_storedfile($file);
+        $externalpath = $this->get_external_path_from_storedfile($file);
 
         $location = $this->filesystem->copy_object_from_local_to_external_by_hash($filehash);
 
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
-        $this->assertTrue(is_readable($remotepath));
+        $this->assertTrue(is_readable($externalpath));
     }
 
     public function test_copy_object_from_local_to_external_by_hash_if_remote() {
@@ -191,14 +191,14 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_delete_object_from_local_by_hash_if_verify_remote_object() {
+    public function test_delete_object_from_local_by_hash_if_cant_verify_external_object() {
         $file = $this->create_duplicated_file();
-        $remotepath = $this->get_remote_path_from_hash($file->get_contenthash());
+        $externalpath = $this->get_external_path_from_hash($file->get_contenthash());
         $localpath = $this->get_local_path_from_storedfile($file);
 
-        unlink($remotepath);
+        unlink($externalpath);
         $differentfilepath = __DIR__ . '/fixtures/test.txt';
-        copy($differentfilepath, $remotepath);
+        copy($differentfilepath, $externalpath);
 
         $location = $this->filesystem->delete_object_from_local_by_hash($file->get_contenthash());
 
@@ -351,7 +351,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $DB->delete_records('files', array('contenthash' => $filehash));
         $this->filesystem->remove_file($filehash);
 
-        $isremotereadable = $this->filesystem->is_file_readable_remotely_by_hash($filehash);
+        $isremotereadable = $this->is_externally_readable_by_hash($filehash);
         $this->assertTrue($isremotereadable);
     }
 }

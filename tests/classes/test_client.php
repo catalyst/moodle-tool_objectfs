@@ -33,7 +33,7 @@ class test_client implements object_client {
         }
     }
 
-    public function get_fullpath_from_hash($contenthash){
+    public function get_fullpath_from_hash($contenthash) {
         return "$this->bucketpath/{$contenthash}";
     }
 
@@ -41,8 +41,18 @@ class test_client implements object_client {
         return true;
     }
 
+    private function get_md5_from_hash($contenthash) {
+        $path = $this->get_fullpath_from_hash($contenthash);
+        return md5_file($path);
+    }
+
     public function verify_object($contenthash, $localpath) {
-        return true;
+        $localmd5 = md5_file($localpath);
+        $externalmd5 = $this->get_md5_from_hash($contenthash);
+        if ($localmd5 === $externalmd5) {
+            return true;
+        }
+        return false;
     }
 
     public function test_connection() {

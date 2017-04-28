@@ -84,7 +84,7 @@ class puller_testcase extends tool_objectfs_testcase {
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
-        $this->assertTrue($this->is_remotely_readable_by_hash($object->contenthash));
+        $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
     public function test_puller_can_handle_duplicated_file() {
@@ -96,7 +96,7 @@ class puller_testcase extends tool_objectfs_testcase {
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
-        $this->assertTrue($this->is_remotely_readable_by_hash($object->contenthash));
+        $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
     public function test_puller_can_handle_local_file() {
@@ -108,7 +108,7 @@ class puller_testcase extends tool_objectfs_testcase {
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
-        $this->assertFalse($this->is_remotely_readable_by_hash($object->contenthash));
+        $this->assertFalse($this->is_externally_readable_by_hash($object->contenthash));
     }
 
 
