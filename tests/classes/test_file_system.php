@@ -32,19 +32,11 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\object_file_system;
 require_once(__DIR__ . '/test_client.php');
-require_once(__DIR__ . '/integration_test_client.php');
 
 class test_file_system extends object_file_system {
 
-    protected function get_remote_client($config) {
-        if (file_exists(__DIR__ . '/integration_test_config.php')) {
-            $integrationconfig = include('integration_test_config.php');
-            $integrationconfig = (object) $integrationconfig; // Cast to object from array.
-            $client = new integration_test_client($integrationconfig);
-        } else {
-            $client = new test_client($config);
-        }
+    protected function get_external_client($config) {
+        $client = new test_client($config);
         return $client;
     }
-
 }
