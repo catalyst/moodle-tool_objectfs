@@ -196,7 +196,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $externalpath = $this->get_external_path_from_hash($file->get_contenthash());
         $localpath = $this->get_local_path_from_storedfile($file);
 
-        unlink($externalpath);
         $differentfilepath = __DIR__ . '/fixtures/test.txt';
         copy($differentfilepath, $externalpath);
 

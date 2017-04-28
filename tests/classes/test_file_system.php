@@ -32,11 +32,23 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\object_file_system;
 require_once(__DIR__ . '/test_client.php');
+require_once(__DIR__ . '/test_s3_integration_client.php');
 
 class test_file_system extends object_file_system {
 
     protected function get_external_client($config) {
-        $client = new test_client($config);
+        global $CFG;
+        if (isset($CFG->phpunit_objectfs_s3_integration_test_credentials)) {
+            $credentials = $CFG->phpunit_objectfs_s3_integration_test_credentials;
+            $config->key = $credentials['key'];
+            $config->secret = $credentials['secret'];
+            $config->bucket = $credentials['bucket'];
+            $config->region = $credentials['region'];
+            $client = new test_s3_integration_client($config);
+        } else {
+            $client = new test_client($config);
+        }
+
         return $client;
     }
 }
