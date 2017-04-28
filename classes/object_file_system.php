@@ -105,7 +105,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     protected function get_remote_path_from_hash($contenthash) {
         if ($this->preferexternal) {
-            $location = $this->get_object_location_by_hash($contenthash);
+            $location = $this->get_object_location_from_hash($contenthash);
             if ($location == OBJECT_LOCATION_DUPLICATED) {
                 return $this->get_external_path_from_hash($contenthash);
             }
@@ -184,7 +184,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     public function copy_object_from_external_to_local_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_object_location_by_hash($contenthash);
+        $initiallocation = $this->get_object_location_from_hash($contenthash);
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
@@ -219,7 +219,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     public function copy_object_from_local_to_external_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_object_location_by_hash($contenthash);
+        $initiallocation = $this->get_object_location_from_hash($contenthash);
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_LOCAL) {
@@ -249,7 +249,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     public function delete_object_from_local_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_object_location_by_hash($contenthash);
+        $initiallocation = $this->get_object_location_from_hash($contenthash);
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {

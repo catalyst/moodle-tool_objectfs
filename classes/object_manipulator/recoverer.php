@@ -80,7 +80,7 @@ class recoverer extends manipulator {
     }
 
     protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->get_object_location_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        $newlocation = $this->filesystem->get_object_location_from_hash($objectrecord->contenthash, $objectrecord->filesize);
         return $newlocation;
     }
 
