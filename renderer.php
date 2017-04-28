@@ -77,7 +77,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                 return get_string('object_status:location:local', 'tool_objectfs');
             case OBJECT_LOCATION_DUPLICATED:
                 return get_string('object_status:location:duplicated', 'tool_objectfs');
-            case OBJECT_LOCATION_REMOTE:
+            case OBJECT_LOCATION_EXTERNAL:
                 return get_string('object_status:location:external', 'tool_objectfs');
             default:
                 return get_string('object_status:location:unknown', 'tool_objectfs');

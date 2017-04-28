@@ -72,7 +72,7 @@ class s3_client implements object_client {
         $this->client->registerStreamWrapper();
     }
 
-    public function get_remote_md5_from_hash($contenthash) {
+    private function get_md5_from_hash($contenthash) {
         try {
             $key = $this->get_remote_filepath_from_hash($contenthash);
             $result = $this->client->headObject(array(
@@ -87,10 +87,10 @@ class s3_client implements object_client {
         return $md5;
     }
 
-    public function verify_remote_object($contenthash, $localpath) {
+    public function verify_object($contenthash, $localpath) {
         $localmd5 = md5_file($localpath);
-        $remotemd5 = $this->get_remote_md5_from_hash($contenthash);
-        if ($localmd5 === $remotemd5) {
+        $externalmd5 = $this->get_md5_from_hash($contenthash);
+        if ($localmd5 === $externalmd5) {
             return true;
         }
         return false;
@@ -102,12 +102,12 @@ class s3_client implements object_client {
      * @param  string $contenthash contenthash used as key in s3.
      * @return string fullpath to s3 object.
      */
-    public function get_remote_fullpath_from_hash($contenthash) {
-        $filepath = $this->get_remote_filepath_from_hash($contenthash);
+    public function get_fullpath_from_hash($contenthash) {
+        $filepath = $this->get_filepath_from_hash($contenthash);
         return "s3://$this->bucket/$filepath";
     }
 
-    protected function get_remote_filepath_from_hash($contenthash) {
+    protected function get_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
         return "$l1/$l2/$contenthash";

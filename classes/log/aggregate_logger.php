@@ -44,7 +44,7 @@ class aggregate_logger extends objectfs_logger {
             OBJECT_LOCATION_ERROR => array(),
             OBJECT_LOCATION_LOCAL => array(),
             OBJECT_LOCATION_DUPLICATED => array(),
-            OBJECT_LOCATION_REMOTE => array()
+            OBJECT_LOCATION_EXTERNAL => array()
         );
         $this->readstatistics = array();
         $this->querystatistics = array();
@@ -104,7 +104,7 @@ class aggregate_logger extends objectfs_logger {
                 return 'local';
             case OBJECT_LOCATION_DUPLICATED:
                 return 'duplicated';
-            case OBJECT_LOCATION_REMOTE:
+            case OBJECT_LOCATION_EXTERNAL:
                 return 'remote';
             default:
                 return $location;

@@ -92,7 +92,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     protected function create_duplicated_file($content = 'test content') {
         $file = $this->create_local_file($content);
         $contenthash = $file->get_contenthash();
-        $this->filesystem->copy_object_from_local_to_remote_by_hash($contenthash);
+        $this->filesystem->copy_object_from_local_to_external_by_hash($contenthash);
         update_object_record($contenthash, OBJECT_LOCATION_DUPLICATED);
         return $file;
     }
@@ -101,7 +101,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_duplicated_file($content);
         $contenthash = $file->get_contenthash();
         $this->filesystem->delete_object_from_local_by_hash($contenthash);
-        update_object_record($contenthash, OBJECT_LOCATION_REMOTE);
+        update_object_record($contenthash, OBJECT_LOCATION_EXTERNAL);
         return $file;
     }
 
@@ -158,7 +158,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_remote_file($content);
         $objectrecord = new \stdClass();
         $objectrecord->contenthash = $file->get_contenthash();
-        $objectrecord->location = OBJECT_LOCATION_REMOTE;
+        $objectrecord->location = OBJECT_LOCATION_EXTERNAL;
         $objectrecord->filesize = $file->get_filesize();
         return $objectrecord;
     }

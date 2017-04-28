@@ -127,7 +127,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $this->pusher->execute(array($object));
 
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
-        $this->assertEquals(OBJECT_LOCATION_REMOTE, $location);
+        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_remotely_readable_by_hash($object->contenthash));
     }

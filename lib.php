@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die;
 define('OBJECT_LOCATION_ERROR', -1);
 define('OBJECT_LOCATION_LOCAL', 0);
 define('OBJECT_LOCATION_DUPLICATED', 1);
-define('OBJECT_LOCATION_REMOTE', 2);
+define('OBJECT_LOCATION_EXTERNAL', 2);
 
 define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
 define('OBJECTFS_REPORT_LOG_SIZE', 1);
@@ -86,7 +86,7 @@ function get_objectfs_config() {
     $config->consistencydelay = 10 * 60;
     $config->maxtaskruntime = 60;
     $config->logging = 0;
-    $config->preferremote = 0;
+    $config->preferexternal = 0;
 
     $storedconfig = get_config('tool_objectfs');
 

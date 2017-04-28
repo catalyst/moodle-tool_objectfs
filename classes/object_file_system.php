@@ -35,8 +35,8 @@ require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
 
 abstract class object_file_system extends \file_system_filedir {
 
-    private $remoteclient;
-    private $preferremote;
+    private $externalclient;
+    private $preferexternal;
     private $logger;
 
     public function __construct() {
@@ -45,9 +45,9 @@ abstract class object_file_system extends \file_system_filedir {
 
         $config = get_objectfs_config();
 
-        $this->remoteclient = $this->get_remote_client($config);
-        $this->remoteclient->register_stream_wrapper();
-        $this->preferremote = $config->preferremote;
+        $this->externalclient = $this->get_external_client($config);
+        $this->externalclient->register_stream_wrapper();
+        $this->preferexternal = $config->preferexternal;
         $this->filepermissions = $CFG->filepermissions;
         $this->dirpermissions = $CFG->directorypermissions;
 
@@ -62,30 +62,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->logger = $logger;
     }
 
-    protected abstract function get_remote_client($config);
-
-    protected function get_object_path_from_storedfile($file) {
-        $contenthash = $file->get_contenthash();
-        return $this->get_object_path_from_hash($contenthash);
-    }
-
-    protected function get_object_path_from_hash($contenthash) {
-        if ($this->preferremote) {
-            $location = $this->get_actual_object_location_by_hash($contenthash);
-            if ($location == OBJECT_LOCATION_DUPLICATED) {
-                return $this->get_remote_path_from_hash($contenthash);
-            }
-        }
-
-        if ($this->is_file_readable_locally_by_hash($contenthash)) {
-            $path = $this->get_local_path_from_hash($contenthash);
-        } else {
-            // We assume it is remote, not checking if it's readable.
-            $path = $this->get_remote_path_from_hash($contenthash);
-        }
-
-        return $path;
-    }
+    protected abstract function get_external_client($config);
 
     /**
      * Get the full path for the specified hash, including the path to the filedir.
@@ -111,7 +88,7 @@ abstract class object_file_system extends \file_system_filedir {
 
             // While gaining lock object might have been moved locally so we recheck.
             if ($objectlock && !is_readable($path)) {
-                $location = $this->copy_object_from_remote_to_local_by_hash($contenthash);
+                $location = $this->copy_object_from_external_to_local_by_hash($contenthash);
                 // We want this file to be deleted again later.
                 update_object_record($contenthash, $location);
 
@@ -122,44 +99,74 @@ abstract class object_file_system extends \file_system_filedir {
         return $path;
     }
 
-    /**
-     * Get a remote filepath for the specified stored file.
-     *
-     * This is typically either the same as the local filepath, or it is a streamable resource.
-     *
-     * See https://secure.php.net/manual/en/wrappers.php for further information on valid wrappers.
-     *
-     * @param stored_file $file The file to serve.
-     * @return string full path to pool file with file content
-     */
     protected function get_remote_path_from_storedfile(\stored_file $file) {
         return $this->get_remote_path_from_hash($file->get_contenthash());
     }
 
-    /**
-     * Get the full path for the specified hash, including the path to the filedir.
-     *
-     * This is typically either the same as the local filepath, or it is a streamable resource.
-     *
-     * See https://secure.php.net/manual/en/wrappers.php for further information on valid wrappers.
-     *
-     * @param string $contenthash The content hash
-     * @return string The full path to the content file
-     */
     protected function get_remote_path_from_hash($contenthash) {
-        return $this->remoteclient->get_remote_fullpath_from_hash($contenthash);
+        if ($this->preferexternal) {
+            $location = $this->get_object_location_by_hash($contenthash);
+            if ($location == OBJECT_LOCATION_DUPLICATED) {
+                return $this->get_external_path_from_hash($contenthash);
+            }
+        }
+
+        if ($this->is_file_readable_locally_by_hash($contenthash)) {
+            $path = $this->get_local_path_from_hash($contenthash);
+        } else {
+            // We assume it is remote, not checking if it's readable.
+            $path = $this->get_external_path_from_hash($contenthash);
+        }
+
+        return $path;
     }
 
-    public function get_actual_object_location_by_hash($contenthash) {
-        $localreadable = $this->is_file_readable_locally_by_hash($contenthash);
-        $remotereadable = $this->is_file_readable_remotely_by_hash($contenthash);
+    protected function get_external_path_from_hash($contenthash) {
+        return $this->externalclient->get_fullpath_from_hash($contenthash);
+    }
 
-        if ($localreadable && $remotereadable) {
+    protected function get_external_path_from_storedfile(stored_file $file) {
+        return $this->get_external_path_from_hash($file);
+    }
+
+    public function is_file_readable_externally_by_storedfile(stored_file $file) {
+        if (!$file->get_filesize()) {
+            // Files with empty size are either directories or empty.
+            // We handle these virtually.
+            return true;
+        }
+
+        $path = $this->get_external_path_from_storedfile($file);
+        if (is_readable($path)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function is_file_readable_externally_by_hash($contenthash) {
+        if ($contenthash === sha1('')) {
+            // Files with empty size are either directories or empty.
+            // We handle these virtually.
+            return true;
+        }
+
+        $path = $this->get_external_path_from_hash($contenthash, false);
+
+        // Note - it is not possible to perform a content recovery safely from a hash alone.
+        return is_readable($path);
+    }
+
+    public function get_object_location_from_hash($contenthash) {
+        $localreadable = $this->is_file_readable_locally_by_hash($contenthash);
+        $externalreadable = $this->is_file_readable_externally_by_hash($contenthash);
+
+        if ($localreadable && $externalreadable) {
             return OBJECT_LOCATION_DUPLICATED;
-        } else if ($localreadable && !$remotereadable) {
+        } else if ($localreadable && !$externalreadable) {
             return OBJECT_LOCATION_LOCAL;
-        } else if (!$localreadable && $remotereadable) {
-            return OBJECT_LOCATION_REMOTE;
+        } else if (!$localreadable && $externalreadable) {
+            return OBJECT_LOCATION_EXTERNAL;
         } else {
             // Object is not anywhere - we toggle an error state in the DB.
             update_object_record($contenthash, OBJECT_LOCATION_ERROR);
@@ -176,14 +183,14 @@ abstract class object_file_system extends \file_system_filedir {
         return $lock;
     }
 
-    public function copy_object_from_remote_to_local_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_actual_object_location_by_hash($contenthash);
+    public function copy_object_from_external_to_local_by_hash($contenthash, $objectsize = 0) {
+        $initiallocation = $this->get_object_location_by_hash($contenthash);
         $finallocation = $initiallocation;
 
-        if ($initiallocation === OBJECT_LOCATION_REMOTE) {
+        if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
-            $remotepath = $this->get_remote_path_from_hash($contenthash);
+            $externalpath = $this->get_external_path_from_hash($contenthash);
 
             $localdirpath = $this->get_fulldir_from_hash($contenthash);
 
@@ -195,7 +202,7 @@ abstract class object_file_system extends \file_system_filedir {
                 }
             }
 
-            $success = copy($remotepath, $localpath);
+            $success = copy($externalpath, $localpath);
 
             if ($success) {
                 chmod($localpath, $this->filepermissions);
@@ -203,7 +210,7 @@ abstract class object_file_system extends \file_system_filedir {
             }
 
         }
-        $this->logger->log_object_move('copy_object_from_remote_to_local',
+        $this->logger->log_object_move('copy_object_from_external_to_local',
                                         $initiallocation,
                                         $finallocation,
                                         $contenthash,
@@ -211,23 +218,23 @@ abstract class object_file_system extends \file_system_filedir {
         return $finallocation;
     }
 
-    public function copy_object_from_local_to_remote_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_actual_object_location_by_hash($contenthash);
+    public function copy_object_from_local_to_external_by_hash($contenthash, $objectsize = 0) {
+        $initiallocation = $this->get_object_location_by_hash($contenthash);
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_LOCAL) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
-            $remotepath = $this->get_remote_path_from_hash($contenthash);
+            $externalpath = $this->get_external_path_from_hash($contenthash);
 
-            $success = copy($localpath, $remotepath);
+            $success = copy($localpath, $externalpath);
 
             if ($success) {
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
             }
         }
 
-        $this->logger->log_object_move('copy_object_from_local_to_remote',
+        $this->logger->log_object_move('copy_object_from_local_to_external',
                                         $initiallocation,
                                         $finallocation,
                                         $contenthash,
@@ -235,24 +242,24 @@ abstract class object_file_system extends \file_system_filedir {
         return $finallocation;
     }
 
-    public function verify_remote_object_from_hash($contenthash) {
+    public function verify_external_object_from_hash($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
-        $objectisvalid = $this->remoteclient->verify_remote_object($contenthash, $localpath);
+        $objectisvalid = $this->externalclient->verify_object($contenthash, $localpath);
         return $objectisvalid;
     }
 
     public function delete_object_from_local_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_actual_object_location_by_hash($contenthash);
+        $initiallocation = $this->get_object_location_by_hash($contenthash);
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {
             $localpath = $this->get_local_path_from_hash($contenthash);
 
-            if ($this->verify_remote_object_from_hash($contenthash)) {
+            if ($this->verify_external_object_from_hash($contenthash)) {
                 $success = unlink($localpath);
 
                 if ($success) {
-                    $finallocation = OBJECT_LOCATION_REMOTE;
+                    $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
         }
@@ -275,7 +282,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return void
      */
     public function readfile(\stored_file $file) {
-        $path = $this->get_object_path_from_storedfile($file);
+        $path = $this->get_remote_path_from_storedfile($file);
 
         $this->logger->start_timing();
         $success = readfile_allow_large($path, $file->get_filesize());
@@ -304,7 +311,7 @@ abstract class object_file_system extends \file_system_filedir {
             return '';
         }
 
-        $path = $this->get_object_path_from_storedfile($file);
+        $path = $this->get_remote_path_from_storedfile($file);
 
         $this->logger->start_timing();
         $contents = file_get_contents($path);
@@ -331,7 +338,7 @@ abstract class object_file_system extends \file_system_filedir {
         global $CFG;
         require_once($CFG->libdir . "/xsendfilelib.php");
 
-        $path = $this->get_object_path_from_hash($contenthash);
+        $path = $this->get_remote_path_from_hash($contenthash);
 
         $this->logger->start_timing();
         $success = xsendfile($path);
@@ -360,7 +367,7 @@ abstract class object_file_system extends \file_system_filedir {
         if ($type == \stored_file::FILE_HANDLE_GZOPEN) {
             $path = $this->get_local_path_from_storedfile($file, true);
         } else {
-            $path = $this->get_object_path_from_storedfile($file);
+            $path = $this->get_remote_path_from_storedfile($file);
         }
 
         $this->logger->start_timing();
@@ -374,54 +381,6 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         return $filehandle;
-    }
-
-    /**
-     * Marks pool file as candidate for deleting.
-     *
-     * We adjust this method from the parent to never delete remote objects
-     *
-     * @param string $contenthash
-     */
-    public function remove_file($contenthash) {
-        if (!self::is_file_removable($contenthash)) {
-            // Don't remove the file - it's still in use.
-            return;
-        }
-
-        if ($this->is_file_readable_remotely_by_hash($contenthash)) {
-            // We never delete remote objects.
-            return;
-        }
-
-        if (!$this->is_file_readable_locally_by_hash($contenthash)) {
-            // The file wasn't found in the first place. Just ignore it.
-            return;
-        }
-
-        $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
-        $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
-        $contentfile = $this->get_local_path_from_hash($contenthash);
-
-        if (!is_dir($trashpath)) {
-            mkdir($trashpath, $this->dirpermissions, true);
-        }
-
-        if (file_exists($trashfile)) {
-            // A copy of this file is already in the trash.
-            // Remove the old version.
-            unlink($contentfile);
-            return;
-        }
-
-        // Move the contentfile to the trash, and fix permissions as required.
-        rename($contentfile, $trashfile);
-
-        // Fix permissions, only if needed.
-        $currentperms = octdec(substr(decoct(fileperms($trashfile)), -4));
-        if ((int)$this->filepermissions !== $currentperms) {
-            chmod($trashfile, $this->filepermissions);
-        }
     }
 
 }

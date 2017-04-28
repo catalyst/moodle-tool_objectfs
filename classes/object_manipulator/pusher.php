@@ -103,7 +103,7 @@ class pusher extends manipulator {
     }
 
     protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->copy_object_from_local_to_remote_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        $newlocation = $this->filesystem->copy_object_from_local_to_external_by_hash($objectrecord->contenthash, $objectrecord->filesize);
         return $newlocation;
     }
 

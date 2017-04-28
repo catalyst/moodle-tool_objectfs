@@ -47,8 +47,8 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertEquals($expectedpath, $actualpath);
     }
 
-    public function test_get_object_path_from_storedfile_returns_remote_path_if_duplicated_and_preferremote() {
-        set_config('preferremote', true, 'tool_objectfs');
+    public function test_get_object_path_from_storedfile_returns_remote_path_if_duplicated_and_preferexternal() {
+        set_config('preferexternal', true, 'tool_objectfs');
         $this->reset_file_system(); // Needed to load new config.
         $file = $this->create_duplicated_file();
         $expectedpath = $this->get_remote_path_from_storedfile($file);
@@ -87,76 +87,76 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertEquals($cfgperms, $fileperms);
     }
 
-    public function test_copy_object_from_remote_to_local() {
+    public function test_copy_object_from_external_to_local() {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
         $localpath = $this->get_local_path_from_storedfile($file);
 
-        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_external_to_local_by_hash($filehash);
 
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue(is_readable($localpath));
     }
 
-    public function test_copy_object_from_remote_to_local_by_hash_if_local() {
+    public function test_copy_object_from_external_to_local_by_hash_if_local() {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
 
-        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_external_to_local_by_hash($filehash);
 
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
-    public function test_copy_object_from_remote_to_local_by_hash_succeeds_if_already_duplicated() {
+    public function test_copy_object_from_external_to_local_by_hash_succeeds_if_already_duplicated() {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
-        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_external_to_local_by_hash($filehash);
 
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_copy_object_from_remote_to_local_by_hash_if_not_local_and_not_remote() {
+    public function test_copy_object_from_external_to_local_by_hash_if_not_local_and_not_remote() {
         $fakehash = 'this is a fake hash';
 
-        $location = $this->filesystem->copy_object_from_remote_to_local_by_hash($fakehash);
+        $location = $this->filesystem->copy_object_from_external_to_local_by_hash($fakehash);
 
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_copy_object_from_local_to_remote_by_hash() {
+    public function test_copy_object_from_local_to_external_by_hash() {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
         $remotepath = $this->get_remote_path_from_storedfile($file);
 
-        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_local_to_external_by_hash($filehash);
 
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue(is_readable($remotepath));
     }
 
-    public function test_copy_object_from_local_to_remote_by_hash_if_remote() {
+    public function test_copy_object_from_local_to_external_by_hash_if_remote() {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
 
-        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_local_to_external_by_hash($filehash);
 
-        $this->assertEquals(OBJECT_LOCATION_REMOTE, $location);
+        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
-    public function test_copy_object_from_local_to_remote_by_hash_succeeds_if_already_duplicated() {
+    public function test_copy_object_from_local_to_external_by_hash_succeeds_if_already_duplicated() {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
-        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($filehash);
+        $location = $this->filesystem->copy_object_from_local_to_external_by_hash($filehash);
 
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_copy_object_from_local_to_remote_by_hash_if_not_local_and_not_remote() {
+    public function test_copy_object_from_local_to_external_by_hash_if_not_local_and_not_remote() {
         $fakehash = 'this is a fake hash';
 
-        $location = $this->filesystem->copy_object_from_local_to_remote_by_hash($fakehash);
+        $location = $this->filesystem->copy_object_from_local_to_external_by_hash($fakehash);
 
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
@@ -168,7 +168,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $location = $this->filesystem->delete_object_from_local_by_hash($filehash);
 
-        $this->assertEquals(OBJECT_LOCATION_REMOTE, $location);
+        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse(is_readable($localpath));
     }
 

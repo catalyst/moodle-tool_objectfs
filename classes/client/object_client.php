@@ -30,9 +30,8 @@ defined('MOODLE_INTERNAL') || die();
 interface object_client {
     public function __construct($config);
     public function register_stream_wrapper();
-    public function get_remote_md5_from_hash($contenthash);
-    public function get_remote_fullpath_from_hash($contenthash);
-    public function verify_remote_object($contenthash, $localpath);
+    public function get_fullpath_from_hash($contenthash);
+    public function verify_object($contenthash, $localpath);
     public function test_connection();
     public function test_permissions();
 }

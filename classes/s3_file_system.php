@@ -37,7 +37,7 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class s3_file_system extends object_file_system {
 
-    protected function get_remote_client($config) {
+    protected function get_external_client($config) {
         $s3client = new s3_client($config);
         return $s3client;
     }

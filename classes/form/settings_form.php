@@ -78,9 +78,9 @@ class settings_form extends \moodleform {
         $mform->disabledIf('maxtaskruntime', 'enabletasks');
         $mform->setType("maxtaskruntime", PARAM_INT);
 
-        $mform->addElement('advcheckbox', 'preferremote', get_string('settings:preferremote', 'tool_objectfs'));
-        $mform->addHelpButton('preferremote', 'settings:preferremote', 'tool_objectfs');
-        $mform->setType("preferremote", PARAM_INT);
+        $mform->addElement('advcheckbox', 'preferexternal', get_string('settings:preferexternal', 'tool_objectfs'));
+        $mform->addHelpButton('preferexternal', 'settings:preferexternal', 'tool_objectfs');
+        $mform->setType("preferexternal", PARAM_INT);
 
         $mform->addElement('advcheckbox', 'enablelogging', get_string('settings:enablelogging', 'tool_objectfs'));
         $mform->addHelpButton('enablelogging', 'settings:enablelogging', 'tool_objectfs');

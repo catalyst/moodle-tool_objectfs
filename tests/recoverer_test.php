@@ -77,7 +77,7 @@ class recoverer_testcase extends tool_objectfs_testcase {
         $this->recoverer->execute(array($object));
 
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
-        $this->assertEquals(OBJECT_LOCATION_REMOTE, $location);
+        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
     public function test_recoverer_will_not_recover_error_objects() {

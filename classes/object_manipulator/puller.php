@@ -75,7 +75,7 @@ class puller extends manipulator {
                 HAVING MAX(f.filesize) <= ?
                        AND (o.location = ?)';
 
-        $params = array($this->sizethreshold, OBJECT_LOCATION_REMOTE);
+        $params = array($this->sizethreshold, OBJECT_LOCATION_EXTERNAL);
 
         $this->logger->start_timing();
         $objects = $DB->get_records_sql($sql, $params);
@@ -89,7 +89,7 @@ class puller extends manipulator {
     }
 
     protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->copy_object_from_remote_to_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
         return $newlocation;
     }
 
