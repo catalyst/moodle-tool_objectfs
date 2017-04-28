@@ -44,6 +44,7 @@ class test_file_system extends object_file_system {
             $config->secret = $credentials['secret'];
             $config->bucket = $credentials['bucket'];
             $config->region = $credentials['region'];
+            set_objectfs_config($config);
             $client = new test_s3_integration_client($config);
         } else {
             $client = new test_client($config);
