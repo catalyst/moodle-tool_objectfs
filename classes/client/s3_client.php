@@ -57,6 +57,7 @@ class s3_client implements object_client {
         // it will be serialised, so re-retrive them now.
         $config = get_objectfs_config();
         $this->set_client($config);
+        $this->client->registerStreamWrapper();
     }
 
     public function set_client($config) {
