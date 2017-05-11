@@ -121,24 +121,7 @@ S3 specific settings
 
 If you are on an older moodle then you can backport the nessesary API's in order to support this plugin. Use with caution!
 
-The quickest way to do this is to rebase your moodle installation onto an already prepared fs-api branch that matches your version. Alternatively you can follow some step by step instructions.
-### Rebase method
-The fs-api repository can be found [here](https://github.com/kenneth-hendricks/moodle-fs-api).
-
-{{moodle_version}} = the target moodle core version. e.g. 27, 31
-{{original_branch}} = the branch you would like to merge the fsapi into
-
-<pre>
-git remote add fsapi git@github.com:kenneth-hendricks/moodle-fs-api.git
-git fetch fsapi
-git checkout MOODLE_{{moodle_version}}_STABLE_FSAPI
-git rebase {{original_branch}}
-git checkout {{original_branch}}
-git merge --no-ff MOODLE_{{moodle_version}}_STABLE_FSAPI
-</pre>
-
-### Step by step method
-#### Moodle 2.6 only
+### Moodle 2.6 only
 1. Cherry pick [MDL-44510](https://tracker.moodle.org/browse/MDL-44510):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
@@ -157,7 +140,7 @@ git cherry-pick b66908597636a0389154aaa86172b63a2570dd31
 
 3. Follow steps in sections below.
 
-#### Moodle 2.6 - 2.8 only
+### Moodle 2.6 - 2.8 only
 1. Cherry pick [MDL-49627](https://tracker.moodle.org/browse/MDL-49627):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
@@ -168,7 +151,7 @@ git cherry-pick 47d3338..2b53b13
 
 2. Follow steps in section below.
 
-#### Moodle 2.6 - 3.2
+### Moodle 2.6 - 3.2
 1. Cherry pick the file system API patch: [MDL-46375](https://tracker.moodle.org/browse/MDL-46375):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
@@ -179,7 +162,7 @@ git cherry-pick 846d899..0c03db6
 2. If you need tests to pass see PHPUnit test compatibility below .
 
 
-#### PHPUnit test compatibility
+### PHPUnit test compatibility
 The file system API patch introduces tests that use:
 - setExpectedExceptionRegExp() which needs phpunit 4.3
 - setExpectedException() which needs phpunit 5.2 which needs needs php 5.6 (Ubuntu 14.04 runs 5.5.9)
@@ -218,6 +201,8 @@ Here are known working configurations:
 | [3.0](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_30_STABLE_FSAPI)            |    No     |   Yes      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_30_STABLE_FSAPI/composer.json)           |
 | [3.1](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_31_STABLE_FSAPI)            |    No     |   Yes      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_31_STABLE_FSAPI/composer.json)           |
 | [3.2](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_32_STABLE_FSAPI)            |    No     |   No      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_32_STABLE_FSAPI/composer.json)           |
+
+
 Crafted by Catalyst IT
 ----------------------
 
