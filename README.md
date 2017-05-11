@@ -121,7 +121,8 @@ S3 specific settings
 
 If you are on an older moodle then you can backport the nessesary API's in order to support this plugin. Use with caution!
 
-### Moodle 2.6 only
+### Backport the File System API
+#### Moodle 2.6 only
 1. Cherry pick [MDL-44510](https://tracker.moodle.org/browse/MDL-44510):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
@@ -140,7 +141,7 @@ git cherry-pick b66908597636a0389154aaa86172b63a2570dd31
 
 3. Follow steps in sections below.
 
-### Moodle 2.6 - 2.8 only
+#### Moodle 2.6 - 2.8 only
 1. Cherry pick [MDL-49627](https://tracker.moodle.org/browse/MDL-49627):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
@@ -151,7 +152,7 @@ git cherry-pick 47d3338..2b53b13
 
 2. Follow steps in section below.
 
-### Moodle 2.6 - 3.2
+#### Moodle 2.6 - 3.2
 1. Cherry pick the file system API patch: [MDL-46375](https://tracker.moodle.org/browse/MDL-46375):
 <pre>
 git remote add upstream git@github.com:moodle/moodle.git
@@ -160,6 +161,20 @@ git cherry-pick 846d899..0c03db6
 // Solve conflicts and git cherry-pick --continue as needed.
 </pre>
 2. If you need tests to pass see PHPUnit test compatibility below .
+
+### Update the backported File System API
+Since it was first created there have been a number of bug fixes to the File System API. These should also be back ported.
+
+TODO: Add watch and add steps for these trackers: MDL-58297, MDL-58281, MDL-58068, MDL-57971
+
+* [MDL-58684](https://tracker.moodle.org/browse/MDL-58684)
+<pre>
+git remote add upstream git@github.com:moodle/moodle.git
+git fetch upstream
+git cherry-pick 5529b4701aa52caf30a25052ba90aaa7b7dc0ef7
+// WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
+git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
+</pre>
 
 
 ### PHPUnit test compatibility
