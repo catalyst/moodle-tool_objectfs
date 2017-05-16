@@ -49,7 +49,7 @@ class pull_objects_from_storage extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('puller');
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\object_manipulator\\puller');
     }
 }
 

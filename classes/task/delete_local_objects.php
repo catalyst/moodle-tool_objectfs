@@ -49,6 +49,6 @@ class delete_local_objects extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('deleter');
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\object_manipulator\\deleter');
     }
 }

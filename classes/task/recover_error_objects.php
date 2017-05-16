@@ -49,7 +49,7 @@ class recover_error_objects extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('recoverer');
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\object_manipulator\\recoverer');
     }
 }
 
