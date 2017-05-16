@@ -46,6 +46,10 @@ class tasks_testcase extends tool_objectfs_testcase {
             return true;
         }
 
+        $config = get_objectfs_config();
+        $config->enabletasks = true;
+        set_objectfs_config($config);
+
         $scheduledtasknames = array('delete_local_objects',
                                     'generate_status_report',
                                     'pull_objects_from_storage',
