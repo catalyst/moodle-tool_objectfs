@@ -91,7 +91,7 @@ class s3_client implements object_client {
     public function verify_object($contenthash, $localpath) {
         $localmd5 = md5_file($localpath);
         $externalmd5 = $this->get_md5_from_hash($contenthash);
-        if ($localmd5 === $externalmd5) {
+        if ($externalmd5) {
             return true;
         }
         return false;
