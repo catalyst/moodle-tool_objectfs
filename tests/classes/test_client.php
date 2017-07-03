@@ -33,6 +33,11 @@ class test_client implements object_client {
         }
     }
 
+    public function get_seekable_stream_context() {
+        $context = stream_context_create();
+        return $context;
+    }
+
     public function get_fullpath_from_hash($contenthash) {
         return "$this->bucketpath/{$contenthash}";
     }

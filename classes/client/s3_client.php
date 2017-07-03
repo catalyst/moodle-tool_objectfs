@@ -108,6 +108,21 @@ class s3_client implements object_client {
         return "s3://$this->bucket/$filepath";
     }
 
+    /**
+     * S3 file streams require a seekable context to be supplied
+     * if they are to be seekable.
+     *
+     * @return void
+     */
+    public function get_seekable_stream_context() {
+        $context = stream_context_create(array(
+            's3' => array(
+                'seekable' => true
+            )
+        ));
+        return $context;
+    }
+
     protected function get_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];

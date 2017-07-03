@@ -371,7 +371,7 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $this->logger->start_timing();
-        $filehandle = self::get_file_handle_for_path($path, $type);
+        $filehandle = $this->get_object_handle_for_path($path, $type);
         $this->logger->end_timing();
 
         $this->logger->log_object_read('get_file_handle_for_path', $path, $file->get_filesize());
@@ -381,6 +381,29 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         return $filehandle;
+    }
+
+    /**
+     * Return a file handle for the specified path.
+     *
+     * This abstraction should be used when overriding get_content_file_handle in a new file system.
+     *
+     * @param string $path The path to the file. This shoudl be any type of path that fopen and gzopen accept.
+     * @param int $type Type of file handle (FILE_HANDLE_xx constant)
+     * @return resource
+     * @throws coding_exception When an unexpected type of file handle is requested
+     */
+    protected function get_object_handle_for_path($path, $type = \stored_file::FILE_HANDLE_FOPEN) {
+        switch ($type) {
+            case \stored_file::FILE_HANDLE_FOPEN:
+                $context = $this->externalclient->get_seekable_stream_context();
+                return fopen($path, 'rb', false, $context);
+            case \stored_file::FILE_HANDLE_GZOPEN:
+                // Binary reading of file in gz format.
+                return gzopen($path, 'rb');
+            default:
+                throw new \coding_exception('Unexpected file handle type');
+        }
     }
 
 }
