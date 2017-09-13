@@ -119,7 +119,7 @@ S3 specific settings
 
 ## Backporting
 
-If you are on an older moodle then you can backport the nessesary API's in order to support this plugin. Use with caution!
+If you are on an older moodle then you can backport the necessary API's in order to support this plugin. Use with caution!
 
 ### Backport the File System API
 #### Moodle 2.6 only
@@ -160,7 +160,16 @@ git fetch upstream
 git cherry-pick 846d899..0c03db6
 // Solve conflicts and git cherry-pick --continue as needed.
 </pre>
-2. If you need tests to pass see PHPUnit test compatibility below .
+
+2. Moodle 3.2 only: revert the changes for MDL-35290 and cherry-pick them from 3.3 instead:
+<pre>
+git revert 100a53119a719a1a5564fedc3e2db4eb70d19857 655b4543662f1b49978c1176e68fffad6286b7b4
+git cherry-pick 67fa4b55b95ea179f68ae8f5f2af84adf18f5546
+// Solve conflicts and git cherry-pick --continue as needed.
+</pre>
+
+3. If you need tests to pass see PHPUnit test compatibility below .
+
 
 ### Update the backported File System API
 Since it was first created there have been a number of bug fixes to the File System API. These should also be back ported.
