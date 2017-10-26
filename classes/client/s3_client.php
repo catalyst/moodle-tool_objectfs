@@ -234,4 +234,66 @@ class s3_client implements object_client {
 
         return $details;
     }
+
+    public function define_amazon_s3_check($mform, $config) {
+        global $OUTPUT;
+        $connection = false;
+
+        $client = new s3_client($config);
+        $connection = $client->test_connection();
+
+        if ($connection->success) {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
+
+            // Check permissions if we can connect.
+            $permissions = $client->test_permissions();
+            if ($permissions->success) {
+                $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
+            } else {
+                foreach ($permissions->messages as $message) {
+                    $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
+                }
+            }
+
+        } else {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
+            $permissions = false;
+        }
+        return $mform;
+    }
+
+    public function define_client_section($mform, $config) {
+
+        $mform->addElement('header', 'awsheader', get_string('settings:aws:header', 'tool_objectfs'));
+        $mform->setExpanded('awsheader');
+
+        $mform = $this->define_amazon_s3_check($mform, $config);
+
+        $regionoptions = array( 'us-east-1'          => 'us-east-1',
+            'us-east-2'         => 'us-east-2',
+            'us-west-1'         => 'us-west-1',
+            'us-west-2'         => 'us-west-2',
+            'ap-northeast-2'    => 'ap-northeast-2',
+            'ap-southeast-1'    => 'ap-southeast-1',
+            'ap-southeast-2'    => 'ap-southeast-2',
+            'ap-northeast-1'    => 'ap-northeast-1',
+            'eu-central-1'      => 'eu-central-1',
+            'eu-west-1'         => 'eu-west-1');
+
+        $mform->addElement('text', 'key', get_string('settings:aws:key', 'tool_objectfs'));
+        $mform->addHelpButton('key', 'settings:aws:key', 'tool_objectfs');
+        $mform->setType("key", PARAM_TEXT);
+
+        $mform->addElement('passwordunmask', 'secret', get_string('settings:aws:secret', 'tool_objectfs'), array('size' => 40));
+        $mform->addHelpButton('secret', 'settings:aws:secret', 'tool_objectfs');
+        $mform->setType("secret", PARAM_TEXT);
+
+        $mform->addElement('text', 'bucket', get_string('settings:aws:bucket', 'tool_objectfs'));
+        $mform->addHelpButton('bucket', 'settings:aws:bucket', 'tool_objectfs');
+        $mform->setType("bucket", PARAM_TEXT);
+
+        $mform->addElement('select', 'region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
+        $mform->addHelpButton('region', 'settings:aws:region', 'tool_objectfs');
+        return $mform;
+    }
 }

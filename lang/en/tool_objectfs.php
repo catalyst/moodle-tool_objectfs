@@ -57,15 +57,15 @@ $string['settings:enablelogging_help'] = 'Enable or disable file system logging.
 
 $string['settings:generalheader'] = 'General Settings';
 
-$string['settings:awsheader'] = 'Amazon S3 Settings';
-$string['settings:key'] = 'Key';
-$string['settings:key_help'] = 'Amazon S3 key credential.';
-$string['settings:secret'] = 'Secret';
-$string['settings:secret_help'] = 'Amazon S3 secret credential.';
-$string['settings:bucket'] = 'Bucket';
-$string['settings:bucket_help'] = 'Amazon S3 bucket to store files in.';
-$string['settings:region'] = 'region';
-$string['settings:region_help'] = 'Amazon S3 API gateway region.';
+$string['settings:aws:header'] = 'Amazon S3 Settings';
+$string['settings:aws:key'] = 'Key';
+$string['settings:aws:key_help'] = 'Amazon S3 key credential.';
+$string['settings:aws:secret'] = 'Secret';
+$string['settings:aws:secret_help'] = 'Amazon S3 secret credential.';
+$string['settings:aws:bucket'] = 'Bucket';
+$string['settings:aws:bucket_help'] = 'Amazon S3 bucket to store files in.';
+$string['settings:aws:region'] = 'region';
+$string['settings:aws:region_help'] = 'Amazon S3 API gateway region.';
 
 $string['settings:azure:header'] = 'Azure Blob Storage Settings';
 $string['settings:azure:accountname'] = 'Account name';
