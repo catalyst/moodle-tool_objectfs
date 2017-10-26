@@ -67,5 +67,9 @@ class test_client implements object_client {
     public function test_permissions() {
         return true;
     }
+
+    public function get_availability() {
+        return true;
+    }
 }
 
