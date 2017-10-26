@@ -30,7 +30,3 @@ $plugin->release   = 2017102600;      // Same as version
 $plugin->requires  = 2013111811;      // Requires Filesystem API.
 $plugin->component = "tool_objectfs";
 $plugin->maturity  = MATURITY_STABLE;
-
-$plugin->dependencies = array(
-    'local_aws' => 2017030100
-);
