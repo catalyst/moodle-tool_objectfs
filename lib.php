@@ -107,6 +107,17 @@ function get_objectfs_config() {
     return $config;
 }
 
+function tool_objectfs_get_filesystem() {
+    global $CFG;
+
+    if ($CFG->alternative_file_system_class == '\tool_objectfs\s3_file_system') {
+        return new \tool_objectfs\s3_file_system();
+    }
+
+    if ($CFG->alternative_file_system_class == '\tool_objectfs\azure_storage_file_system') {
+        return new \tool_objectfs\azure_storage_file_system();
+    }
+}
 
 function tool_objectfs_get_client($config) {
     global $CFG;
