@@ -76,10 +76,6 @@ function get_objectfs_config() {
     $config = new stdClass;
     $config->enabletasks = 0;
     $config->enablelogging = 0;
-    $config->key = '';
-    $config->secret = '';
-    $config->bucket = '';
-    $config->region = 'us-east-1';
     $config->sizethreshold = 1024 * 10;
     $config->minimumage = 7 * 24 * 60 * 60;
     $config->deletelocal = 0;
@@ -87,6 +83,20 @@ function get_objectfs_config() {
     $config->maxtaskruntime = 60;
     $config->logging = 0;
     $config->preferexternal = 0;
+
+    // TODO: load based on fs? move to client files?
+
+    // '\tool_objectfs\s3_file_system'
+    $config->key = '';
+    $config->secret = '';
+    $config->bucket = '';
+    $config->region = 'us-east-1';
+
+    // '\tool_objectfs\azure_storage_file_system'
+    $config->accountname = '';
+    $config->accountkey = '';
+    $config->container = '';
+    $config->sastoken = '';
 
     $storedconfig = get_config('tool_objectfs');
 
