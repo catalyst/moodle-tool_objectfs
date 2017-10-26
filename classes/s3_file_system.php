@@ -30,7 +30,6 @@ namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\object_file_system;
 use tool_objectfs\client\s3_client;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -39,6 +38,11 @@ class s3_file_system extends object_file_system {
 
     protected function get_external_client($config) {
         $s3client = new s3_client($config);
+
+        if (!$s3client->get_availability()) {
+            throw new \RuntimeException('The required libraries are not available. Please install local_aws.');
+        }
+
         return $s3client;
     }
 }

@@ -27,7 +27,20 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
+$autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+
+if (!file_exists($autoloader)) {
+
+    class s3_client {
+        public function get_availability() {
+            return false;
+        }
+    }
+
+    return;
+}
+
+require_once($autoloader);
 
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
@@ -66,6 +79,10 @@ class s3_client implements object_client {
         'region' => $config->region,
         'version' => AWS_API_VERSION
         ));
+    }
+
+    public function get_availability() {
+        return true;
     }
 
     public function register_stream_wrapper() {
