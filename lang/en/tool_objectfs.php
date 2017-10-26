@@ -67,6 +67,16 @@ $string['settings:bucket_help'] = 'Amazon S3 bucket to store files in.';
 $string['settings:region'] = 'region';
 $string['settings:region_help'] = 'Amazon S3 API gateway region.';
 
+$string['settings:azure:header'] = 'Azure Blob Storage Settings';
+$string['settings:azure:accountname'] = 'Account name';
+$string['settings:azure:accountname_help'] = '';
+$string['settings:azure:accountkey'] = 'Account key';
+$string['settings:azure:accountkey_help'] = '';
+$string['settings:azure:container'] = 'Container name';
+$string['settings:azure:container_help'] = '';
+$string['settings:azure:sastoken'] = 'Shared Access Signature';
+$string['settings:azure:sastoken_help'] = '';
+
 $string['settings:filetransferheader'] = 'File Transfer Settings';
 $string['settings:sizethreshold'] = 'Minimum size threshold (KB)';
 $string['settings:sizethreshold_help'] = 'Minimum size threshold for transfering objects to external object storage. If objects are over this size they will be transfered.';
