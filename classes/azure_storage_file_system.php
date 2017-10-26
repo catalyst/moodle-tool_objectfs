@@ -35,6 +35,11 @@ class azure_storage_file_system extends object_file_system {
 
     protected function get_external_client($config) {
         $asclient = new azure_storage_client($config);
+
+        if (!$asclient->get_availability()) {
+            throw new \RuntimeException('The required libraries are not available. Please install local_azure_storage.');
+        }
+
         return $asclient;
     }
 }

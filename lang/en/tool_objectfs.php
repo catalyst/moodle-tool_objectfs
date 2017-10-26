@@ -57,6 +57,8 @@ $string['settings:enablelogging_help'] = 'Enable or disable file system logging.
 
 $string['settings:generalheader'] = 'General Settings';
 
+$string['settings:clientnotavailable'] = 'The configured client \'{$a}\' is not availble. Please install the required dependencies.';
+
 $string['settings:aws:header'] = 'Amazon S3 Settings';
 $string['settings:aws:key'] = 'Key';
 $string['settings:aws:key_help'] = 'Amazon S3 key credential.';

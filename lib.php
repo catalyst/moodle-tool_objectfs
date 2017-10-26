@@ -110,25 +110,18 @@ function get_objectfs_config() {
 function tool_objectfs_get_filesystem() {
     global $CFG;
 
-    if ($CFG->alternative_file_system_class == '\tool_objectfs\s3_file_system') {
-        return new \tool_objectfs\s3_file_system();
-    }
-
-    if ($CFG->alternative_file_system_class == '\tool_objectfs\azure_storage_file_system') {
-        return new \tool_objectfs\azure_storage_file_system();
-    }
+    return new $CFG->alternative_file_system_class();
 }
 
 function tool_objectfs_get_client($config) {
     global $CFG;
 
-    if ($CFG->alternative_file_system_class == '\tool_objectfs\s3_file_system') {
-        return new \tool_objectfs\client\s3_client($config);
-    }
+    $fsclass = $CFG->alternative_file_system_class;
 
-    if ($CFG->alternative_file_system_class == '\tool_objectfs\azure_storage_file_system') {
-        return new \tool_objectfs\client\azure_storage_client($config);
-    }
+    $client = str_replace('file_system', 'client', $fsclass);
+    $client = str_replace('\\tool_objectfs\\', '\\tool_objectfs\\client\\', $client);
+
+    return new $client($config);
 }
 
 function tool_objectfs_should_tasks_run() {

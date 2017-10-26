@@ -27,7 +27,20 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/azure_storage/vendor/autoload.php');
+$autoloader = $CFG->dirroot . '/local/azure_storage/vendor/autoload.php';
+
+if (!file_exists($autoloader)) {
+
+    class azure_storage_client {
+        public function get_availability() {
+            return false;
+        }
+    }
+
+    return;
+}
+
+require_once($autoloader);
 
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
 use MicrosoftAzure\Storage\Common\ServicesBuilder;
@@ -45,6 +58,10 @@ class azure_storage_client implements object_client {
     public function __construct($config) {
         $this->container = $config->container;
         $this->set_client($config);
+    }
+
+    public function get_availability() {
+        return true;
     }
 
     public function set_client($config) {

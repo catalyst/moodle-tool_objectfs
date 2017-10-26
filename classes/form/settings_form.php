@@ -111,14 +111,20 @@ class settings_form extends \moodleform {
     }
 
     public function define_client_section($mform, $config) {
-        global $CFG;
+        global $CFG, $OUTPUT;
 
         if (empty($CFG->alternative_file_system_class)) {
             return $mform;
         }
 
         $client = tool_objectfs_get_client($config);
-        $mform = $client->define_client_section($mform, $config);
+
+        if ($client->get_availability()) {
+            $mform = $client->define_client_section($mform, $config);
+        } else {
+            $errstr = get_string('settings:clientnotavailable', 'tool_objectfs', $CFG->alternative_file_system_class);
+            $mform->addElement('html', $OUTPUT->notification($errstr, 'notifyproblem'));
+        }
 
         return $mform;
     }
