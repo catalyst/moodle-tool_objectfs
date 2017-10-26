@@ -16,9 +16,9 @@
 //
 
   /**
-   * Strings for component 'local_catdeleter', language 'en'.
+   * Strings for component 'tool_objectfs', language 'en'.
    *
-   * @package   local_catdeleter
+   * @package   tool_objectfs
    * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
    * @copyright Catalyst IT
    * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -57,7 +57,7 @@ $string['settings:enablelogging_help'] = 'Enable or disable file system logging.
 
 $string['settings:generalheader'] = 'General Settings';
 
-$string['settings:clientnotavailable'] = 'The configured client \'{$a}\' is not availble. Please install the required dependencies.';
+$string['settings:clientnotavailable'] = 'The configured client \'{$a}\' is not available. Please install the required dependencies.';
 
 $string['settings:aws:header'] = 'Amazon S3 Settings';
 $string['settings:aws:key'] = 'Key';
@@ -93,10 +93,11 @@ $string['settings:maxtaskruntime_help'] = 'Background tasks handle the transfer 
 $string['settings:preferexternal'] = 'Prefer external objects';
 $string['settings:preferexternal_help'] = 'If a file is stored both locally and in external object storage, read from external\. This is setting is mainly for testing purposes and introduces overhead to check the location.';
 
-$string['settings:connectionsuccess'] = 'Could establish connection to the AWS S3 bucket.';
-$string['settings:connectionfailure'] = 'Could not establish connection to the AWS S3 bucket.';
-$string['settings:writefailure'] = 'Could not write object to the S3 bucket. ';
-$string['settings:readfailure'] = 'Could not read object from the S3 bucket. ';
-$string['settings:deletesuccess'] = 'Could delete object from the S3 bucket - It is not recommended for the AWS user to have delete permissions. ';
+$string['settings:connectionsuccess'] = 'Could establish connection to the external object storage.';
+$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage.';
+$string['settings:writefailure'] = 'Could not write object to the external object storage. ';
+$string['settings:readfailure'] = 'Could not read object from the external object storage. ';
+$string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
+$string['settings:deleteerror'] = 'Could not delete object from the external object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
-$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from S3. Background tasks can still function.';
+$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from the external object storage. Background tasks can still function.';
