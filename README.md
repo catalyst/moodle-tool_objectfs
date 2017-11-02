@@ -4,8 +4,7 @@
 
 # moodle-tool_objectfs
 
-A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution. This plug-in requires [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) to function.
-
+A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution. 
 * [Use cases](#use-cases)
   * [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
   * [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
@@ -15,10 +14,12 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
 * [Currently supported object stores](#currently-supported-object-stores)
   * [Roadmap](#roadmap)
   * [Amazon S3](#amazon-s3)
+  * [Azure Blob Storage](#azure-blob-storage)
 * [Moodle configuration](#moodle-configuration)
   * [General Settings](#general-settings)
   * [File Transfer settings](#file-transfer-settings)
   * [Amazon S3 settings](#amazon-s3-settings)
+  * [Azure Blob Storage settings](#azure-blob-storage-settings)
 * [Backporting](#backporting)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 * [Contributing and support](#contributing-and-support)
@@ -93,6 +94,31 @@ There is support for more object stores planed, in particular enabling Openstack
 }
 ```
 
+### Azure Blob Storage
+
+*Azure Storage container setup*
+
+- Create a storage container
+- Use the command below to create a policy that has only read and write capabilities.
+- Generate the SAS token against that policy to use for granting access to the container contents.
+```
+az storage container policy create \
+    --account-name <storage-account-name> \
+    --account-key <storage-account-key> \
+    --container-name <container-name> \
+    --name <policy-name> \
+    --permissions rw
+```
+
+```
+az storage container generate-sas \
+    --account-name <storage-account-name> \
+    --account-key <storage-account-key> \
+    --name <container-name> \
+    --policy <policy-name> \
+    --output tsv
+```
+
 ## Moodle configuration
 Go to Site Administration -> Plugins -> Admin tools -> Object storage file system. Descriptions for the various settings are as follows:
 
@@ -116,6 +142,11 @@ S3 specific settings
 - **Bucket**: S3 bucket name to store files in
 - **AWS region**: AWS API endpoint region to use.
 
+### Azure Blob Storage S3 settings
+Azure Blob Storage specific settings
+- **Account name**: Storage account name
+- **Container name**: Container name to store files in
+- **Shared Access Signature**: Shared access signature that is signed to use the container 
 
 ## Backporting
 
