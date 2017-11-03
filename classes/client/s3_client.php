@@ -42,6 +42,7 @@ if (!file_exists($autoloader)) {
 
 require_once($autoloader);
 
+use Aws\S3\MultipartUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
 
@@ -83,6 +84,10 @@ class s3_client implements object_client {
 
     public function get_availability() {
         return true;
+    }
+
+    public function get_maximum_upload_size() {
+        return MultipartUploader::PART_MAX_SIZE;
     }
 
     public function register_stream_wrapper() {

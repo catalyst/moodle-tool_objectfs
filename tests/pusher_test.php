@@ -65,10 +65,11 @@ class pusher_testcase extends tool_objectfs_testcase {
         $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
     }
 
-    public function test_pusher_get_candidate_objects_wont_get_objects_bigger_than_5_gb() {
+    public function test_pusher_get_candidate_objects_wont_get_objects_bigger_than_maximum_filesize() {
         global $DB;
         $object = $this->create_local_object();
-        $DB->set_field('files', 'filesize', 9999999999, array('contenthash' => $object->contenthash));
+        $maximumfilesize = $this->filesystem->get_maximum_upload_filesize() + 1;
+        $DB->set_field('files', 'filesize', $maximumfilesize, array('contenthash' => $object->contenthash));
 
         $candidateobjects = $this->pusher->get_candidate_objects();
 

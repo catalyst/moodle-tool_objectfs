@@ -48,6 +48,13 @@ class pusher extends manipulator {
     private $minimumage;
 
     /**
+     * The maximum upload file size in bytes.
+     *
+     * @var int
+     */
+    private $maximumfilesize;
+
+    /**
      * Pusher constructor.
      *
      * @param object_client $client remote object client
@@ -58,6 +65,7 @@ class pusher extends manipulator {
         parent::__construct($filesystem, $config);
         $this->sizethreshold = $config->sizethreshold;
         $this->minimumage = $config->minimumage;
+        $this->maximumfilesize = $this->filesystem->get_maximum_upload_filesize();
 
         $this->logger = $logger;
         // Inject our logger into the filesystem.
@@ -82,14 +90,19 @@ class pusher extends manipulator {
               GROUP BY f.contenthash,
                        f.filesize,
                        o.location
-                HAVING MIN(f.timecreated) <= ?
-                       AND MAX(f.filesize) > ?
-                       AND MAX(f.filesize) < 5000000000
-                       AND (o.location IS NULL OR o.location = ?)';
+                HAVING MIN(f.timecreated) <= :maxcreatedtimstamp
+                       AND MAX(f.filesize) > :threshold
+                       AND MAX(f.filesize) < :maximum_file_size
+                       AND (o.location IS NULL OR o.location = :object_location)';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
 
-        $params = array($maxcreatedtimestamp, $this->sizethreshold, OBJECT_LOCATION_LOCAL);
+        $params = array(
+            'maxcreatedtimstamp' => $maxcreatedtimestamp,
+            'threshold' => $this->sizethreshold,
+            'maximum_file_size' => $this->maximumfilesize,
+            'object_location' => OBJECT_LOCATION_LOCAL,
+         );
 
         $this->logger->start_timing();
         $objects = $DB->get_records_sql($sql, $params);

@@ -406,4 +406,8 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
+    public function get_maximum_upload_filesize() {
+        return $this->externalclient->get_maximum_upload_size();
+    }
+
 }

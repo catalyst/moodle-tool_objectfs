@@ -43,6 +43,7 @@ if (!file_exists($autoloader)) {
 require_once($autoloader);
 
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
+use MicrosoftAzure\Storage\Common\Internal\Resources;
 use MicrosoftAzure\Storage\Common\ServicesBuilder;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use tool_objectfs\azure\StreamWrapper;
@@ -62,6 +63,10 @@ class azure_storage_client implements object_client {
 
     public function get_availability() {
         return true;
+    }
+
+    public function get_maximum_upload_size() {
+        return Resources::MAX_BLOCK_BLOB_SIZE;
     }
 
     public function set_client($config) {
