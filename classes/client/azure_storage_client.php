@@ -42,10 +42,12 @@ if (!file_exists($autoloader)) {
 
 require_once($autoloader);
 
+use GuzzleHttp\Exception\ConnectException;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
 use MicrosoftAzure\Storage\Common\Internal\Resources;
 use MicrosoftAzure\Storage\Common\ServicesBuilder;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
+use SimpleXMLElement;
 use tool_objectfs\azure\StreamWrapper;
 
 class azure_storage_client implements object_client {
@@ -157,11 +159,15 @@ class azure_storage_client implements object_client {
         $connection->message = '';
 
         try {
-            $result = $this->client->getContainerProperties($this->container);
+            $result = $this->client->createBlockBlob($this->container, 'connection_check_file', 'connection_check_file');
             $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
         } catch (ServiceException $e) {
             $connection->success = false;
             $details = $this->get_exception_details($e);
+            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+        } catch (ConnectException $e) {
+            $connection->success = false;
+            $details = $e->getMessage();
             $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
         }
 
@@ -184,9 +190,14 @@ class azure_storage_client implements object_client {
         try {
             $result = $this->client->getBlob($this->container, 'permissions_check_file');
         } catch (ServiceException $e) {
-            $details = $this->get_exception_details($e);
-            $permissions->messages[] = get_string('settings:readfailure', 'tool_objectfs') . $details;
-            $permissions->success = false;
+            $errorcode = $this->get_body_error_code($e);
+
+            // Write could have failed.
+            if ($errorcode !== 'BlobNotFound') {
+                $details = $this->get_exception_details($e);
+                $permissions->messages[] = get_string('settings:readfailure', 'tool_objectfs') . $details;
+                $permissions->success = false;
+            }
         }
 
         try {
@@ -194,15 +205,14 @@ class azure_storage_client implements object_client {
             $permissions->messages[] = get_string('settings:deletesuccess', 'tool_objectfs');
             $permissions->success = false;
         } catch (ServiceException $e) {
-            // TODO
-//            $details = $this->get_exception_details($e);
-//            $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
+            $errorcode = $this->get_body_error_code($e);
 
-//            // Something else went wrong.
-//            if ($errorcode !== 'AccessDenied') {
-//                $details = $this->get_exception_details($e);
-//                $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
-//            }
+            // Something else went wrong.
+            if ($errorcode == 'AuthorizationPermissionMismatch') {
+                $details = $this->get_exception_details($e);
+                $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
+                $permissions->success = false;
+            }
         }
 
         if ($permissions->success) {
@@ -213,13 +223,13 @@ class azure_storage_client implements object_client {
     }
 
     protected function get_exception_details(ServiceException $exception) {
-        $message = $exception->getErrorText();
+        $message = $exception->getErrorMessage();
 
         if (get_class($exception) !== 'MicrosoftAzure\Storage\Common\Exceptions\ServiceException') {
             return "Not an Azure exception : $message";
         }
 
-        $errorcode = $exception->getCode();
+        $errorcode = $this->get_body_error_code($exception);
 
         $details = ' ';
 
@@ -272,10 +282,6 @@ class azure_storage_client implements object_client {
         $mform->addHelpButton('accountname', 'settings:azure:accountname', 'tool_objectfs');
         $mform->setType("accountname", PARAM_TEXT);
 
-//        $mform->addElement('passwordunmask', 'accountkey', get_string('settings:azure:accountkey', 'tool_objectfs'), array('size' => 40));
-//        $mform->addHelpButton('accountkey', 'settings:azure:accountkey', 'tool_objectfs');
-//        $mform->setType("accountkey", PARAM_TEXT);
-
         $mform->addElement('text', 'container', get_string('settings:azure:container', 'tool_objectfs'));
         $mform->addHelpButton('container', 'settings:azure:container', 'tool_objectfs');
         $mform->setType("container", PARAM_TEXT);
@@ -285,5 +291,18 @@ class azure_storage_client implements object_client {
         $mform->setType("sastoken", PARAM_RAW);
 
         return $mform;
+    }
+
+    private function get_body_error_code(ServiceException $e) {
+        // Casting the stream content to a string will give us the HTTP body content.
+        $body = (string) $e->getResponse()->getBody();
+
+        $xml = simplexml_load_string($body);
+
+        if ($xml instanceof SimpleXMLElement) {
+            return (string) $xml->Code;
+        }
+
+         return '';
     }
 }

@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 use tool_objectfs\object_file_system;
 require_once(__DIR__ . '/test_client.php');
 require_once(__DIR__ . '/test_s3_integration_client.php');
+require_once(__DIR__ . '/test_azure_integration_client.php');
 
 class test_file_system extends object_file_system {
 
@@ -46,6 +47,13 @@ class test_file_system extends object_file_system {
             $config->region = $credentials['region'];
             set_objectfs_config($config);
             $client = new test_s3_integration_client($config);
+        } else if (isset($CFG->phpunit_objectfs_azure_integration_test_credentials)) {
+            $credentials = $CFG->phpunit_objectfs_azure_integration_test_credentials;
+            $config->accountname = $credentials['accountname'];
+            $config->container = $credentials['container'];
+            $config->sastoken = $credentials['sastoken'];
+            set_objectfs_config($config);
+            $client = new test_azure_integration_client($config);
         } else {
             $client = new test_client($config);
         }
