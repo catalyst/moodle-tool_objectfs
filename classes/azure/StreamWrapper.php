@@ -37,6 +37,9 @@ use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\CachingStream;
 use GuzzleHttp\Psr7;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
+use MicrosoftAzure\Storage\Blob\Models\BlobProperties;
+use MicrosoftAzure\Storage\Blob\Models\CreateBlobOptions;
+use MicrosoftAzure\Storage\Blob\Models\SetBlobPropertiesOptions;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use Psr\Http\Message\StreamInterface;
 
@@ -60,6 +63,9 @@ class StreamWrapper {
     /** @var string The opened protocol (e.g. "blob") */
     private $protocol = 'blob';
 
+    /** @var string The computed hash of the file content */
+    private $hash;
+
     /**
      * Register the blob://' stream wrapper
      *
@@ -79,6 +85,7 @@ class StreamWrapper {
 
     public function stream_close() {
         $this->body = null;
+        $this->hash = null;
     }
 
     public function stream_open($path, $mode, $options, &$opened_path) {
@@ -89,6 +96,8 @@ class StreamWrapper {
         if ($errors = $this->validate($path, $this->mode)) {
             return $this->triggerError($errors);
         }
+
+        $this->hash = hash_init('md5');
 
         return $this->boolCall(function() use ($path) {
             switch ($this->mode) {
@@ -112,11 +121,29 @@ class StreamWrapper {
             $this->body->seek(0);
         }
 
+        $hash = hash_final($this->hash);
+        $md5 = base64_encode(hex2bin($hash));
+
         $params = $this->getOptions(true);
         $params['Body'] = $this->body;
+        $params['ContentMD5'] = $md5;
 
         return $this->boolCall(function () use ($params) {
-            return (bool) $this->getClient()->createBlockBlob($params['Container'], $params['Key'], $params['Body']);
+            $this->getClient()->createBlockBlob(
+                $params['Container'],
+                $params['Key'],
+                $params['Body']);
+
+            // Set the ContentMD5, as this is not computed server-side for multipart blob uploads.
+            $properties = new SetBlobPropertiesOptions(new BlobProperties());
+            $properties->setContentMD5($params['ContentMD5']);
+
+            $this->getClient()->setBlobProperties(
+                $params['Container'],
+                $params['Key'],
+                $properties);
+
+            return true;
         });
     }
 
@@ -138,6 +165,7 @@ class StreamWrapper {
     }
 
     public function stream_write($data) {
+        hash_update($this->hash, $data);
         return $this->body->write($data);
     }
 
@@ -309,8 +337,15 @@ class StreamWrapper {
     private function openReadStream() {
         $client = $this->getClient();
         $params = $this->getOptions(true);
-        $blob = $client->getBlob($params['Container'], $params['Key']);
-        $this->body = Psr7\stream_for($blob->getContentStream());
+
+        try {
+            $blob = $client->getBlob($params['Container'], $params['Key']);
+            $this->body = Psr7\stream_for($blob->getContentStream());
+        } catch (ServiceException $e) {
+            // Prevent the client from keeping the request open when the content cannot be found.
+            $response = $e->getResponse();
+            $this->body = $response->getBody();
+        }
 
         // Wrap the body in a caching entity body if seeking is allowed
         if ($this->getOption('seekable') && !$this->body->isSeekable()) {

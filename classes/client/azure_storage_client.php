@@ -120,6 +120,12 @@ class azure_storage_client implements object_client {
             return false;
         }
 
+        $contentmd5 = $result->getContentMD5();
+
+        if ($contentmd5) {
+            return bin2hex(base64_decode($contentmd5));
+        }
+
         $md5 = trim($result->getETag(), '"'); // Strip quotation marks.
 
         return $md5;
@@ -128,7 +134,7 @@ class azure_storage_client implements object_client {
     public function verify_object($contenthash, $localpath) {
         $localmd5 = md5_file($localpath);
         $externalmd5 = $this->get_md5_from_hash($contenthash);
-        if ($externalmd5) {
+        if ($localmd5 === $externalmd5) {
             return true;
         }
         return false;
