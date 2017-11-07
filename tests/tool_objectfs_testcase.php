@@ -27,6 +27,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
 
     protected function setUp() {
         global $CFG;
+        $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
         $this->filesystem = new test_file_system();
         $this->logger = new \tool_objectfs\log\null_logger();
         $this->resetAfterTest(true);
