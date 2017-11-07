@@ -353,5 +353,17 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $isremotereadable = $this->is_externally_readable_by_hash($filehash);
         $this->assertTrue($isremotereadable);
     }
+
+    public function test_file_is_seekable() {
+        $file = $this->create_remote_file('this is some content for the remote file');
+        $filehandle = $this->filesystem->get_content_file_handle($file);
+
+        $metadata = stream_get_meta_data($filehandle);
+
+        $this->assertTrue($metadata['seekable']);
+        $this->assertEquals(0, fseek($filehandle, 10, SEEK_SET));
+        $this->assertTrue(rewind($filehandle));
+    }
+
 }
 
