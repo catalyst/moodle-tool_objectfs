@@ -27,9 +27,10 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\report\objectfs_report;
 
-require_once( __DIR__ . '/../../lib.php');
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once( __DIR__ . '/../../lib.php');
 
 class generate_status_report extends \core\task\scheduled_task {
 
