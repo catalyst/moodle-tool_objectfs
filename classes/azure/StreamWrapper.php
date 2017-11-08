@@ -83,6 +83,10 @@ class StreamWrapper {
         stream_context_set_default($default);
     }
 
+    public function stream_cast($cast_as) {
+        return false;
+    }
+
     public function stream_close() {
         $this->body = null;
         $this->hash = null;
@@ -167,11 +171,6 @@ class StreamWrapper {
     public function stream_write($data) {
         hash_update($this->hash, $data);
         return $this->body->write($data);
-    }
-
-    public function unlink($path) {
-        // TODO
-        throw new \RuntimeException('TODO ' .  __FUNCTION__);
     }
 
     public function stream_stat() {
@@ -361,8 +360,17 @@ class StreamWrapper {
     }
 
     private function openAppendStream() {
-        // TODO
-        throw new \RuntimeException('TODO ' .  __FUNCTION__);
+        try {
+            // Get the body of the object and seek to the end of the stream
+            $client = $this->getClient();
+            $params = $this->getOptions(true);
+            $this->body = $client->getBlob($params['Container'], $params['Key']);
+            $this->body->seek(0, SEEK_END);
+            return true;
+        } catch (ServiceException $e) {
+            // The object does not exist, so use a simple write stream
+            return $this->openWriteStream();
+        }
     }
 
     /**
