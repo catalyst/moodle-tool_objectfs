@@ -290,16 +290,6 @@ Here are known working configurations:
 | [3.2](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_32_STABLE_FSAPI)            |    No     |   No      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_32_STABLE_FSAPI/composer.json)           |
 
 
-Crafted by Catalyst IT
-----------------------
-
-This plugin was developed by Catalyst IT Australia:
-
-https://www.catalyst-au.net/
-
-![Catalyst IT](/pix/catalyst-logo.png?raw=true)
-
-
 Contributing and support
 ------------------------
 
@@ -311,3 +301,21 @@ If you would like commercial support or would like to sponsor additional improve
 to this plugin please contact us:
 
 https://www.catalyst-au.net/contact-us
+
+
+Warm thanks
+-----------
+
+Thanks to Microsoft for sponsoring the Azure Storage implementation.
+
+![Microsoft](/pix/Microsoft-logo_rgb_c-gray.png?raw=true)
+
+
+Crafted by Catalyst IT
+----------------------
+
+This plugin was developed by Catalyst IT Australia:
+
+https://www.catalyst-au.net/
+
+![Catalyst IT](/pix/catalyst-logo.png?raw=true)
