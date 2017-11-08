@@ -51,13 +51,21 @@ https://github.com/catalyst/moodle-local_datacleaner
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
 2. Setup your remote object storage. See [Remote object storage setup](#remote-object-storage-setup)
 3. Clone this repository into admin/tool/objectfs
-4. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws
-4. Install the plugins through the moodle GUI.
-5. Configure the plugin. See [Moodle configuration](#moodle-configuration)
-6. Place the following line inside your Moodle config.php:
+4. Install one of the required SDK libraries for the storage file system that you will be using
+    1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws, or
+    2. Clone [moodle-local_azure](https://github.com/catalyst/moodle-local_azure) into local/azure
+5. Install the plugins through the moodle GUI.
+6. Configure the plugin. See [Moodle configuration](#moodle-configuration)
+7. Place of the following lines inside your Moodle config.php:
 
+* Amazon S3
 ```php
 $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
+```
+
+* Azure Blob Storage
+```php
+$CFG->alternative_file_system_class = '\tool_objectfs\azure_storage_file_system';
 ```
 ## Currently supported object stores
 
@@ -96,16 +104,17 @@ There is support for more object stores planed, in particular enabling Openstack
 
 ### Azure Blob Storage
 
-*Azure Storage container guide*
+*Azure Storage container guide with the CLI*
 
-It is possible to install the CLI locally to administer the storage account. [The Azure CLI can be obtained here.](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
+It is possible to install the Azure CLI locally to administer the storage account. [The Azure CLI can be obtained here.](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 
-- Obtain the storage account keys to be used for setting up the container and access policy via the CLI tool or visit the [Azure Portal](https://portal.azure.com).
+- Visit the [Online Azure Portal](https://portal.azure.com) or use the Azure CLI to obtain the storage account keys. These keys are used to setup the container, configure an access policy and acquire a Shared Access Signature.
 ```
+az login
+
 az storage account keys list \
   --resource-group <resource_group_name> \
   --account-name <storage_account_name>
-
 ```
 
 - Create a private container in a storage account.
