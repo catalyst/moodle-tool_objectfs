@@ -62,6 +62,7 @@ before_install:
   - phpenv config-rm xdebug.ini
   - nvm install node
   - cd ../..
+  - git config --global url."https://".insteadOf "git://"
   - composer create-project -n --no-dev moodlerooms/moodle-plugin-ci ci ^$CI
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
