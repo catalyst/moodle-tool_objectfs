@@ -48,29 +48,50 @@ use MicrosoftAzure\Storage\Common\Internal\Resources;
 use MicrosoftAzure\Storage\Common\ServicesBuilder;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use SimpleXMLElement;
+use stdClass;
 use tool_objectfs\azure\StreamWrapper;
 
 class azure_storage_client implements object_client {
 
-    /** @var BlobRestProxy */
+    /** @var BlobRestProxy $client The Blob client. */
     protected $client;
 
-    /** @var string */
+    /** @var string $container The current container. */
     protected $container;
 
+    /**
+     * The azure_storage_client constructor.
+     *
+     * @param $config
+     */
     public function __construct($config) {
         $this->container = $config->container;
         $this->set_client($config);
     }
 
+    /**
+     * Returns true if the Azure Storage SDK exists and has been loaded.
+     *
+     * @return bool
+     */
     public function get_availability() {
         return true;
     }
 
+    /**
+     * Returns the maximum allowed file size that is to be uploaded.
+     *
+     * @return int
+     */
     public function get_maximum_upload_size() {
         return Resources::MAX_BLOCK_BLOB_SIZE;
     }
 
+    /**
+     * Configures the BlobRestProxy client for access with the SAS token provided.
+     *
+     * @param stdClass $config
+     */
     public function set_client($config) {
         $accountname = $config->accountname;
         $sastoken = $this->clean_sastoken($config->sastoken);
@@ -85,6 +106,9 @@ class azure_storage_client implements object_client {
         $this->client = ServicesBuilder::getInstance()->createBlobService($sasconnectionstring);
     }
 
+    /**
+     * Sets the StreamWrapper to allow accessing the remote content via a blob:// path.
+     */
     public function register_stream_wrapper() {
         StreamWrapper::register($this->client);
     }
@@ -130,10 +154,10 @@ class azure_storage_client implements object_client {
         $contentmd5 = $result->getContentMD5();
 
         if ($contentmd5) {
-            return bin2hex(base64_decode($contentmd5));
+            $md5 = bin2hex(base64_decode($contentmd5));
+        } else {
+            $md5 = trim($result->getETag(), '"'); // Strip quotation marks.
         }
-
-        $md5 = trim($result->getETag(), '"'); // Strip quotation marks.
 
         return $md5;
     }
@@ -208,7 +232,7 @@ class azure_storage_client implements object_client {
             $errorcode = $this->get_body_error_code($e);
 
             // Something else went wrong.
-            if ($errorcode == 'AuthorizationPermissionMismatch') {
+            if ($errorcode !== 'AuthorizationPermissionMismatch') {
                 $details = $this->get_exception_details($e);
                 $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
                 $permissions->success = false;
@@ -244,9 +268,15 @@ class azure_storage_client implements object_client {
         return $details;
     }
 
+    /**
+     * Moodle form element to display connection details for the Azure service.
+     *
+     * @param $mform
+     * @param $config
+     * @return mixed
+     */
     public function define_azure_check($mform, $config) {
         global $OUTPUT;
-        $connection = false;
 
         $client = new azure_storage_client($config);
         $connection = $client->test_connection();
@@ -266,11 +296,21 @@ class azure_storage_client implements object_client {
 
         } else {
             $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
-            $permissions = false;
         }
         return $mform;
     }
 
+    /**
+     * Azure settings form with the following elements:
+     *
+     * Storage account name.
+     * Container name.
+     * Shared Access Signature.
+     *
+     * @param $mform
+     * @param $config
+     * @return mixed
+     */
     public function define_client_section($mform, $config) {
 
         $mform->addElement('header', 'azureheader', get_string('settings:azure:header', 'tool_objectfs'));
@@ -293,6 +333,15 @@ class azure_storage_client implements object_client {
         return $mform;
     }
 
+    /**
+     * Extract an error code from the XML response.
+     *
+     * @link https://docs.microsoft.com/en-us/rest/api/storageservices/common-rest-api-error-codes
+     * @link https://docs.microsoft.com/en-us/rest/api/storageservices/blob-service-error-codes
+     *
+     * @param ServiceException $e The exception that contains the XML body.
+     * @return string The error code.
+     */
     private function get_body_error_code(ServiceException $e) {
         // Casting the stream content to a string will give us the HTTP body content.
         $body = (string) $e->getResponse()->getBody();

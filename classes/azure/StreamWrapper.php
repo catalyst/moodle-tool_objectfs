@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Azure Blob Storage stream wrapper to use "blob://<container>/<key>" files with PHP
+ * Azure Blob Storage stream wrapper to use "blob://<container>/<key>" files with PHP.
  *
  * Implementation references,
  * https://github.com/aws/aws-sdk-php/blob/master/src/S3/StreamWrapper.php
@@ -38,7 +38,6 @@ use GuzzleHttp\Psr7\CachingStream;
 use GuzzleHttp\Psr7;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
 use MicrosoftAzure\Storage\Blob\Models\BlobProperties;
-use MicrosoftAzure\Storage\Blob\Models\CreateBlobOptions;
 use MicrosoftAzure\Storage\Blob\Models\SetBlobPropertiesOptions;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use Psr\Http\Message\StreamInterface;

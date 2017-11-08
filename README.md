@@ -96,27 +96,59 @@ There is support for more object stores planed, in particular enabling Openstack
 
 ### Azure Blob Storage
 
-*Azure Storage container setup*
+*Azure Storage container guide*
 
-- Create a storage container
-- Use the command below to create a policy that has only read and write capabilities.
-- Generate the SAS token against that policy to use for granting access to the container contents.
+It is possible to install the CLI locally to administer the storage account. [The Azure CLI can be obtained here.](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
+
+- Obtain the storage account keys to be used for setting up the container and access policy via the CLI tool or visit the [Azure Portal](https://portal.azure.com).
+```
+az storage account keys list \
+  --resource-group <resource_group_name> \
+  --account-name <storage_account_name>
+
+```
+
+- Create a private container in a storage account.
+```
+az storage container create \
+    --name <container_name> \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --public-access off \
+    --fail-on-exist
+```
+
+- Create a stored access policy on the containing object.
 ```
 az storage container policy create \
-    --account-name <storage-account-name> \
-    --account-key <storage-account-key> \
-    --container-name <container-name> \
-    --name <policy-name> \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --container-name <container_name> \
+    --name <policy_name> \
+    --start <YYYY-MM-DD> \
+    --expiry <YYYY-MM-DD> \
     --permissions rw
+
+# Start and Expiry are optional arguments.
 ```
 
+- Generates a shared access signature for the container. This is associated with a policy.
 ```
 az storage container generate-sas \
-    --account-name <storage-account-name> \
-    --account-key <storage-account-key> \
-    --name <container-name> \
-    --policy <policy-name> \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --name <container_name> \
+    --policy <policy_name> \
     --output tsv
+```
+
+- If you wish to revoke access to the container, remove the policy which will invalidate the SAS.
+```
+az storage container policy delete \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --container-name <container_name>
+    --name <policy_name>
 ```
 
 ## Moodle configuration
@@ -137,16 +169,16 @@ These settings control the movement of files to and from object storage.
 
 ### Amazon S3 settings
 S3 specific settings
-- **Key**: AWS credential key
-- **Secret**: AWS credential secret
-- **Bucket**: S3 bucket name to store files in
+- **Key**: AWS credential key.
+- **Secret**: AWS credential secret.
+- **Bucket**: S3 bucket name to store files in.
 - **AWS region**: AWS API endpoint region to use.
 
 ### Azure Blob Storage S3 settings
 Azure Blob Storage specific settings
-- **Account name**: Storage account name
-- **Container name**: Container name to store files in
-- **Shared Access Signature**: Shared access signature that is signed to use the container 
+- **Storage account**: Storage account name.
+- **Container name**: Name of the container that will be used.
+- **Shared Access Signature**: A shared access signature that is signed to use the container. Recommended with Read and Write access only.
 
 ## Backporting
 
