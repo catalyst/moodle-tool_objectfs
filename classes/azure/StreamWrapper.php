@@ -180,6 +180,11 @@ class StreamWrapper {
         return $stat;
     }
 
+    /**
+     * Provides information for is_dir, is_file, filesize, etc. Works on
+     * buckets, keys, and prefixes.
+     * @link http://www.php.net/manual/en/streamwrapper.url-stat.php
+     */
     public function url_stat($path, $flags) {
         $stat = $this->getStatTemplate();
 
