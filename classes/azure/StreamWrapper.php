@@ -62,7 +62,7 @@ class StreamWrapper {
     /** @var string The opened protocol (e.g. "blob") */
     private $protocol = 'blob';
 
-    /** @var string The computed hash of the file content */
+    /** @var resource Hash resource that is sent when flushing the file to Azure. */
     private $hash;
 
     /**
