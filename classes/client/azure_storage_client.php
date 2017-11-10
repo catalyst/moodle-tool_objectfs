@@ -31,8 +31,13 @@ $autoloader = $CFG->dirroot . '/local/azure_storage/vendor/autoload.php';
 
 if (!file_exists($autoloader)) {
 
+    // Stub class with bare implementation for when the SDK prerequisite does not exist.
     class azure_storage_client {
         public function get_availability() {
+            return false;
+        }
+
+        public function register_stream_wrapper() {
             return false;
         }
     }
