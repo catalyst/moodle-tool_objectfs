@@ -93,7 +93,7 @@ function get_objectfs_config() {
     $config->region = 'us-east-1';
 
     // '\tool_objectfs\azure_storage_file_system'
-    $config->accountname = 'account';
+    $config->accountname = '';
     $config->accountkey = '';
     $config->container = '';
     $config->sastoken = '';

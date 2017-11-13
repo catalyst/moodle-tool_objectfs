@@ -101,9 +101,15 @@ class azure_storage_client implements object_client {
         $accountname = $config->accountname;
         $sastoken = $this->clean_sastoken($config->sastoken);
 
+        // If the account name is specified, append a period to create a valid url.
+        // When $accountname is not set, prevent the general exception validation error.
+        if ($accountname) {
+            $accountname .= '.';
+        }
+
         $sasconnectionstring = "BlobEndpoint=https://" .
             $accountname .
-            ".blob.core.windows.net;SharedAccessSignature=" .
+            "blob.core.windows.net;SharedAccessSignature=" .
             $sastoken;
 
         $sasconnectionstring = str_replace(' ', '', $sasconnectionstring);
