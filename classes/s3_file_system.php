@@ -38,11 +38,6 @@ class s3_file_system extends object_file_system {
 
     protected function get_external_client($config) {
         $s3client = new s3_client($config);
-
-        if (!$s3client->get_availability()) {
-            throw new \RuntimeException('The required libraries are not available. Please install local_aws.');
-        }
-
         return $s3client;
     }
 }
