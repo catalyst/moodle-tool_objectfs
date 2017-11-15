@@ -53,7 +53,7 @@ https://github.com/catalyst/moodle-local_datacleaner
 3. Clone this repository into admin/tool/objectfs
 4. Install one of the required SDK libraries for the storage file system that you will be using
     1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws, or
-    2. Clone [moodle-local_azure](https://github.com/catalyst/moodle-local_azure) into local/azure
+    2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure
 5. Install the plugins through the moodle GUI.
 6. Configure the plugin. See [Moodle configuration](#moodle-configuration)
 7. Place of the following lines inside your Moodle config.php:
@@ -65,7 +65,7 @@ $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 
 * Azure Blob Storage
 ```php
-$CFG->alternative_file_system_class = '\tool_objectfs\azure_storage_file_system';
+$CFG->alternative_file_system_class = '\tool_objectfs\azure_file_system';
 ```
 ## Currently supported object stores
 
@@ -108,7 +108,11 @@ There is support for more object stores planed, in particular enabling Openstack
 
 It is possible to install the Azure CLI locally to administer the storage account. [The Azure CLI can be obtained here.](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 
-- Visit the [Online Azure Portal](https://portal.azure.com) or use the Azure CLI to obtain the storage account keys. These keys are used to setup the container, configure an access policy and acquire a Shared Access Signature.
+Visit the [Online Azure Portal](https://portal.azure.com) or use the Azure CLI to obtain the storage account keys. These keys are used to setup the container, configure an access policy and acquire a [Shared Access Signature](https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1) that has Read and Write capabilities on the container.
+
+It will be assumed at this point that a [resource group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-overview) and [blob storage account](https://docs.microsoft.com/en-us/azure/storage/common/storage-introduction) exists.
+
+- Obtain the account keys.
 ```
 az login
 
@@ -176,6 +180,9 @@ These settings control the movement of files to and from object storage.
 - **Delete local objects**: Delete local objects once they are in remote object storage after the consistency delay.
 - **Consistency delay**: How long an object must have existed after being transfered to remote object storage before they are a candidate for deletion locally.
 
+### File System settings
+- **Storage File System Selection**: The backend filesystem to be used. This is also used for the background transfer tasks when the main alternative_file_system_class variable is not set.
+
 ### Amazon S3 settings
 S3 specific settings
 - **Key**: AWS credential key.
@@ -183,7 +190,7 @@ S3 specific settings
 - **Bucket**: S3 bucket name to store files in.
 - **AWS region**: AWS API endpoint region to use.
 
-### Azure Blob Storage S3 settings
+### Azure Blob Storage settings
 Azure Blob Storage specific settings
 - **Storage account**: Storage account name.
 - **Container name**: Name of the container that will be used.
