@@ -29,8 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-use Aws\S3\Exception\S3Exception;
-
 class pusher extends manipulator {
 
     /**
@@ -84,10 +82,12 @@ class pusher extends manipulator {
     public function get_candidate_objects() {
         global $DB;
         $sql = 'SELECT f.contenthash,
+                       f.mimetype,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
               GROUP BY f.contenthash,
+                       f.mimetype,
                        f.filesize,
                        o.location
                 HAVING MIN(f.timecreated) <= :maxcreatedtimstamp
