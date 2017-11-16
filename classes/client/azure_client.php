@@ -32,7 +32,7 @@ $autoloader = $CFG->dirroot . '/local/azure_storage/vendor/autoload.php';
 if (!file_exists($autoloader)) {
 
     // Stub class with bare implementation for when the SDK prerequisite does not exist.
-    class azure_storage_client {
+    class azure_client {
         public function get_availability() {
             return false;
         }
@@ -56,7 +56,7 @@ use SimpleXMLElement;
 use stdClass;
 use tool_objectfs\azure\StreamWrapper;
 
-class azure_storage_client implements object_client {
+class azure_client implements object_client {
 
     /** @var BlobRestProxy $client The Blob client. */
     protected $client;
@@ -65,12 +65,12 @@ class azure_storage_client implements object_client {
     protected $container;
 
     /**
-     * The azure_storage_client constructor.
+     * The azure_client constructor.
      *
      * @param $config
      */
     public function __construct($config) {
-        $this->container = $config->container;
+        $this->container = $config->azure_container;
         $this->set_client($config);
     }
 
@@ -98,8 +98,8 @@ class azure_storage_client implements object_client {
      * @param stdClass $config
      */
     public function set_client($config) {
-        $accountname = $config->accountname;
-        $sastoken = $this->clean_sastoken($config->sastoken);
+        $accountname = $config->azure_accountname;
+        $sastoken = $this->clean_sastoken($config->azure_sastoken);
 
         // If the account name is specified, append a period to create a valid url.
         // When $accountname is not set, prevent the general exception validation error.
@@ -289,7 +289,7 @@ class azure_storage_client implements object_client {
     public function define_azure_check($mform, $config) {
         global $OUTPUT;
 
-        $client = new azure_storage_client($config);
+        $client = new azure_client($config);
         $connection = $client->test_connection();
 
         if ($connection->success) {
@@ -329,17 +329,17 @@ class azure_storage_client implements object_client {
 
         $mform = $this->define_azure_check($mform, $config);
 
-        $mform->addElement('text', 'accountname', get_string('settings:azure:accountname', 'tool_objectfs'));
-        $mform->addHelpButton('accountname', 'settings:azure:accountname', 'tool_objectfs');
-        $mform->setType("accountname", PARAM_TEXT);
+        $mform->addElement('text', 'azure_accountname', get_string('settings:azure:accountname', 'tool_objectfs'));
+        $mform->addHelpButton('azure_accountname', 'settings:azure:accountname', 'tool_objectfs');
+        $mform->setType("azure_accountname", PARAM_TEXT);
 
-        $mform->addElement('text', 'container', get_string('settings:azure:container', 'tool_objectfs'));
-        $mform->addHelpButton('container', 'settings:azure:container', 'tool_objectfs');
-        $mform->setType("container", PARAM_TEXT);
+        $mform->addElement('text', 'azure_container', get_string('settings:azure:container', 'tool_objectfs'));
+        $mform->addHelpButton('azure_container', 'settings:azure:container', 'tool_objectfs');
+        $mform->setType("azure_container", PARAM_TEXT);
 
-        $mform->addElement('text', 'sastoken', get_string('settings:azure:sastoken', 'tool_objectfs'));
-        $mform->addHelpButton('sastoken', 'settings:azure:sastoken', 'tool_objectfs');
-        $mform->setType("sastoken", PARAM_RAW);
+        $mform->addElement('text', 'azure_sastoken', get_string('settings:azure:sastoken', 'tool_objectfs'));
+        $mform->addHelpButton('azure_sastoken', 'settings:azure:sastoken', 'tool_objectfs');
+        $mform->setType("azure_sastoken", PARAM_RAW);
 
         return $mform;
     }
