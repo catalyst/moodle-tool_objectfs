@@ -111,7 +111,6 @@ class deleter extends manipulator {
         return $objects;
     }
 
-
     protected function manipulate_object($objectrecord) {
         $newlocation = $this->filesystem->delete_object_from_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
         return $newlocation;

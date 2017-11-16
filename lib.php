@@ -85,7 +85,6 @@ function get_objectfs_config() {
     $config->preferexternal = 0;
 
     $config->filesystem = '';
-    // TODO: load based on fs? move to client files?
 
     // '\tool_objectfs\s3_file_system'
     $config->key = '';
@@ -131,6 +130,7 @@ function tool_objectfs_get_client_components($type = 'base') {
         $client = str_replace('_client.php', '', $client);
         $basename = basename($client);
 
+        // Ignore the abstract class.
         if ($basename == 'object') {
             continue;
         }
