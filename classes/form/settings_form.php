@@ -48,6 +48,7 @@ class settings_form extends \moodleform {
         $mform = $this->define_cfg_check($mform, $config);
         $mform = $this->define_general_section($mform, $config);
         $mform = $this->define_file_transfer_section($mform, $config);
+        $mform = $this->define_client_selection($mform, $config);
         $mform = $this->define_client_section($mform, $config);
 
         foreach ($config as $key => $value) {
@@ -113,21 +114,38 @@ class settings_form extends \moodleform {
     public function define_client_section($mform, $config) {
         global $CFG, $OUTPUT;
 
-        if (empty($CFG->alternative_file_system_class)) {
-            return $mform;
-        }
+        $clients = tool_objectfs_get_client_components('client');
 
-        $client = tool_objectfs_get_client($config);
-
-        if ($client->get_availability()) {
+        foreach ($clients as $name) {
+            $client = new $name($config);
             $mform = $client->define_client_section($mform, $config);
-        } else {
-            $errstr = get_string('settings:clientnotavailable', 'tool_objectfs', $CFG->alternative_file_system_class);
-            $mform->addElement('html', $OUTPUT->notification($errstr, 'notifyproblem'));
+
+            if (!$client->get_availability()) {
+                $errstr = get_string('settings:clientnotavailable', 'tool_objectfs', $CFG->alternative_file_system_class);
+                $mform->addElement('html', $OUTPUT->notification($errstr, 'notifyproblem'));
+            }
         }
 
         return $mform;
     }
 
+    public function define_client_selection($mform, $config) {
+        global $CFG, $OUTPUT;
+
+        $mform->addElement('header', 'clientselectionheader', get_string('settings:clientselection:header', 'tool_objectfs'));
+        $mform->setExpanded('clientselectionheader');
+
+        if (isset($CFG->alternative_file_system_class) && $CFG->alternative_file_system_class == $config->filesystem) {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:matchfilesystem', 'tool_objectfs'), 'notifysuccess'));
+        } else {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs'), 'notifyproblem'));
+        }
+
+        $names = tool_objectfs_get_client_components('file_system');
+        $clientlist = array_combine($names, $names);
+
+        $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $clientlist);
+        return $mform;
+    }
 }
 

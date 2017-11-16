@@ -84,6 +84,7 @@ function get_objectfs_config() {
     $config->logging = 0;
     $config->preferexternal = 0;
 
+    $config->filesystem = '';
     // TODO: load based on fs? move to client files?
 
     // '\tool_objectfs\s3_file_system'
@@ -107,12 +108,6 @@ function get_objectfs_config() {
     return $config;
 }
 
-function tool_objectfs_get_filesystem() {
-    global $CFG;
-
-    return new $CFG->alternative_file_system_class();
-}
-
 function tool_objectfs_get_client($config) {
     global $CFG;
 
@@ -122,6 +117,41 @@ function tool_objectfs_get_client($config) {
     $client = str_replace('\\tool_objectfs\\', '\\tool_objectfs\\client\\', $client);
 
     return new $client($config);
+}
+
+function tool_objectfs_get_client_components($type = 'base') {
+    global $CFG;
+
+    $found = [];
+
+    $path = $CFG->dirroot . '/admin/tool/objectfs/classes/client/*_client.php';
+
+    $clients = glob($path);
+
+    foreach ($clients as $client) {
+        $client = str_replace('_client.php', '', $client);
+        $basename = basename($client);
+
+        if ($basename == 'object') {
+            continue;
+        }
+
+        switch ($type) {
+            case 'file_system':
+                $found[$basename] = '\\tool_objectfs\\' . $basename . '_file_system';
+                break;
+            case 'client':
+                $found[$basename] = '\\tool_objectfs\\client\\' . $basename . '_client';
+                break;
+            case 'base':
+                $found[$basename] = $basename;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return $found;
 }
 
 function tool_objectfs_should_tasks_run() {
