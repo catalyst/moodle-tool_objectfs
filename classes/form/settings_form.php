@@ -145,6 +145,7 @@ class settings_form extends \moodleform {
         $clientlist = array_combine($names, $names);
 
         $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $clientlist);
+        $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
         return $mform;
     }
 }
