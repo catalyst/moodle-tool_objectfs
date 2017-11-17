@@ -41,10 +41,10 @@ class test_file_system extends object_file_system {
         global $CFG;
         if (isset($CFG->phpunit_objectfs_s3_integration_test_credentials)) {
             $credentials = $CFG->phpunit_objectfs_s3_integration_test_credentials;
-            $config->key = $credentials['key'];
-            $config->secret = $credentials['secret'];
-            $config->bucket = $credentials['bucket'];
-            $config->region = $credentials['region'];
+            $config->s3_key = $credentials['s3_key'];
+            $config->s3_secret = $credentials['s3_secret'];
+            $config->s3_bucket = $credentials['s3_bucket'];
+            $config->s3_region = $credentials['s3_region'];
             set_objectfs_config($config);
             $client = new test_s3_integration_client($config);
         } else if (isset($CFG->phpunit_objectfs_azure_integration_test_credentials)) {

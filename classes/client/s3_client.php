@@ -307,20 +307,20 @@ class s3_client implements object_client {
             'eu-central-1'      => 'eu-central-1',
             'eu-west-1'         => 'eu-west-1');
 
-        $mform->addElement('text', 'key', get_string('settings:aws:key', 'tool_objectfs'));
-        $mform->addHelpButton('key', 'settings:aws:key', 'tool_objectfs');
-        $mform->setType("key", PARAM_TEXT);
+        $mform->addElement('text', 's3_key', get_string('settings:aws:key', 'tool_objectfs'));
+        $mform->addHelpButton('s3_key', 'settings:aws:key', 'tool_objectfs');
+        $mform->setType("s3_key", PARAM_TEXT);
 
-        $mform->addElement('passwordunmask', 'secret', get_string('settings:aws:secret', 'tool_objectfs'), array('size' => 40));
-        $mform->addHelpButton('secret', 'settings:aws:secret', 'tool_objectfs');
-        $mform->setType("secret", PARAM_TEXT);
+        $mform->addElement('passwordunmask', 's3_secret', get_string('settings:aws:secret', 'tool_objectfs'), array('size' => 40));
+        $mform->addHelpButton('s3_secret', 'settings:aws:secret', 'tool_objectfs');
+        $mform->setType("s3_secret", PARAM_TEXT);
 
-        $mform->addElement('text', 'bucket', get_string('settings:aws:bucket', 'tool_objectfs'));
-        $mform->addHelpButton('bucket', 'settings:aws:bucket', 'tool_objectfs');
-        $mform->setType("bucket", PARAM_TEXT);
+        $mform->addElement('text', 's3_bucket', get_string('settings:aws:bucket', 'tool_objectfs'));
+        $mform->addHelpButton('s3_bucket', 'settings:aws:bucket', 'tool_objectfs');
+        $mform->setType("s3_bucket", PARAM_TEXT);
 
-        $mform->addElement('select', 'region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
-        $mform->addHelpButton('region', 'settings:aws:region', 'tool_objectfs');
+        $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
+        $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
         return $mform;
     }
 }
