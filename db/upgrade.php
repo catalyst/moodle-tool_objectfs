@@ -42,5 +42,31 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017031000, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2017111700) {
+        $config = get_config('tool_objectfs');
+
+        // Remapping the new namespaced variables.
+        set_config('s3_key', $config->key, 'tool_objectfs');
+        set_config('s3_secret', $config->secret, 'tool_objectfs');
+        set_config('s3_bucket', $config->bucket, 'tool_objectfs');
+        set_config('s3_region', $config->region, 'tool_objectfs');
+
+        // Use the existing filesystem that was once hardcoded.
+        set_config('filesystem', '\\tool_objectfs\\azure_file_system', 'tool_objectfs');
+
+        // Adding default variables for the azure config.
+        set_config('azure_accountname', '', 'tool_objectfs');
+        set_config('azure_container', '', 'tool_objectfs');
+        set_config('azure_sastoken', '', 'tool_objectfs');
+
+        // Cleaning up previous variables.
+        unset_config('key', 'tool_objectfs');
+        unset_config('secret', 'tool_objectfs');
+        unset_config('bucket', 'tool_objectfs');
+        unset_config('region', 'tool_objectfs');
+
+        upgrade_plugin_savepoint(true, 2017111700, 'tool', 'objectfs');
+    }
+
     return true;
 }
