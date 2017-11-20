@@ -87,10 +87,10 @@ function get_objectfs_config() {
     $config->filesystem = '';
 
     // '\tool_objectfs\s3_file_system'
-    $config->key = '';
-    $config->secret = '';
-    $config->bucket = '';
-    $config->region = 'us-east-1';
+    $config->s3_key = '';
+    $config->s3_secret = '';
+    $config->s3_bucket = '';
+    $config->s3_region = 'us-east-1';
 
     // '\tool_objectfs\azure_file_system'
     $config->azure_accountname = '';
