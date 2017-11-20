@@ -52,7 +52,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         set_config('s3_region', $config->region, 'tool_objectfs');
 
         // Use the existing filesystem that was once hardcoded.
-        set_config('filesystem', '\\tool_objectfs\\azure_file_system', 'tool_objectfs');
+        set_config('filesystem', '\\tool_objectfs\\s3_file_system', 'tool_objectfs');
 
         // Adding default variables for the azure config.
         set_config('azure_accountname', '', 'tool_objectfs');
