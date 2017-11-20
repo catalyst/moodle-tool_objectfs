@@ -29,8 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-use Aws\S3\Exception\S3Exception;
-
 class recoverer extends manipulator {
 
     /**

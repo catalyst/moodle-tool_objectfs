@@ -27,9 +27,8 @@ namespace tool_objectfs\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\client\s3_client;
-
 require_once($CFG->libdir . "/formslib.php");
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class settings_form extends \moodleform {
 
@@ -49,7 +48,8 @@ class settings_form extends \moodleform {
         $mform = $this->define_cfg_check($mform, $config);
         $mform = $this->define_general_section($mform, $config);
         $mform = $this->define_file_transfer_section($mform, $config);
-        $mform = $this->define_amazon_s3_section($mform, $config);
+        $mform = $this->define_client_selection($mform, $config);
+        $mform = $this->define_client_section($mform, $config);
 
         foreach ($config as $key => $value) {
             $mform->setDefault($key, $value);
@@ -60,7 +60,7 @@ class settings_form extends \moodleform {
 
     public function define_cfg_check($mform, $config) {
         global $CFG, $OUTPUT;
-        if (!isset($CFG->alternative_file_system_class) || $CFG->alternative_file_system_class !== '\tool_objectfs\s3_file_system') {
+        if (!isset($CFG->alternative_file_system_class)) {
             $mform->addElement('html', $OUTPUT->notification(get_string('settings:handlernotset', 'tool_objectfs'), 'notifyproblem'));
         }
         return $mform;
@@ -111,65 +111,41 @@ class settings_form extends \moodleform {
         return $mform;
     }
 
-    public function define_amazon_s3_check($mform, $config) {
-        global $OUTPUT;
-        $connection = false;
+    public function define_client_section($mform, $config) {
+        global $CFG, $OUTPUT;
 
-        $client = new s3_client($config);
-        $connection = $client->test_connection();
+        $clients = tool_objectfs_get_client_components('client');
 
-        if ($connection->success) {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
+        foreach ($clients as $name) {
+            $client = new $name($config);
+            $mform = $client->define_client_section($mform, $config);
 
-            // Check permissions if we can connect.
-            $permissions = $client->test_permissions();
-            if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
-            } else {
-                foreach ($permissions->messages as $message) {
-                    $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
-                }
+            if (!$client->get_availability()) {
+                $errstr = get_string('settings:clientnotavailable', 'tool_objectfs', $CFG->alternative_file_system_class);
+                $mform->addElement('html', $OUTPUT->notification($errstr, 'notifyproblem'));
             }
-
-        } else {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
-            $permissions = false;
         }
+
         return $mform;
     }
 
-    public function define_amazon_s3_section($mform, $config) {
+    public function define_client_selection($mform, $config) {
+        global $CFG, $OUTPUT;
 
-        $mform->addElement('header', 'awsheader', get_string('settings:awsheader', 'tool_objectfs'));
-        $mform->setExpanded('awsheader');
+        $mform->addElement('header', 'clientselectionheader', get_string('settings:clientselection:header', 'tool_objectfs'));
+        $mform->setExpanded('clientselectionheader');
 
-        $mform = $this->define_amazon_s3_check($mform, $config);
+        if (isset($CFG->alternative_file_system_class) && $CFG->alternative_file_system_class == $config->filesystem) {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:matchfilesystem', 'tool_objectfs'), 'notifysuccess'));
+        } else {
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs'), 'notifyproblem'));
+        }
 
-        $regionoptions = array( 'us-east-1'          => 'us-east-1',
-                                'us-east-2'         => 'us-east-2',
-                                'us-west-1'         => 'us-west-1',
-                                'us-west-2'         => 'us-west-2',
-                                'ap-northeast-2'    => 'ap-northeast-2',
-                                'ap-southeast-1'    => 'ap-southeast-1',
-                                'ap-southeast-2'    => 'ap-southeast-2',
-                                'ap-northeast-1'    => 'ap-northeast-1',
-                                'eu-central-1'      => 'eu-central-1',
-                                'eu-west-1'         => 'eu-west-1');
+        $names = tool_objectfs_get_client_components('file_system');
+        $clientlist = array_combine($names, $names);
 
-        $mform->addElement('text', 'key', get_string('settings:key', 'tool_objectfs'));
-        $mform->addHelpButton('key', 'settings:key', 'tool_objectfs');
-        $mform->setType("key", PARAM_TEXT);
-
-        $mform->addElement('passwordunmask', 'secret', get_string('settings:secret', 'tool_objectfs'), array('size' => 40));
-        $mform->addHelpButton('secret', 'settings:secret', 'tool_objectfs');
-        $mform->setType("secret", PARAM_TEXT);
-
-        $mform->addElement('text', 'bucket', get_string('settings:bucket', 'tool_objectfs'));
-        $mform->addHelpButton('bucket', 'settings:bucket', 'tool_objectfs');
-        $mform->setType("bucket", PARAM_TEXT);
-
-        $mform->addElement('select', 'region', get_string('settings:region', 'tool_objectfs'), $regionoptions);
-        $mform->addHelpButton('region', 'settings:region', 'tool_objectfs');
+        $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $clientlist);
+        $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
         return $mform;
     }
 }

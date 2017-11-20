@@ -14,30 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * object_file_system abstract class.
- *
- * Remote object storage providers extent this class.
- * At minimum you need to impletment get_remote_client.
- *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace tool_objectfs;
+namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\client\s3_client;
+use tool_objectfs\client\azure_client;
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+class test_azure_integration_client extends azure_client {
 
-class s3_file_system extends object_file_system {
+    private $runidentifier;
 
-    protected function get_external_client($config) {
-        $s3client = new s3_client($config);
-        return $s3client;
+    public function __construct($config) {
+        parent::__construct($config);
+        $time = microtime();
+        $this->runidentifier = md5($time);
     }
+
+    protected function get_filepath_from_hash($contenthash) {
+        $l1 = $contenthash[0] . $contenthash[1];
+        $l2 = $contenthash[2] . $contenthash[3];
+        $runidentifier = $this->runidentifier;
+        return "test/$runidentifier/$l1/$l2/$contenthash";
+    }
+
 }
+

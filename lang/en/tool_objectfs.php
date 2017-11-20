@@ -16,9 +16,9 @@
 //
 
   /**
-   * Strings for component 'local_catdeleter', language 'en'.
+   * Strings for component 'tool_objectfs', language 'en'.
    *
-   * @package   local_catdeleter
+   * @package   tool_objectfs
    * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
    * @copyright Catalyst IT
    * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -57,15 +57,31 @@ $string['settings:enablelogging_help'] = 'Enable or disable file system logging.
 
 $string['settings:generalheader'] = 'General Settings';
 
-$string['settings:awsheader'] = 'Amazon S3 Settings';
-$string['settings:key'] = 'Key';
-$string['settings:key_help'] = 'Amazon S3 key credential.';
-$string['settings:secret'] = 'Secret';
-$string['settings:secret_help'] = 'Amazon S3 secret credential.';
-$string['settings:bucket'] = 'Bucket';
-$string['settings:bucket_help'] = 'Amazon S3 bucket to store files in.';
-$string['settings:region'] = 'region';
-$string['settings:region_help'] = 'Amazon S3 API gateway region.';
+$string['settings:clientnotavailable'] = 'The configured client \'{$a}\' is not available. Please install the required dependencies.';
+
+$string['settings:clientselection:header'] = 'Storage File System Selection';
+$string['settings:clientselection:title'] = 'Storage File System';
+$string['settings:clientselection:title_help'] = 'The storage file system. This is also the active file system for the background tasks.';
+$string['settings:clientselection:matchfilesystem'] = 'This setting matches $CFG->alternative_file_system_class';
+$string['settings:clientselection:mismatchfilesystem'] = 'This setting does not match $CFG->alternative_file_system_class';
+
+$string['settings:aws:header'] = 'Amazon S3 Settings';
+$string['settings:aws:key'] = 'Key';
+$string['settings:aws:key_help'] = 'Amazon S3 key credential.';
+$string['settings:aws:secret'] = 'Secret';
+$string['settings:aws:secret_help'] = 'Amazon S3 secret credential.';
+$string['settings:aws:bucket'] = 'Bucket';
+$string['settings:aws:bucket_help'] = 'Amazon S3 bucket to store files in.';
+$string['settings:aws:region'] = 'region';
+$string['settings:aws:region_help'] = 'Amazon S3 API gateway region.';
+
+$string['settings:azure:header'] = 'Azure Blob Storage Settings';
+$string['settings:azure:accountname'] = 'Account name';
+$string['settings:azure:accountname_help'] = 'The name of the storage account.';
+$string['settings:azure:container'] = 'Container name';
+$string['settings:azure:container_help'] = 'The name of the container that will store the blobs.';
+$string['settings:azure:sastoken'] = 'Shared Access Signature';
+$string['settings:azure:sastoken_help'] = 'This Shared Access Signature should have the following two capabilites only. Read, write.';
 
 $string['settings:filetransferheader'] = 'File Transfer Settings';
 $string['settings:sizethreshold'] = 'Minimum size threshold (KB)';
@@ -81,10 +97,11 @@ $string['settings:maxtaskruntime_help'] = 'Background tasks handle the transfer 
 $string['settings:preferexternal'] = 'Prefer external objects';
 $string['settings:preferexternal_help'] = 'If a file is stored both locally and in external object storage, read from external\. This is setting is mainly for testing purposes and introduces overhead to check the location.';
 
-$string['settings:connectionsuccess'] = 'Could establish connection to the AWS S3 bucket.';
-$string['settings:connectionfailure'] = 'Could not establish connection to the AWS S3 bucket.';
-$string['settings:writefailure'] = 'Could not write object to the S3 bucket. ';
-$string['settings:readfailure'] = 'Could not read object from the S3 bucket. ';
-$string['settings:deletesuccess'] = 'Could delete object from the S3 bucket - It is not recommended for the AWS user to have delete permissions. ';
+$string['settings:connectionsuccess'] = 'Could establish connection to the external object storage.';
+$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage.';
+$string['settings:writefailure'] = 'Could not write object to the external object storage. ';
+$string['settings:readfailure'] = 'Could not read object from the external object storage. ';
+$string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
+$string['settings:deleteerror'] = 'Could not delete object from the external object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
-$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from S3. Background tasks can still function.';
+$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from the external object storage. Background tasks can still function.';

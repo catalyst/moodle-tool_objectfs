@@ -27,8 +27,27 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
+$autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
 
+if (!file_exists($autoloader)) {
+
+    // Stub class with bare implementation for when the SDK prerequisite does not exist.
+    class s3_client {
+        public function get_availability() {
+            return false;
+        }
+
+        public function register_stream_wrapper() {
+            return false;
+        }
+    }
+
+    return;
+}
+
+require_once($autoloader);
+
+use Aws\S3\MultipartUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
 
@@ -44,7 +63,7 @@ class s3_client implements object_client {
     protected $bucket;
 
     public function __construct($config) {
-        $this->bucket = $config->bucket;
+        $this->bucket = $config->s3_bucket;
         $this->set_client($config);
     }
 
@@ -62,10 +81,18 @@ class s3_client implements object_client {
 
     public function set_client($config) {
         $this->client = S3Client::factory(array(
-        'credentials' => array('key' => $config->key, 'secret' => $config->secret),
-        'region' => $config->region,
+        'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
+        'region' => $config->s3_region,
         'version' => AWS_API_VERSION
         ));
+    }
+
+    public function get_availability() {
+        return true;
+    }
+
+    public function get_maximum_upload_size() {
+        return MultipartUploader::PART_MAX_SIZE;
     }
 
     public function register_stream_wrapper() {
@@ -233,5 +260,67 @@ class s3_client implements object_client {
         }
 
         return $details;
+    }
+
+    public function define_amazon_s3_check($mform, $config) {
+        global $OUTPUT;
+        $connection = false;
+
+        $client = new s3_client($config);
+        $connection = $client->test_connection();
+
+        if ($connection->success) {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
+
+            // Check permissions if we can connect.
+            $permissions = $client->test_permissions();
+            if ($permissions->success) {
+                $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
+            } else {
+                foreach ($permissions->messages as $message) {
+                    $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
+                }
+            }
+
+        } else {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
+            $permissions = false;
+        }
+        return $mform;
+    }
+
+    public function define_client_section($mform, $config) {
+
+        $mform->addElement('header', 'awsheader', get_string('settings:aws:header', 'tool_objectfs'));
+        $mform->setExpanded('awsheader');
+
+        $mform = $this->define_amazon_s3_check($mform, $config);
+
+        $regionoptions = array( 'us-east-1'          => 'us-east-1',
+            'us-east-2'         => 'us-east-2',
+            'us-west-1'         => 'us-west-1',
+            'us-west-2'         => 'us-west-2',
+            'ap-northeast-2'    => 'ap-northeast-2',
+            'ap-southeast-1'    => 'ap-southeast-1',
+            'ap-southeast-2'    => 'ap-southeast-2',
+            'ap-northeast-1'    => 'ap-northeast-1',
+            'eu-central-1'      => 'eu-central-1',
+            'eu-west-1'         => 'eu-west-1');
+
+        $mform->addElement('text', 's3_key', get_string('settings:aws:key', 'tool_objectfs'));
+        $mform->addHelpButton('s3_key', 'settings:aws:key', 'tool_objectfs');
+        $mform->setType("s3_key", PARAM_TEXT);
+
+        $mform->addElement('passwordunmask', 's3_secret', get_string('settings:aws:secret', 'tool_objectfs'), array('size' => 40));
+        $mform->addHelpButton('s3_secret', 'settings:aws:secret', 'tool_objectfs');
+        $mform->setType("s3_secret", PARAM_TEXT);
+
+        $mform->addElement('text', 's3_bucket', get_string('settings:aws:bucket', 'tool_objectfs'));
+        $mform->addHelpButton('s3_bucket', 'settings:aws:bucket', 'tool_objectfs');
+        $mform->setType("s3_bucket", PARAM_TEXT);
+
+        $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
+        $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
+        return $mform;
     }
 }

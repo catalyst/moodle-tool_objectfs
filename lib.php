@@ -76,10 +76,6 @@ function get_objectfs_config() {
     $config = new stdClass;
     $config->enabletasks = 0;
     $config->enablelogging = 0;
-    $config->key = '';
-    $config->secret = '';
-    $config->bucket = '';
-    $config->region = 'us-east-1';
     $config->sizethreshold = 1024 * 10;
     $config->minimumage = 7 * 24 * 60 * 60;
     $config->deletelocal = 0;
@@ -88,6 +84,19 @@ function get_objectfs_config() {
     $config->logging = 0;
     $config->preferexternal = 0;
 
+    $config->filesystem = '';
+
+    // '\tool_objectfs\s3_file_system'
+    $config->s3_key = '';
+    $config->s3_secret = '';
+    $config->s3_bucket = '';
+    $config->s3_region = 'us-east-1';
+
+    // '\tool_objectfs\azure_file_system'
+    $config->azure_accountname = '';
+    $config->azure_container = '';
+    $config->azure_sastoken = '';
+
     $storedconfig = get_config('tool_objectfs');
 
     // Override defaults if set.
@@ -95,6 +104,53 @@ function get_objectfs_config() {
         $config->$key = $value;
     }
     return $config;
+}
+
+function tool_objectfs_get_client($config) {
+    global $CFG;
+
+    $fsclass = $CFG->alternative_file_system_class;
+
+    $client = str_replace('file_system', 'client', $fsclass);
+    $client = str_replace('\\tool_objectfs\\', '\\tool_objectfs\\client\\', $client);
+
+    return new $client($config);
+}
+
+function tool_objectfs_get_client_components($type = 'base') {
+    global $CFG;
+
+    $found = [];
+
+    $path = $CFG->dirroot . '/admin/tool/objectfs/classes/client/*_client.php';
+
+    $clients = glob($path);
+
+    foreach ($clients as $client) {
+        $client = str_replace('_client.php', '', $client);
+        $basename = basename($client);
+
+        // Ignore the abstract class.
+        if ($basename == 'object') {
+            continue;
+        }
+
+        switch ($type) {
+            case 'file_system':
+                $found[$basename] = '\\tool_objectfs\\' . $basename . '_file_system';
+                break;
+            case 'client':
+                $found[$basename] = '\\tool_objectfs\\client\\' . $basename . '_client';
+                break;
+            case 'base':
+                $found[$basename] = $basename;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return $found;
 }
 
 function tool_objectfs_should_tasks_run() {

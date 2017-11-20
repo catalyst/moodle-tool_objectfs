@@ -67,5 +67,13 @@ class test_client implements object_client {
     public function test_permissions() {
         return true;
     }
+
+    public function get_availability() {
+        return true;
+    }
+
+    public function get_maximum_upload_size() {
+        return 5000000000;
+    }
 }
 

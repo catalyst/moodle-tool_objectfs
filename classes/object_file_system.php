@@ -32,6 +32,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
+require_once($CFG->libdir . '/filestorage/file_storage.php');
 
 abstract class object_file_system extends \file_system_filedir {
 
@@ -404,6 +405,10 @@ abstract class object_file_system extends \file_system_filedir {
             default:
                 throw new \coding_exception('Unexpected file handle type');
         }
+    }
+
+    public function get_maximum_upload_filesize() {
+        return $this->externalclient->get_maximum_upload_size();
     }
 
 }

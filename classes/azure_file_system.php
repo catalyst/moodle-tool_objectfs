@@ -15,29 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * object_file_system abstract class.
+ * File system for Azure Blob Storage.
  *
- * Remote object storage providers extent this class.
- * At minimum you need to impletment get_remote_client.
- *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    tool_objectfs
+ * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @copyright  Catalyst IT
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\client\s3_client;
+use tool_objectfs\client\azure_client;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-class s3_file_system extends object_file_system {
+class azure_file_system extends object_file_system {
 
     protected function get_external_client($config) {
-        $s3client = new s3_client($config);
-        return $s3client;
+        $asclient = new azure_client($config);
+        return $asclient;
     }
 }

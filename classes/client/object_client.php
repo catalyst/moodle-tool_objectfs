@@ -32,6 +32,8 @@ interface object_client {
     public function register_stream_wrapper();
     public function get_fullpath_from_hash($contenthash);
     public function get_seekable_stream_context();
+    public function get_availability();
+    public function get_maximum_upload_size();
     public function verify_object($contenthash, $localpath);
     public function test_connection();
     public function test_permissions();

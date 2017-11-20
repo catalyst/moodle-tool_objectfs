@@ -4,8 +4,7 @@
 
 # moodle-tool_objectfs
 
-A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution. This plug-in requires [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) to function.
-
+A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution. 
 * [Use cases](#use-cases)
   * [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
   * [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
@@ -15,10 +14,12 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
 * [Currently supported object stores](#currently-supported-object-stores)
   * [Roadmap](#roadmap)
   * [Amazon S3](#amazon-s3)
+  * [Azure Blob Storage](#azure-blob-storage)
 * [Moodle configuration](#moodle-configuration)
   * [General Settings](#general-settings)
   * [File Transfer settings](#file-transfer-settings)
   * [Amazon S3 settings](#amazon-s3-settings)
+  * [Azure Blob Storage settings](#azure-blob-storage-settings)
 * [Backporting](#backporting)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 * [Contributing and support](#contributing-and-support)
@@ -50,13 +51,21 @@ https://github.com/catalyst/moodle-local_datacleaner
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
 2. Setup your remote object storage. See [Remote object storage setup](#remote-object-storage-setup)
 3. Clone this repository into admin/tool/objectfs
-4. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws
-4. Install the plugins through the moodle GUI.
-5. Configure the plugin. See [Moodle configuration](#moodle-configuration)
-6. Place the following line inside your Moodle config.php:
+4. Install one of the required SDK libraries for the storage file system that you will be using
+    1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws, or
+    2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure
+5. Install the plugins through the moodle GUI.
+6. Configure the plugin. See [Moodle configuration](#moodle-configuration)
+7. Place of the following lines inside your Moodle config.php:
 
+* Amazon S3
 ```php
 $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
+```
+
+* Azure Blob Storage
+```php
+$CFG->alternative_file_system_class = '\tool_objectfs\azure_file_system';
 ```
 ## Currently supported object stores
 
@@ -93,6 +102,68 @@ There is support for more object stores planed, in particular enabling Openstack
 }
 ```
 
+### Azure Blob Storage
+
+*Azure Storage container guide with the CLI*
+
+It is possible to install the Azure CLI locally to administer the storage account. [The Azure CLI can be obtained here.](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
+
+Visit the [Online Azure Portal](https://portal.azure.com) or use the Azure CLI to obtain the storage account keys. These keys are used to setup the container, configure an access policy and acquire a [Shared Access Signature](https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1) that has Read and Write capabilities on the container.
+
+It will be assumed at this point that a [resource group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-overview) and [blob storage account](https://docs.microsoft.com/en-us/azure/storage/common/storage-introduction) exists.
+
+- Obtain the account keys.
+```
+az login
+
+az storage account keys list \
+  --resource-group <resource_group_name> \
+  --account-name <storage_account_name>
+```
+
+- Create a private container in a storage account.
+```
+az storage container create \
+    --name <container_name> \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --public-access off \
+    --fail-on-exist
+```
+
+- Create a stored access policy on the containing object.
+```
+az storage container policy create \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --container-name <container_name> \
+    --name <policy_name> \
+    --start <YYYY-MM-DD> \
+    --expiry <YYYY-MM-DD> \
+    --permissions rw
+
+# Start and Expiry are optional arguments.
+```
+
+- Generates a shared access signature for the container. This is associated with a policy.
+```
+az storage container generate-sas \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --name <container_name> \
+    --policy <policy_name> \
+    --output tsv
+```
+
+- If you wish to revoke access to the container, remove the policy which will invalidate the SAS.
+```
+az storage container policy delete \
+    --account-name <storage_account_name> \
+    --account-key <storage_account_key> \
+    --container-name <container_name>
+    --name <policy_name>
+```
+
 ## Moodle configuration
 Go to Site Administration -> Plugins -> Admin tools -> Object storage file system. Descriptions for the various settings are as follows:
 
@@ -109,13 +180,21 @@ These settings control the movement of files to and from object storage.
 - **Delete local objects**: Delete local objects once they are in remote object storage after the consistency delay.
 - **Consistency delay**: How long an object must have existed after being transfered to remote object storage before they are a candidate for deletion locally.
 
+### File System settings
+- **Storage File System Selection**: The backend filesystem to be used. This is also used for the background transfer tasks when the main alternative_file_system_class variable is not set.
+
 ### Amazon S3 settings
 S3 specific settings
-- **Key**: AWS credential key
-- **Secret**: AWS credential secret
-- **Bucket**: S3 bucket name to store files in
+- **Key**: AWS credential key.
+- **Secret**: AWS credential secret.
+- **Bucket**: S3 bucket name to store files in.
 - **AWS region**: AWS API endpoint region to use.
 
+### Azure Blob Storage settings
+Azure Blob Storage specific settings
+- **Storage account**: Storage account name.
+- **Container name**: Name of the container that will be used.
+- **Shared Access Signature**: A shared access signature that is signed to use the container. Recommended with Read and Write access only.
 
 ## Backporting
 
@@ -227,16 +306,6 @@ Here are known working configurations:
 | [3.2](https://github.com/kenneth-hendricks/moodle-fs-api/tree/MOODLE_32_STABLE_FSAPI)            |    No     |   No      |      No   |     [composer.json](https://github.com/kenneth-hendricks/moodle-fs-api/blob/MOODLE_32_STABLE_FSAPI/composer.json)           |
 
 
-Crafted by Catalyst IT
-----------------------
-
-This plugin was developed by Catalyst IT Australia:
-
-https://www.catalyst-au.net/
-
-![Catalyst IT](/pix/catalyst-logo.png?raw=true)
-
-
 Contributing and support
 ------------------------
 
@@ -248,3 +317,21 @@ If you would like commercial support or would like to sponsor additional improve
 to this plugin please contact us:
 
 https://www.catalyst-au.net/contact-us
+
+
+Warm thanks
+-----------
+
+Thanks to Microsoft for sponsoring the Azure Storage implementation.
+
+![Microsoft](/pix/Microsoft-logo_rgb_c-gray.png?raw=true)
+
+
+Crafted by Catalyst IT
+----------------------
+
+This plugin was developed by Catalyst IT Australia:
+
+https://www.catalyst-au.net/
+
+![Catalyst IT](/pix/catalyst-logo.png?raw=true)
