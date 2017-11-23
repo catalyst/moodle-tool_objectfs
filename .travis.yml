@@ -34,6 +34,8 @@ env:
   - DB=mysqli MOODLE_BRANCH=MOODLE_32_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
   - DB=pgsql MOODLE_BRANCH=MOODLE_33_STABLE
   - DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
 #  - DB=pgsql MOODLE_BRANCH=master
 #  - DB=mysqli MOODLE_BRANCH=master
 
@@ -51,6 +53,10 @@ matrix:
       env: DB=pgsql MOODLE_BRANCH=MOODLE_33_STABLE
     - php: 7.0
       env: DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE
+    - php: 7.0
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
     - php: 7.0
       env: DB=pgsql MOODLE_BRANCH=master
     - php: 7.0
