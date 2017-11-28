@@ -53,7 +53,7 @@ https://github.com/catalyst/moodle-local_datacleaner
 3. Clone this repository into admin/tool/objectfs
 4. Install one of the required SDK libraries for the storage file system that you will be using
     1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws, or
-    2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure
+    2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure_storage
 5. Install the plugins through the moodle GUI.
 6. Configure the plugin. See [Moodle configuration](#moodle-configuration)
 7. Place of the following lines inside your Moodle config.php:
