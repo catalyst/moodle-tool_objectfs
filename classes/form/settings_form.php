@@ -118,10 +118,11 @@ class settings_form extends \moodleform {
 
         foreach ($clients as $name) {
             $client = new $name($config);
-            $mform = $client->define_client_section($mform, $config);
 
-            if (!$client->get_availability()) {
-                $errstr = get_string('settings:clientnotavailable', 'tool_objectfs', $CFG->alternative_file_system_class);
+            if ($client->get_availability()) {
+                $mform = $client->define_client_section($mform, $config);
+            } else {
+                $errstr = get_string('settings:clientnotavailable', 'tool_objectfs', $name);
                 $mform->addElement('html', $OUTPUT->notification($errstr, 'notifyproblem'));
             }
         }
