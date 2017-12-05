@@ -46,10 +46,21 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         $config = get_config('tool_objectfs');
 
         // Remapping the new namespaced variables.
-        set_config('s3_key', $config->key, 'tool_objectfs');
-        set_config('s3_secret', $config->secret, 'tool_objectfs');
-        set_config('s3_bucket', $config->bucket, 'tool_objectfs');
-        set_config('s3_region', $config->region, 'tool_objectfs');
+        if (!empty($config->key)) {
+            set_config('s3_key', $config->key, 'tool_objectfs');
+        }
+
+        if (!empty($config->secret)) {
+            set_config('s3_secret', $config->secret, 'tool_objectfs');
+        }
+
+        if (!empty($config->bucket)) {
+            set_config('s3_bucket', $config->bucket, 'tool_objectfs');
+        }
+
+        if (!empty($config->region)) {
+            set_config('s3_region', $config->region, 'tool_objectfs');
+        }
 
         // Use the existing filesystem that was once hardcoded.
         set_config('filesystem', '\\tool_objectfs\\s3_file_system', 'tool_objectfs');
