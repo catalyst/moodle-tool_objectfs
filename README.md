@@ -49,7 +49,7 @@ https://github.com/catalyst/moodle-local_datacleaner
 
 ## Installation
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
-2. Setup your remote object storage. See [Remote object storage setup](#remote-object-storage-setup)
+2. Setup your remote object storage. See [Remote object storage setup](#amazon-s3)
 3. Clone this repository into admin/tool/objectfs
 4. Install one of the required SDK libraries for the storage file system that you will be using
     1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws, or
