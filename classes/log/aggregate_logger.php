@@ -113,7 +113,7 @@ class aggregate_logger extends objectfs_logger {
 
     public function log_object_query($queryname, $objectcount, $objectsum = 0) {
         if (array_key_exists($queryname, $this->querystatistics)) {
-            $querystat = $this->readstatistics[$queryname];
+            $querystat = $this->querystatistics[$queryname];
         } else {
             $querystat = new objectfs_statistic($queryname);
         }
