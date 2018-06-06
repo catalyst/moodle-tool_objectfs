@@ -86,7 +86,6 @@ class pusher extends manipulator {
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
               GROUP BY f.contenthash,
-                       f.filesize,
                        o.location
                 HAVING MIN(f.timecreated) <= :maxcreatedtimstamp
                        AND MAX(f.filesize) > :threshold
