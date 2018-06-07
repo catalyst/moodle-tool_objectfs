@@ -38,7 +38,11 @@ $string['object_status:location'] = 'Object location';
 $string['object_status:files'] = 'Objects';
 $string['object_status:size'] = 'Total size';
 
-$string['object_status:location:error'] = 'Missing from filedir and external storage';
+$string['page:missingfiles'] = 'Missing from filedir and external storage files';
+
+$string['filename:missingfiles'] = 'missingfiles';
+
+$string['object_status:location:error'] = 'Missing from filedir and external storage (<a href="/admin/tool/objectfs/missing_files.php">view files</a>)';
 $string['object_status:location:duplicated'] = 'Duplicated in filedir and external storage';
 $string['object_status:location:local'] = 'Only in filedir';
 $string['object_status:location:external'] = 'Only in external storage';
