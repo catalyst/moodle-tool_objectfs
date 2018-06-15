@@ -38,6 +38,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     private $externalclient;
     private $preferexternal;
+    private $deleteexternally;
     private $logger;
 
     public function __construct() {
@@ -51,6 +52,9 @@ abstract class object_file_system extends \file_system_filedir {
         $this->preferexternal = $config->preferexternal;
         $this->filepermissions = $CFG->filepermissions;
         $this->dirpermissions = $CFG->directorypermissions;
+        if (isset($CFG->tool_objectfs_delete_externally)) {
+            $this->deleteexternally = $CFG->tool_objectfs_delete_externally;
+        }
 
         if ($config->enablelogging) {
             $this->logger = new \tool_objectfs\log\real_time_logger();
@@ -409,6 +413,103 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function get_maximum_upload_filesize() {
         return $this->externalclient->get_maximum_upload_size();
+    }
+
+    /**
+     * Extends remove_file to delete file from remote object storage.
+     *
+     * @param string $contenthash
+     */
+    public function remove_file($contenthash) {
+        if (!self::is_file_removable($contenthash)) {
+            // Don't remove the file - it's still in use.
+            return;
+        }
+
+        $location = $this->get_object_location_from_hash($contenthash);
+        if ($location == OBJECT_LOCATION_ERROR) {
+            return;
+        }
+
+        $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
+        $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
+
+        if (!is_dir($trashpath)) {
+            mkdir($trashpath, $this->dirpermissions, true);
+        }
+
+        if (file_exists($trashfile)) {
+            // A copy of this file is already in the trash.
+            // Remove the old version.
+            $this->delete_object_from_hash($contenthash);
+            return;
+        }
+
+        // Move the contentfile to the trash, and fix permissions as required.
+        $this->copy_file_from_hash_to_path($contenthash, $trashfile);
+        $this->delete_object_from_hash($contenthash);
+
+        // Fix permissions, only if needed.
+        $currentperms = octdec(substr(decoct(fileperms($trashfile)), -4));
+        if ((int)$this->filepermissions !== $currentperms) {
+            chmod($trashfile, $this->filepermissions);
+        }
+    }
+
+    /**
+     * Copies file by its hash to directory specified at $destinationpath
+     *
+     * @param string $contenthash file to be copied
+     * @param string $destinationpath destination directory
+     */
+    public function copy_file_from_hash_to_path($contenthash, $destinationpath) {
+        $path = $this->get_remote_path_from_hash($contenthash);
+        copy($path, $destinationpath);
+    }
+
+    /**
+     * Deletes file from local/remote filesystem by its hash
+     *
+     * @param string $contenthash file to be copied
+     */
+    public function delete_object_from_hash($contenthash) {
+        $location = $this->get_object_location_from_hash($contenthash);
+
+        switch ($location) {
+            case OBJECT_LOCATION_LOCAL:
+                $this->delete_local_file_from_hash($contenthash);
+                break;
+            case OBJECT_LOCATION_DUPLICATED:
+                $this->delete_local_file_from_hash($contenthash);
+                $this->delete_external_file_from_hash($contenthash);
+                break;
+            case OBJECT_LOCATION_EXTERNAL;
+                $this->delete_external_file_from_hash($contenthash);
+                break;
+        }
+    }
+
+    /**
+     * Deletes file from local filesystem by its hash
+     *
+     * @param string $contenthash file to be copied
+     */
+    public function delete_local_file_from_hash($contenthash) {
+        $path = $this->get_local_path_from_hash($contenthash);
+        unlink($path);
+    }
+
+    /**
+     * Deletes file from remote filesystem by its hash
+     * if $CFG->tool_objectfs_delete_externally is enabled
+     *
+     * @param string $contenthash file to be copied
+     */
+    public function delete_external_file_from_hash($contenthash) {
+        if ($this->deleteexternally) {
+            $path = $this->get_remote_path_from_hash($contenthash);
+            unlink($path);
+        }
     }
 
 }

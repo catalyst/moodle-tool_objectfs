@@ -4,7 +4,7 @@
 
 # moodle-tool_objectfs
 
-A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution. 
+A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution.
 * [Use cases](#use-cases)
   * [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
   * [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
@@ -47,6 +47,12 @@ Often you want a sanitised version of the data for giving to developers or other
 
 https://github.com/catalyst/moodle-local_datacleaner
 
+
+## GDPR
+
+This plugin is GDPR complient if you enable the deletion of remote objects.
+
+
 ## Installation
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
 2. Setup your remote object storage. See [Remote object storage setup](#amazon-s3)
@@ -67,6 +73,15 @@ $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 ```php
 $CFG->alternative_file_system_class = '\tool_objectfs\azure_file_system';
 ```
+
+8. If you intend to allow deletion of remote files then add the following line. 
+
+```php
+$CFG->tool_objectfs_delete_externally = 1;
+```
+
+This is not reccomended if you intend to share one object store between multiple environments, however this is a requirement for GDPR complience.
+
 ## Currently supported object stores
 
 ### Roadmap
@@ -80,6 +95,7 @@ There is support for more object stores planed, in particular enabling Openstack
 - Create an Amazon S3 bucket.
 - The AWS Users access policy should mirror the policy listed below.
 - Replace 'bucketname' with the name of your S3 bucket.
+- If you intend to allow deletion of objects in S3, Add 's3:DeleteObject' to the actions below.
 
 ```json
 {
