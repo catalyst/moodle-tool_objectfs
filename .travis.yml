@@ -1,11 +1,6 @@
 
 language: php
 
-notifications:
-  email:
-    recipients:
-    - kennethhendricks@catalyst-au.net
-
 sudo: false
 
 cache:
@@ -38,6 +33,8 @@ env:
   - DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE
   - DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
   - DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
   - DB=pgsql MOODLE_BRANCH=master
   - DB=mysqli MOODLE_BRANCH=master
 
@@ -82,9 +79,13 @@ matrix:
     - php: 5.6
       env: DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
     - php: 5.6
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
+    - php: 5.6
       env: DB=pgsql MOODLE_BRANCH=master
     - php: 5.6
       env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
+    - php: 5.6
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
     - php: 5.6
       env: DB=mysqli MOODLE_BRANCH=master
 
@@ -108,6 +109,7 @@ install:
   - moodle-plugin-ci install -vvv
 
 script:
+  - php moodle/admin/tool/objectfs/tests/privacy/privacy.php
   - moodle-plugin-ci validate
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpcpd
