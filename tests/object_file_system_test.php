@@ -365,5 +365,89 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue(rewind($filehandle));
     }
 
+    protected function delete_draft_files($contenthash) {
+        global $DB;
+
+        $DB->delete_records('files', array('contenthash' => $contenthash));
+    }
+
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_local() {
+        global $CFG;
+
+        $CFG->tool_objectfs_delete_externally = 1;
+        $this->filesystem = new test_file_system();
+        $file = $this->create_local_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+        $this->assertFalse($this->is_externally_readable_by_hash($filehash));
+    }
+
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_local() {
+        global $CFG;
+
+        $CFG->tool_objectfs_delete_externally = 0;
+        $this->filesystem = new test_file_system();
+        $file = $this->create_local_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+        $this->assertFalse($this->is_externally_readable_by_hash($filehash));
+    }
+
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_duplicated() {
+        global $CFG;
+
+        $CFG->tool_objectfs_delete_externally = 1;
+        $this->filesystem = new test_file_system();
+        $file = $this->create_duplicated_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+        $this->assertFalse($this->is_externally_readable_by_hash($filehash));
+    }
+
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_duplicated() {
+        global $CFG;
+
+        $CFG->tool_objectfs_delete_externally = 0;
+        $this->filesystem = new test_file_system();
+        $file = $this->create_duplicated_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+        $this->assertTrue($this->is_externally_readable_by_hash($filehash));
+    }
+
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_remote() {
+        global $CFG;
+
+        $CFG->tool_objectfs_delete_externally = 1;
+        $this->filesystem = new test_file_system();
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+        $this->assertFalse($this->is_externally_readable_by_hash($filehash));
+    }
+
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_remote() {
+        global $CFG;
+
+        $CFG->tool_objectfs_delete_externally = 0;
+        $this->filesystem = new test_file_system();
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+        $this->assertTrue($this->is_externally_readable_by_hash($filehash));
+    }
+
 }
 
