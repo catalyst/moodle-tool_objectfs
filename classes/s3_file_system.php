@@ -18,7 +18,7 @@
  * object_file_system abstract class.
  *
  * Remote object storage providers extent this class.
- * At minimum you need to impletment get_remote_client.
+ * At minimum you need to implement get_remote_client.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -39,5 +39,12 @@ class s3_file_system extends object_file_system {
     protected function get_external_client($config) {
         $s3client = new s3_client($config);
         return $s3client;
+    }
+
+    public function copy_object_from_local_to_external_path($contenthash) {
+        $config = get_objectfs_config();
+        $s3client = $this->get_external_client($config);
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $s3client->copy_object_from_local_to_external_path($localpath, $contenthash);
     }
 }

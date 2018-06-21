@@ -449,5 +449,27 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
     }
 
+    public function test_copy_object_from_local_to_external_path() {
+        $file = $this->create_local_file();
+        $filehash = $file->get_contenthash();
+        $externalpath = $this->get_external_path_from_storedfile($file);
+
+        $location = $this->filesystem->copy_object_from_local_to_external_path($filehash);
+
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
+        $this->assertTrue(is_readable($externalpath));
+    }
+
+    public function test_copy_object_from_external_to_local_path() {
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+        $localpath = $this->get_local_path_from_storedfile($file);
+
+        $location = $this->filesystem->copy_object_from_external_to_local_path($filehash);
+
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
+        $this->assertTrue(is_readable($localpath));
+    }
+
 }
 

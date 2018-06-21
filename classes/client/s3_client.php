@@ -92,7 +92,7 @@ class s3_client implements object_client {
     }
 
     public function get_maximum_upload_size() {
-        return MultipartUploader::PART_MAX_SIZE;
+        return PHP_INT_MAX;
     }
 
     public function register_stream_wrapper() {
@@ -150,7 +150,7 @@ class s3_client implements object_client {
         return $context;
     }
 
-    protected function get_filepath_from_hash($contenthash) {
+    public function get_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
         return "$l1/$l2/$contenthash";
@@ -332,5 +332,23 @@ class s3_client implements object_client {
         $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
         $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
         return $mform;
+    }
+
+    public function copy_object_from_local_to_external_path($localpath, $contenthash) {
+
+        $externalpath = $this->get_filepath_from_hash($contenthash);
+
+        $uploader = new MultipartUploader($this->client, $localpath, [
+            'bucket' => $this->bucket,
+            'key'    => $externalpath,
+        ]);
+
+        try {
+            $result = $uploader->upload();
+            echo "Upload complete: {$result['ObjectURL']}\n";
+            return $result;
+        } catch (MultipartUploadException $e) {
+            echo $e->getMessage() . "\n";
+        }
     }
 }

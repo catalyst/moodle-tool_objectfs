@@ -195,8 +195,6 @@ abstract class object_file_system extends \file_system_filedir {
         if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
-            $externalpath = $this->get_external_path_from_hash($contenthash);
-
             $localdirpath = $this->get_fulldir_from_hash($contenthash);
 
             // Folder may not exist yet if pulling a file that came from another environment.
@@ -207,7 +205,7 @@ abstract class object_file_system extends \file_system_filedir {
                 }
             }
 
-            $success = copy($externalpath, $localpath);
+            $success = $this->copy_object_from_external_to_local_path($contenthash);
 
             if ($success) {
                 chmod($localpath, $this->filepermissions);
@@ -229,10 +227,7 @@ abstract class object_file_system extends \file_system_filedir {
 
         if ($initiallocation === OBJECT_LOCATION_LOCAL) {
 
-            $localpath = $this->get_local_path_from_hash($contenthash);
-            $externalpath = $this->get_external_path_from_hash($contenthash);
-
-            $success = copy($localpath, $externalpath);
+            $success = $this->copy_object_from_local_to_external_path($contenthash);
 
             if ($success) {
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
@@ -510,6 +505,18 @@ abstract class object_file_system extends \file_system_filedir {
             $path = $this->get_remote_path_from_hash($contenthash);
             unlink($path);
         }
+    }
+
+    public function copy_object_from_local_to_external_path($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $externalpath = $this->get_external_path_from_hash($contenthash);
+        return copy($localpath, $externalpath);
+    }
+
+    public function copy_object_from_external_to_local_path($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $externalpath = $this->get_external_path_from_hash($contenthash);
+        return copy($externalpath, $localpath);
     }
 
 }
