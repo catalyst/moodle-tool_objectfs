@@ -50,6 +50,7 @@ class settings_form extends \moodleform {
         $mform = $this->define_file_transfer_section($mform, $config);
         $mform = $this->define_client_selection($mform, $config);
         $mform = $this->define_client_section($mform, $config);
+        $mform = $this->define_testing_section($mform, $config);
 
         foreach ($config as $key => $value) {
             $mform->setDefault($key, $value);
@@ -66,6 +67,21 @@ class settings_form extends \moodleform {
         return $mform;
     }
 
+    public function define_testing_section($mform, $config) {
+        global $OUTPUT;
+        $mform->addElement('header', 'testingheader', get_string('settings:testingheader', 'tool_objectfs'));
+        $mform->setExpanded('testingheader');
+
+        $alert = get_string('settings:testingdescr', 'tool_objectfs');
+        $mform->addElement('html', $OUTPUT->notification($alert, 'warning'));
+
+        $mform->addElement('advcheckbox', 'preferexternal', get_string('settings:preferexternal', 'tool_objectfs'));
+        $mform->addHelpButton('preferexternal', 'settings:preferexternal', 'tool_objectfs');
+        $mform->setType("preferexternal", PARAM_INT);
+
+        return $mform;
+    }
+
     public function define_general_section($mform, $config) {
         $mform->addElement('header', 'generalheader', get_string('settings:generalheader', 'tool_objectfs'));
         $mform->setExpanded('generalheader');
@@ -77,10 +93,6 @@ class settings_form extends \moodleform {
         $mform->addHelpButton('maxtaskruntime', 'settings:maxtaskruntime', 'tool_objectfs');
         $mform->disabledIf('maxtaskruntime', 'enabletasks');
         $mform->setType("maxtaskruntime", PARAM_INT);
-
-        $mform->addElement('advcheckbox', 'preferexternal', get_string('settings:preferexternal', 'tool_objectfs'));
-        $mform->addHelpButton('preferexternal', 'settings:preferexternal', 'tool_objectfs');
-        $mform->setType("preferexternal", PARAM_INT);
 
         $mform->addElement('advcheckbox', 'enablelogging', get_string('settings:enablelogging', 'tool_objectfs'));
         $mform->addHelpButton('enablelogging', 'settings:enablelogging', 'tool_objectfs');
