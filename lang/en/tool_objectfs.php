@@ -110,3 +110,6 @@ $string['settings:deletesuccess'] = 'Could delete object from the external objec
 $string['settings:deleteerror'] = 'Could not delete object from the external object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
 $string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from the external object storage. Background tasks can still function.';
+
+$string['settings:testingheader'] = 'Test Settings';
+$string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
