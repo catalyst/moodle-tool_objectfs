@@ -57,7 +57,7 @@ class recoverer extends manipulator {
         global $DB;
 
         $sql = 'SELECT f.contenthash,
-                       MAX(f.filesize) AS filesize
+                       f.filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE o.location = ?

@@ -64,13 +64,13 @@ class puller extends manipulator {
     public function get_candidate_objects() {
         global $DB;
         $sql = 'SELECT f.contenthash,
-                       MAX(f.filesize) AS filesize
+                       f.filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
               GROUP BY f.contenthash,
                        f.filesize,
                        o.location
-                HAVING MAX(f.filesize) <= ?
+                HAVING (f.filesize <= ?)
                        AND (o.location = ?)';
 
         $params = array($this->sizethreshold, OBJECT_LOCATION_EXTERNAL);
