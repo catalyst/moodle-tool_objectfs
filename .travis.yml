@@ -14,7 +14,7 @@ php:
   - 7.1
 
 addons:
-  postgresql: "9.3"
+  postgresql: "9.4"
 
 env:
   - DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
