@@ -89,7 +89,7 @@ class pusher extends manipulator {
                        AND f.filesize > :threshold
                        AND f.filesize < :maximum_file_size
                        AND (o.location IS NULL OR o.location = :object_location)
-              GROUP BY f.contenthash,
+              GROUP BY f.contenthash, f.filesize
                        o.location';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
