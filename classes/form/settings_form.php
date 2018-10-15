@@ -161,5 +161,27 @@ class settings_form extends \moodleform {
         $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
         return $mform;
     }
+
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        if (is_numeric($data['maxtaskruntime']) && $data['maxtaskruntime'] < 0 ) {
+            $errors['maxtaskruntime'] = get_string('settings:error:numeric', 'tool_objectfs');
+        }
+
+        if (is_numeric($data['sizethreshold']) && $data['sizethreshold'] < 0 ) {
+            $errors['sizethreshold'] = get_string('settings:error:numeric', 'tool_objectfs');
+        }
+
+        if (is_numeric($data['minimumage']) && $data['minimumage'] < 0 ) {
+            $errors['minimumage'] = get_string('settings:error:numeric', 'tool_objectfs');
+        }
+
+        if (is_numeric($data['consistencydelay']) && $data['consistencydelay'] < 0 ) {
+            $errors['consistencydelay'] = get_string('settings:error:numeric', 'tool_objectfs');
+        }
+
+        return $errors;
+    }
 }
 
