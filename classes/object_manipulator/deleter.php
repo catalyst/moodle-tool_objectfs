@@ -87,15 +87,15 @@ class deleter extends manipulator {
         }
 
         $sql = 'SELECT f.contenthash,
-                       MAX(f.filesize) AS filesize
+                       f.filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE o.timeduplicated <= ?
                        AND o.location = ?
+                       AND f.filesize > ?
               GROUP BY f.contenthash,
                        f.filesize,
-                       o.location
-                HAVING MAX(f.filesize) > ?';
+                       o.location';
 
         $consistancythrehold = time() - $this->consistencydelay;
         $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED, $this->sizethreshold);

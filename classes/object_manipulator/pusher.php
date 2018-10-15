@@ -82,15 +82,15 @@ class pusher extends manipulator {
     public function get_candidate_objects() {
         global $DB;
         $sql = 'SELECT f.contenthash,
-                       MAX(f.filesize) AS filesize
+                       f.filesize AS filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-              GROUP BY f.contenthash,
-                       o.location
-                HAVING MIN(f.timecreated) <= :maxcreatedtimstamp
-                       AND MAX(f.filesize) > :threshold
-                       AND MAX(f.filesize) < :maximum_file_size
-                       AND (o.location IS NULL OR o.location = :object_location)';
+                WHERE (f.timecreated) <= :maxcreatedtimstamp
+                       AND f.filesize > :threshold
+                       AND f.filesize < :maximum_file_size
+                       AND (o.location IS NULL OR o.location = :object_location)
+              GROUP BY f.contenthash, f.filesize
+                       o.location';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
 
