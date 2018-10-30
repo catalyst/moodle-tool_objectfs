@@ -133,10 +133,10 @@ abstract class manipulator {
 
         $shouldtaskrun = tool_objectfs_should_tasks_run();
 
-        if ($shouldtaskrun) {
-            $logger = new \tool_objectfs\log\aggregate_logger();
+        $filesystem = new $config->filesystem();
 
-            $filesystem = new $config->filesystem();
+        if ($shouldtaskrun && $filesystem->get_client_availability()) {
+            $logger = new \tool_objectfs\log\aggregate_logger();
 
             $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
             $candidatehashes = $manipulator->get_candidate_objects();
