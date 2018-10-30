@@ -516,8 +516,7 @@ abstract class object_file_system extends \file_system_filedir {
      * Return availability of external client.
      * @return mixed
      */
-    public function get_client_availability(){
+    public function get_client_availability() {
         return $this->externalclient->get_availability();
     }
-
 }
