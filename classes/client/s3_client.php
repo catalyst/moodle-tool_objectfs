@@ -83,22 +83,18 @@ class s3_client implements object_client {
         $proxy = '';
         if (!empty($config->proxyserver)) {
             if (!empty($config->proxyusername)) {
-                $array_proxy = explode("//", $config->proxyserver);
-                if (count($array_proxy) > 2) {
-                    $proxy =
-                        $array_proxy[0]
+                $arrayproxy = explode("//", $config->proxyserver);
+                if (count($arrayproxy) > 2) {
+                    $proxy = $arrayproxy[0]
                         . "//" . $config->proxyusername
                         . ":" . $config->proxypassword
-                        . "@" . $array_proxy[1]
-                        . ":" . $config->proxyport
-                        ;
+                        . "@" . $arrayproxy[1]
+                        . ":" . $config->proxyport;
                 } else {
-                    $proxy =
-                        $config->proxyusername
+                    $proxy = $config->proxyusername
                         . ":" . $config->proxypassword
-                        . "@" . $array_proxy[0]
-                        . ":" . $config->proxyport
-                    ;
+                        . "@" . $arrayproxy[0]
+                        . ":" . $config->proxyport;
                 }
             } else {
                 $proxy = $config->proxyserver.':'.$config->proxyport;
