@@ -113,3 +113,13 @@ $string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not 
 
 $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
+
+$string['settings:proxyheader'] = 'Proxy';
+$string['settings:proxyserver'] = 'Server';
+$string['settings:proxyserver_help'] = 'Proxy Server. e.g https://192.168.0.1';
+$string['settings:proxyport'] = 'Port';
+$string['settings:proxyport_help'] = 'Proxy Port';
+$string['settings:proxyusername'] = 'Username';
+$string['settings:proxyusername_help'] = 'Proxy Username. Leave blank if there is no username';
+$string['settings:proxypassword'] = 'Password';
+$string['settings:proxypassword_help'] = 'Proxy Password. Leave blank if there is no username';

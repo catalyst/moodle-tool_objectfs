@@ -80,10 +80,38 @@ class s3_client implements object_client {
     }
 
     public function set_client($config) {
+        $proxy = '';
+        if (!empty($config->proxyserver)) {
+            if (!empty($config->proxyusername)) {
+                $array_proxy = explode("//", $config->proxyserver);
+                if (count($array_proxy) > 2) {
+                    $proxy =
+                        $array_proxy[0]
+                        . "//" . $config->proxyusername
+                        . ":" . $config->proxypassword
+                        . "@" . $array_proxy[1]
+                        . ":" . $config->proxyport
+                        ;
+                } else {
+                    $proxy =
+                        $config->proxyusername
+                        . ":" . $config->proxypassword
+                        . "@" . $array_proxy[0]
+                        . ":" . $config->proxyport
+                    ;
+                }
+            } else {
+                $proxy = $config->proxyserver.':'.$config->proxyport;
+            }
+        }
+
         $this->client = S3Client::factory(array(
         'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
         'region' => $config->s3_region,
-        'version' => AWS_API_VERSION
+        'version' => AWS_API_VERSION,
+            'http'    => [
+                'proxy' => $proxy,
+            ]
         ));
     }
 
@@ -331,6 +359,33 @@ class s3_client implements object_client {
 
         $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
         $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
+
+        $mform = $this->define_proxy_config($mform, $config);
+
+        return $mform;
+    }
+
+    private function define_proxy_config($mform, $config) {
+
+        $mform->addElement('header', 'proxyheader', get_string('settings:proxyheader', 'tool_objectfs'));
+        $mform->setExpanded('proxyheader');
+
+        $mform->addElement('text', 'proxyserver', get_string('settings:proxyserver', 'tool_objectfs'));
+        $mform->addHelpButton('proxyserver', 'settings:proxyserver', 'tool_objectfs');
+        $mform->setType("proxyserver", PARAM_TEXT);
+
+        $mform->addElement('text', 'proxyport', get_string('settings:proxyport', 'tool_objectfs'));
+        $mform->addHelpButton('proxyport', 'settings:proxyport', 'tool_objectfs');
+        $mform->setType("proxyport", PARAM_TEXT);
+
+        $mform->addElement('text', 'proxyusername', get_string('settings:proxyusername', 'tool_objectfs'));
+        $mform->addHelpButton('proxyusername', 'settings:proxyusername', 'tool_objectfs');
+        $mform->setType("proxyusername", PARAM_TEXT);
+
+        $mform->addElement('password', 'proxypassword', get_string('settings:proxypassword', 'tool_objectfs'));
+        $mform->addHelpButton('proxypassword', 'settings:proxypassword', 'tool_objectfs');
+        $mform->setType("proxypassword", PARAM_TEXT);
+
         return $mform;
     }
 }
