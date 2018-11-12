@@ -80,35 +80,21 @@ class s3_client implements object_client {
     }
 
     public function set_client($config) {
-        $proxy = '';
-        if (!empty($config->proxyserver)) {
-            if (!empty($config->proxyusername)) {
-                $arrayproxy = explode("//", $config->proxyserver);
-                if (count($arrayproxy) > 2) {
-                    $proxy = $arrayproxy[0]
-                        . "//" . $config->proxyusername
-                        . ":" . $config->proxypassword
-                        . "@" . $arrayproxy[1]
-                        . ":" . $config->proxyport;
-                } else {
-                    $proxy = $config->proxyusername
-                        . ":" . $config->proxypassword
-                        . "@" . $arrayproxy[0]
-                        . ":" . $config->proxyport;
-                }
-            } else {
-                $proxy = $config->proxyserver.':'.$config->proxyport;
-            }
+        $proxy = $this->construct_proxy_string($config);
+        if (!empty($proxy)) {
+            $this->client = S3Client::factory(array(
+                'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
+                'region' => $config->s3_region,
+                'version' => AWS_API_VERSION,
+                'http' => ['proxy' => $proxy],
+            ));
+        } else {
+            $this->client = S3Client::factory(array(
+                'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
+                'region' => $config->s3_region,
+                'version' => AWS_API_VERSION,
+            ));
         }
-
-        $this->client = S3Client::factory(array(
-        'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
-        'region' => $config->s3_region,
-        'version' => AWS_API_VERSION,
-            'http'    => [
-                'proxy' => $proxy,
-            ]
-        ));
     }
 
     public function get_availability() {
@@ -356,7 +342,7 @@ class s3_client implements object_client {
         $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
         $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
 
-        $mform = $this->define_proxy_config($mform, $config);
+        $this->define_proxy_config($mform, $config);
 
         return $mform;
     }
@@ -381,7 +367,29 @@ class s3_client implements object_client {
         $mform->addElement('password', 'proxypassword', get_string('settings:proxypassword', 'tool_objectfs'));
         $mform->addHelpButton('proxypassword', 'settings:proxypassword', 'tool_objectfs');
         $mform->setType("proxypassword", PARAM_TEXT);
+    }
 
-        return $mform;
+    private function construct_proxy_string($config) {
+        $proxy = '';
+        if (!empty($config->proxyserver)) {
+            if (!empty($config->proxyusername)) {
+                $arrayproxy = explode("//", $config->proxyserver);
+                if (count($arrayproxy) > 2) {
+                    $proxy = $arrayproxy[0]
+                        . "//" . $config->proxyusername
+                        . ":" . $config->proxypassword
+                        . "@" . $arrayproxy[1]
+                        . ":" . $config->proxyport;
+                } else {
+                    $proxy = $config->proxyusername
+                        . ":" . $config->proxypassword
+                        . "@" . $arrayproxy[0]
+                        . ":" . $config->proxyport;
+                }
+            } else {
+                $proxy = $config->proxyserver.':'.$config->proxyport;
+            }
+        }
+        return $proxy;
     }
 }
