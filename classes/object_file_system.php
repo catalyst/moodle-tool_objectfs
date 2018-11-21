@@ -36,6 +36,9 @@ require_once($CFG->libdir . '/filestorage/file_storage.php');
 
 abstract class object_file_system extends \file_system_filedir {
 
+    /**
+     * @var \tool_objectfs\client\object_client
+     */
     private $externalclient;
     private $preferexternal;
     private $deleteexternally;
@@ -65,6 +68,15 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function set_logger(\tool_objectfs\log\objectfs_logger $logger) {
         $this->logger = $logger;
+    }
+
+    /**
+     * Return logger.
+     *
+     * @return \tool_objectfs\log\objectfs_logger
+     */
+    public function get_logger() {
+        return $this->logger;
     }
 
     protected abstract function get_external_client($config);
@@ -130,8 +142,8 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient->get_fullpath_from_hash($contenthash);
     }
 
-    protected function get_external_path_from_storedfile(stored_file $file) {
-        return $this->get_external_path_from_hash($file);
+    protected function get_external_path_from_storedfile(\stored_file $file) {
+        return $this->get_external_path_from_hash($file->get_contenthash());
     }
 
     public function is_file_readable_externally_by_storedfile(stored_file $file) {
@@ -205,10 +217,10 @@ abstract class object_file_system extends \file_system_filedir {
                 }
             }
 
-            $success = $this->copy_object_from_external_to_local_path($contenthash);
+            $success = $this->copy_from_external_to_local($contenthash);
 
             if ($success) {
-                chmod($localpath, $this->filepermissions);
+                chmod($this->get_local_path_from_hash($contenthash), $this->filepermissions);
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
             }
 
@@ -227,7 +239,7 @@ abstract class object_file_system extends \file_system_filedir {
 
         if ($initiallocation === OBJECT_LOCATION_LOCAL) {
 
-            $success = $this->copy_object_from_local_to_external_path($contenthash);
+            $success = $this->copy_from_local_to_external($contenthash);
 
             if ($success) {
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
@@ -507,15 +519,17 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
-    public function copy_object_from_local_to_external_path($contenthash) {
+    protected function copy_from_local_to_external($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
         $externalpath = $this->get_external_path_from_hash($contenthash);
+
         return copy($localpath, $externalpath);
     }
 
-    public function copy_object_from_external_to_local_path($contenthash) {
+    protected function copy_from_external_to_local($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
         $externalpath = $this->get_external_path_from_hash($contenthash);
+
         return copy($externalpath, $localpath);
     }
 

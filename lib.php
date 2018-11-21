@@ -73,8 +73,6 @@ function set_objectfs_config($config) {
 }
 
 function get_objectfs_config() {
-    global $CFG;
-
     $config = new stdClass;
     $config->enabletasks = 0;
     $config->enablelogging = 0;

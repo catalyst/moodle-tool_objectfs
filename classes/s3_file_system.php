@@ -38,13 +38,23 @@ class s3_file_system extends object_file_system {
 
     protected function get_external_client($config) {
         $s3client = new s3_client($config);
+
         return $s3client;
     }
 
-    public function copy_object_from_local_to_external_path($contenthash) {
+    public function copy_from_local_to_external($contenthash) {
         $config = get_objectfs_config();
         $s3client = $this->get_external_client($config);
         $localpath = $this->get_local_path_from_hash($contenthash);
-        $s3client->copy_object_from_local_to_external_path($localpath, $contenthash);
+
+        try {
+            $s3client->upload_to_s3($localpath, $contenthash);
+            return true;
+        } catch (\Exception $e) {
+            $this->get_logger()->error_log(
+                'ERROR: copy ' . $localpath . ' to ' . $this->get_external_path_from_hash($contenthash) . ': ' . $e->getMessage()
+            );
+            return false;
+        }
     }
 }

@@ -150,7 +150,7 @@ class s3_client implements object_client {
         return $context;
     }
 
-    public function get_filepath_from_hash($contenthash) {
+    protected function get_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
         return "$l1/$l2/$contenthash";
@@ -334,8 +334,13 @@ class s3_client implements object_client {
         return $mform;
     }
 
-    public function copy_object_from_local_to_external_path($localpath, $contenthash) {
-
+    /**
+     * @param $localpath
+     * @param $contenthash
+     *
+     * @throws \Exception if fails.
+     */
+    public function upload_to_s3($localpath, $contenthash) {
         $externalpath = $this->get_filepath_from_hash($contenthash);
 
         $uploader = new MultipartUploader($this->client, $localpath, [
@@ -343,12 +348,6 @@ class s3_client implements object_client {
             'key'    => $externalpath,
         ]);
 
-        try {
-            $result = $uploader->upload();
-            echo "Upload complete: {$result['ObjectURL']}\n";
-            return $result;
-        } catch (MultipartUploadException $e) {
-            echo $e->getMessage() . "\n";
-        }
+        $uploader->upload();
     }
 }
