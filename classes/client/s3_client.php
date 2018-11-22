@@ -93,7 +93,9 @@ class s3_client implements object_client {
     }
 
     public function get_maximum_upload_size() {
-        return OBJECTFS_BYTES_IN_TERABYTE;
+        // Using the multipart upload methods , you can upload objects from 5 MB to 5 TB in size.
+        // See https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-multipart-upload.html.
+        return OBJECTFS_BYTES_IN_TERABYTE * 5;
     }
 
     public function register_stream_wrapper() {
