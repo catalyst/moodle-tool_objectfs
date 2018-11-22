@@ -47,6 +47,7 @@ if (!file_exists($autoloader)) {
 
 require_once($autoloader);
 
+use Aws\Exception\MultipartUploadException;
 use Aws\S3\MultipartUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
@@ -92,7 +93,7 @@ class s3_client implements object_client {
     }
 
     public function get_maximum_upload_size() {
-        return PHP_INT_MAX;
+        return OBJECTFS_BYTES_IN_TERABYTE;
     }
 
     public function register_stream_wrapper() {
@@ -335,19 +336,30 @@ class s3_client implements object_client {
     }
 
     /**
-     * @param $localpath
-     * @param $contenthash
+     * Upload a file from the local path to s3 bucket.
+     *
+     * @param string $localpath Path to a local file.
+     * @param string $contenthash Content hash of the file.
      *
      * @throws \Exception if fails.
      */
     public function upload_to_s3($localpath, $contenthash) {
         $externalpath = $this->get_filepath_from_hash($contenthash);
 
+        // With a single PutObject operation, you can upload objects up to 5 GB in size.
+        // However, by using the multipart upload methods (e.g., CreateMultipartUpload, UploadPart,
+        // CompleteMultipartUpload, AbortMultipartUpload), you can upload objects from 5 MB to 5 TB in size.
         $uploader = new MultipartUploader($this->client, $localpath, [
             'bucket' => $this->bucket,
             'key'    => $externalpath,
         ]);
 
-        $uploader->upload();
+        try {
+            $uploader->upload();
+        } catch (MultipartUploadException $e) {
+            $params = $e->getState()->getId();
+            $this->client->abortMultipartUpload($params);
+            throw new \Exception($e->getMessage());
+        }
     }
 }

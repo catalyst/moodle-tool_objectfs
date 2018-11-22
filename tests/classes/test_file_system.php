@@ -37,7 +37,7 @@ require_once(__DIR__ . '/test_azure_integration_client.php');
 
 class test_file_system extends object_file_system {
 
-    protected function get_external_client($config) {
+    protected function initialise_external_client($config) {
         global $CFG;
         if (isset($CFG->phpunit_objectfs_s3_integration_test_credentials)) {
             $credentials = $CFG->phpunit_objectfs_s3_integration_test_credentials;
