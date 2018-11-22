@@ -34,6 +34,8 @@ define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
 define('OBJECTFS_REPORT_LOG_SIZE', 1);
 define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
+define('OBJECTFS_BYTES_IN_TERABYTE', 1099511627776);
+
 function update_object_record($contenthash, $location) {
     global $DB;
 
@@ -73,8 +75,6 @@ function set_objectfs_config($config) {
 }
 
 function get_objectfs_config() {
-    global $CFG;
-
     $config = new stdClass;
     $config->enabletasks = 0;
     $config->enablelogging = 0;
