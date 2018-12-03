@@ -115,6 +115,8 @@ abstract class object_file_system extends \file_system_filedir {
                 // We want this file to be deleted again later.
                 update_object_record($contenthash, $location);
 
+            }
+            if ($objectlock) {
                 $objectlock->release();
             }
         }
