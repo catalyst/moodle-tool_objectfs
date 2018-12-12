@@ -85,12 +85,11 @@ class pusher extends manipulator {
                        MAX(f.filesize) AS filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-              GROUP BY f.contenthash,
-                       o.location
-                HAVING MIN(f.timecreated) <= :maxcreatedtimstamp
-                       AND MAX(f.filesize) > :threshold
-                       AND MAX(f.filesize) < :maximum_file_size
-                       AND (o.location IS NULL OR o.location = :object_location)';
+                  WHERE f.filesize > :threshold
+                        AND f.filesize < :maximum_file_size
+                        AND f.timecreated <= :maxcreatedtimstamp
+                        AND (o.location IS NULL OR o.location = :object_location)
+               GROUP BY f.contenthash, o.location';
 
         $maxcreatedtimestamp = time() - $this->minimumage;
 

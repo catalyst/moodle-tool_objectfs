@@ -171,7 +171,7 @@ class pusher_testcase extends tool_objectfs_testcase {
 
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_filesize() {
         global $DB;
-        // Push initial objects so they arnt candidates
+        // Push initial objects so they arnt candidates.
         $objects = $this->pusher->get_candidate_objects();
         $this->pusher->execute($objects);
 
@@ -179,13 +179,19 @@ class pusher_testcase extends tool_objectfs_testcase {
         $file = $DB->get_record('files', array('contenthash' => $object->contenthash));
 
         // Update filesize to something different and insert as new file.
-        $file->filesize = 999;
+        $file->filesize = $this->filesystem->get_maximum_upload_filesize() + 100;
         $file->pathnamehash = '1234';
+        $DB->insert_record('files', $file);
+
+        $file->filesize = $this->filesystem->get_maximum_upload_filesize() - 100;
+        $file->pathnamehash = '12345';
         $DB->insert_record('files', $file);
 
         $objects = $this->pusher->get_candidate_objects();
 
         $this->assertEquals(1, count($objects));
+        $this->assertEquals($this->filesystem->get_maximum_upload_filesize() - 100, reset($objects)->filesize);
+        $this->assertEquals($file->contenthash, reset($objects)->contenthash);
     }
 }
 

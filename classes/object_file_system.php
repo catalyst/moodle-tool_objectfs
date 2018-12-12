@@ -47,7 +47,7 @@ abstract class object_file_system extends \file_system_filedir {
 
         $config = get_objectfs_config();
 
-        $this->externalclient = $this->get_external_client($config);
+        $this->externalclient = $this->initialise_external_client($config);
         $this->externalclient->register_stream_wrapper();
         $this->preferexternal = $config->preferexternal;
         $this->filepermissions = $CFG->filepermissions;
@@ -57,9 +57,9 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         if ($config->enablelogging) {
-            $this->logger = new \tool_objectfs\log\real_time_logger();
+            $this->set_logger(new \tool_objectfs\log\real_time_logger());
         } else {
-            $this->logger = new \tool_objectfs\log\null_logger();
+            $this->set_logger(new \tool_objectfs\log\null_logger());
         }
     }
 
@@ -67,7 +67,25 @@ abstract class object_file_system extends \file_system_filedir {
         $this->logger = $logger;
     }
 
-    protected abstract function get_external_client($config);
+    /**
+     * Return logger.
+     *
+     * @return \tool_objectfs\log\objectfs_logger
+     */
+    public function get_logger() {
+        return $this->logger;
+    }
+
+    /**
+     * Return external client.
+     *
+     * @return \tool_objectfs\client\object_client
+     */
+    public function get_external_client() {
+        return $this->externalclient;
+    }
+
+    protected abstract function initialise_external_client($config);
 
     /**
      * Get the full path for the specified hash, including the path to the filedir.
@@ -97,6 +115,8 @@ abstract class object_file_system extends \file_system_filedir {
                 // We want this file to be deleted again later.
                 update_object_record($contenthash, $location);
 
+            }
+            if ($objectlock) {
                 $objectlock->release();
             }
         }
@@ -130,8 +150,8 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient->get_fullpath_from_hash($contenthash);
     }
 
-    protected function get_external_path_from_storedfile(stored_file $file) {
-        return $this->get_external_path_from_hash($file);
+    protected function get_external_path_from_storedfile(\stored_file $file) {
+        return $this->get_external_path_from_hash($file->get_contenthash());
     }
 
     public function is_file_readable_externally_by_storedfile(stored_file $file) {
@@ -195,8 +215,6 @@ abstract class object_file_system extends \file_system_filedir {
         if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
 
             $localpath = $this->get_local_path_from_hash($contenthash);
-            $externalpath = $this->get_external_path_from_hash($contenthash);
-
             $localdirpath = $this->get_fulldir_from_hash($contenthash);
 
             // Folder may not exist yet if pulling a file that came from another environment.
@@ -207,10 +225,10 @@ abstract class object_file_system extends \file_system_filedir {
                 }
             }
 
-            $success = copy($externalpath, $localpath);
+            $success = $this->copy_from_external_to_local($contenthash);
 
             if ($success) {
-                chmod($localpath, $this->filepermissions);
+                chmod($this->get_local_path_from_hash($contenthash), $this->filepermissions);
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
             }
 
@@ -229,10 +247,7 @@ abstract class object_file_system extends \file_system_filedir {
 
         if ($initiallocation === OBJECT_LOCATION_LOCAL) {
 
-            $localpath = $this->get_local_path_from_hash($contenthash);
-            $externalpath = $this->get_external_path_from_hash($contenthash);
-
-            $success = copy($localpath, $externalpath);
+            $success = $this->copy_from_local_to_external($contenthash);
 
             if ($success) {
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
@@ -510,6 +525,34 @@ abstract class object_file_system extends \file_system_filedir {
             $path = $this->get_remote_path_from_hash($contenthash);
             unlink($path);
         }
+    }
+
+    /**
+     * Copy from local to external file system by hash.
+     *
+     * @param string $contenthash File content hash.
+     *
+     * @return bool
+     */
+    protected function copy_from_local_to_external($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $externalpath = $this->get_external_path_from_hash($contenthash);
+
+        return copy($localpath, $externalpath);
+    }
+
+    /**
+     * Copy form external to local file system by hash.
+     *
+     * @param string $contenthash File content hash.
+     *
+     * @return bool
+     */
+    protected function copy_from_external_to_local($contenthash) {
+        $localpath = $this->get_local_path_from_hash($contenthash);
+        $externalpath = $this->get_external_path_from_hash($contenthash);
+
+        return copy($externalpath, $localpath);
     }
 
 }

@@ -33,7 +33,7 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class azure_file_system extends object_file_system {
 
-    protected function get_external_client($config) {
+    protected function initialise_external_client($config) {
         $asclient = new azure_client($config);
         return $asclient;
     }

@@ -47,7 +47,9 @@ if (!file_exists($autoloader)) {
 
 require_once($autoloader);
 
+use Aws\Exception\MultipartUploadException;
 use Aws\S3\MultipartUploader;
+use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
 
@@ -102,7 +104,9 @@ class s3_client implements object_client {
     }
 
     public function get_maximum_upload_size() {
-        return MultipartUploader::PART_MAX_SIZE;
+        // Using the multipart upload methods , you can upload objects from 5 MB to 5 TB in size.
+        // See https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-multipart-upload.html.
+        return OBJECTFS_BYTES_IN_TERABYTE * 5;
     }
 
     public function register_stream_wrapper() {
@@ -347,6 +351,7 @@ class s3_client implements object_client {
         return $mform;
     }
 
+
     private function define_proxy_config($mform, $config) {
 
         $mform->addElement('header', 'proxyheader', get_string('settings:proxyheader', 'tool_objectfs'));
@@ -369,7 +374,8 @@ class s3_client implements object_client {
         $mform->setType("proxypassword", PARAM_TEXT);
     }
 
-    private function construct_proxy_string($config) {
+    private function construct_proxy_string($config)
+    {
         $proxy = '';
         if (!empty($config->proxyserver)) {
             if (!empty($config->proxyusername)) {
@@ -387,9 +393,38 @@ class s3_client implements object_client {
                         . ":" . $config->proxyport;
                 }
             } else {
-                $proxy = $config->proxyserver.':'.$config->proxyport;
+                $proxy = $config->proxyserver . ':' . $config->proxyport;
             }
         }
         return $proxy;
+    }
+
+    /**
+     * Upload a file from the local path to s3 bucket.
+     *
+     * @param string $localpath Path to a local file.
+     * @param string $contenthash Content hash of the file.
+     *
+     * @throws \Exception if fails.
+     */
+    public function upload_to_s3($localpath, $contenthash) {
+        $filehandle = fopen($localpath, 'rb');
+
+        if (!$filehandle) {
+            throw new \Exception('Can not open the file for reading: ' . $localpath);
+        }
+
+        try {
+            $externalpath = $this->get_filepath_from_hash($contenthash);
+            $uploader = new ObjectUploader($this->client, $this->bucket, $externalpath, $filehandle);
+            $uploader->upload();
+            fclose($filehandle);
+        } catch (MultipartUploadException $e) {
+            $params = $e->getState()->getId();
+            $this->client->abortMultipartUpload($params);
+            fclose($filehandle);
+
+            throw new \Exception($e->getMessage());
+        }
     }
 }
