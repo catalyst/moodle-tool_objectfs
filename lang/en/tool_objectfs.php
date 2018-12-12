@@ -123,3 +123,5 @@ $string['settings:proxyusername'] = 'Username';
 $string['settings:proxyusername_help'] = 'Proxy Username. Leave blank if there is no username';
 $string['settings:proxypassword'] = 'Password';
 $string['settings:proxypassword_help'] = 'Proxy Password. Leave blank if there is no username';
+
+$string['settings:error:numeric'] = 'Please enter a number which is greater than or equal 0.';
