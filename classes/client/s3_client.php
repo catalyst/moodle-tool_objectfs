@@ -374,9 +374,9 @@ class s3_client implements object_client {
         $mform->setType("proxypassword", PARAM_TEXT);
     }
 
-    private function construct_proxy_string($config)
-    {
+    private function construct_proxy_string($config) {
         $proxy = '';
+        // Build Proxy string: proxyusername:proxypassword@host:port.
         if (!empty($config->proxyserver)) {
             if (!empty($config->proxyusername)) {
                 $arrayproxy = explode("//", $config->proxyserver);
