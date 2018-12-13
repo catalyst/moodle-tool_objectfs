@@ -33,6 +33,7 @@ $string['recover_error_objects_task'] = 'Object error recovery task';
 
 $string['generate_status_report_task'] = 'Object status report generator task';
 $string['not_enabled'] = 'The object file system background tasks are not enabled. No objects will move location until you do.';
+$string['client_not_available'] = 'The configured remote client is not available. Please ensure it is installed correctly.';
 
 $string['object_status:page'] = 'Object status';
 $string['object_status:location'] = 'Object location';

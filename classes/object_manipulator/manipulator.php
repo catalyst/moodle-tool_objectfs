@@ -131,18 +131,21 @@ abstract class manipulator {
     public static function setup_and_run_object_manipulator($manipulatorclassname) {
         $config = get_objectfs_config();
 
-        $shouldtaskrun = tool_objectfs_should_tasks_run();
+        $filesystem = new $config->filesystem();
 
-        if ($shouldtaskrun) {
-            $logger = new \tool_objectfs\log\aggregate_logger();
-
-            $filesystem = new $config->filesystem();
-
-            $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
-            $candidatehashes = $manipulator->get_candidate_objects();
-            $manipulator->execute($candidatehashes);
-        } else {
+        if (!tool_objectfs_should_tasks_run()) {
             mtrace(get_string('not_enabled', 'tool_objectfs'));
+            return;
         }
+
+        if (!$filesystem->get_client_availability()) {
+            mtrace(get_string('client_not_available', 'tool_objectfs'));
+            return;
+        }
+
+        $logger = new \tool_objectfs\log\aggregate_logger();
+        $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
+        $candidatehashes = $manipulator->get_candidate_objects();
+        $manipulator->execute($candidatehashes);
     }
 }
