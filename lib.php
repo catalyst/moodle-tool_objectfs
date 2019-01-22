@@ -75,6 +75,8 @@ function set_objectfs_config($config) {
 }
 
 function get_objectfs_config() {
+    global $CFG;
+
     $config = new stdClass;
     $config->enabletasks = 0;
     $config->enablelogging = 0;
@@ -86,7 +88,11 @@ function get_objectfs_config() {
     $config->logging = 0;
     $config->preferexternal = 0;
 
-    $config->filesystem = '';
+    if (isset($CFG->ofs_filesystem)) {
+        $config->filesystem = $CFG->ofs_filesystem;
+    } else {
+        $config->filesystem = '';
+    }
 
     // '\tool_objectfs\s3_file_system'
     $config->s3_key = '';
