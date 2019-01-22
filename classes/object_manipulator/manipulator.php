@@ -131,12 +131,12 @@ abstract class manipulator {
     public static function setup_and_run_object_manipulator($manipulatorclassname) {
         $config = get_objectfs_config();
 
-        $filesystem = new $config->filesystem();
-
         if (!tool_objectfs_should_tasks_run()) {
             mtrace(get_string('not_enabled', 'tool_objectfs'));
             return;
         }
+
+        $filesystem = new $config->filesystem();
 
         if (!$filesystem->get_client_availability()) {
             mtrace(get_string('client_not_available', 'tool_objectfs'));
