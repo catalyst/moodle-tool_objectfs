@@ -199,10 +199,10 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
-    // Acquire the obect lock any time you are moving an object between locations.
+    // Acquire the object lock any time you are moving an object between locations.
     public function acquire_object_lock($contenthash) {
         $timeout = 600; // 10 minutes before giving up.
-        $resource = "object: $contenthash";
+        $resource = "tool_objectfs: $contenthash";
         $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_object');
         $lock = $lockfactory->get_lock($resource, $timeout);
         return $lock;
