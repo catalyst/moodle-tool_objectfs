@@ -82,11 +82,20 @@ class s3_client implements object_client {
     }
 
     public function set_client($config) {
-        $this->client = S3Client::factory(array(
-        'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
-        'region' => $config->s3_region,
-        'version' => AWS_API_VERSION
-        ));
+        if (!$config->s3_compatible) {
+            $this->client = S3Client::factory(array(
+                'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
+                'region' => $config->s3_region,
+                'version' => AWS_API_VERSION
+                ));
+            } else {
+            $this->client = S3Client::factory(array(
+                'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
+                'region' => $config->s3_compatible_region,
+                'endpoint' => $config->s3_compatible_endpoint,
+                'version' => AWS_API_VERSION
+                ));
+        }
     }
 
     public function get_availability() {
@@ -335,6 +344,22 @@ class s3_client implements object_client {
 
         $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
         $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
+        $mform->disabledIf('s3_region', 's3_compatible','checked');
+
+        $mform->addElement('advcheckbox', 's3_compatible', get_string('settings:aws:compatible', 'tool_objectfs'));
+        $mform->addHelpButton('s3_compatible', 'settings:aws:compatible', 'tool_objectfs');
+        $mform->setType("s3_compatible", PARAM_INT);
+
+        $mform->addElement('text', 's3_compatible_region', get_string('settings:aws:compatible_region', 'tool_objectfs'));
+        $mform->addHelpButton('s3_compatible_region', 'settings:aws:compatible_region', 'tool_objectfs');
+        $mform->disabledIf('s3_compatible_region', 's3_compatible');
+        $mform->setType("s3_compatible_region", PARAM_TEXT);
+
+        $mform->addElement('text', 's3_compatible_endpoint', get_string('settings:aws:endpoint', 'tool_objectfs'));
+        $mform->addHelpButton('s3_compatible_endpoint', 'settings:aws:endpoint', 'tool_objectfs');
+        $mform->disabledIf('s3_compatible_endpoint', 's3_compatible');
+        $mform->setType("s3_compatible_endpoint", PARAM_TEXT);
+
         return $mform;
     }
 
