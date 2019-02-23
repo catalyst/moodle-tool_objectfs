@@ -81,6 +81,13 @@ $string['settings:aws:bucket_help'] = 'Amazon S3 bucket to store files in.';
 $string['settings:aws:region'] = 'region';
 $string['settings:aws:region_help'] = 'Amazon S3 API gateway region.';
 
+$string['settings:aws:compatible'] = 'S3 Compatible';
+$string['settings:aws:compatible_help'] = 'S3 compatible connection.';
+$string['settings:aws:compatible_region'] = 'region';
+$string['settings:aws:compatible_region_help'] = 'S3 compatible API gateway region.';
+$string['settings:aws:endpoint'] = 'entrypoint';
+$string['settings:aws:endpoint_help'] = 'S3 compatible API entrypoint URL.';
+
 $string['settings:azure:header'] = 'Azure Blob Storage Settings';
 $string['settings:azure:accountname'] = 'Account name';
 $string['settings:azure:accountname_help'] = 'The name of the storage account.';
