@@ -82,17 +82,17 @@ class s3_client implements object_client {
     }
 
     public function set_client($config) {
-        if (!$config->s3_compatible) {
-            $this->client = S3Client::factory(array(
-                'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
-                'region' => $config->s3_region,
-                'version' => AWS_API_VERSION
-                ));
-            } else {
+        if ($config->s3_compatible) {
             $this->client = S3Client::factory(array(
                 'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
                 'region' => $config->s3_compatible_region,
                 'endpoint' => $config->s3_compatible_endpoint,
+                'version' => AWS_API_VERSION
+            ));
+        } else {
+            $this->client = S3Client::factory(array(
+                'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
+                'region' => $config->s3_region,
                 'version' => AWS_API_VERSION
                 ));
         }

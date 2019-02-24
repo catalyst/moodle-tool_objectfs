@@ -93,6 +93,9 @@ function get_objectfs_config() {
     $config->s3_secret = '';
     $config->s3_bucket = '';
     $config->s3_region = 'us-east-1';
+    $config->s3_compatible = 0;
+    $config->s3_compatible_region = '';
+    $config->s3_compatible_endpoint = '';
 
     // '\tool_objectfs\azure_file_system'
     $config->azure_accountname = '';
