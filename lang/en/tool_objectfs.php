@@ -85,8 +85,8 @@ $string['settings:aws:compatible'] = 'S3 Compatible';
 $string['settings:aws:compatible_help'] = 'S3 compatible connection.';
 $string['settings:aws:compatible_region'] = 'region';
 $string['settings:aws:compatible_region_help'] = 'S3 compatible API gateway region.';
-$string['settings:aws:endpoint'] = 'entrypoint';
-$string['settings:aws:endpoint_help'] = 'S3 compatible API entrypoint URL.';
+$string['settings:aws:endpoint'] = 'endpoint';
+$string['settings:aws:endpoint_help'] = 'S3 compatible API endpoint URL.';
 
 $string['settings:azure:header'] = 'Azure Blob Storage Settings';
 $string['settings:azure:accountname'] = 'Account name';
