@@ -81,6 +81,16 @@ $string['settings:aws:bucket_help'] = 'Amazon S3 bucket to store files in.';
 $string['settings:aws:region'] = 'region';
 $string['settings:aws:region_help'] = 'Amazon S3 API gateway region.';
 
+$string['settings:do:header'] = 'DigitalOcean Spaces Settings';
+$string['settings:do:key'] = 'Key';
+$string['settings:do:key_help'] = 'DO Spaces key credential.';
+$string['settings:do:secret'] = 'Secret';
+$string['settings:do:secret_help'] = 'DO Spaces secret credential.';
+$string['settings:do:space'] = 'Space';
+$string['settings:do:space_help'] = 'DO Space to store files in.';
+$string['settings:do:region'] = 'Region';
+$string['settings:do:region_help'] = 'DO Spaces API gateway region.';
+
 $string['settings:azure:header'] = 'Azure Blob Storage Settings';
 $string['settings:azure:accountname'] = 'Account name';
 $string['settings:azure:accountname_help'] = 'The name of the storage account.';

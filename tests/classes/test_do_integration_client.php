@@ -14,25 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Object client interface.
- *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace tool_objectfs\client;
+namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-interface object_client {
-    public function __construct($config);
-    public function register_stream_wrapper();
-    public function get_fullpath_from_hash($contenthash);
-    public function get_seekable_stream_context();
-    public function get_availability();
-    public function get_maximum_upload_size();
-    public function verify_object($contenthash, $localpath);
+use tool_objectfs\object_file_system;
+use tool_objectfs\client\do_client;
+
+class test_do_integration_client extends do_client {
+
+    private $runidentifier;
+
+    public function __construct($config) {
+        parent::__construct($config);
+        $time = microtime();
+        $this->runidentifier = md5($time);
+    }
+
+    protected function get_filepath_from_hash($contenthash) {
+        $l1 = $contenthash[0] . $contenthash[1];
+        $l2 = $contenthash[2] . $contenthash[3];
+        $runidentifier = $this->runidentifier;
+        return "test/$runidentifier/$l1/$l2/$contenthash";
+    }
+
 }
+

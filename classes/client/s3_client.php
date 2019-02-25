@@ -192,7 +192,7 @@ class s3_client implements object_client {
      *
      * @return boolean true on success, false on failure.
      */
-    public function test_permissions() {
+    public function test_permissions($testdelete) {
         $permissions = new \stdClass();
         $permissions->success = true;
         $permissions->messages = array();
@@ -222,18 +222,18 @@ class s3_client implements object_client {
             }
         }
 
-        try {
-            $result = $this->client->deleteObject(array(
-                            'Bucket' => $this->bucket,
-                            'Key' => 'permissions_check_file'));
-            $permissions->messages[] = get_string('settings:deletesuccess', 'tool_objectfs');
-            $permissions->success = false;
-        } catch (S3Exception $e) {
-            $errorcode = $e->getAwsErrorCode();
-            // Something else went wrong.
-            if ($errorcode !== 'AccessDenied') {
-                $details = $this->get_exception_details($e);
-                $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
+        if ($testdelete) {
+            try {
+                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => 'permissions_check_file'));
+                $permissions->messages[] = get_string('settings:deletesuccess', 'tool_objectfs');
+                $permissions->success = false;
+            } catch (S3Exception $e) {
+                $errorcode = $e->getAwsErrorCode();
+                // Something else went wrong.
+                if ($errorcode !== 'AccessDenied') {
+                    $details = $this->get_exception_details($e);
+                    $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
+                }
             }
         }
 
@@ -266,18 +266,17 @@ class s3_client implements object_client {
         return $details;
     }
 
-    public function define_amazon_s3_check($mform, $config) {
+    public function define_amazon_s3_check($mform, $testdelete = true) {
         global $OUTPUT;
         $connection = false;
 
-        $client = new s3_client($config);
-        $connection = $client->test_connection();
+        $connection = $this->test_connection();
 
         if ($connection->success) {
             $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
 
             // Check permissions if we can connect.
-            $permissions = $client->test_permissions();
+            $permissions = $this->test_permissions($testdelete);
             if ($permissions->success) {
                 $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
             } else {
@@ -285,7 +284,6 @@ class s3_client implements object_client {
                     $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
                 }
             }
-
         } else {
             $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
             $permissions = false;
@@ -298,7 +296,7 @@ class s3_client implements object_client {
         $mform->addElement('header', 'awsheader', get_string('settings:aws:header', 'tool_objectfs'));
         $mform->setExpanded('awsheader');
 
-        $mform = $this->define_amazon_s3_check($mform, $config);
+        $mform = $this->define_amazon_s3_check($mform);
 
         $regionoptions = array(
             'us-east-1'      => 'us-east-1 (N. Virginia)',
