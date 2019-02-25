@@ -15,11 +15,13 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   * [Roadmap](#roadmap)
   * [Amazon S3](#amazon-s3)
   * [Azure Blob Storage](#azure-blob-storage)
+  * [DigitalOcean Spaces](#digitalocean-spaces)
 * [Moodle configuration](#moodle-configuration)
   * [General Settings](#general-settings)
   * [File Transfer settings](#file-transfer-settings)
   * [Amazon S3 settings](#amazon-s3-settings)
   * [Azure Blob Storage settings](#azure-blob-storage-settings)
+  * [DigitalOcean Spaces settings](#digitalocean-spaces-settings)
 * [Backporting](#backporting)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 * [Contributing and support](#contributing-and-support)
@@ -58,8 +60,8 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 2. Setup your remote object storage. See [Remote object storage setup](#amazon-s3)
 3. Clone this repository into admin/tool/objectfs
 4. Install one of the required SDK libraries for the storage file system that you will be using
-    1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws, or
-    2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure_storage
+    1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws for S3 or DigitalOcean Spaces, or
+    2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure_storage for Azure Blob Storage
 5. Install the plugins through the moodle GUI.
 6. Configure the plugin. See [Moodle configuration](#moodle-configuration)
 7. Place of the following lines inside your Moodle config.php:
@@ -72,6 +74,11 @@ $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 * Azure Blob Storage
 ```php
 $CFG->alternative_file_system_class = '\tool_objectfs\azure_file_system';
+```
+
+* DigitalOcean Spaces
+```php
+$CFG->alternative_file_system_class = '\tool_objectfs\do_file_system';
 ```
 
 8. If you intend to allow deletion of remote files then add the following line. 
@@ -180,6 +187,13 @@ az storage container policy delete \
     --name <policy_name>
 ```
 
+### DigitalOcean Spaces
+
+*DigitalOcean Spaces bucket setup*
+
+- Create an DigitalOcean Space.
+- Currently DigitalOcean does not provide an ACL to their Spaces offering.
+
 ## Moodle configuration
 Go to Site Administration -> Plugins -> Admin tools -> Object storage file system. Descriptions for the various settings are as follows:
 
@@ -211,6 +225,13 @@ Azure Blob Storage specific settings
 - **Storage account**: Storage account name.
 - **Container name**: Name of the container that will be used.
 - **Shared Access Signature**: A shared access signature that is signed to use the container. Recommended with Read and Write access only.
+
+### DigitalOcean Spaces settings
+DigitalOcean Spaces specific settings
+- **Key**: DO Spaces credential key.
+- **Secret**: DO Spaces secret credential secret.
+- **Space**: DigitalOcean space name to store files in.
+- **Region**: DigitalOcean Spaces API endpoint region to use.
 
 ## Backporting
 
