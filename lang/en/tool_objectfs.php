@@ -99,6 +99,22 @@ $string['settings:azure:container_help'] = 'The name of the container that will 
 $string['settings:azure:sastoken'] = 'Shared Access Signature';
 $string['settings:azure:sastoken_help'] = 'This Shared Access Signature should have the following two capabilites only. Read, write.';
 
+$string['settings:openstack:header'] = 'Openstack Swift Object Storage Settings';
+$string['settings:openstack:username'] = 'User name';
+$string['settings:openstack:username_help'] = 'The username of the storage account.';
+$string['settings:openstack:password'] = 'Account password';
+$string['settings:openstack:password_help'] = 'The password of the storage account user.';
+$string['settings:openstack:authurl'] = 'Authentication API URL';
+$string['settings:openstack:authurl_help'] = 'The URL to the Authentication API URL';
+$string['settings:openstack:region'] = 'Openstack Region';
+$string['settings:openstack:region_help'] = 'The Openstack availability region';
+$string['settings:openstack:tenantname'] = 'Tenant name';
+$string['settings:openstack:tenantname_help'] = 'The Openstack Tenant Name';
+$string['settings:openstack:projectid'] = 'Project ID';
+$string['settings:openstack:projectid_help'] = 'The Openstack Project ID';
+$string['settings:openstack:container'] = 'Container name';
+$string['settings:openstack:container_help'] = 'The name of the container that will store the objects.';
+
 $string['settings:filetransferheader'] = 'File Transfer Settings';
 $string['settings:sizethreshold'] = 'Minimum size threshold (KB)';
 $string['settings:sizethreshold_help'] = 'Minimum size threshold for transfering objects to external object storage. If objects are over this size they will be transfered.';
