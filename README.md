@@ -201,6 +201,26 @@ az storage container policy delete \
 - Create an DigitalOcean Space.
 - Currently DigitalOcean does not provide an ACL to their Spaces offering.
 
+### Openstack Object Storage
+
+*Openstack object storage container setup*
+
+Create a dedicated user that does **not** have the 'Object Storage' role, and is then assign read and write permissions directly on the object storage container. This is to ensure least privileges.
+
+
+- Create the container
+```
+openstack container create <container_name>
+```
+- Assign read permissions
+```
+swift post <container_name> -r '<project_name>:<storage_username>'
+```
+- Assign write permissions
+```
+swift post <container_name> -w '<project_name>:<storage_username>'
+```
+
 ## Moodle configuration
 Go to Site Administration -> Plugins -> Admin tools -> Object storage file system. Descriptions for the various settings are as follows:
 
