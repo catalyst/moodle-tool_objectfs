@@ -82,8 +82,8 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $reflection->setAccessible(true);
         $localpath = $reflection->invokeArgs($this->filesystem, [$filehash, true]);
 
-        $fileperms = substr(sprintf('%o', fileperms($localpath)), -4);
-        $cfgperms = substr(sprintf('%o', $CFG->filepermissions), -4);
+        $fileperms = substr(sprintf('%04o', fileperms($localpath)), -4);
+        $cfgperms = substr(sprintf('%04o', $CFG->filepermissions), -4);
         $this->assertEquals($cfgperms, $fileperms);
     }
 
