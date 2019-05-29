@@ -90,7 +90,7 @@ class pusher extends manipulator {
 
     protected function get_candidates_sql_params() {
         $params = array(
-            'maxcreatedtimstamp' => $maxcreatedtimestamp,
+            'maxcreatedtimstamp' => time() - $this->minimumage,
             'threshold' => $this->sizethreshold,
             'maximum_file_size' => $this->maximumfilesize,
             'object_location' => OBJECT_LOCATION_LOCAL,
