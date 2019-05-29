@@ -70,17 +70,11 @@ class pusher extends manipulator {
         $this->filesystem->set_logger($this->logger);
     }
 
-    /**
-     * Get candidate content hashes for pushing.
-     * Files that are bigger than the sizethreshold,
-     * less than 5GB (S3 upload max),
-     * older than the minimum age
-     * and have no location / are in local.
-     *
-     * @return array candidate contenthashes
-     */
-    public function get_candidate_objects() {
-        global $DB;
+    protected function get_query_name() {
+        return 'get_push_candidates';
+    }
+
+    protected function get_candidates_sql() {
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
@@ -91,24 +85,18 @@ class pusher extends manipulator {
                         AND (o.location IS NULL OR o.location = :object_location)
                GROUP BY f.contenthash, o.location';
 
-        $maxcreatedtimestamp = time() - $this->minimumage;
+        return $sql;
+    }
 
+    protected function get_candidates_sql_params() {
         $params = array(
             'maxcreatedtimstamp' => $maxcreatedtimestamp,
             'threshold' => $this->sizethreshold,
             'maximum_file_size' => $this->maximumfilesize,
             'object_location' => OBJECT_LOCATION_LOCAL,
-         );
+        );
 
-        $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params);
-        $this->logger->end_timing();
-
-        $totalobjectsfound = count($objects);
-
-        $this->logger->log_object_query('get_push_candidates', $totalobjectsfound);
-
-        return $objects;
+        return $params;
     }
 
     protected function manipulate_object($objectrecord) {
