@@ -75,15 +75,6 @@ class deleter_testcase extends tool_objectfs_testcase {
         $this->assertArrayNotHasKey($duplicatedbject->contenthash, $candidateobjects);
     }
 
-    public function test_deleter_get_candidate_objects_will_return_no_objects_if_deletelocal_disabled() {
-        $duplicatedbject = $this->create_duplicated_object();
-        $this->set_deleter_config('deletelocal', 0);
-
-        $candidateobjects = $this->deleter->get_candidate_objects();
-
-        $this->assertArrayNotHasKey($duplicatedbject->contenthash, $candidateobjects);
-    }
-
     public function test_deleter_can_delete_object() {
         global $DB;
         $object = $this->create_duplicated_object();
