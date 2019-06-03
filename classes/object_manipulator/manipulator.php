@@ -93,34 +93,32 @@ abstract class manipulator {
 
         $limit = 1000; // TODO: config option?
 
-        while (time() <= $this->finishtime) {
-            $objects = $this->get_candidate_objects($limit);
+        $objects = $this->get_candidate_objects($limit);
 
-            if (empty($objects)) {
-                mtrace('No candidate objects found.');
-                return;
-            }
-
-            $this->logger->start_timing();
-            foreach ($objects as $object) {
-                if (time() >= $this->finishtime) {
-                    break;
-                }
-
-                $objectlock = $this->filesystem->acquire_object_lock($object->contenthash);
-
-                // Object is currently being manipulated elsewhere.
-                if (!$objectlock) {
-                    continue;
-                }
-
-                $newlocation = $this->manipulate_object($object);
-                update_object_record($object->contenthash, $newlocation);
-                $objectlock->release();
-            }
-            $this->logger->end_timing();
-            $this->logger->output_move_statistics();
+        if (empty($objects)) {
+            mtrace('No candidate objects found.');
+            return;
         }
+
+        $this->logger->start_timing();
+        foreach ($objects as $object) {
+            if (time() >= $this->finishtime) {
+                break;
+            }
+
+            $objectlock = $this->filesystem->acquire_object_lock($object->contenthash);
+
+            // Object is currently being manipulated elsewhere.
+            if (!$objectlock) {
+                continue;
+            }
+
+            $newlocation = $this->manipulate_object($object);
+            update_object_record($object->contenthash, $newlocation);
+            $objectlock->release();
+        }
+        $this->logger->end_timing();
+        $this->logger->output_move_statistics();
     }
 
     /**
