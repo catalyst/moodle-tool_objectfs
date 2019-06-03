@@ -84,58 +84,59 @@ abstract class manipulator {
     /**
      * Pushes files from local file system to remote.
      *
-     * @param  array $candidatehashes content hashes to push
      */
-    public function execute($objectrecords) {
-
+    public final function execute() {
         if (!$this->manipulator_can_execute()) {
             mtrace('Objectfs manipulator exiting early');
             return;
         }
 
-        if (count($objectrecords) == 0) {
-            mtrace('No candidate objects found.');
-            return;
-        }
+        $limit = 1000; // TODO: config option?
 
-        $this->logger->start_timing();
+        while (time() <= $this->finishtime) {
+            $objects = $this->get_candidate_objects($limit);
 
-        foreach ($objectrecords as $objectrecord) {
-            if (time() >= $this->finishtime) {
+            if (empty($objects)) {
                 break;
             }
 
-            $objectlock = $this->filesystem->acquire_object_lock($objectrecord->contenthash);
+            $this->logger->start_timing();
+            foreach ($objects as $object) {
+                if (time() >= $this->finishtime) {
+                    break;
+                }
 
-            // Object is currently being manipulated elsewhere.
-            if (!$objectlock) {
-                continue;
+                $objectlock = $this->filesystem->acquire_object_lock($object->contenthash);
+
+                // Object is currently being manipulated elsewhere.
+                if (!$objectlock) {
+                    continue;
+                }
+
+                $newlocation = $this->manipulate_object($object);
+                update_object_record($object->contenthash, $newlocation);
+                $objectlock->release();
             }
-
-            $newlocation = $this->manipulate_object($objectrecord);
-
-            update_object_record($objectrecord->contenthash, $newlocation);
-
-            $objectlock->release();
+            $this->logger->end_timing();
+            $this->logger->output_move_statistics();
         }
-
-        $this->logger->end_timing();
-        $this->logger->output_move_statistics();
     }
 
     /**
-     * get candidate content hashes for execution.
+     * Get candidate content hashes for execution.
      *
-     * @return array $candidatehashes candidate content hashes
+     * @param int $limit This many candidate objects in total.
+     *
+     * @return array $objects candidate content hashes
      */
-    public final function get_candidate_objects() {
+    public final function get_candidate_objects($limit = 1000) {
         global $DB;
 
         $sql = $this->get_candidates_sql();
         $params = $this->get_candidates_sql_params();
 
         $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params);
+        $objects = $DB->get_records_sql($sql, $params, 0, $limit);
         $this->logger->end_timing();
 
         $totalobjectsfound = count($objects);
@@ -179,7 +180,6 @@ abstract class manipulator {
 
         $logger = new \tool_objectfs\log\aggregate_logger();
         $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
-        $candidatehashes = $manipulator->get_candidate_objects();
-        $manipulator->execute($candidatehashes);
+        $manipulator->execute();
     }
 }
