@@ -97,7 +97,8 @@ abstract class manipulator {
             $objects = $this->get_candidate_objects($limit);
 
             if (empty($objects)) {
-                break;
+                mtrace('No candidate objects found.');
+                return;
             }
 
             $this->logger->start_timing();
