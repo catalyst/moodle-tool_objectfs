@@ -135,7 +135,7 @@ abstract class manipulator {
         $params = $this->get_candidates_sql_params();
 
         $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params);
+        $objects = $DB->get_records_sql($sql, $params, 0, 1000); // Hard limit on one batch of files.
         $this->logger->end_timing();
 
         $totalobjectsfound = count($objects);

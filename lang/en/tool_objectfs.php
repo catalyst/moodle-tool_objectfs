@@ -109,7 +109,7 @@ $string['settings:deletelocal_help'] = 'Delete local objects once they are in ex
 $string['settings:consistencydelay'] = 'Consistency delay';
 $string['settings:consistencydelay_help'] = 'How long an object must have existed after being transfered to external object storage before they are a candidate for deletion locally.';
 $string['settings:maxtaskruntime'] = 'Maximum transfer task runtime';
-$string['settings:maxtaskruntime_help'] = 'Background tasks handle the transfer of objects to and from external object storage. This setting controlls the maximum runtime for all object transfer related tasks.';
+$string['settings:maxtaskruntime_help'] = 'Background tasks handle the transfer of objects to and from external object storage. This setting controlls the maximum runtime for all object transfer related tasks to process 1000 files.';
 $string['settings:preferexternal'] = 'Prefer external objects';
 $string['settings:preferexternal_help'] = 'If a file is stored both locally and in external object storage, read from external\. This is setting is mainly for testing purposes and introduces overhead to check the location.';
 
