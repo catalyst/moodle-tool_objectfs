@@ -35,6 +35,14 @@ class test_client implements object_client {
         if (!is_dir($this->bucketpath)) {
             mkdir($this->bucketpath);
         }
+        // Trashdir for local storage.
+        if (!is_dir($this->bucketpath . '/trashdir')) {
+            mkdir($this->bucketpath . '/trashdir');
+        }
+        // Trashdir for external storage.
+        if (!is_dir($this->bucketpath . '/trash')) {
+            mkdir($this->bucketpath . '/trash');
+        }
     }
 
     public function get_seekable_stream_context() {
@@ -44,6 +52,22 @@ class test_client implements object_client {
 
     public function get_fullpath_from_hash($contenthash) {
         return "$this->bucketpath/{$contenthash}";
+    }
+
+    public function get_trash_fullpath_from_hash($contenthash) {
+        return "$this->bucketpath/trashdir/{$contenthash}";
+    }
+
+    public function delete_file($fullpath) {
+        return unlink($fullpath);
+    }
+
+    public function rename_file($currentpath, $destinationpath) {
+        return rename($currentpath, $destinationpath);
+    }
+
+    public function get_external_trash_path_from_hash($contenthash) {
+        return "$this->bucketpath/trash/{$contenthash}";
     }
 
     public function register_stream_wrapper() {
@@ -56,9 +80,11 @@ class test_client implements object_client {
     }
 
     public function verify_object($contenthash, $localpath) {
-        $localmd5 = md5_file($localpath);
-        $externalmd5 = $this->get_md5_from_hash($contenthash);
-        if ($localmd5 === $externalmd5) {
+        // For objects uploaded to S3 storage using the multipart upload, the etag will not be the objects MD5.
+        // So we can't compare here to verify the object.
+        // For now we just check that we can retrieve any Etag to verify the object for all supported storages.
+        $retrievemd5 = $this->get_md5_from_hash($contenthash);
+        if ($retrievemd5) {
             return true;
         }
         return false;

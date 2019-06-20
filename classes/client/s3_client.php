@@ -120,9 +120,11 @@ class s3_client implements object_client {
     }
 
     public function verify_object($contenthash, $localpath) {
-        $localmd5 = md5_file($localpath);
-        $externalmd5 = $this->get_md5_from_hash($contenthash);
-        if ($externalmd5) {
+        // For objects uploaded to S3 storage using the multipart upload, the etag will not be the objects MD5.
+        // So we can't compare here to verify the object.
+        // For now we just check that we can retrieve any Etag to verify the object for all supported storages.
+        $retrievemd5 = $this->get_md5_from_hash($contenthash);
+        if ($retrievemd5) {
             return true;
         }
         return false;
@@ -137,6 +139,36 @@ class s3_client implements object_client {
     public function get_fullpath_from_hash($contenthash) {
         $filepath = $this->get_filepath_from_hash($contenthash);
         return "s3://$this->bucket/$filepath";
+    }
+
+    /**
+     * Returns s3 trash fullpath to use with php file functions.
+     *
+     * @param  string $contenthash contenthash used as key in s3.
+     * @return string trash fullpath to s3 object.
+     */
+    public function get_trash_fullpath_from_hash($contenthash) {
+        $filepath = $this->get_filepath_from_hash($contenthash);
+        return "s3://$this->bucket/trash/$filepath";
+    }
+
+    /**
+     * Deletes a file in S3 storage.
+     *
+     * @path   string full path to S3 file.
+     */
+    public function delete_file($fullpath) {
+        unlink($fullpath);
+    }
+
+    /**
+     * Moves a file in S3 storage.
+     *
+     * @param string $currentpath     current full path to S3 file.
+     * @param string $destinationpath destination path.
+     */
+    public function rename_file($currentpath, $destinationpath) {
+        rename($currentpath, $destinationpath);
     }
 
     /**
