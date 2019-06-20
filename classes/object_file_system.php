@@ -28,6 +28,9 @@
 
 namespace tool_objectfs;
 
+use stored_file;
+use file_storage;
+use BlobRestProxy;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -150,6 +153,10 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient->get_fullpath_from_hash($contenthash);
     }
 
+    protected function get_external_trash_path_from_hash($contenthash) {
+        return $this->externalclient->get_trash_fullpath_from_hash($contenthash);
+    }
+
     protected function get_external_path_from_storedfile(\stored_file $file) {
         return $this->get_external_path_from_hash($file->get_contenthash());
     }
@@ -177,6 +184,19 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $path = $this->get_external_path_from_hash($contenthash, false);
+
+        // Note - it is not possible to perform a content recovery safely from a hash alone.
+        return is_readable($path);
+    }
+
+    public function is_file_readable_externally_in_trash_by_hash($contenthash) {
+        if ($contenthash === sha1('')) {
+            // Files with empty size are either directories or empty.
+            // We handle these virtually.
+            return true;
+        }
+
+        $path = $this->get_external_trash_path_from_hash($contenthash, false);
 
         // Note - it is not possible to perform a content recovery safely from a hash alone.
         return is_readable($path);
@@ -445,34 +465,50 @@ abstract class object_file_system extends \file_system_filedir {
             return;
         }
 
-        $location = $this->get_object_location_from_hash($contenthash);
-        if ($location == OBJECT_LOCATION_ERROR) {
-            return;
-        }
-
-        $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
-        $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
-
-        if (!is_dir($trashpath)) {
-            mkdir($trashpath, $this->dirpermissions, true);
-        }
-
-        if (file_exists($trashfile)) {
-            // A copy of this file is already in the trash.
-            // Remove the old version.
-            $this->delete_object_from_hash($contenthash);
-            return;
-        }
-
-        // Move the contentfile to the trash, and fix permissions as required.
-        $this->copy_file_from_hash_to_path($contenthash, $trashfile);
         $this->delete_object_from_hash($contenthash);
+    }
 
-        // Fix permissions, only if needed.
-        $currentperms = octdec(substr(decoct(fileperms($trashfile)), -4));
-        if ((int)$this->filepermissions !== $currentperms) {
-            chmod($trashfile, $this->filepermissions);
+    /**
+     * Extends recover_file to recover missing content of file from trash.
+     *
+     * @param stored_file $file stored_file instance
+     * @return bool success
+     */
+    protected function recover_file(\stored_file $file) {
+        $contentfile = $this->get_external_path_from_storedfile($file);
+
+        if (file_exists($contentfile) ) {
+            // The file already exists on the external storage. No need to recover.
+            return true;
         }
+
+        $contenthash = $file->get_contenthash();
+        $externalreadable = $this->is_file_readable_externally_in_trash_by_hash($contenthash);
+
+        if ($externalreadable) {
+            $trashfile = $this->get_external_trash_path_from_hash($contenthash);
+
+            if (filesize($trashfile) != $file->get_filesize() or $this->hash_from_path($trashfile) != $contenthash) {
+                // The files are different. Leave this one in trash - something seems to be wrong with it.
+                return false;
+            }
+
+            $this->rename_external_file($trashfile, $contentfile);
+            return true;
+
+        } else {
+            return parent::recover_file($file);
+        }
+    }
+
+    /**
+     * Calculate and return the contenthash of the supplied file.
+     *
+     * @param   string $filepath The path to the file on disk
+     * @return  string The file's content hash
+     */
+    public static function hash_from_path($filepath) {
+        return sha1_file($filepath);
     }
 
     /**
@@ -487,6 +523,49 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
+     * Copies local file to trashdir by its hash
+     *
+     * @param string $contenthash file to be copied
+     */
+    public function copy_local_file_to_trashdir_from_hash($contenthash) {
+        $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
+        $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
+
+        if (!is_dir($trashpath)) {
+            mkdir($trashpath, $this->dirpermissions, true);
+        }
+
+        if (file_exists($trashfile)) {
+            // A copy of this file is already in the trash.
+            // Remove the old version.
+            $this->delete_object_from_hash($contenthash);
+            return;
+        }
+
+        $this->copy_file_from_hash_to_path($contenthash, $trashfile);
+
+        // Fix permissions, only if needed.
+        $currentperms = octdec(substr(decoct(fileperms($trashfile)), -4));
+        if ((int)$this->filepermissions !== $currentperms) {
+            chmod($trashfile, $this->filepermissions);
+        }
+    }
+
+    /**
+     * Moves external file to trashdir by its hash
+     *
+     * @param string $contenthash file to be moved
+     */
+    public function move_external_file_to_trashdir_from_hash($contenthash) {
+        if ($this->deleteexternally) {
+            $currentpath = $this->get_external_path_from_hash($contenthash);
+            $destinationpath = $this->get_external_trash_path_from_hash($contenthash);
+
+            $this->rename_external_file($currentpath, $destinationpath);
+        }
+    }
+
+    /**
      * Deletes file from local/remote filesystem by its hash
      *
      * @param string $contenthash file to be copied
@@ -496,15 +575,22 @@ abstract class object_file_system extends \file_system_filedir {
 
         switch ($location) {
             case OBJECT_LOCATION_LOCAL:
+                $this->copy_local_file_to_trashdir_from_hash($contenthash);
                 $this->delete_local_file_from_hash($contenthash);
                 break;
+
             case OBJECT_LOCATION_DUPLICATED:
                 $this->delete_local_file_from_hash($contenthash);
-                $this->delete_external_file_from_hash($contenthash);
+                $this->move_external_file_to_trashdir_from_hash($contenthash);
                 break;
-            case OBJECT_LOCATION_EXTERNAL;
-                $this->delete_external_file_from_hash($contenthash);
+
+            case OBJECT_LOCATION_EXTERNAL:
+                $this->move_external_file_to_trashdir_from_hash($contenthash);
                 break;
+
+            case OBJECT_LOCATION_ERROR:
+            default:
+                return;
         }
     }
 
@@ -519,15 +605,15 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Deletes file from remote filesystem by its hash
-     * if $CFG->tool_objectfs_delete_externally is enabled
+     * Moves external file
+     * if $CFG->tool_objectfs_delete_externally is enabled.
      *
-     * @param string $contenthash file to be copied
+     * @param string $currentpath current path to file to be moved.
+     * @param string $destinationpath destination path.
      */
-    public function delete_external_file_from_hash($contenthash) {
+    public function rename_external_file($currentpath, $destinationpath) {
         if ($this->deleteexternally) {
-            $path = $this->get_remote_path_from_hash($contenthash);
-            unlink($path);
+            $this->externalclient->rename_file($currentpath, $destinationpath);
         }
     }
 
@@ -537,6 +623,16 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function get_client_availability() {
         return $this->externalclient->get_availability();
+    }
+
+    /**
+     * Delete file with external client.
+     *
+     * @path   path to file to be deleted.
+     * @return bool.
+     */
+    public function delete_client_file($path) {
+        return $this->externalclient->delete_file($path);
     }
 
     /**

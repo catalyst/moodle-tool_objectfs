@@ -124,9 +124,62 @@ class azure_client implements object_client {
         StreamWrapper::register($this->client);
     }
 
+    /**
+     * Returns azure fullpath to use with php file functions.
+     *
+     * @param  string $contenthash contenthash used as key in azure.
+     * @return string fullpath to azure object.
+     */
     public function get_fullpath_from_hash($contenthash) {
         $filepath = $this->get_filepath_from_hash($contenthash);
         return "blob://$this->container/$filepath";
+    }
+
+    /**
+     * Returns azure trash fullpath to use with php file functions.
+     *
+     * @param  string $contenthash contenthash used as key in azure.
+     * @return string trash fullpath to azure object.
+     */
+    public function get_trash_fullpath_from_hash($contenthash) {
+        $filepath = $this->get_filepath_from_hash($contenthash);
+        return "blob://$this->container/trash/$filepath";
+    }
+
+    /**
+     * Deletes file (blob) in azure blob storage.
+     *
+     * @param string $fullpath path to azure blob.
+     */
+    public function delete_file($fullpath) {
+        $container = $this->container;
+        $relativepath = $this->get_relative_path_from_fullpath($fullpath);
+
+        $this->client->deleteBlob($container, $relativepath);
+    }
+
+    /**
+     * Moves file (blob) within azure blob storage.
+     *
+     * @param string $currentpath     current path to file to be moved.
+     * @param string $destinationpath destination path to file.
+     */
+    public function rename_file($currentpath, $destinationpath) {
+        copy($currentpath, $destinationpath);
+
+        $this->delete_file($currentpath);
+    }
+
+    /**
+     * Returns relative path to blob from fullpath to use with php file functions.
+     *
+     * @param    string    $fullpath full path to azure blob.
+     * @return   string    relative path to azure blob.
+     */
+    public function get_relative_path_from_fullpath($fullpath) {
+        $relativepath = str_replace("blob://$this->container/", '', $fullpath);
+
+        return $relativepath;
     }
 
     public function get_seekable_stream_context() {
@@ -174,9 +227,11 @@ class azure_client implements object_client {
     }
 
     public function verify_object($contenthash, $localpath) {
-        $localmd5 = md5_file($localpath);
-        $externalmd5 = $this->get_md5_from_hash($contenthash);
-        if ($localmd5 === $externalmd5) {
+        // For objects uploaded to S3 storage using the multipart upload, the etag will not be the objects MD5.
+        // So we can't compare here to verify the object.
+        // For now we just check that we can retrieve any Etag to verify the object for all supported storages.
+        $retrievemd5 = $this->get_md5_from_hash($contenthash);
+        if ($retrievemd5) {
             return true;
         }
         return false;
