@@ -184,7 +184,7 @@ class streamwrapper {
      *
      * @return boolean
      */
-    public function dir_closedir(): bool {
+    public function dir_closedir() {
         $this->dirindex = 0;
         $this->dirlisting = [];
         return true;
@@ -197,7 +197,7 @@ class streamwrapper {
      * @param integer $options
      * @return boolean
      */
-    public function dir_opendir(string $path, int $options): bool {
+    public function dir_opendir($path, $options) {
         $url = $this->parse_url($path);
 
         if (empty($url['host'])) {
@@ -241,7 +241,7 @@ class streamwrapper {
         return $this->push_object();
     }
 
-    public function stream_eof(): bool {
+    public function stream_eof() {
         return $this->objstream->eof();
     }
 
@@ -255,7 +255,7 @@ class streamwrapper {
      * @param string $openedpath
      * @return boolean
      */
-    public function stream_open(string $path , string $mode , int $options , string &$openedpath = null): bool {
+    public function stream_open($path, $mode, $options, &$openedpath = null) {
 
         $this->set_mode($mode);
 
@@ -330,7 +330,7 @@ class streamwrapper {
      * @param integer $count
      * @return string
      */
-    public function stream_read(int $count): string {
+    public function stream_read($count) {
 
         return $this->objstream->read($count);
     }
@@ -342,7 +342,7 @@ class streamwrapper {
      * @param integer $whence
      * @return boolean
      */
-    public function stream_seek(int $offset , int $whence = SEEK_SET): bool {
+    public function stream_seek($offset, $whence = SEEK_SET) {
 
         $this->objstream->seek($offset, $whence);
         return true;
@@ -354,7 +354,7 @@ class streamwrapper {
      *
      * @return array
      */
-    public function stream_stat(): array {
+    public function stream_stat() {
 
         $size = $this->objstream->getSize();
 
@@ -367,7 +367,7 @@ class streamwrapper {
      *
      * @return integer
      */
-    public function stream_tell(): int {
+    public function stream_tell() {
 
         return $this->objstream->tell();
     }
@@ -379,7 +379,7 @@ class streamwrapper {
      * @param string $data
      * @return integer
      */
-    public function stream_write(string $data ): int {
+    public function stream_write($data) {
 
         if (!$this->iswriting) {
             tigger_error("Steam is not writable", E_USER_WARNING);
@@ -394,7 +394,7 @@ class streamwrapper {
      *
      * @return boolean
      */
-    public function steam_flush(): bool {
+    public function steam_flush() {
 
         return $this->push_object();
     }
@@ -405,15 +405,13 @@ class streamwrapper {
      * @param string $path
      * @return boolean
      */
-    public function unlink(string $path): bool {
+    public function unlink($path) {
 
         $url = $this->parse_url($path);
 
         try {
 
-            $this->get_container($url['host'])
-                ->getObject($url['path'])
-                ->delete();
+            $this->get_container($url['host'])->getObject($url['path'])->delete();
             return true;
 
         } catch (\OpenStack\Common\Error\BadResponseError $e) {
@@ -440,7 +438,7 @@ class streamwrapper {
      * @param integer $flags
      * @return void
      */
-    public function url_stat(string $path , int $flags) {
+    public function url_stat($path, $flags) {
 
         $url = $this->parse_url($path);
 
@@ -495,7 +493,7 @@ class streamwrapper {
      * @param string $url
      * @return array
      */
-    private function parse_url(string $url): array {
+    private function parse_url($url) {
         $res = parse_url($url);
 
         // These have to be decode because they will later
@@ -521,7 +519,7 @@ class streamwrapper {
      * @param string $key
      * @return string
      */
-    private function context(string $key): string {
+    private function context($key) {
 
         $defaultctx = [];
         $ctx = [];
@@ -558,7 +556,7 @@ class streamwrapper {
      *
      * @return boolean
      */
-    private function push_object(): bool {
+    private function push_object() {
         if (!$this->isdirty) {
             return true;
         }
@@ -584,7 +582,7 @@ class streamwrapper {
      * @param string $containername
      * @return object
      */
-    private function get_container(string $containername): \OpenStack\ObjectStore\v1\Models\Container {
+    private function get_container($containername) {
         $params = [
             'authUrl' => $this->context('endpoint'),
             'region'  => $this->context('region'),
@@ -620,7 +618,7 @@ class streamwrapper {
      * @param string $mode
      * @return void
      */
-    private function set_mode(string $mode) {
+    private function set_mode($mode) {
         $mode = strtolower($mode);
 
         $this->isbinary = strpos($mode, 'b') !== false;
