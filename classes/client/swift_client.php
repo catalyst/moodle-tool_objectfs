@@ -308,6 +308,7 @@ class swift_client implements object_client {
 
         } else {
             $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
+            $permissions = true;
         }
         return $mform;
     }
