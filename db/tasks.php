@@ -29,7 +29,7 @@ $tasks = array(
     array(
         'classname' => 'tool_objectfs\task\push_objects_to_storage',
         'blocking'  => 0,
-        'minute'    => '*/5',
+        'minute'    => '*',
         'hour'      => '*',
         'day'       => '*',
         'dayofweek' => '*',
@@ -47,7 +47,7 @@ $tasks = array(
     array(
         'classname' => 'tool_objectfs\task\delete_local_objects',
         'blocking'  => 0,
-        'minute'    => '*/5',
+        'minute'    => '*',
         'hour'      => '*',
         'day'       => '*',
         'dayofweek' => '*',
@@ -56,7 +56,7 @@ $tasks = array(
     array(
         'classname' => 'tool_objectfs\task\pull_objects_from_storage',
         'blocking'  => 0,
-        'minute'    => '*/5',
+        'minute'    => '*',
         'hour'      => '*',
         'day'       => '*',
         'dayofweek' => '*',
