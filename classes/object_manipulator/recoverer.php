@@ -46,16 +46,11 @@ class recoverer extends manipulator {
         $this->filesystem->set_logger($this->logger);
     }
 
-    /**
-     * Get candidate content hashes for cleaning.
-     * Files that are past the consistancy delay
-     * and are in location duplicated.
-     *
-     * @return array candidate contenthashes
-     */
-    public function get_candidate_objects() {
-        global $DB;
+    protected function get_query_name() {
+        return 'get_recover_candidates';
+    }
 
+    protected function get_candidates_sql() {
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
@@ -65,16 +60,13 @@ class recoverer extends manipulator {
                        f.filesize,
                        o.location';
 
+        return $sql;
+    }
+
+    protected function get_candidates_sql_params() {
         $params = array(OBJECT_LOCATION_ERROR);
 
-        $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params);
-        $this->logger->end_timing();
-
-        $totalobjectsfound = count($objects);
-
-        $this->logger->log_object_query('get_recover_candidates', $totalobjectsfound);
-        return $objects;
+        return $params;
     }
 
     protected function manipulate_object($objectrecord) {

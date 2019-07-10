@@ -54,15 +54,11 @@ class puller extends manipulator {
         $this->filesystem->set_logger($this->logger);
     }
 
-    /**
-     * Get candidate content hashes for pulling.
-     * Files that are less or equal to the sizethreshold,
-     * and are external.
-     *
-     * @return array candidate contenthashes
-     */
-    public function get_candidate_objects() {
-        global $DB;
+    protected function get_query_name() {
+        return 'get_pull_candidates';
+    }
+
+    protected function get_candidates_sql() {
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
@@ -73,24 +69,19 @@ class puller extends manipulator {
                 HAVING MAX(f.filesize) <= ?
                        AND (o.location = ?)';
 
+        return $sql;
+    }
+
+    protected function get_candidates_sql_params() {
         $params = array($this->sizethreshold, OBJECT_LOCATION_EXTERNAL);
 
-        $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params);
-        $this->logger->end_timing();
-
-        $totalobjectsfound = count($objects);
-
-        $this->logger->log_object_query('get_pull_candidates', $totalobjectsfound);
-
-        return $objects;
+        return $params;
     }
 
     protected function manipulate_object($objectrecord) {
         $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
         return $newlocation;
     }
-
 }
 
 

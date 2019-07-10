@@ -71,20 +71,11 @@ class deleter extends manipulator {
         $this->filesystem->set_logger($this->logger);
     }
 
-    /**
-     * Get candidate content hashes for cleaning.
-     * Files that are past the consistancy delay
-     * and are in location duplicated.
-     *
-     * @return array candidate contenthashes
-     */
-    public function get_candidate_objects() {
-        global $DB;
+    protected function get_query_name() {
+        return 'get_delete_candidates';
+    }
 
-        if ($this->deletelocal == 0) {
-            mtrace("Delete local disabled, not running query \n");
-            return array();
-        }
+    protected function get_candidates_sql() {
 
         $sql = 'SELECT f.contenthash,
                        MAX(f.filesize) AS filesize
@@ -97,18 +88,14 @@ class deleter extends manipulator {
                        o.location
                 HAVING MAX(f.filesize) > ?';
 
+        return $sql;
+    }
+
+    protected function get_candidates_sql_params() {
         $consistancythrehold = time() - $this->consistencydelay;
         $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED, $this->sizethreshold);
 
-        $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params);
-        $this->logger->end_timing();
-
-        $totalobjectsfound = count($objects);
-
-        $this->logger->log_object_query('get_delete_candidates', $totalobjectsfound);
-
-        return $objects;
+        return $params;
     }
 
     protected function manipulate_object($objectrecord) {

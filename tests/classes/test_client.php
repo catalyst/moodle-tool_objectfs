@@ -27,7 +27,11 @@ class test_client implements object_client {
 
     public function __construct($config) {
         global $CFG;
-        $this->bucketpath = $CFG->phpunit_dataroot . '/mockbucket';
+        $dataroot = $CFG->phpunit_dataroot;
+        if (defined('PHPUNIT_INSTANCE') && PHPUNIT_INSTANCE !== null) {
+            $dataroot .= '/' . PHPUNIT_INSTANCE;
+        }
+        $this->bucketpath = $dataroot . '/mockbucket';
         if (!is_dir($this->bucketpath)) {
             mkdir($this->bucketpath);
         }

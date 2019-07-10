@@ -61,11 +61,25 @@ abstract class manipulator {
     }
 
     /**
-     * get candidate content hashes for execution.
+     * Returns a manipulator query name for logging.
      *
-     * @return array $candidatehashes candidate content hashes
+     * @return string
      */
-    abstract public function get_candidate_objects();
+    abstract protected function get_query_name();
+
+    /**
+     * Returns SQL to retrieve objects for manipulation.
+     *
+     * @return string
+     */
+    abstract protected function get_candidates_sql();
+
+    /**
+     * Returns a list of parameters for SQL from get_candidates_sql.
+     *
+     * @return array
+     */
+    abstract protected function get_candidates_sql_params();
 
     /**
      * Pushes files from local file system to remote.
@@ -109,11 +123,31 @@ abstract class manipulator {
         $this->logger->output_move_statistics();
     }
 
+    /**
+     * get candidate content hashes for execution.
+     *
+     * @return array $candidatehashes candidate content hashes
+     */
+    public final function get_candidate_objects() {
+        global $DB;
+
+        $sql = $this->get_candidates_sql();
+        $params = $this->get_candidates_sql_params();
+
+        $this->logger->start_timing();
+        $objects = $DB->get_records_sql($sql, $params, 0, 1000); // Hard limit on one batch of files.
+        $this->logger->end_timing();
+
+        $totalobjectsfound = count($objects);
+
+        $this->logger->log_object_query($this->get_query_name(), $totalobjectsfound);
+
+        return $objects;
+    }
+
     protected function manipulator_can_execute() {
         return true;
     }
-
-
 
     public static function get_all_manipulator_classnames() {
         $manipulators = array('deleter',
