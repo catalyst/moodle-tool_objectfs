@@ -183,5 +183,11 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $externalpath = $this->get_external_path_from_hash($contenthash);
         return is_readable($externalpath);
     }
+
+    protected function acquire_object_lock($filehash, $timeout = 0) {
+        $reflection = new \ReflectionMethod(object_file_system::class, 'acquire_object_lock');
+        $reflection->setAccessible(true);
+        return $reflection->invokeArgs($this->filesystem, [$filehash, $timeout]);
+    }
 }
 
