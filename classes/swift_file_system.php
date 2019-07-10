@@ -15,18 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * File system for Openstack Object Storage
  *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    tool_objectfs
+ * @author     Matt Clarkson
+ * @copyright  Catalyst IT
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2019070401;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2019070401;      // Same as version
-$plugin->requires  = 2013111811;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+use tool_objectfs\client\swift_client;
+
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+
+class swift_file_system extends object_file_system {
+
+    protected function initialise_external_client($config) {
+        $client = new swift_client($config);
+        return $client;
+    }
+}

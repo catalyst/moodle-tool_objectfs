@@ -243,6 +243,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function copy_object_from_local_to_external_by_hash($contenthash, $objectsize = 0) {
         $initiallocation = $this->get_object_location_from_hash($contenthash);
+
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_LOCAL) {

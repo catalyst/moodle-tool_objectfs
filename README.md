@@ -16,6 +16,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   * [Amazon S3](#amazon-s3)
   * [Azure Blob Storage](#azure-blob-storage)
   * [DigitalOcean Spaces](#digitalocean-spaces)
+  * [Openstack Object Storage](#openstack-object-storage)
 * [Moodle configuration](#moodle-configuration)
   * [General Settings](#general-settings)
   * [File Transfer settings](#file-transfer-settings)
@@ -41,7 +42,7 @@ Many of our clients have multiple moodle instances, and there is much duplicated
 
 Some of our clients moodles are truly massive. We also have multiple environments for various types of testing, and often have ad hoc environments created on demand. Not only do we not want to have to store duplicated files, but we also want refreshing data to new environments to be as fast as possible.
 
-Using this plugin we can configure production to have full read write to the remote filesystem and store the vast bulk of content remotely. In this setup the latency and bandwidth isn't an issue as they are colocated. The local filedir on disk would only consist of small or fast churning files such as course backups. A refresh of the production data back to a staging environment can be much quicker now as we skip the sitedir clone completely and stage is simple configured with readonly access to the production filesystem. Any files it creates would only be writen to it's local filesystem which can then be discarded when next refreshed.
+Using this plugin we can configure production to have full read write to the remote filesystem and store the vast bulk of content remotely. In this setup the latency and bandwidth isn't an issue as they are colocated. The local filedir on disk would only consist of small or fast churning files such as course backups. A refresh of the production data back to a staging environment can be much quicker now as we skip the sitedir clone completely and stage is simple configured with readonly access to the production filesystem. Any files it creates would only be written to it's local filesystem which can then be discarded when next refreshed.
 
 ### Sharing files with data washed environments
 
@@ -81,19 +82,25 @@ $CFG->alternative_file_system_class = '\tool_objectfs\azure_file_system';
 $CFG->alternative_file_system_class = '\tool_objectfs\do_file_system';
 ```
 
-8. If you intend to allow deletion of remote files then add the following line. 
+
+* Openstack Object Storage (swift)
+```php
+$CFG->alternative_file_system_class = '\tool_objectfs\swift_file_system';
+```
+
+8. If you intend to allow deletion of remote files then add the following line.
 
 ```php
 $CFG->tool_objectfs_delete_externally = 1;
 ```
 
-This is not reccomended if you intend to share one object store between multiple environments, however this is a requirement for GDPR complience.
+This is not recommended if you intend to share one object store between multiple environments, however this is a requirement for GDPR compliance.
 
 ## Currently supported object stores
 
 ### Roadmap
 
-There is support for more object stores planed, in particular enabling Openstack deployments.
+There is support for more object stores planed.
 
 ### Amazon S3
 
@@ -194,6 +201,26 @@ az storage container policy delete \
 - Create an DigitalOcean Space.
 - Currently DigitalOcean does not provide an ACL to their Spaces offering.
 
+### Openstack Object Storage
+
+*Openstack object storage container setup*
+
+Create a dedicated user that does **not** have the 'Object Storage' role, and is then assign read and write permissions directly on the object storage container. This is to ensure least privileges.
+
+
+- Create the container
+```
+openstack container create <container_name>
+```
+- Assign read permissions
+```
+swift post <container_name> -r '<project_name>:<storage_username>'
+```
+- Assign write permissions
+```
+swift post <container_name> -w '<project_name>:<storage_username>'
+```
+
 ## Moodle configuration
 Go to Site Administration -> Plugins -> Admin tools -> Object storage file system. Descriptions for the various settings are as follows:
 
@@ -205,10 +232,10 @@ Go to Site Administration -> Plugins -> Admin tools -> Object storage file syste
 ### File Transfer settings
 These settings control the movement of files to and from object storage.
 
-- **Minimum size threshold (KB)**: Minimum size threshold for transferring objects to remote object storage. If objects are over this size they will be transfered.
+- **Minimum size threshold (KB)**: Minimum size threshold for transferring objects to remote object storage. If objects are over this size they will be transferred.
 - **Minimum age**: Minimum age that a object must exist on the local filedir before it will be considered for transfer.
 - **Delete local objects**: Delete local objects once they are in remote object storage after the consistency delay.
-- **Consistency delay**: How long an object must have existed after being transfered to remote object storage before they are a candidate for deletion locally.
+- **Consistency delay**: How long an object must have existed after being transferred to remote object storage before they are a candidate for deletion locally.
 
 ### File System settings
 - **Storage File System Selection**: The backend filesystem to be used. This is also used for the background transfer tasks when the main alternative_file_system_class variable is not set.
@@ -232,6 +259,17 @@ DigitalOcean Spaces specific settings
 - **Secret**: DO Spaces secret credential secret.
 - **Space**: DigitalOcean space name to store files in.
 - **Region**: DigitalOcean Spaces API endpoint region to use.
+
+
+### Openstack Object Storage settings
+Openstack Object Storage settings
+- **Username**: Storage account username
+- **Password**: Storage account password
+- **Authentication URL**: URL to openstack auth API
+- **Region**: Openstack region
+- **Tenant Name**: Openstack tenant name
+- **Project ID**: Openstack project ID
+- **Container**: Name of the storage container
 
 ## Backporting
 
