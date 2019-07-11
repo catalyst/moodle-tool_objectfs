@@ -121,5 +121,4 @@ class aggregate_logger extends objectfs_logger {
         $querystat->add_object_data($objectcount, $objectsum);
         $this->querystatistics[$queryname] = $querystat;
     }
-
 }

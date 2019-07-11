@@ -58,6 +58,15 @@ abstract class objectfs_logger {
         // @codingStandardsIgnoreEnd
     }
 
+    public function log_lock_timing($lock) {
+        $locktime = $this->get_timing();
+        if ($lock) {
+            $this->error_log('Lock acquired in '.$locktime.' seconds.');
+        } else {
+            $this->error_log('Can\'t acquire lock. Time waited '.$locktime.' seconds.');
+        }
+    }
+
     public abstract function log_object_read($readname, $objectpath, $objectsize = 0);
     public abstract function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0);
     public abstract function log_object_query($queryname, $objectcount, $objectsum = 0);

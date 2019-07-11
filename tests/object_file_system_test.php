@@ -449,5 +449,15 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
     }
 
+    public function test_object_storage_locker_can_acquire_lock_if_object_is_not_locked() {
+        $this->filesystem = new test_file_system();
+        $file = $this->create_local_file();
+        $filehash = $file->get_contenthash();
+        $lock = $this->acquire_object_lock($filehash);
+        $this->assertEquals(gettype($lock), 'object');
+        $this->assertEquals(get_class($lock), 'core\lock\lock');
+        $lock->release();
+    }
+
 }
 

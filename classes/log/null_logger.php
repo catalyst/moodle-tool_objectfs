@@ -43,4 +43,8 @@ class null_logger extends objectfs_logger {
         return;
     }
 
+    public function log_lock_timing($lock) {
+        return;
+    }
+
 }

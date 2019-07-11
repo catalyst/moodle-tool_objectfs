@@ -107,7 +107,7 @@ abstract class object_file_system extends \file_system_filedir {
         if ($fetchifnotfound && !is_readable($path)) {
 
             // Try and pull from remote.
-            $objectlock = $this->acquire_object_lock($contenthash);
+            $objectlock = $this->acquire_object_lock($contenthash, 600);
 
             // While gaining lock object might have been moved locally so we recheck.
             if ($objectlock && !is_readable($path)) {
@@ -200,11 +200,14 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     // Acquire the object lock any time you are moving an object between locations.
-    public function acquire_object_lock($contenthash) {
-        $timeout = 600; // 10 minutes before giving up.
+    public function acquire_object_lock($contenthash, $timeout = 0) {
         $resource = "tool_objectfs: $contenthash";
         $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_object');
+        $this->logger->start_timing();
         $lock = $lockfactory->get_lock($resource, $timeout);
+        $this->logger->end_timing();
+        $this->logger->log_lock_timing($lock);
+
         return $lock;
     }
 
