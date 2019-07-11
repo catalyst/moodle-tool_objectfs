@@ -121,14 +121,4 @@ class aggregate_logger extends objectfs_logger {
         $querystat->add_object_data($objectcount, $objectsum);
         $this->querystatistics[$queryname] = $querystat;
     }
-
-    public function log_lock_timing($lock) {
-        $locktime = $this->get_timing();
-        if ($lock) {
-            $this->error_log('Lock acquired in '.$locktime.' seconds.');
-        } else {
-            $this->error_log('Can\'t acquire lock. Time waited '.$locktime.' seconds.');
-        }
-    }
-
 }
