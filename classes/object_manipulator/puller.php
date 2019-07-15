@@ -59,7 +59,8 @@ class puller extends manipulator {
     }
 
     protected function get_candidates_sql() {
-        $sql = 'SELECT f.contenthash,
+        $sql = 'SELECT MAX(f.id),
+                       f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash

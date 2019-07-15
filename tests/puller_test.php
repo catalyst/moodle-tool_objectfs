@@ -51,7 +51,9 @@ class puller_testcase extends tool_objectfs_testcase {
 
         $candidateobjects = $this->puller->get_candidate_objects();
 
-        $this->assertArrayHasKey($remoteobject->contenthash, $candidateobjects);
+        foreach ($candidateobjects as $candidate) {
+            $this->assertEquals($remoteobject->contenthash, $candidate->contenthash);
+        }
     }
 
     public function test_puller_get_candidate_objects_will_not_get_duplicated_or_local_objects() {

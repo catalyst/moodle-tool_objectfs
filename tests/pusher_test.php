@@ -51,8 +51,13 @@ class pusher_testcase extends tool_objectfs_testcase {
         $object = $this->create_local_object();
 
         $candidateobjects = $this->pusher->get_candidate_objects();
-
-        $this->assertArrayHasKey($object->contenthash, $candidateobjects);
+        $objectfound = false;
+        foreach ($candidateobjects as $candidate) {
+            if ($object->contenthash === $candidate->contenthash) {
+                $objectfound = true;
+            }
+        }
+        $this->assertTrue($objectfound);
     }
 
     public function test_pusher_get_candidate_objects_wont_get_duplicated_or_remote_objects() {
