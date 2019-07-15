@@ -53,7 +53,9 @@ class deleter_testcase extends tool_objectfs_testcase {
 
         $candidateobjects = $this->deleter->get_candidate_objects();
 
-        $this->assertArrayHasKey($duplicatedbject->contenthash, $candidateobjects);
+        foreach ($candidateobjects as $candidate) {
+            $this->assertEquals($duplicatedbject->contenthash, $candidate->contenthash);
+        }
     }
 
     public function test_deleter_get_candidate_objects_will_not_get_local_or_remote_objects() {

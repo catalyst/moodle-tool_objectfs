@@ -44,7 +44,9 @@ class recoverer_testcase extends tool_objectfs_testcase {
 
         $candidateobjects = $this->recoverer->get_candidate_objects();
 
-        $this->assertArrayHasKey($recovererobject->contenthash, $candidateobjects);
+        foreach ($candidateobjects as $candidate) {
+            $this->assertEquals($recovererobject->contenthash, $candidate->contenthash);
+        }
     }
 
     public function test_recoverer_will_recover_local_objects() {
