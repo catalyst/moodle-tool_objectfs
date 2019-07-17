@@ -127,7 +127,7 @@ abstract class object_file_system extends \file_system_filedir {
         return $path;
     }
 
-    protected function get_remote_path_from_storedfile(\stored_file $file) {
+    public function get_remote_path_from_storedfile(\stored_file $file) {
         return $this->get_remote_path_from_hash($file->get_contenthash());
     }
 
