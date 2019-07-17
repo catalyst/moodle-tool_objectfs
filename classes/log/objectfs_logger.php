@@ -59,12 +59,7 @@ abstract class objectfs_logger {
     }
 
     public function log_lock_timing($lock) {
-        $locktime = $this->get_timing();
-        if ($lock) {
-            $this->error_log('Lock acquired in '.$locktime.' seconds.');
-        } else {
-            $this->error_log('Can\'t acquire lock. Time waited '.$locktime.' seconds.');
-        }
+        return;
     }
 
     public abstract function log_object_read($readname, $objectpath, $objectsize = 0);
