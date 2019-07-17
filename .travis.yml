@@ -13,6 +13,8 @@ php:
   - 7.0
   - 7.1
 
+dist: trusty
+
 addons:
   postgresql: "9.4"
 
