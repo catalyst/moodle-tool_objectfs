@@ -90,4 +90,13 @@ class real_time_logger extends objectfs_logger {
         error_log($logstring);
         // @codingStandardsIgnoreEnd
     }
+
+    public function log_lock_timing($lock) {
+        $locktime = $this->get_timing();
+        if ($lock) {
+            $this->error_log('Lock acquired in '.$locktime.' seconds.');
+        } else {
+            $this->error_log('Can\'t acquire lock. Time waited '.$locktime.' seconds.');
+        }
+    }
 }
