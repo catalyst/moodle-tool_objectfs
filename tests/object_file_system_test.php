@@ -494,4 +494,19 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->recover_file($file);
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
     }
+
+    public function test_can_delete_local_file_if_exists_in_trashdir() {
+        $this->filesystem = new test_file_system();
+        $file = $this->create_local_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+
+        $file = $this->create_local_file();
+        $filehash = $file->get_contenthash();
+        $this->delete_draft_files($filehash);
+        $this->filesystem->remove_file($filehash);
+        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+    }
 }
