@@ -537,8 +537,6 @@ abstract class object_file_system extends \file_system_filedir {
 
         if (file_exists($trashfile)) {
             // A copy of this file is already in the trash.
-            // Remove the old version.
-            $this->delete_object_from_hash($contenthash);
             return;
         }
 
@@ -597,7 +595,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * Deletes file from local filesystem by its hash
      *
-     * @param string $contenthash file to be copied
+     * @param string $contenthash file to be deleted
      */
     public function delete_local_file_from_hash($contenthash) {
         $path = $this->get_local_path_from_hash($contenthash);
