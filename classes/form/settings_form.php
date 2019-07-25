@@ -108,6 +108,10 @@ class settings_form extends \moodleform {
         $mform->addHelpButton('sizethreshold', 'settings:sizethreshold', 'tool_objectfs');
         $mform->setType("sizethreshold", PARAM_INT);
 
+        $mform->addElement('text', 'batchsize', get_string('settings:batchsize', 'tool_objectfs'));
+        $mform->addHelpButton('batchsize', 'settings:batchsize', 'tool_objectfs');
+        $mform->setType("batchsize", PARAM_INT);
+
         $mform->addElement('duration', 'minimumage', get_string('settings:minimumage', 'tool_objectfs'));
         $mform->addHelpButton('minimumage', 'settings:minimumage', 'tool_objectfs');
         $mform->setType("minimumage", PARAM_INT);
@@ -171,6 +175,10 @@ class settings_form extends \moodleform {
 
         if (is_numeric($data['sizethreshold']) && $data['sizethreshold'] < 0 ) {
             $errors['sizethreshold'] = get_string('settings:error:numeric', 'tool_objectfs');
+        }
+
+        if (is_numeric($data['batchsize']) && $data['batchsize'] < 0 ) {
+            $errors['batchsize'] = get_string('settings:error:numeric', 'tool_objectfs');
         }
 
         if (is_numeric($data['minimumage']) && $data['minimumage'] < 0 ) {

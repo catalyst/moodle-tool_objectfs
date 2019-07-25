@@ -49,6 +49,8 @@ abstract class manipulator {
 
     protected $logger;
 
+    protected $batchsize;
+
     /**
      * Manipulator constructor
      *
@@ -56,8 +58,9 @@ abstract class manipulator {
      * @param int $maxruntime What time the file manipulator should finish execution by
      */
     public function __construct($filesystem, $config) {
-         $this->finishtime = time() + $config->maxtaskruntime;
-         $this->filesystem = $filesystem;
+        $this->finishtime = time() + $config->maxtaskruntime;
+        $this->filesystem = $filesystem;
+        $this->batchsize = $config->batchsize;
     }
 
     /**
@@ -135,7 +138,7 @@ abstract class manipulator {
         $params = $this->get_candidates_sql_params();
 
         $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params, 0, 1000); // Hard limit on one batch of files.
+        $objects = $DB->get_records_sql($sql, $params, 0, $this->batchsize);
         $this->logger->end_timing();
 
         $totalobjectsfound = count($objects);
