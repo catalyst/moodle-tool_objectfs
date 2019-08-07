@@ -130,13 +130,10 @@ function tool_objectfs_get_client($config) {
     return false;
 }
 
-function tool_objectfs_get_client_components($type = 'base') {
+function tool_objectfs_get_fs_list() {
     global $CFG;
-
     $found = [];
-
     $path = $CFG->dirroot . '/admin/tool/objectfs/classes/client/*_client.php';
-
     $clients = glob($path);
 
     foreach ($clients as $client) {
@@ -148,19 +145,8 @@ function tool_objectfs_get_client_components($type = 'base') {
             continue;
         }
 
-        switch ($type) {
-            case 'file_system':
-                $found[$basename] = '\\tool_objectfs\\' . $basename . '_file_system';
-                break;
-            case 'client':
-                $found[$basename] = '\\tool_objectfs\\client\\' . $basename . '_client';
-                break;
-            case 'base':
-                $found[$basename] = $basename;
-                break;
-            default:
-                break;
-        }
+        $filesystem = '\\tool_objectfs\\' . $basename . '_file_system';
+        $found[$filesystem] = $filesystem;
     }
 
     return $found;

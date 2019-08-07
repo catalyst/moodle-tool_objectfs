@@ -234,20 +234,5 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         global $DB;
         $DB->delete_records('files', array('contenthash' => $contenthash));
     }
-
-    protected function is_externally_readable_by_url($url) {
-        try {
-            $file = fopen($url, 'r');
-            if ($file === false) {
-                $result = false;
-            } else {
-                fclose($file);
-                $result = true;
-            }
-            return $result;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
 }
 

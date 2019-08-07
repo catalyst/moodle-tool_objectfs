@@ -78,10 +78,6 @@ class s3_client extends object_client {
         ));
     }
 
-    public function get_availability() {
-        return true;
-    }
-
     public function get_maximum_upload_size() {
         // Using the multipart upload methods , you can upload objects from 5 MB to 5 TB in size.
         // See https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-multipart-upload.html.

@@ -151,11 +151,9 @@ class settings_form extends \moodleform {
         $mform->addElement('header', 'clientselectionheader', get_string('settings:clientselection:header', 'tool_objectfs'));
         $mform->setExpanded('clientselectionheader');
 
-        $names = tool_objectfs_get_client_components('file_system');
-        $clientlist = array_combine($names, $names);
-
         if (isset($CFG->alternative_file_system_class)) {
-            $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $clientlist);
+            $fslist = tool_objectfs_get_fs_list();
+            $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $fslist);
             $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
 
             if ($CFG->alternative_file_system_class == $config->filesystem) {
