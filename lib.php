@@ -123,7 +123,11 @@ function tool_objectfs_get_client($config) {
     $client = str_replace('file_system', 'client', $fsclass);
     $client = str_replace('\\tool_objectfs\\', '\\tool_objectfs\\client\\', $client);
 
-    return new $client($config);
+    if (class_exists($client)) {
+        return new $client($config);
+    }
+
+    return false;
 }
 
 function tool_objectfs_get_client_components($type = 'base') {

@@ -27,26 +27,6 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-$autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
-
-if (!file_exists($autoloader)) {
-
-    // Stub class with bare implementation for when the SDK prerequisite does not exist.
-    class s3_client {
-        public function get_availability() {
-            return false;
-        }
-
-        public function register_stream_wrapper() {
-            return false;
-        }
-    }
-
-    return;
-}
-
-require_once($autoloader);
-
 use Aws\Exception\MultipartUploadException;
 use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
@@ -54,19 +34,28 @@ use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
 
 define('AWS_API_VERSION', '2006-03-01');
-
 define('AWS_CAN_READ_OBJECT', 0);
 define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
-class s3_client implements object_client {
+
+class s3_client extends object_client {
 
     protected $client;
     protected $bucket;
+    protected $autoloader;
 
     public function __construct($config) {
-        $this->bucket = $config->s3_bucket;
-        $this->set_client($config);
+        global $CFG;
+        $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+
+        if ($this->get_availability() && !empty($config)) {
+            require_once($this->autoloader);
+            $this->bucket = $config->s3_bucket;
+            $this->set_client($config);
+        } else {
+            parent::__construct($config);
+        }
     }
 
     public function __sleep() {
@@ -99,9 +88,16 @@ class s3_client implements object_client {
         return OBJECTFS_BYTES_IN_TERABYTE * 5;
     }
 
+    /**
+     * Registers 's3://bucket' as a prefix for file actions.
+     *
+     */
     public function register_stream_wrapper() {
-        // Registers 's3://bucket' as a prefix for file actions.
-        $this->client->registerStreamWrapper();
+        if ($this->get_availability()) {
+            $this->client->registerStreamWrapper();
+        } else {
+            parent::register_stream_wrapper();
+        }
     }
 
     private function get_md5_from_hash($contenthash) {
@@ -236,7 +232,7 @@ class s3_client implements object_client {
                             'Body' => 'test content'));
         } catch (S3Exception $e) {
             $details = $this->get_exception_details($e);
-            $permissions->messages[] = get_string('settings:writefailure', 'tool_objectfs') . $details;
+            $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
         }
 
@@ -249,7 +245,7 @@ class s3_client implements object_client {
             // Write could have failed.
             if ($errorcode !== 'NoSuchKey') {
                 $details = $this->get_exception_details($e);
-                $permissions->messages[] = get_string('settings:readfailure', 'tool_objectfs') . $details;
+                $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
                 $permissions->success = false;
             }
         }
@@ -257,20 +253,21 @@ class s3_client implements object_client {
         if ($testdelete) {
             try {
                 $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => 'permissions_check_file'));
-                $permissions->messages[] = get_string('settings:deletesuccess', 'tool_objectfs');
+                $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
                 $permissions->success = false;
             } catch (S3Exception $e) {
                 $errorcode = $e->getAwsErrorCode();
                 // Something else went wrong.
                 if ($errorcode !== 'AccessDenied') {
                     $details = $this->get_exception_details($e);
-                    $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
+                    $permissions->messages[get_string('settings:deleteerror', 'tool_objectfs') . $details] = 'notifyproblem';
+                    $permissions->success = false;
                 }
             }
         }
 
         if ($permissions->success) {
-            $permissions->messages[] = get_string('settings:permissioncheckpassed', 'tool_objectfs');
+            $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
         }
 
         return $permissions;
@@ -310,10 +307,10 @@ class s3_client implements object_client {
             // Check permissions if we can connect.
             $permissions = $this->test_permissions($testdelete);
             if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
+                $mform->addElement('html', $OUTPUT->notification(key($permissions->messages), current($permissions->messages)));
             } else {
-                foreach ($permissions->messages as $message) {
-                    $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
+                foreach ($permissions->messages as $message => $type) {
+                    $mform->addElement('html', $OUTPUT->notification($message, $type));
                 }
             }
         } else {

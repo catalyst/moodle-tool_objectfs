@@ -26,33 +26,21 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-$autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
-
-if (!file_exists($autoloader)) {
-
-    // Stub class with bare implementation for when the SDK prerequisite does not exist.
-    class do_client {
-        public function get_availability() {
-            return false;
-        }
-
-        public function register_stream_wrapper() {
-            return false;
-        }
-    }
-
-    return;
-}
-
-require_once($autoloader);
-
 use Aws\S3\S3Client;
 
 class do_client extends s3_client {
 
     public function __construct($config) {
-        $this->bucket = $config->do_space;
-        $this->set_client($config);
+        global $CFG;
+        $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+
+        if ($this->get_availability() && !empty($config)) {
+            require_once($this->autoloader);
+            $this->bucket = $config->do_space;
+            $this->set_client($config);
+        } else {
+            parent::__construct($config);
+        }
     }
 
     public function set_client($config) {

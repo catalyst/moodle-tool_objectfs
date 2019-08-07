@@ -21,7 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 use tool_objectfs\object_file_system;
 use tool_objectfs\client\object_client;
 
-class test_client implements object_client {
+class test_client extends object_client {
 
     private $bucketpath;
 
@@ -105,5 +105,6 @@ class test_client implements object_client {
     public function get_maximum_upload_size() {
         return 5000000000;
     }
+
 }
 

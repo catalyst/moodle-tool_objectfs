@@ -22,32 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-$autoloader = $CFG->dirroot . '/local/openstack/vendor/autoload.php';
-
-if (!file_exists($autoloader)) {
-
-    // Stub class with bare implementation for when the SDK prerequisite does not exist.
-    class swift_client {
-        public function get_availability() {
-            return false;
-        }
-
-        public function register_stream_wrapper() {
-            return false;
-        }
-    }
-
-    return;
-}
-
-require_once($autoloader);
-
-class swift_client implements object_client {
+class swift_client extends object_client {
 
     /** @var string $containername The current container. */
     protected $containername;
@@ -56,6 +35,8 @@ class swift_client implements object_client {
 
     protected $config;
 
+    protected $autoloader;
+
     /**
      * The swift_client constructor.
      *
@@ -63,15 +44,16 @@ class swift_client implements object_client {
      */
     public function __construct($config) {
         global $CFG;
+        $this->autoloader = $CFG->dirroot . '/local/openstack/vendor/autoload.php';
 
-        if (empty($config)) {
-            return;
+        if ($this->get_availability() && !empty($config)) {
+            require_once($this->autoloader);
+            $this->containername = $config->openstack_container;
+            $this->config = $config;
+        } else {
+            parent::__construct($config);
         }
-
-        $this->containername = $config->openstack_container;
-        $this->config = $config;
     }
-
 
     public function get_container() {
 
@@ -105,15 +87,6 @@ class swift_client implements object_client {
     }
 
     /**
-     * Returns true if the Openstack SDK exists and has been loaded.
-     *
-     * @return bool
-     */
-    public function get_availability() {
-        return true;
-    }
-
-    /**
      * Returns the maximum allowed file size that is to be uploaded.
      *
      * @return int
@@ -128,16 +101,22 @@ class swift_client implements object_client {
      */
     public function register_stream_wrapper() {
 
-        static $bootstraped = false;
+        if ($this->get_availability()) {
+            static $bootstraped = false;
 
-        if ($bootstraped) {
-            return;
+            if ($bootstraped) {
+                return;
+            }
+
+            stream_wrapper_register('swift', "tool_objectfs\swift\streamwrapper") or die("cant create wrapper");
+            \tool_objectfs\swift\streamwrapper::set_default_context($this->get_seekable_stream_context());
+
+            $bootstraped = true;
+
+        } else {
+            parent::register_stream_wrapper();
         }
 
-        stream_wrapper_register('swift', "tool_objectfs\swift\streamwrapper") or die("cant create wrapper");
-        \tool_objectfs\swift\streamwrapper::set_default_context($this->get_seekable_stream_context());
-
-        $bootstraped = true;
     }
 
     public function get_fullpath_from_hash($contenthash) {
@@ -236,7 +215,7 @@ class swift_client implements object_client {
             $result = $container->createObject(['name' => 'permissions_check_file', 'content' => 'permissions_check_file']);
         } catch (BadResponseError $e) {
             $details = $this->get_exception_details($e);
-            $permissions->messages[] = get_string('settings:writefailure', 'tool_objectfs') . $details;
+            $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
         }
 
@@ -244,26 +223,28 @@ class swift_client implements object_client {
             $result = $container->getObject('permissions_check_file')->download();
         } catch (BadResponseError $e) {
             $details = $this->get_exception_details($e);
-            $permissions->messages[] = get_string('settings:readfailure', 'tool_objectfs') . $details;
+            $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
 
         }
 
         try {
             $result = $container->getObject('permissions_check_file')->delete();
+            $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
+            $permissions->success = false;
         } catch (\Exception $e) {
 
             $code = $this->get_error_code($e);
 
             // Bug in openstack means that a 404 will be returned if an object has not been replicated.
             if ($code !== 404) {
+                $permissions->messages[get_string('settings:deleteerror', 'tool_objectfs')] = 'notifyproblem';
                 $permissions->success = false;
-                $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs');
             }
         }
 
         if ($permissions->success) {
-            $permissions->messages[] = get_string('settings:permissioncheckpassed', 'tool_objectfs');
+            $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
         }
 
         return $permissions;
@@ -282,39 +263,6 @@ class swift_client implements object_client {
     }
 
     /**
-     * Moodle form element to display connection details for the swift service.
-     *
-     * @param $mform
-     * @param $config
-     * @return mixed
-     */
-    public function define_swift_check($mform, $config) {
-        global $OUTPUT;
-
-        $client = new swift_client($config, false);
-        $connection = $client->test_connection();
-
-        if ($connection->success) {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
-
-            // Check permissions if we can connect.
-            $permissions = $client->test_permissions();
-            if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
-            } else {
-                foreach ($permissions->messages as $message) {
-                    $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
-                }
-            }
-
-        } else {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
-            $permissions = true;
-        }
-        return $mform;
-    }
-
-    /**
      * swift settings form with the following elements:
      *
      * @param $mform
@@ -326,7 +274,8 @@ class swift_client implements object_client {
         $mform->addElement('header', 'openstackheader', get_string('settings:openstack:header', 'tool_objectfs'));
         $mform->setExpanded('openstackheader');
 
-        $mform = $this->define_swift_check($mform, $config);
+        $client = new swift_client($config);
+        $mform = $this->define_client_check($mform, $client);
 
         $mform->addElement('text', 'openstack_username', get_string('settings:openstack:username', 'tool_objectfs'));
         $mform->addHelpButton('openstack_username', 'settings:openstack:username', 'tool_objectfs');
@@ -371,4 +320,15 @@ class swift_client implements object_client {
         return $e->getResponse()->getStatusCode();
     }
 
+    public function delete_file($fullpath) {
+        // TODO: Implement delete_file() method.
+    }
+
+    public function rename_file($currentpath, $destinationpath) {
+        // TODO: Implement rename_file() method.
+    }
+
+    public function get_trash_fullpath_from_hash($contenthash) {
+        // TODO: Implement get_trash_fullpath_from_hash() method.
+    }
 }
