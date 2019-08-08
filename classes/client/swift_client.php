@@ -274,9 +274,6 @@ class swift_client extends object_client {
         $mform->addElement('header', 'openstackheader', get_string('settings:openstack:header', 'tool_objectfs'));
         $mform->setExpanded('openstackheader');
 
-        $client = new swift_client($config);
-        $mform = $this->define_client_check($mform, $client);
-
         $mform->addElement('text', 'openstack_username', get_string('settings:openstack:username', 'tool_objectfs'));
         $mform->addHelpButton('openstack_username', 'settings:openstack:username', 'tool_objectfs');
         $mform->setType("openstack_username", PARAM_TEXT);
@@ -304,6 +301,9 @@ class swift_client extends object_client {
         $mform->addElement('text', 'openstack_container', get_string('settings:openstack:container', 'tool_objectfs'));
         $mform->addHelpButton('openstack_container', 'settings:openstack:container', 'tool_objectfs');
         $mform->setType("openstack_container", PARAM_TEXT);
+
+        $client = new swift_client($config);
+        $mform = $this->define_client_check($mform, $client);
 
         return $mform;
     }

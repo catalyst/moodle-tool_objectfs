@@ -335,9 +335,6 @@ class azure_client extends object_client {
         $mform->addElement('header', 'azureheader', get_string('settings:azure:header', 'tool_objectfs'));
         $mform->setExpanded('azureheader');
 
-        $client = new azure_client($config);
-        $mform = $this->define_client_check($mform, $client);
-
         $mform->addElement('text', 'azure_accountname', get_string('settings:azure:accountname', 'tool_objectfs'));
         $mform->addHelpButton('azure_accountname', 'settings:azure:accountname', 'tool_objectfs');
         $mform->setType("azure_accountname", PARAM_TEXT);
@@ -349,6 +346,9 @@ class azure_client extends object_client {
         $mform->addElement('text', 'azure_sastoken', get_string('settings:azure:sastoken', 'tool_objectfs'));
         $mform->addHelpButton('azure_sastoken', 'settings:azure:sastoken', 'tool_objectfs');
         $mform->setType("azure_sastoken", PARAM_RAW);
+
+        $client = new azure_client($config);
+        $mform = $this->define_client_check($mform, $client);
 
         return $mform;
     }

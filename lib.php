@@ -116,10 +116,7 @@ function get_objectfs_config() {
 }
 
 function tool_objectfs_get_client($config) {
-    global $CFG;
-
-    $fsclass = $CFG->alternative_file_system_class;
-
+    $fsclass = $config->filesystem;
     $client = str_replace('file_system', 'client', $fsclass);
     $client = str_replace('\\tool_objectfs\\', '\\tool_objectfs\\client\\', $client);
 
@@ -132,7 +129,7 @@ function tool_objectfs_get_client($config) {
 
 function tool_objectfs_get_fs_list() {
     global $CFG;
-    $found = [];
+    $found[''] = 'Please, select';
     $path = $CFG->dirroot . '/admin/tool/objectfs/classes/client/*_client.php';
     $clients = glob($path);
 

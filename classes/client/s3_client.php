@@ -321,8 +321,6 @@ class s3_client extends object_client {
         $mform->addElement('header', 'awsheader', get_string('settings:aws:header', 'tool_objectfs'));
         $mform->setExpanded('awsheader');
 
-        $mform = $this->define_amazon_s3_check($mform);
-
         $regionoptions = array(
             'us-east-1'      => 'us-east-1 (N. Virginia)',
             'us-east-2'      => 'us-east-2 (Ohio)',
@@ -358,6 +356,9 @@ class s3_client extends object_client {
 
         $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
         $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
+
+        $mform = $this->define_amazon_s3_check($mform);
+
         return $mform;
     }
 
