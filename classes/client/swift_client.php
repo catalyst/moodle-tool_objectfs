@@ -26,7 +26,7 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-class swift_client extends object_client {
+class swift_client extends object_client_base {
 
     /** @var string $containername The current container. */
     protected $containername;

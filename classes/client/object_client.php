@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Object client abstract class.
+ * Objectfs client interface.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -27,77 +27,17 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-abstract class object_client implements client_interface {
-
-    public function __construct($config) {
-
-    }
-
-    /**
-     * Returns true if the Client SDK exists and has been loaded.
-     *
-     * @return bool
-     */
-    public function get_availability() {
-        if (file_exists($this->autoloader)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public function register_stream_wrapper() {
-
-    }
-
-    /**
-     * Does the storage support pre-signed URLs.
-     *
-     * @return bool.
-     */
-    public function support_signed_urls() {
-        return false;
-    }
-
-    /**
-     * Generates pre-signed URL to storage file from its hash.
-     *
-     * @param string $contenthash File content hash.
-     *
-     * @return string.
-     */
-    public function generate_signed_url($contenthash) {
-        return 'Not supported';
-    }
-
-    /**
-     * Moodle form element to display connection details for the client service.
-     *
-     * @param $mform
-     * @param $client
-     * @return mixed
-     */
-    public function define_client_check($mform, $client) {
-        global $OUTPUT;
-        $connection = $client->test_connection();
-
-        if ($connection->success) {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
-
-            // Check permissions if we can connect.
-            $permissions = $client->test_permissions();
-            if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification(key($permissions->messages), current($permissions->messages)));
-            } else {
-                foreach ($permissions->messages as $message => $type) {
-                    $mform->addElement('html', $OUTPUT->notification($message, $type));
-                }
-            }
-        } else {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
-        }
-        return $mform;
-    }
-
-
+interface object_client {
+    public function __construct($config);
+    public function register_stream_wrapper();
+    public function get_fullpath_from_hash($contenthash);
+    public function get_trash_fullpath_from_hash($contenthash);
+    public function delete_file($fullpath);
+    public function rename_file($currentpath, $destinationpath);
+    public function get_seekable_stream_context();
+    public function get_availability();
+    public function get_maximum_upload_size();
+    public function verify_object($contenthash, $localpath);
 }
+
+

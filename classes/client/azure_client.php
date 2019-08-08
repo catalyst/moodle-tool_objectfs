@@ -36,7 +36,7 @@ use SimpleXMLElement;
 use stdClass;
 use tool_objectfs\azure\StreamWrapper;
 
-class azure_client extends object_client {
+class azure_client extends object_client_base {
 
     /** @var BlobRestProxy $client The Blob client. */
     protected $client;

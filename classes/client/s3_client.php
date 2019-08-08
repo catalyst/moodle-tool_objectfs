@@ -39,7 +39,7 @@ define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
 
-class s3_client extends object_client {
+class s3_client extends object_client_base {
 
     protected $client;
     protected $bucket;
