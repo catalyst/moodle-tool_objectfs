@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Recovers objects that are in the error state if it can.
+ * Pulls files from remote storage if they meet the configured criterea.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,23 +23,31 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\object_manipulator;
+namespace tool_objectfs\local\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-class recoverer extends manipulator {
+class puller extends manipulator {
 
     /**
-     * recoverer constructor.
+     * Size threshold for pulling files from remote in bytes.
      *
-     * @param sss_client $client S3 client
-     * @param object_file_system $filesystem S3 file system
-     * @param object $config sssfs config.
+     * @var int
+     */
+    private $sizethreshold;
+
+    /**
+     * Puller constructor.
+     *
+     * @param object_client $client object client
+     * @param object_file_system $filesystem object file system
+     * @param object $config objectfs config.
      */
     public function __construct($filesystem, $config, $logger) {
         parent::__construct($filesystem, $config);
+        $this->sizethreshold = $config->sizethreshold;
 
         $this->logger = $logger;
         // Inject our logger into the filesystem.
@@ -47,7 +55,7 @@ class recoverer extends manipulator {
     }
 
     protected function get_query_name() {
-        return 'get_recover_candidates';
+        return 'get_pull_candidates';
     }
 
     protected function get_candidates_sql() {
@@ -56,23 +64,25 @@ class recoverer extends manipulator {
                        MAX(f.filesize) AS filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE o.location = ?
               GROUP BY f.contenthash,
                        f.filesize,
-                       o.location';
+                       o.location
+                HAVING MAX(f.filesize) <= ?
+                       AND (o.location = ?)';
 
         return $sql;
     }
 
     protected function get_candidates_sql_params() {
-        $params = array(OBJECT_LOCATION_ERROR);
+        $params = array($this->sizethreshold, OBJECT_LOCATION_EXTERNAL);
 
         return $params;
     }
 
     protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->get_object_location_from_hash($objectrecord->contenthash, $objectrecord->filesize);
+        $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
         return $newlocation;
     }
-
 }
+
+

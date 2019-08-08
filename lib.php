@@ -117,8 +117,8 @@ function get_objectfs_config() {
 
 function tool_objectfs_get_client($config) {
     $fsclass = $config->filesystem;
-    $client = str_replace('file_system', 'client', $fsclass);
-    $client = str_replace('\\tool_objectfs\\', '\\tool_objectfs\\client\\', $client);
+    $client = str_replace('_file_system', '', $fsclass);
+    $client = str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $client.'\\client');
 
     if (class_exists($client)) {
         return new $client($config);
@@ -128,24 +128,11 @@ function tool_objectfs_get_client($config) {
 }
 
 function tool_objectfs_get_fs_list() {
-    global $CFG;
     $found[''] = 'Please, select';
-    $path = $CFG->dirroot . '/admin/tool/objectfs/classes/client/*_client.php';
-    $clients = glob($path);
-
-    foreach ($clients as $client) {
-        $client = str_replace('_client.php', '', $client);
-        $basename = basename($client);
-
-        // Ignore the abstract class.
-        if ($basename == 'object') {
-            continue;
-        }
-
-        $filesystem = '\\tool_objectfs\\' . $basename . '_file_system';
-        $found[$filesystem] = $filesystem;
-    }
-
+    $found['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
+    $found['\tool_objectfs\do_file_system'] = '\tool_objectfs\do_file_system';
+    $found['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
+    $found['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
     return $found;
 }
 

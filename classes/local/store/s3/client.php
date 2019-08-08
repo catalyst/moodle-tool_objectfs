@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\client;
+namespace tool_objectfs\local\store\s3;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -32,14 +32,14 @@ use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
+use tool_objectfs\local\store\object_client_base;
 
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
 define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
-
-class s3_client extends object_client_base {
+class client extends object_client_base {
 
     protected $client;
     protected $bucket;

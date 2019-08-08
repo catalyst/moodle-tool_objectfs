@@ -14,28 +14,27 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_objectfs\tests;
+/**
+ * File system for Azure Blob Storage.
+ *
+ * @package    tool_objectfs
+ * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @copyright  Catalyst IT
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace tool_objectfs\local\store\azure;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\store\do\do_client;
+use tool_objectfs\local\store\object_file_system;
 
-class test_do_integration_client extends do_client {
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-    private $runidentifier;
+class file_system extends object_file_system {
 
-    public function __construct($config) {
-        parent::__construct($config);
-        $time = microtime();
-        $this->runidentifier = md5($time);
+    protected function initialise_external_client($config) {
+        $asclient = new client($config);
+        return $asclient;
     }
-
-    protected function get_filepath_from_hash($contenthash) {
-        $l1 = $contenthash[0] . $contenthash[1];
-        $l2 = $contenthash[2] . $contenthash[3];
-        $runidentifier = $this->runidentifier;
-        return "test/$runidentifier/$l1/$l2/$contenthash";
-    }
-
 }
-

@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\report;
+namespace tool_objectfs\local\report;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -74,7 +74,7 @@ class objectfs_report implements \renderable {
         $reporttypes = self::get_report_types();
 
         foreach ($reporttypes as $reporttype) {
-            $reportbuilderclass = "tool_objectfs\\report\\{$reporttype}_report_builder";
+            $reportbuilderclass = "tool_objectfs\\local\\report\\{$reporttype}_report_builder";
             $reportbuilder = new $reportbuilderclass();
             $report = $reportbuilder->build_report();
             objectfs_report_builder::save_report_to_database($report);

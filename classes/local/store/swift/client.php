@@ -22,11 +22,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\client;
+namespace tool_objectfs\local\store\swift;
 
 defined('MOODLE_INTERNAL') || die();
 
-class swift_client extends object_client_base {
+use tool_objectfs\local\store\object_client_base;
+
+class client extends object_client_base {
 
     /** @var string $containername The current container. */
     protected $containername;
@@ -38,7 +40,7 @@ class swift_client extends object_client_base {
     protected $autoloader;
 
     /**
-     * The swift_client constructor.
+     * The swift client constructor.
      *
      * @param $config
      */
@@ -108,8 +110,8 @@ class swift_client extends object_client_base {
                 return;
             }
 
-            stream_wrapper_register('swift', "tool_objectfs\swift\streamwrapper") or die("cant create wrapper");
-            \tool_objectfs\swift\streamwrapper::set_default_context($this->get_seekable_stream_context());
+            stream_wrapper_register('swift', "tool_objectfs\local\store\swift\stream_wrapper") or die("cant create wrapper");
+            \tool_objectfs\local\store\swift\stream_wrapper::set_default_context($this->get_seekable_stream_context());
 
             $bootstraped = true;
 
@@ -302,7 +304,7 @@ class swift_client extends object_client_base {
         $mform->addHelpButton('openstack_container', 'settings:openstack:container', 'tool_objectfs');
         $mform->setType("openstack_container", PARAM_TEXT);
 
-        $client = new swift_client($config);
+        $client = new client($config);
         $mform = $this->define_client_check($mform, $client);
 
         return $mform;

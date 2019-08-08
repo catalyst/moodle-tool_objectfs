@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_objectfs\form\settings_form;
+use tool_objectfs\local\form\settings_form;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once( __DIR__ . '/lib.php');

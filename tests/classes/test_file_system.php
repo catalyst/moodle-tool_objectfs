@@ -30,7 +30,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\object_file_system;
+use tool_objectfs\local\store\object_file_system;
 require_once(__DIR__ . '/test_client.php');
 require_once(__DIR__ . '/test_s3_integration_client.php');
 require_once(__DIR__ . '/test_azure_integration_client.php');

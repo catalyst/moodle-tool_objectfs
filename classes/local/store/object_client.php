@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * Objectfs client interface.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,28 +23,21 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\task;
-
-use tool_objectfs\local\report\objectfs_report;
-
+namespace tool_objectfs\local\store;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once( __DIR__ . '/../../lib.php');
-
-class generate_status_report extends \core\task\scheduled_task {
-
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('generate_status_report_task', 'tool_objectfs');
-    }
-
-    /**
-     * Execute task
-     */
-    public function execute() {
-        objectfs_report::generate_status_report();
-    }
+interface object_client {
+    public function __construct($config);
+    public function register_stream_wrapper();
+    public function get_fullpath_from_hash($contenthash);
+    public function get_trash_fullpath_from_hash($contenthash);
+    public function delete_file($fullpath);
+    public function rename_file($currentpath, $destinationpath);
+    public function get_seekable_stream_context();
+    public function get_availability();
+    public function get_maximum_upload_size();
+    public function verify_object($contenthash, $localpath);
 }
+
+

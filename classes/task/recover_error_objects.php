@@ -25,9 +25,9 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\object_manipulator\manipulator;
-use tool_objectfs\object_file_system;
-use tool_objectfs\s3_file_system;
+use tool_objectfs\local\object_manipulator\manipulator;
+//use tool_objectfs\local\object_file_system;
+//use tool_objectfs\local\s3_file_system;
 
 
 defined('MOODLE_INTERNAL') || die();
@@ -49,7 +49,7 @@ class recover_error_objects extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\object_manipulator\\recoverer');
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\recoverer');
     }
 }
 

@@ -27,7 +27,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\azure;
+namespace tool_objectfs\local\store\azure;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,7 +42,7 @@ use MicrosoftAzure\Storage\Blob\Models\SetBlobPropertiesOptions;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use Psr\Http\Message\StreamInterface;
 
-class StreamWrapper {
+class stream_wrapper {
 
     /** @var resource|null Stream context (this is set by PHP) */
     public $context;

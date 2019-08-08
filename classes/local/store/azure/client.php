@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\client;
+namespace tool_objectfs\local\store\azure;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,9 +34,10 @@ use MicrosoftAzure\Storage\Common\ServicesBuilder;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use SimpleXMLElement;
 use stdClass;
-use tool_objectfs\azure\StreamWrapper;
+use tool_objectfs\local\store\azure\stream_wrapper;
+use tool_objectfs\local\store\object_client_base;
 
-class azure_client extends object_client_base {
+class client extends object_client_base {
 
     /** @var BlobRestProxy $client The Blob client. */
     protected $client;
@@ -47,7 +48,7 @@ class azure_client extends object_client_base {
     protected $autoloader;
 
     /**
-     * The azure_client constructor.
+     * The azure client constructor.
      *
      * @param $config
      */
@@ -103,7 +104,7 @@ class azure_client extends object_client_base {
      */
     public function register_stream_wrapper() {
         if ($this->get_availability()) {
-            StreamWrapper::register($this->client);
+            stream_wrapper::register($this->client);
         } else {
             parent::register_stream_wrapper();
         }
@@ -347,7 +348,7 @@ class azure_client extends object_client_base {
         $mform->addHelpButton('azure_sastoken', 'settings:azure:sastoken', 'tool_objectfs');
         $mform->setType("azure_sastoken", PARAM_RAW);
 
-        $client = new azure_client($config);
+        $client = new client($config);
         $mform = $this->define_client_check($mform, $client);
 
         return $mform;

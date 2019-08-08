@@ -15,29 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Objectfs client interface.
+ * object_file_system abstract class.
+ *
+ * Remote object storage providers extent this class.
+ * At minimum you need to implement get_remote_client.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
+ * @author    Brian Yanosik <kisonay@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\client;
+namespace tool_objectfs\local\store\do;
 
 defined('MOODLE_INTERNAL') || die();
 
-interface object_client {
-    public function __construct($config);
-    public function register_stream_wrapper();
-    public function get_fullpath_from_hash($contenthash);
-    public function get_trash_fullpath_from_hash($contenthash);
-    public function delete_file($fullpath);
-    public function rename_file($currentpath, $destinationpath);
-    public function get_seekable_stream_context();
-    public function get_availability();
-    public function get_maximum_upload_size();
-    public function verify_object($contenthash, $localpath);
+use tool_objectfs\local\store\s3\s3_file_system;
+
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+
+class do_file_system extends s3_file_system {
+
+    protected function initialise_external_client($config) {
+        $doclient = new do_client($config);
+
+        return $doclient;
+    }
+
 }
-
-

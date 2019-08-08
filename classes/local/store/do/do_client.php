@@ -22,11 +22,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\client;
+namespace tool_objectfs\local\store\do;
 
 defined('MOODLE_INTERNAL') || die();
 
 use Aws\S3\S3Client;
+use tool_objectfs\local\store\s3\client;
 
 class do_client extends s3_client {
 
