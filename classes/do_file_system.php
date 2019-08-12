@@ -26,8 +26,8 @@ namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\store\digitalocean\digitalocean_file_system;
+use tool_objectfs\local\store\digitalocean\file_system;
 
-class do_file_system extends digitalocean_file_system {
+class do_file_system extends file_system {
 
 }

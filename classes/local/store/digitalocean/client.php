@@ -27,9 +27,9 @@ namespace tool_objectfs\local\store\digitalocean;
 defined('MOODLE_INTERNAL') || die();
 
 use Aws\S3\S3Client;
-use tool_objectfs\local\store\s3\client;
+use tool_objectfs\local\store\s3\client as s3_client;
 
-class digitalocean_client extends client {
+class client extends s3_client {
 
     public function __construct($config) {
         global $CFG;

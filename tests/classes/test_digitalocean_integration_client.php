@@ -18,9 +18,9 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\store\digitalocean\digitalocean_client;
+use tool_objectfs\local\store\digitalocean\client;
 
-class test_digitalocean_integration_client extends digitalocean_client {
+class test_digitalocean_integration_client extends client {
 
     private $runidentifier;
 
