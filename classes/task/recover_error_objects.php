@@ -26,9 +26,6 @@
 namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\manipulator;
-//use tool_objectfs\local\object_file_system;
-//use tool_objectfs\local\s3_file_system;
-
 
 defined('MOODLE_INTERNAL') || die();
 

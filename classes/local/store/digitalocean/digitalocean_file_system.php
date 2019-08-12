@@ -15,39 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * object_file_system abstract class.
+ *
+ * Remote object storage providers extent this class.
+ * At minimum you need to implement get_remote_client.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
+ * @author    Brian Yanosik <kisonay@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\task;
-
-use tool_objectfs\local\object_manipulator\manipulator;
+namespace tool_objectfs\local\store\digitalocean;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once( __DIR__ . '/../../lib.php');
-require_once(__DIR__ . '/../../../../../config.php');
-require_once($CFG->libdir . '/filestorage/file_system.php');
+use tool_objectfs\local\store\s3\file_system;
 
-class push_objects_to_storage extends \core\task\scheduled_task {
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('push_objects_to_storage_task', 'tool_objectfs');
+class digitalocean_file_system extends file_system {
+
+    protected function initialise_external_client($config) {
+        $doclient = new digitalocean_client($config);
+
+        return $doclient;
     }
 
-    /**
-     * Execute task
-     */
-    public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\pusher');
-    }
 }
-
-

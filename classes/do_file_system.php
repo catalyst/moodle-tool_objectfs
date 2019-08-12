@@ -15,30 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * object_file_system abstract class.
- *
- * Remote object storage providers extent this class.
- * At minimum you need to implement get_remote_client.
+ * File system for Digital Ocean Storage.
  *
  * @package   tool_objectfs
  * @author    Brian Yanosik <kisonay@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\local\store\do;
+namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\store\s3\s3_file_system;
+use tool_objectfs\local\store\digitalocean\digitalocean_file_system;
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
-
-class do_file_system extends s3_file_system {
-
-    protected function initialise_external_client($config) {
-        $doclient = new do_client($config);
-
-        return $doclient;
-    }
+class do_file_system extends digitalocean_file_system {
 
 }
