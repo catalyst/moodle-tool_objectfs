@@ -19,8 +19,6 @@ addons:
   postgresql: "9.4"
 
 env:
-  - IGNORE_PATHS=classes/local/store/azure/stream_wrapper.php,classes/local/store/swift/stream_wrapper.php
-
   - DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
   - DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
   - DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
