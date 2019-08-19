@@ -509,4 +509,16 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem->remove_file($filehash);
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
     }
+
+    public function test_can_generate_signed_url_by_hash_if_object_is_external() {
+        $this->filesystem = new test_file_system();
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+        try {
+            $signedurl = $this->filesystem->generate_presigned_url_to_external_file($filehash);
+            $this->assertTrue($this->is_externally_readable_by_url($signedurl));
+        } catch (\coding_exception $e) {
+            $this->assertEquals($e->a, 'Pre-signed URLs not supported');
+        }
+    }
 }

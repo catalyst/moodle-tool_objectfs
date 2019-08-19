@@ -46,7 +46,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function __construct() {
         global $CFG;
-        parent::__construct(); // Setup fildir.
+        parent::__construct(); // Setup filedir.
 
         $config = get_objectfs_config();
 
@@ -379,22 +379,9 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool success
      */
     public function xsendfile($contenthash) {
-        global $CFG;
-        require_once($CFG->libdir . "/xsendfilelib.php");
-
-        $path = $this->get_remote_path_from_hash($contenthash);
-
-        $this->logger->start_timing();
-        $success = xsendfile($path);
-        $this->logger->end_timing();
-
-        $this->logger->log_object_read('xsendfile', $path);
-
-        if (!$success) {
-            update_object_record($contenthash, OBJECT_LOCATION_ERROR);
-        }
-
-        return $success;
+        // As we don't use xsendfile functionality anymore,
+        // use this method to redirect to pre-signed URL.
+        return $this->redirect_to_presigned_url($contenthash);
     }
 
     /**
@@ -640,7 +627,7 @@ abstract class object_file_system extends \file_system_filedir {
      *
      * @return bool
      */
-    protected function copy_from_local_to_external($contenthash) {
+    public function copy_from_local_to_external($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
         $externalpath = $this->get_external_path_from_hash($contenthash);
 
@@ -659,6 +646,67 @@ abstract class object_file_system extends \file_system_filedir {
         $externalpath = $this->get_external_path_from_hash($contenthash);
 
         return copy($externalpath, $localpath);
+    }
+
+    /**
+     * Generates signed URL to external file from its hash.
+     *
+     * @param string $contenthash file content hash.
+     *
+     * @return string.
+     */
+    public function generate_signed_url_to_external_file_from_hash($contenthash) {
+        $signedurl = $this->externalclient->generate_signed_url($contenthash);
+        return $signedurl;
+    }
+
+    /**
+     * Redirect to pre-signed URL to download file directly from external storage.
+     * Return false if file is local or external storage doesn't support pre-signed URLs.
+     *
+     * @param string $contenthash The content hash of the file to be served
+     * @return bool
+     */
+    public function redirect_to_presigned_url($contenthash) {
+        $location = $this->get_object_location_from_hash($contenthash);
+        switch ($location) {
+            case OBJECT_LOCATION_EXTERNAL:
+            case OBJECT_LOCATION_DUPLICATED:
+                global $DB;
+                $filesize = $DB->get_field('files', 'filesize', array('contenthash' => $contenthash));
+                $support = $this->externalclient->support_presigned_urls();
+                $enablepresignedurls = $this->externalclient->enablepresignedurls;
+                if ($support && $enablepresignedurls && $filesize > $this->externalclient->presignedminfilesize) {
+                    $path = $this->generate_presigned_url_to_external_file($contenthash, headers_list());
+                    try {
+                        redirect($path);
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                }
+                break;
+            case OBJECT_LOCATION_LOCAL:
+            case OBJECT_LOCATION_ERROR:
+            default:
+                return false;
+        }
+        return false;
+    }
+
+    public function get_local_path($contenthash) {
+        return $this->get_local_path_from_hash($contenthash);
+    }
+
+    /**
+     * Generates pre-signed URL to external file.
+     *
+     * @param string $contenthash file content hash.
+     * @param array $headers request headers.
+     *
+     * @return string.
+     */
+    public function generate_presigned_url_to_external_file($contenthash, $headers = array()) {
+        return $this->externalclient->generate_presigned_url($contenthash, $headers);
     }
 
 }
