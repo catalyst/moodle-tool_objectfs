@@ -18,6 +18,8 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/tool_objectfs_testcase.php');
+
 /**
  * End to end tests for tasks. Make sure all the plumbing is ok.
  */

@@ -14,37 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Task that pushes files to S3.
- *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace tool_objectfs\task;
-
-use tool_objectfs\local\report\objectfs_report;
-
+namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once( __DIR__ . '/../../lib.php');
+use tool_objectfs\local\store\digitalocean\client;
 
-class generate_status_report extends \core\task\scheduled_task {
+class test_digitalocean_integration_client extends client {
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('generate_status_report_task', 'tool_objectfs');
+    private $runidentifier;
+
+    public function __construct($config) {
+        parent::__construct($config);
+        $time = microtime();
+        $this->runidentifier = md5($time);
     }
 
-    /**
-     * Execute task
-     */
-    public function execute() {
-        objectfs_report::generate_status_report();
+    protected function get_filepath_from_hash($contenthash) {
+        $l1 = $contenthash[0] . $contenthash[1];
+        $l2 = $contenthash[2] . $contenthash[3];
+        $runidentifier = $this->runidentifier;
+        return "test/$runidentifier/$l1/$l2/$contenthash";
     }
+
 }
+

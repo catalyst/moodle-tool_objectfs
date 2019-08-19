@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\form;
+namespace tool_objectfs\local\form;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -45,12 +45,13 @@ class settings_form extends \moodleform {
 
         $mform->addElement('html', $OUTPUT->heading($link, 5));
 
-        $mform = $this->define_cfg_check($mform, $config);
-        $mform = $this->define_general_section($mform, $config);
-        $mform = $this->define_file_transfer_section($mform, $config);
+        $mform = $this->define_general_section($mform);
+        $mform = $this->define_file_transfer_section($mform);
         $mform = $this->define_client_selection($mform, $config);
-        $mform = $this->define_client_section($mform, $config);
-        $mform = $this->define_testing_section($mform, $config);
+        if ($config->filesystem !== '') {
+            $mform = $this->define_client_section($mform, $config);
+        }
+        $mform = $this->define_testing_section($mform);
 
         foreach ($config as $key => $value) {
             $mform->setDefault($key, $value);
@@ -59,18 +60,10 @@ class settings_form extends \moodleform {
         $this->add_action_buttons();
     }
 
-    public function define_cfg_check($mform, $config) {
-        global $CFG, $OUTPUT;
-        if (!isset($CFG->alternative_file_system_class)) {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:handlernotset', 'tool_objectfs'), 'notifyproblem'));
-        }
-        return $mform;
-    }
-
-    public function define_testing_section($mform, $config) {
+    public function define_testing_section($mform) {
         global $OUTPUT;
         $mform->addElement('header', 'testingheader', get_string('settings:testingheader', 'tool_objectfs'));
-        $mform->setExpanded('testingheader');
+        $mform->setExpanded('testingheader', false);
 
         $alert = get_string('settings:testingdescr', 'tool_objectfs');
         $mform->addElement('html', $OUTPUT->notification($alert, 'warning'));
@@ -82,7 +75,7 @@ class settings_form extends \moodleform {
         return $mform;
     }
 
-    public function define_general_section($mform, $config) {
+    public function define_general_section($mform) {
         $mform->addElement('header', 'generalheader', get_string('settings:generalheader', 'tool_objectfs'));
         $mform->setExpanded('generalheader');
 
@@ -100,7 +93,7 @@ class settings_form extends \moodleform {
         return $mform;
     }
 
-    public function define_file_transfer_section($mform, $config) {
+    public function define_file_transfer_section($mform) {
         $mform->addElement('header', 'filetransferheader', get_string('settings:filetransferheader', 'tool_objectfs'));
         $mform->setExpanded('filetransferheader');
 
@@ -128,19 +121,15 @@ class settings_form extends \moodleform {
     }
 
     public function define_client_section($mform, $config) {
-        global $CFG, $OUTPUT;
+        global $OUTPUT;
 
-        $clients = tool_objectfs_get_client_components('client');
+        $client = tool_objectfs_get_client($config);
 
-        foreach ($clients as $name) {
-            $client = new $name($config);
-
-            if ($client->get_availability()) {
-                $mform = $client->define_client_section($mform, $config);
-            } else {
-                $errstr = get_string('settings:clientnotavailable', 'tool_objectfs', $name);
-                $mform->addElement('html', $OUTPUT->notification($errstr, 'notifyproblem'));
-            }
+        if ($client and $client->get_availability()) {
+            $mform = $client->define_client_section($mform, $config);
+        } else {
+            $errstr = get_string('settings:clientnotavailable', 'tool_objectfs');
+            $mform->addElement('html', $OUTPUT->notification($errstr, 'notifyproblem'));
         }
 
         return $mform;
@@ -152,17 +141,18 @@ class settings_form extends \moodleform {
         $mform->addElement('header', 'clientselectionheader', get_string('settings:clientselection:header', 'tool_objectfs'));
         $mform->setExpanded('clientselectionheader');
 
-        if (isset($CFG->alternative_file_system_class) && $CFG->alternative_file_system_class == $config->filesystem) {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:matchfilesystem', 'tool_objectfs'), 'notifysuccess'));
+        $fslist = tool_objectfs_get_fs_list();
+        $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $fslist);
+        $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
+
+        if (isset($CFG->alternative_file_system_class)) {
+            if ($CFG->alternative_file_system_class != $config->filesystem) {
+                $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs'), 'notifyproblem'));
+            }
         } else {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs'), 'notifyproblem'));
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:filesystemnotdefined', 'tool_objectfs'), 'warning'));
         }
 
-        $names = tool_objectfs_get_client_components('file_system');
-        $clientlist = array_combine($names, $names);
-
-        $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $clientlist);
-        $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
         return $mform;
     }
 
@@ -187,6 +177,10 @@ class settings_form extends \moodleform {
 
         if (is_numeric($data['consistencydelay']) && $data['consistencydelay'] < 0 ) {
             $errors['consistencydelay'] = get_string('settings:error:numeric', 'tool_objectfs');
+        }
+
+        if ($data['filesystem'] === '') {
+            $errors['filesystem'] = get_string('settings:error:filesystemnotselected', 'tool_objectfs');
         }
 
         return $errors;

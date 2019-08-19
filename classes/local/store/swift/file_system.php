@@ -15,23 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * object_file_system abstract class.
+ * File system for Openstack Object Storage
  *
- * Remote object storage providers extent this class.
- * At minimum you need to implement get_remote_client.
- *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    tool_objectfs
+ * @author     Matt Clarkson
+ * @copyright  Catalyst IT
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs;
+namespace tool_objectfs\local\store\swift;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\store\s3\file_system;
+use tool_objectfs\local\store\object_file_system;
 
-class s3_file_system extends file_system {
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+class file_system extends object_file_system {
+
+    protected function initialise_external_client($config) {
+        $client = new client($config);
+        return $client;
+    }
 }

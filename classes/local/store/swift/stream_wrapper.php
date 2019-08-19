@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\swift;
+namespace tool_objectfs\local\store\swift;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/local/openstack/vendor/autoload.php');
@@ -30,9 +30,9 @@ require_once($CFG->dirroot . '/local/openstack/vendor/autoload.php');
 use GuzzleHttp\Psr7\Stream;
 
 /**
- * streamwrapper for swift
+ * Stream wrapper for swift.
  */
-class streamwrapper {
+class stream_wrapper {
 
     /**
      * PHP stream context

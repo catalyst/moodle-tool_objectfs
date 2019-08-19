@@ -27,14 +27,8 @@ namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\client\azure_client;
+use tool_objectfs\local\store\azure\file_system;
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+class azure_file_system extends file_system {
 
-class azure_file_system extends object_file_system {
-
-    protected function initialise_external_client($config) {
-        $asclient = new azure_client($config);
-        return $asclient;
-    }
 }

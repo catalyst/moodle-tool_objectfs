@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Object client interface.
+ * Objectfs client interface.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\client;
+namespace tool_objectfs\local\store;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,3 +39,5 @@ interface object_client {
     public function get_maximum_upload_size();
     public function verify_object($contenthash, $localpath);
 }
+
+

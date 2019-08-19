@@ -14,29 +14,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_objectfs\tests;
+/**
+ * object_file_system abstract class.
+ *
+ * Remote object storage providers extent this class.
+ * At minimum you need to implement get_remote_client.
+ *
+ * @package   tool_objectfs
+ * @author    Brian Yanosik <kisonay@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace tool_objectfs\local\store\digitalocean;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\object_file_system;
-use tool_objectfs\client\do_client;
+use tool_objectfs\local\store\s3\file_system as s3_file_system;
 
-class test_do_integration_client extends do_client {
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-    private $runidentifier;
+class file_system extends s3_file_system {
 
-    public function __construct($config) {
-        parent::__construct($config);
-        $time = microtime();
-        $this->runidentifier = md5($time);
-    }
+    protected function initialise_external_client($config) {
+        $doclient = new client($config);
 
-    protected function get_filepath_from_hash($contenthash) {
-        $l1 = $contenthash[0] . $contenthash[1];
-        $l2 = $contenthash[2] . $contenthash[3];
-        $runidentifier = $this->runidentifier;
-        return "test/$runidentifier/$l1/$l2/$contenthash";
+        return $doclient;
     }
 
 }
-

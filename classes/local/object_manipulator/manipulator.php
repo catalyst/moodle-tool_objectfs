@@ -23,9 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\object_manipulator;
-
-use tool_objectfs\object_manipulator\logger;
+namespace tool_objectfs\local\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -159,7 +157,7 @@ abstract class manipulator {
                               'recoverer');
 
         foreach ($manipulators as $key => $manipulator) {
-            $manipulators[$key] = '\\tool_objectfs\\object_manipulator\\' . $manipulator;
+            $manipulators[$key] = '\\tool_objectfs\\local\\object_manipulator\\' . $manipulator;
         }
 
         return $manipulators;

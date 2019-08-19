@@ -26,7 +26,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs;
+namespace tool_objectfs\local\store;
 
 use stored_file;
 use file_storage;

@@ -27,14 +27,8 @@ namespace tool_objectfs;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\client\swift_client;
+use tool_objectfs\local\store\swift\file_system;
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+class swift_file_system extends file_system {
 
-class swift_file_system extends object_file_system {
-
-    protected function initialise_external_client($config) {
-        $client = new swift_client($config);
-        return $client;
-    }
 }

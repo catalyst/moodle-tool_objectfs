@@ -63,13 +63,13 @@ $string['settings:enablelogging_help'] = 'Enable or disable file system logging.
 
 $string['settings:generalheader'] = 'General Settings';
 
-$string['settings:clientnotavailable'] = 'The configured client \'{$a}\' is not available. Please install the required dependencies.';
+$string['settings:clientnotavailable'] = 'Client for current file system is not available. Please install the required dependencies if this is the desired object storage client.';
 
 $string['settings:clientselection:header'] = 'Storage File System Selection';
 $string['settings:clientselection:title'] = 'Storage File System';
 $string['settings:clientselection:title_help'] = 'The storage file system. This is also the active file system for the background tasks.';
-$string['settings:clientselection:matchfilesystem'] = 'This setting matches $CFG->alternative_file_system_class';
-$string['settings:clientselection:mismatchfilesystem'] = 'This setting does not match $CFG->alternative_file_system_class';
+$string['settings:clientselection:mismatchfilesystem'] = 'This setting should match $CFG->alternative_file_system_class';
+$string['settings:clientselection:filesystemnotdefined'] = '$CFG->alternative_file_system_class should be set in your Moodle config.php';
 
 $string['settings:aws:header'] = 'Amazon S3 Settings';
 $string['settings:aws:key'] = 'Key';
@@ -138,9 +138,9 @@ $string['settings:readfailure'] = 'Could not read object from the external objec
 $string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
 $string['settings:deleteerror'] = 'Could not delete object from the external object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
-$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from the external object storage. Background tasks can still function.';
 
 $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
 
 $string['settings:error:numeric'] = 'Please enter a number which is greater than or equal 0.';
+$string['settings:error:filesystemnotselected'] = 'Please specify Storage File System.';
