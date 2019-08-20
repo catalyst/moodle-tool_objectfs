@@ -28,6 +28,10 @@ namespace tool_objectfs\local\store;
 defined('MOODLE_INTERNAL') || die();
 
 abstract class object_client_base implements object_client {
+    protected $autoloader;
+    protected $expirationtime;
+    public $presignedminfilesize;
+    public $enablepresignedurls;
 
     public function __construct($config) {
 
@@ -55,7 +59,7 @@ abstract class object_client_base implements object_client {
      *
      * @return bool.
      */
-    public function support_signed_urls() {
+    public function support_presigned_urls() {
         return false;
     }
 
@@ -63,11 +67,30 @@ abstract class object_client_base implements object_client {
      * Generates pre-signed URL to storage file from its hash.
      *
      * @param string $contenthash File content hash.
+     * @param array $headers request headers.
      *
-     * @return string.
+     * @throws \coding_exception
      */
-    public function generate_signed_url($contenthash) {
-        return 'Not supported';
+    public function generate_presigned_url($contenthash, $headers) {
+        throw new \coding_exception("Pre-signed URLs not supported");
+    }
+
+    /**
+     * Returns given header from headers set.
+     *
+     * @param array $headers request headers.
+     * @param string $search
+     *
+     * @return string header.
+     */
+    public function get_header($headers, $search) {
+        foreach ($headers as $header) {
+            $found = strpos($header, $search);
+            if ($found !== false) {
+                return substr($header, strlen($search) + 1);
+            }
+        }
+        return '';
     }
 
     /**
@@ -80,10 +103,8 @@ abstract class object_client_base implements object_client {
     public function define_client_check($mform, $client) {
         global $OUTPUT;
         $connection = $client->test_connection();
-
         if ($connection->success) {
             $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
-
             // Check permissions if we can connect.
             $permissions = $client->test_permissions();
             if ($permissions->success) {

@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-  /**
-   * Strings for component 'tool_objectfs', language 'en'.
-   *
-   * @package   tool_objectfs
-   * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
-   * @copyright Catalyst IT
-   * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-   */
+/**
+ * Strings for component 'tool_objectfs', language 'en'.
+ *
+ * @package   tool_objectfs
+ * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 $string['pluginname'] = 'Object storage file system';
 $string['privacy:metadata'] = 'The tool objectfs plugin does not store any personal data.';
@@ -131,6 +131,30 @@ $string['settings:maxtaskruntime_help'] = 'Background tasks handle the transfer 
 $string['settings:preferexternal'] = 'Prefer external objects';
 $string['settings:preferexternal_help'] = 'If a file is stored both locally and in external object storage, read from external\. This is setting is mainly for testing purposes and introduces overhead to check the location.';
 
+$string['settings:presignedurl:header'] = 'Pre-Signed URLs Settings';
+$string['settings:presignedurl:enablepresignedurls'] = 'Enable Pre-Signed URLs';
+$string['settings:presignedurl:enablepresignedurls_help'] = 'Enable Pre-Signed URLs to request content directly from external storage.';
+$string['settings:presignedurl:expirationtime'] = 'Pre-Signed URL expiration time';
+$string['settings:presignedurl:expirationtime_help'] = 'The time after which the Pre-Signed URL should expire.';
+$string['settings:presignedurl:presignedminfilesize'] = 'Minimum size for Pre-Signed URL (KB)';
+$string['settings:presignedurl:presignedminfilesize_help'] = 'Minimum file size to be redirected to Pre-Signed URL.';
+
+$string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
+$string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLa are not supported by chosen storage file system.';
+$string['presignedurl_testing:test1'] = '1) Test links below to download file with contenthash as its name:';
+$string['presignedurl_testing:test2'] = '2) Test links below to download file with original file name:';
+$string['presignedurl_testing:test3'] = '3) Test links below to open content inline:';
+$string['presignedurl_testing:test4'] = '4) In this block IFrames should be visible and workable:';
+$string['presignedurl_testing:test5'] = '5) Without enabling Pre-Signed URLs, vary Minimum size for Pre-Signed URL and see how links below are generated:';
+$string['presignedurl_testing:downloadfile'] = 'Download file';
+$string['presignedurl_testing:openinbrowser'] = 'Open file in browser';
+$string['presignedurl_testing:fileiniframe'] = 'file in Iframe';
+$string['presignedurl_testing:iframesnotsupported'] = 'Your browser does not support IFrames';
+$string['presignedurl_testing:objectfssettings'] = 'Objectfs settings';
+$string['presignedurl_testing:checkconnectionsettings'] = 'Check connection settings at ';
+$string['presignedurl_testing:checkclientsettings'] = 'Check client settings at ';
+$string['presignedurl_testing:checkfssettings'] = 'Check filesystem settings at ';
+
 $string['settings:connectionsuccess'] = 'Could establish connection to the external object storage.';
 $string['settings:connectionfailure'] = 'Could not establish connection to the external object storage.';
 $string['settings:writefailure'] = 'Could not write object to the external object storage. ';
@@ -138,9 +162,9 @@ $string['settings:readfailure'] = 'Could not read object from the external objec
 $string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
 $string['settings:deleteerror'] = 'Could not delete object from the external object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
+$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from the external object storage. Background tasks can still function.';
 
 $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
 
 $string['settings:error:numeric'] = 'Please enter a number which is greater than or equal 0.';
-$string['settings:error:filesystemnotselected'] = 'Please specify Storage File System.';

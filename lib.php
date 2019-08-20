@@ -79,15 +79,18 @@ function get_objectfs_config() {
     $config->enabletasks = 0;
     $config->enablelogging = 0;
     $config->sizethreshold = 1024 * 10;
-    $config->minimumage = 7 * 24 * 60 * 60;
+    $config->minimumage = 7 * DAYSECS;
     $config->deletelocal = 0;
-    $config->consistencydelay = 10 * 60;
-    $config->maxtaskruntime = 60;
+    $config->consistencydelay = 10 * MINSECS;
+    $config->maxtaskruntime = MINSECS;
     $config->logging = 0;
     $config->preferexternal = 0;
     $config->batchsize = 10000;
 
     $config->filesystem = '';
+    $config->enablepresignedurls = 0;
+    $config->expirationtime = 10 * MINSECS;
+    $config->presignedminfilesize = 1024 * 50;
 
     // '\tool_objectfs\s3_file_system'
     $config->s3_key = '';
@@ -142,6 +145,15 @@ function tool_objectfs_should_tasks_run() {
         return true;
     }
 
+    return false;
+}
+
+function tool_objectfs_filesystem_supports_presigned_urls($fs) {
+    $supportedlist = array();
+    $supportedlist[] = '\tool_objectfs\s3_file_system';
+    if (in_array($fs, $supportedlist)) {
+        return true;
+    }
     return false;
 }
 

@@ -40,10 +40,8 @@ define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
 class client extends object_client_base {
-
     protected $client;
     protected $bucket;
-    protected $autoloader;
 
     public function __construct($config) {
         global $CFG;
@@ -52,6 +50,9 @@ class client extends object_client_base {
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
             $this->bucket = $config->s3_bucket;
+            $this->expirationtime = $config->expirationtime;
+            $this->presignedminfilesize = $config->presignedminfilesize;
+            $this->enablepresignedurls = $config->enablepresignedurls;
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -389,5 +390,51 @@ class client extends object_client_base {
 
             throw new \Exception($e->getMessage());
         }
+    }
+
+    /**
+     * Does the storage support pre-signed URLs.
+     *
+     * @return bool.
+     */
+    public function support_presigned_urls() {
+        return true;
+    }
+
+    /**
+     * Generates pre-signed URL to S3 file from its hash.
+     *
+     * @param string $contenthash file content hash.
+     * @param array $headers request headers.
+     *
+     * @return string.
+     */
+    public function generate_presigned_url($contenthash, $headers) {
+        $key = $this->get_filepath_from_hash($contenthash);
+        $params['Bucket'] = $this->bucket;
+        $params['Key'] = $key;
+
+        $contentdisposition = $this->get_header($headers, 'Content-Disposition');
+        if ($contentdisposition !== '') {
+            $params['ResponseContentDisposition'] = $contentdisposition;
+        }
+
+        $contenttype = $this->get_header($headers, 'Content-Type');
+        if ($contenttype !== '') {
+            $params['ResponseContentType'] = $contenttype;
+        }
+
+        $command = $this->client->getCommand('GetObject', $params);
+
+        $expirationtime = $this->get_header($headers, 'Expires');
+        if ($expirationtime !== '') {
+            $request = $this->client->createPresignedRequest($command, $expirationtime);
+        } else {
+            $request = $this->client->createPresignedRequest($command, '+'.$this->expirationtime.' seconds');
+        }
+
+        $signedurl = (string)$request->getUri();
+
+        return $signedurl;
     }
 }

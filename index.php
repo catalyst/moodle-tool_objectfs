@@ -36,11 +36,13 @@ $output = $PAGE->get_renderer('tool_objectfs');
 $config = get_objectfs_config();
 
 $config->sizethreshold /= 1024; // Convert to KB.
+$config->presignedminfilesize /= 1024; // Convert to KB.
 
 $form = new settings_form(null, array('config' => $config));
 
 if ($data = $form->get_data()) {
     $data->sizethreshold *= 1024; // Convert back to Bytes.
+    $data->presignedminfilesize *= 1024; // Convert back to Bytes.
     set_objectfs_config($data);
     redirect(new moodle_url('/admin/tool/objectfs/index.php'));
 }

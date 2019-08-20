@@ -105,5 +105,11 @@ class test_client extends object_client_base {
         return 5000000000;
     }
 
+    public function support_signed_urls() {
+        return false;
+    }
+    public function generate_signed_url($contenthash) {
+        return 'Not supported';
+    }
 }
 

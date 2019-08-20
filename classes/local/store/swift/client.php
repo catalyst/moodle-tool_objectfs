@@ -37,8 +37,6 @@ class client extends object_client_base {
 
     protected $config;
 
-    protected $autoloader;
-
     /**
      * The swift client constructor.
      *
