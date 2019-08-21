@@ -379,8 +379,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool success
      */
     public function xsendfile($contenthash) {
-        // As we don't use xsendfile functionality anymore,
-        // use this method to redirect to pre-signed URL.
+        // Use this method to redirect to pre-signed URL.
         return $this->redirect_to_presigned_url($contenthash);
     }
 
@@ -709,4 +708,12 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient->generate_presigned_url($contenthash, $headers);
     }
 
+    /**
+     * Returns true to override xsendfile.
+     *
+     * @return bool
+     */
+    public function supports_xsendfile() {
+        return true;
+    }
 }
