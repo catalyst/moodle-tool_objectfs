@@ -425,16 +425,15 @@ class client extends object_client_base {
         }
 
         $command = $this->client->getCommand('GetObject', $params);
-
         $expirationtime = $this->get_header($headers, 'Expires');
-        if ($expirationtime !== '') {
+
+        if ($expirationtime !== '' and strtotime($expirationtime) != 0) {
             $request = $this->client->createPresignedRequest($command, $expirationtime);
         } else {
             $request = $this->client->createPresignedRequest($command, '+'.$this->expirationtime.' seconds');
         }
 
         $signedurl = (string)$request->getUri();
-
         return $signedurl;
     }
 }
