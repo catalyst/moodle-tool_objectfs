@@ -173,7 +173,7 @@ function tool_objectfs_cron() {
             mtrace("Objectfs $manipulator successfully executed");
         }
 
-        \tool_objectfs\report\objectfs_report::generate_status_report();
+        \tool_objectfs\local\report\objectfs_report::generate_status_report();
     }
 
     return true;

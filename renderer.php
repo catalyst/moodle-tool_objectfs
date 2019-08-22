@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_objectfs\report\objectfs_report;
+use tool_objectfs\local\report\objectfs_report;
 
 defined('MOODLE_INTERNAL') || die();
 
