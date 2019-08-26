@@ -15,18 +15,39 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Task that adds missing objects locations.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_objectfs\task;
+
+use tool_objectfs\local\object_manipulator\manipulator;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2019082601;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2019082601;      // Same as version
-$plugin->requires  = 2013111811;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+require_once( __DIR__ . '/../../lib.php');
+require_once(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
+
+class check_objects_location extends \core\task\scheduled_task {
+
+    /**
+     * Get task name
+     */
+    public function get_name() {
+        return get_string('check_objects_location_task', 'tool_objectfs');
+    }
+
+    /**
+     * Execute task
+     */
+    public function execute() {
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\checker');
+    }
+}
+
+
