@@ -672,15 +672,24 @@ abstract class object_file_system extends \file_system_filedir {
             case OBJECT_LOCATION_EXTERNAL:
             case OBJECT_LOCATION_DUPLICATED:
                 global $DB;
-                $filesize = $DB->get_field('files', 'filesize', array('contenthash' => $contenthash));
-                $support = $this->externalclient->support_presigned_urls();
-                $enablepresignedurls = $this->externalclient->enablepresignedurls;
-                if ($support && $enablepresignedurls && $filesize > $this->externalclient->presignedminfilesize) {
-                    $path = $this->generate_presigned_url_to_external_file($contenthash, headers_list());
-                    try {
-                        redirect($path);
-                    } catch (\Exception $e) {
-                        return false;
+
+                if ($this->externalclient->support_presigned_urls()) {
+                    if ($this->externalclient->enablepresignedurls) {
+
+                        if (isset($this->externalclient->presignedminfilesize) && $this->externalclient->presignedminfilesize > 0) {
+                            $filesize = $DB->get_field('files', 'filesize', array('contenthash' => $contenthash));
+                        } else {
+                            $filesize = $this->get_maximum_upload_filesize();
+                        }
+
+                        if ($filesize > $this->externalclient->presignedminfilesize) {
+                            $path = $this->generate_presigned_url_to_external_file($contenthash, headers_list());
+                            try {
+                                redirect($path);
+                            } catch (\Exception $e) {
+                                return false;
+                            }
+                        }
                     }
                 }
                 break;
