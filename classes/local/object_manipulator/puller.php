@@ -63,12 +63,12 @@ class puller extends manipulator {
                        f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
-             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+            INNER JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                 WHERE f.filesize <= ?
+                       AND o.location = ?
               GROUP BY f.contenthash,
                        f.filesize,
-                       o.location
-                HAVING MAX(f.filesize) <= ?
-                       AND (o.location = ?)';
+                       o.location';
 
         return $sql;
     }
