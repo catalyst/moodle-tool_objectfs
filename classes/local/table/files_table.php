@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\table;
+namespace tool_objectfs\local\table;
 
 defined('MOODLE_INTERNAL') || die();
 
