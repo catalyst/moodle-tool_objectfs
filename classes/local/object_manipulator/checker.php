@@ -51,7 +51,7 @@ class checker extends manipulator {
 
     protected function get_candidates_sql() {
         $sql = 'SELECT f.contenthash
-                  FROM {files} f 
+                  FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE f.filesize > 0
                    AND o.location is NULL

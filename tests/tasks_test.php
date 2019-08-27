@@ -57,7 +57,8 @@ class tasks_testcase extends tool_objectfs_testcase {
                                     'generate_status_report',
                                     'pull_objects_from_storage',
                                     'push_objects_to_storage',
-                                    'recover_error_objects');
+                                    'recover_error_objects',
+                                    'check_objects_location');
 
         foreach ($scheduledtasknames as $taskname) {
             $task = \core\task\manager::get_scheduled_task('\\tool_objectfs\\task\\' . $taskname);
