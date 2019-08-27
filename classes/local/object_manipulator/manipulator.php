@@ -154,7 +154,8 @@ abstract class manipulator {
         $manipulators = array('deleter',
                               'puller',
                               'pusher',
-                              'recoverer');
+                              'recoverer',
+                              'checker');
 
         foreach ($manipulators as $key => $manipulator) {
             $manipulators[$key] = '\\tool_objectfs\\local\\object_manipulator\\' . $manipulator;
