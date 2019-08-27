@@ -58,7 +58,12 @@ abstract class manipulator {
     public function __construct($filesystem, $config) {
         $this->finishtime = time() + $config->maxtaskruntime;
         $this->filesystem = $filesystem;
-        $this->batchsize = $config->batchsize;
+
+        if (get_class($this) === 'tool_objectfs\\local\\object_manipulator\\checker') {
+            $this->batchsize = $config->batchsize * 10;
+        } else {
+            $this->batchsize = $config->batchsize;
+        }
     }
 
     /**
