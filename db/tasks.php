@@ -74,7 +74,7 @@ $tasks = array(
     array(
         'classname' => 'tool_objectfs\task\check_objects_location',
         'blocking'  => 0,
-        'minute'    => '7',
+        'minute'    => 'R',
         'hour'      => '*',
         'day'       => '*',
         'dayofweek' => '*',

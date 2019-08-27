@@ -27,8 +27,6 @@ namespace tool_objectfs\local\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
-
 class deleter extends manipulator {
 
     /**
@@ -81,10 +79,10 @@ class deleter extends manipulator {
                        f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
-            INNER JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE o.timeduplicated <= ?
-                       AND o.location = ?
-                       AND f.filesize > ?
+                   AND o.location = ?
+                   AND f.filesize > ?
               GROUP BY f.contenthash,
                        f.filesize,
                        o.location';

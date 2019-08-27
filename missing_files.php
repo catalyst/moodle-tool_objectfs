@@ -24,7 +24,7 @@
  */
 
 require_once(__DIR__ . '/../../../config.php');
-require_once( __DIR__ . '/lib.php');
+require_once(__DIR__ . '/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 use tool_objectfs\local\table\files_table;

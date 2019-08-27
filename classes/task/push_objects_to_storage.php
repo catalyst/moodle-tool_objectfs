@@ -29,8 +29,6 @@ use tool_objectfs\local\object_manipulator\manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once( __DIR__ . '/../../lib.php');
-require_once(__DIR__ . '/../../../../../config.php');
 require_once($CFG->libdir . '/filestorage/file_system.php');
 
 class push_objects_to_storage extends \core\task\scheduled_task {

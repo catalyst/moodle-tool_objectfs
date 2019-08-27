@@ -27,12 +27,11 @@ namespace tool_objectfs\local\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
-
 class checker extends manipulator {
 
     /**
-     * Pusher constructor.
+     * Checker constructor.
+     * This manipulator adds location for files that do not have records in {tool_objectfs_objects} table.
      *
      * @param object_client $client remote object client
      * @param object_file_system $filesystem objectfs file system
@@ -52,9 +51,10 @@ class checker extends manipulator {
 
     protected function get_candidates_sql() {
         $sql = 'SELECT f.contenthash
-                  FROM mdl_files f LEFT JOIN mdl_tool_objectfs_objects o ON f.contenthash = o.contenthash
+                  FROM {files} f 
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE f.filesize > 0
-                       AND o.location is NULL
+                   AND o.location is NULL
               GROUP BY f.contenthash';
 
         return $sql;
@@ -62,7 +62,6 @@ class checker extends manipulator {
 
     protected function get_candidates_sql_params() {
         $params = array();
-
         return $params;
     }
 

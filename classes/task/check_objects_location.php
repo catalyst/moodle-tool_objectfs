@@ -29,8 +29,6 @@ use tool_objectfs\local\object_manipulator\manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once( __DIR__ . '/../../lib.php');
-require_once(__DIR__ . '/../../../../../config.php');
 require_once($CFG->libdir . '/filestorage/file_system.php');
 
 class check_objects_location extends \core\task\scheduled_task {
