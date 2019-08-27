@@ -78,7 +78,9 @@ class puller extends manipulator {
     }
 
     protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        $contenthash = $objectrecord->contenthash;
+        $filesize = $objectrecord->filesize;
+        $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($contenthash, $filesize);
         return $newlocation;
     }
 }

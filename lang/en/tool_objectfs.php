@@ -133,6 +133,7 @@ $string['settings:preferexternal'] = 'Prefer external objects';
 $string['settings:preferexternal_help'] = 'If a file is stored both locally and in external object storage, read from external\. This is setting is mainly for testing purposes and introduces overhead to check the location.';
 
 $string['settings:presignedurl:header'] = 'Pre-Signed URLs Settings';
+$string['settings:presignedurl:warning'] = 'Before enabling Pre-Signed URL, please, make sure that all tests are passed successfully: ';
 $string['settings:presignedurl:enablepresignedurls'] = 'Enable Pre-Signed URLs';
 $string['settings:presignedurl:enablepresignedurls_help'] = 'Enable Pre-Signed URLs to request content directly from external storage.';
 $string['settings:presignedurl:expirationtime'] = 'Pre-Signed URL expiration time';

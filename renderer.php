@@ -266,7 +266,8 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test3', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().'"', 'Content-Type: '.$file->get_mimetype());
+            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
+                '"', 'Content-Type: '.$file->get_mimetype());
             $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
 
             $outputstring = get_string('presignedurl_testing:openinbrowser', 'tool_objectfs').': '.
@@ -277,7 +278,8 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test4', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().'"', 'Content-Type: '.$file->get_mimetype());
+            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
+                '"', 'Content-Type: '.$file->get_mimetype());
             $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
 
             $outputstring = '"'.$file->get_filename().'" '.get_string('presignedurl_testing:fileiniframe', 'tool_objectfs').':';

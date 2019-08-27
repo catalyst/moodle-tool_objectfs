@@ -61,14 +61,16 @@ class logger {
     public function log_object_manipulation() {
         $duration = $this->timestart - $this->timeend;
         $totalfilesize = display_size($this->totalfilesize);
-        $logstring = "Objectsfs $this->action manipulator took $duration seconds to $this->action $this->totalfilecount objects. ";
+        $logstring = "Objectsfs $this->action manipulator took $duration seconds ";
+        $logstring .= "to $this->action $this->totalfilecount objects. ";
         $logstring .= "Total size: $totalfilesize Total time: $duration seconds";
         mtrace($logstring);
     }
 
     public function log_object_manipulation_query($totalobjectsfound) {
         $duration = $this->timeend - $this->timestart;
-        $logstring = "Objectsfs $this->action manipulator took $duration seconds to find $totalobjectsfound potential $this->action objects. ";
+        $logstring = "Objectsfs $this->action manipulator took $duration seconds ";
+        $logstring .= "to find $totalobjectsfound potential $this->action objects. ";
         $logstring .= "Total time: $duration seconds";
         mtrace($logstring);
     }

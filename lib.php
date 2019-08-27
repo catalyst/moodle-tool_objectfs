@@ -92,19 +92,19 @@ function get_objectfs_config() {
     $config->expirationtime = 10 * MINSECS;
     $config->presignedminfilesize = 1024 * 50;
 
-    // '\tool_objectfs\s3_file_system'
+    // S3 file system.
     $config->s3_key = '';
     $config->s3_secret = '';
     $config->s3_bucket = '';
     $config->s3_region = 'us-east-1';
 
-    // '\tool_objectfs\do_file_system'
+    // Digital ocean file system.
     $config->do_key = '';
     $config->do_secret = '';
     $config->do_space = '';
     $config->do_region = 'sfo2';
 
-    // '\tool_objectfs\azure_file_system'
+    // Azure file system.
     $config->azure_accountname = '';
     $config->azure_container = '';
     $config->azure_sastoken = '';
