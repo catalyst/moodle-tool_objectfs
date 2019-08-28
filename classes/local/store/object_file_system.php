@@ -671,25 +671,11 @@ abstract class object_file_system extends \file_system_filedir {
         switch ($location) {
             case OBJECT_LOCATION_EXTERNAL:
             case OBJECT_LOCATION_DUPLICATED:
-                global $DB;
-
-                if ($this->externalclient->support_presigned_urls()) {
-                    if ($this->externalclient->enablepresignedurls) {
-
-                        if (isset($this->externalclient->presignedminfilesize) && $this->externalclient->presignedminfilesize > 0) {
-                            $filesize = $DB->get_field('files', 'filesize', array('contenthash' => $contenthash));
-                        } else {
-                            $filesize = $this->get_maximum_upload_filesize();
-                        }
-
-                        if ($filesize > $this->externalclient->presignedminfilesize) {
-                            $path = $this->generate_presigned_url_to_external_file($contenthash, headers_list());
-                            try {
-                                redirect($path);
-                            } catch (\Exception $e) {
-                                return false;
-                            }
-                        }
+                if ($this->presigned_url_should_redirect($contenthash)) {
+                    try {
+                        redirect($this->generate_presigned_url_to_external_file($contenthash, headers_list()));
+                    } catch (\Exception $e) {
+                        return false;
                     }
                 }
                 break;
@@ -699,6 +685,33 @@ abstract class object_file_system extends \file_system_filedir {
                 return false;
         }
         return false;
+    }
+
+    public function presigned_url_configured() {
+        return $this->externalclient->support_presigned_urls()
+            && $this->externalclient->enablepresignedurls
+            && isset($this->externalclient->presignedminfilesize);
+    }
+
+    public function presigned_url_should_redirect($contenthash) {
+        global $DB;
+
+        // Disabled.
+        if (!$this->presigned_url_configured()) {
+            return false;
+        }
+
+        // Redirect regardless.
+        if ($this->externalclient->presignedminfilesize == 0) {
+            return true;
+        }
+
+        // Redirect only files that bigger than configured value.
+        if ($this->externalclient->presignedminfilesize > 0) {
+            $sql = "SELECT MAX(filesize) FROM {files} WHERE contenthash = ? AND filesize > ?";
+            $filesize = $DB->get_field_sql($sql, [$contenthash, 0]);
+            return ($filesize > $this->externalclient->presignedminfilesize);
+        }
     }
 
     public function get_local_path($contenthash) {
