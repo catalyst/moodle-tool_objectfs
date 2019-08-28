@@ -156,7 +156,7 @@ class settings_form extends \moodleform {
 
         if (isset($CFG->alternative_file_system_class)) {
             if ($CFG->alternative_file_system_class != $config->filesystem) {
-                $string = get_string('settings:clientselection:mismatchfilesystem','tool_objectfs');
+                $string = get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs');
                 $mform->addElement('html', $OUTPUT->notification($string, 'notifyproblem'));
             }
         } else {

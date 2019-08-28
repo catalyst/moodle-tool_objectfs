@@ -28,7 +28,6 @@ class checker_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
-        // $config->sizethreshold = 100;
         set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->checker = new checker($this->filesystem, $config, $this->logger);
@@ -44,10 +43,11 @@ class checker_testcase extends tool_objectfs_testcase {
         $file = $this->create_local_object();
         $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $dbrecord = gettype($dblocation) == 'string' ? true : false;
 
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $fslocation);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
-        $this->assertIsNotBool($dblocation);
+        $this->assertTrue($dbrecord);
     }
 
     public function test_checker_get_location_duplicated_if_object_is_duplicated() {
@@ -55,10 +55,11 @@ class checker_testcase extends tool_objectfs_testcase {
         $file = $this->create_duplicated_object();
         $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $dbrecord = gettype($dblocation) == 'string' ? true : false;
 
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $fslocation);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $dblocation);
-        $this->assertIsNotBool($dblocation);
+        $this->assertTrue($dbrecord);
     }
 
     public function test_checker_get_location_external_if_object_is_external() {
@@ -66,10 +67,11 @@ class checker_testcase extends tool_objectfs_testcase {
         $file = $this->create_remote_object();
         $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $dbrecord = gettype($dblocation) == 'string' ? true : false;
 
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $fslocation);
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $dblocation);
-        $this->assertIsNotBool($dblocation);
+        $this->assertTrue($dbrecord);
     }
 
     public function test_checker_get_candidate_objects_will_not_get_objects() {
