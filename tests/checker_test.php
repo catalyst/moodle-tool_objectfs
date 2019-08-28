@@ -43,11 +43,11 @@ class checker_testcase extends tool_objectfs_testcase {
         $file = $this->create_local_object();
         $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-        $dbrecord = gettype($dblocation) == 'string' ? true : false;
+        $dblocationtype = gettype($dblocation) == 'string' ? true : false;
 
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $fslocation);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
-        $this->assertTrue($dbrecord);
+        $this->assertTrue($dblocationtype);
     }
 
     public function test_checker_get_location_duplicated_if_object_is_duplicated() {
@@ -55,11 +55,11 @@ class checker_testcase extends tool_objectfs_testcase {
         $file = $this->create_duplicated_object();
         $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-        $dbrecord = gettype($dblocation) == 'string' ? true : false;
+        $dblocationtype = gettype($dblocation) == 'string' ? true : false;
 
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $fslocation);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $dblocation);
-        $this->assertTrue($dbrecord);
+        $this->assertTrue($dblocationtype);
     }
 
     public function test_checker_get_location_external_if_object_is_external() {
@@ -67,11 +67,11 @@ class checker_testcase extends tool_objectfs_testcase {
         $file = $this->create_remote_object();
         $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-        $dbrecord = gettype($dblocation) == 'string' ? true : false;
+        $dblocationtype = gettype($dblocation) == 'string' ? true : false;
 
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $fslocation);
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $dblocation);
-        $this->assertTrue($dbrecord);
+        $this->assertTrue($dblocationtype);
     }
 
     public function test_checker_get_candidate_objects_will_not_get_objects() {
@@ -105,9 +105,63 @@ class checker_testcase extends tool_objectfs_testcase {
         $this->checker->execute(array($localobject));
         $candidateobjects = $this->checker->get_candidate_objects();
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $localobject->contenthash));
+        $dblocationtype = gettype($dblocation) == 'string' ? true : false;
 
         $this->assertCount(0, $candidateobjects);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
-        $this->assertIsNotBool($dblocation);
+        $this->assertTrue($dblocationtype);
+    }
+
+    public function test_checker_get_candidates_sql_params_method_will_get_empty_array() {
+        $reflection = new \ReflectionMethod(checker::class, "get_candidates_sql_params");
+        $reflection->setAccessible(true);
+        $result = $reflection->invokeArgs($this->checker, array());
+
+        $this->assertCount(0, $result);
+    }
+
+    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_local() {
+        $file = $this->create_local_object();
+        $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
+        $reflection->setAccessible(true);
+        $result = $reflection->invokeArgs($this->checker, array($file));
+        $resulttype = gettype($result) == 'integer' ? true : false;
+
+        $this->assertEquals(OBJECT_LOCATION_LOCAL, $result);
+        $this->assertTrue($resulttype);
+    }
+
+    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_duplicated() {
+        $file = $this->create_duplicated_object();
+        $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
+        $reflection->setAccessible(true);
+        $result = $reflection->invokeArgs($this->checker, array($file));
+        $resulttype = gettype($result) == 'integer' ? true : false;
+
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $result);
+        $this->assertTrue($resulttype);
+    }
+
+    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_external() {
+        $file = $this->create_remote_object();
+        $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
+        $reflection->setAccessible(true);
+        $result = $reflection->invokeArgs($this->checker, array($file));
+        $resulttype = gettype($result) == 'integer' ? true : false;
+
+        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $result);
+        $this->assertTrue($resulttype);
+    }
+
+    public function test_checker_manipulate_object_method_will_get_error_on_fake_file() {
+        $file = $this->create_local_object();
+        $file->contenthash = 'This is a fake contenthash';
+        $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
+        $reflection->setAccessible(true);
+        $result = $reflection->invokeArgs($this->checker, array($file));
+        $resulttype = gettype($result) == 'integer' ? true : false;
+
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $result);
+        $this->assertTrue($resulttype);
     }
 }
