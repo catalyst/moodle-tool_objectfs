@@ -75,6 +75,7 @@ class checker_testcase extends tool_objectfs_testcase {
     }
 
     public function test_checker_get_candidate_objects_will_not_get_objects() {
+        $this->delete_all_files_in_db();
         $localobject = $this->create_local_object();
         $remoteobject = $this->create_remote_object();
         $duplicatedbject = $this->create_duplicated_object();
@@ -88,6 +89,7 @@ class checker_testcase extends tool_objectfs_testcase {
 
     public function test_checker_get_candidate_objects_will_get_object() {
         global $DB;
+        $this->delete_all_files_in_db();
         $localobject = $this->create_local_object();
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
         $candidateobjects = $this->checker->get_candidate_objects();
@@ -100,6 +102,7 @@ class checker_testcase extends tool_objectfs_testcase {
 
     public function test_checker_can_update_object() {
         global $DB;
+        $this->delete_all_files_in_db();
         $localobject = $this->create_local_object();
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
         $this->checker->execute(array($localobject));
@@ -153,9 +156,8 @@ class checker_testcase extends tool_objectfs_testcase {
         $this->assertTrue($resulttype);
     }
 
-    public function test_checker_manipulate_object_method_will_get_error_on_fake_file() {
-        $file = $this->create_local_object();
-        $file->contenthash = 'This is a fake contenthash';
+    public function test_checker_manipulate_object_method_will_get_error_location_on_error_file() {
+        $file = $this->create_error_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
         $result = $reflection->invokeArgs($this->checker, array($file));
