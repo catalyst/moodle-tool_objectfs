@@ -27,8 +27,6 @@ namespace tool_objectfs\local\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
-
 class puller extends manipulator {
 
     /**
@@ -63,12 +61,12 @@ class puller extends manipulator {
                        f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
-             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                 WHERE f.filesize <= ?
+                   AND o.location = ?
               GROUP BY f.contenthash,
                        f.filesize,
-                       o.location
-                HAVING MAX(f.filesize) <= ?
-                       AND (o.location = ?)';
+                       o.location';
 
         return $sql;
     }
@@ -80,7 +78,9 @@ class puller extends manipulator {
     }
 
     protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
+        $contenthash = $objectrecord->contenthash;
+        $filesize = $objectrecord->filesize;
+        $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($contenthash, $filesize);
         return $newlocation;
     }
 }

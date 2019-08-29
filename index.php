@@ -26,7 +26,7 @@
 use tool_objectfs\local\form\settings_form;
 
 require_once(__DIR__ . '/../../../config.php');
-require_once( __DIR__ . '/lib.php');
+require_once(__DIR__ . '/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 admin_externalpage_setup('tool_objectfs_settings');

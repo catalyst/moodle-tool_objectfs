@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * Task that adds missing objects locations.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,20 +31,20 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/filestorage/file_system.php');
 
-class push_objects_to_storage extends \core\task\scheduled_task {
+class check_objects_location extends \core\task\scheduled_task {
 
     /**
      * Get task name
      */
     public function get_name() {
-        return get_string('push_objects_to_storage_task', 'tool_objectfs');
+        return get_string('check_objects_location_task', 'tool_objectfs');
     }
 
     /**
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\pusher');
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\checker');
     }
 }
 

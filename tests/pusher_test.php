@@ -156,7 +156,7 @@ class pusher_testcase extends tool_objectfs_testcase {
 
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_mimetype() {
         global $DB;
-        // Push initial objects so they arnt candidates
+        // Push initial objects so they arnt candidates.
         $objects = $this->pusher->get_candidate_objects();
         $this->pusher->execute($objects);
 

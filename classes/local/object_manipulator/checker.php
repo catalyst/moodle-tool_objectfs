@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Recovers objects that are in the error state if it can.
+ * Checks files to have their location stored in database.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,14 +27,15 @@ namespace tool_objectfs\local\object_manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-class recoverer extends manipulator {
+class checker extends manipulator {
 
     /**
-     * recoverer constructor.
+     * Checker constructor.
+     * This manipulator adds location for files that do not have records in {tool_objectfs_objects} table.
      *
-     * @param sss_client $client S3 client
-     * @param object_file_system $filesystem S3 file system
-     * @param object $config sssfs config.
+     * @param object_client $client remote object client
+     * @param object_file_system $filesystem objectfs file system
+     * @param object $config objectfs config.
      */
     public function __construct($filesystem, $config, $logger) {
         parent::__construct($filesystem, $config);
@@ -45,32 +46,27 @@ class recoverer extends manipulator {
     }
 
     protected function get_query_name() {
-        return 'get_recover_candidates';
+        return 'get_check_candidates';
     }
 
     protected function get_candidates_sql() {
-        $sql = 'SELECT MAX(f.id),
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
+        $sql = 'SELECT f.contenthash
                   FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE o.location = ?
-              GROUP BY f.contenthash,
-                       f.filesize,
-                       o.location';
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                 WHERE f.filesize > 0
+                   AND o.location is NULL
+              GROUP BY f.contenthash';
 
         return $sql;
     }
 
     protected function get_candidates_sql_params() {
-        $params = array(OBJECT_LOCATION_ERROR);
-
+        $params = array();
         return $params;
     }
 
     protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->get_object_location_from_hash($objectrecord->contenthash, $objectrecord->filesize);
-        return $newlocation;
+        $location = $this->filesystem->get_object_location_from_hash($objectrecord->contenthash);
+        return $location;
     }
-
 }

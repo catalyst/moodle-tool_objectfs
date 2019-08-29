@@ -60,8 +60,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
-
         return $file;
     }
 
@@ -87,7 +85,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
@@ -152,7 +149,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     }
 
     protected function rename_file($currentpath, $destinationpath) {
-        $reflection = new \ReflectionMethod(object_file_system::class, 'delete_file');
+        $reflection = new \ReflectionMethod(object_file_system::class, 'rename_file');
         $reflection->setAccessible(true);
         return $reflection->invokeArgs($this->filesystem, [$currentpath, $destinationpath]);
     }
@@ -233,6 +230,12 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     protected function delete_draft_files($contenthash) {
         global $DB;
         $DB->delete_records('files', array('contenthash' => $contenthash));
+    }
+
+    protected function delete_all_files_in_db() {
+        global $DB;
+        $DB->delete_records('files');
+        $DB->delete_records('tool_objectfs_objects');
     }
 
     protected function is_externally_readable_by_url($url) {

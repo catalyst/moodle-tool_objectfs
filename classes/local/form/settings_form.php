@@ -41,7 +41,8 @@ class settings_form extends \moodleform {
         $mform = $this->_form;
         $config = $this->_customdata['config'];
 
-        $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/object_status.php'), get_string('object_status:page', 'tool_objectfs'));
+        $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/object_status.php'),
+            get_string('object_status:page', 'tool_objectfs'));
 
         $mform->addElement('html', $OUTPUT->heading($link, 5));
 
@@ -155,10 +156,12 @@ class settings_form extends \moodleform {
 
         if (isset($CFG->alternative_file_system_class)) {
             if ($CFG->alternative_file_system_class != $config->filesystem) {
-                $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs'), 'notifyproblem'));
+                $string = get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs');
+                $mform->addElement('html', $OUTPUT->notification($string, 'notifyproblem'));
             }
         } else {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:filesystemnotdefined', 'tool_objectfs'), 'warning'));
+            $string = get_string('settings:clientselection:filesystemnotdefined', 'tool_objectfs');
+            $mform->addElement('html', $OUTPUT->notification($string, 'warning'));
         }
 
         return $mform;
@@ -167,22 +170,28 @@ class settings_form extends \moodleform {
     public function define_presignedurl_section($mform) {
         global $OUTPUT;
 
-        $mform->addElement('header', 'presignedurlheader', get_string('settings:presignedurl:header', 'tool_objectfs'));
+        $mform->addElement('header', 'presignedurlheader',
+            get_string('settings:presignedurl:header', 'tool_objectfs'));
         $mform->setExpanded('presignedurlheader');
 
-        $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php'), get_string('presignedurl_testing:page', 'tool_objectfs'));
-        $text = $OUTPUT->heading('Before enabling Pre-Signed URL, please, make sure that all tests are passed successfully: '.$link, 6);
+        $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php'),
+            get_string('presignedurl_testing:page', 'tool_objectfs'));
+
+        $text = $OUTPUT->heading(get_string('settings:presignedurl:warning', 'tool_objectfs').$link, 6);
         $mform->addElement('html', $OUTPUT->notification($text, 'warning'));
 
-        $mform->addElement('advcheckbox', 'enablepresignedurls', get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'));
+        $mform->addElement('advcheckbox', 'enablepresignedurls',
+            get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'));
         $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:enablepresignedurls', 'tool_objectfs');
         $mform->setType("enablepresignedurls", PARAM_INT);
 
-        $mform->addElement('duration', 'expirationtime', get_string('settings:presignedurl:expirationtime', 'tool_objectfs'));
+        $mform->addElement('duration', 'expirationtime',
+            get_string('settings:presignedurl:expirationtime', 'tool_objectfs'));
         $mform->addHelpButton('expirationtime', 'settings:presignedurl:expirationtime', 'tool_objectfs');
         $mform->setType("expirationtime", PARAM_INT);
 
-        $mform->addElement('text', 'presignedminfilesize', get_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'));
+        $mform->addElement('text', 'presignedminfilesize',
+            get_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'));
         $mform->addHelpButton('presignedminfilesize', 'settings:presignedurl:presignedminfilesize', 'tool_objectfs');
         $mform->setType("presignedminfilesize", PARAM_INT);
 

@@ -738,4 +738,35 @@ abstract class object_file_system extends \file_system_filedir {
     public function supports_xsendfile() {
         return true;
     }
+
+    /**
+     * Add the supplied file to the file system and update its location.
+     *
+     * @param string $pathname Path to file currently on disk
+     * @param string $contenthash SHA1 hash of content if known (performance only)
+     * @return array (contenthash, filesize, newfile)
+     */
+    public function add_file_from_path($pathname, $contenthash = null) {
+        $result = parent::add_file_from_path($pathname, $contenthash);
+
+        $location = $this->get_object_location_from_hash($result[0]);
+        update_object_record($result[0], $location);
+
+        return $result;
+    }
+
+    /**
+     * Add a file with the supplied content to the file system and update its location.
+     *
+     * @param string $content file content - binary string
+     * @return array (contenthash, filesize, newfile)
+     */
+    public function add_file_from_string($content) {
+        $result = parent::add_file_from_string($content);
+
+        $location = $this->get_object_location_from_hash($result[0]);
+        update_object_record($result[0], $location);
+
+        return $result;
+    }
 }
