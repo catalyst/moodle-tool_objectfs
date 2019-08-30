@@ -252,4 +252,13 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
             return false;
         }
     }
+
+    protected function integration_client_supports_presigned_urls($client) {
+        $supportedlist = array();
+        $supportedlist[] = 'tool_objectfs\tests\test_s3_integration_client';
+        if (in_array($client, $supportedlist)) {
+            return true;
+        }
+        return false;
+    }
 }

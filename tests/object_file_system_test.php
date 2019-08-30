@@ -25,6 +25,19 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class object_file_system_testcase extends tool_objectfs_testcase {
 
+    public function set_externalclient_config($key, $value) {
+        // Get a reflection of externalclient object as a property.
+        $reflection = new \ReflectionClass($this->filesystem);
+        $externalclientref = $reflection->getParentClass()->getProperty('externalclient');
+        $externalclientref->setAccessible(true);
+
+        // Get a reflection of externalclient->$key property.
+        $property = new \ReflectionProperty($externalclientref->getValue($this->filesystem), $key);
+
+        // Set new value for externalclient->$key property.
+        $property->setValue($externalclientref->getValue($this->filesystem), $value);
+    }
+
     public function test_get_remote_path_from_storedfile_returns_local_path_if_local() {
         $file = $this->create_local_file();
         $expectedpath = $this->get_local_path_from_storedfile($file);
@@ -519,6 +532,66 @@ class object_file_system_testcase extends tool_objectfs_testcase {
             $this->assertTrue($this->is_externally_readable_by_url($signedurl));
         } catch (\coding_exception $e) {
             $this->assertEquals($e->a, 'Pre-signed URLs not supported');
+        }
+    }
+
+    public function test_presigned_url_configured_method() {
+        $this->filesystem = new test_file_system();
+        $client = get_class($this->filesystem->get_external_client());
+
+        if ($this->integration_client_supports_presigned_urls($client)) {
+            $this->set_externalclient_config('enablepresignedurls', '1');
+            $res = $this->filesystem->presigned_url_configured();
+            $this->assertTrue($res);
+
+            $this->set_externalclient_config('enablepresignedurls', '0');
+            $res = $this->filesystem->presigned_url_configured();
+            $this->assertFalse($res);
+        } else {
+            $res = $this->filesystem->presigned_url_configured();
+            $this->assertFalse($res);
+        }
+    }
+
+    public function test_presigned_url_should_redirect_method_return_false_as_disabled() {
+        $this->filesystem = new test_file_system();
+        $object = $this->create_local_object();
+        $this->assertFalse($this->filesystem->presigned_url_should_redirect($object->contenthash));
+    }
+
+    public function test_presigned_url_should_redirect_method_return_true_regardless_filesize() {
+        $this->filesystem = new test_file_system();
+        $client = get_class($this->filesystem->get_external_client());
+
+        if ($this->integration_client_supports_presigned_urls($client)) {
+            $this->set_externalclient_config('enablepresignedurls', '1');
+            $this->set_externalclient_config('presignedminfilesize', 0);
+            $object = $this->create_local_object();
+            $this->assertTrue($this->filesystem->presigned_url_should_redirect($object->contenthash));
+        }
+    }
+
+    public function test_presigned_url_should_redirect_method_return_false_if_filesize_less_than_threshold() {
+        $this->filesystem = new test_file_system();
+        $client = get_class($this->filesystem->get_external_client());
+
+        if ($this->integration_client_supports_presigned_urls($client)) {
+            $this->set_externalclient_config('enablepresignedurls', '1');
+            $this->set_externalclient_config('presignedminfilesize', 1000);
+            $object = $this->create_local_object();
+            $this->assertFalse($this->filesystem->presigned_url_should_redirect($object->contenthash));
+        }
+    }
+
+    public function test_presigned_url_should_redirect_method_return_true_if_filesize_greater_than_threshold() {
+        $this->filesystem = new test_file_system();
+        $client = get_class($this->filesystem->get_external_client());
+
+        if ($this->integration_client_supports_presigned_urls($client)) {
+            $this->set_externalclient_config('enablepresignedurls', '1');
+            $this->set_externalclient_config('presignedminfilesize', 1);
+            $object = $this->create_local_object();
+            $this->assertTrue($this->filesystem->presigned_url_should_redirect($object->contenthash));
         }
     }
 }
