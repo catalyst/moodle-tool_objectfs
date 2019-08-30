@@ -714,10 +714,6 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
-    public function get_local_path($contenthash) {
-        return $this->get_local_path_from_hash($contenthash);
-    }
-
     /**
      * Generates pre-signed URL to external file.
      *
