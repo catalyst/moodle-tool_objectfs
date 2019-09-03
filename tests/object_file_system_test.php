@@ -580,9 +580,13 @@ class object_file_system_testcase extends tool_objectfs_testcase {
             $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
         }
 
-        $this->set_externalclient_config('enablepresignedurls', '1');
-        $this->set_externalclient_config('presignedminfilesize', 1000);
+        // Test files are created with file size = 10.
         $object = $this->create_local_object();
+
+        // Set presignedminfilesize = 1000 to be greater than file size.
+        $this->set_externalclient_config('presignedminfilesize', 1000);
+        $this->set_externalclient_config('enablepresignedurls', '1');
+
         $this->assertFalse($this->filesystem->presigned_url_should_redirect($object->contenthash));
     }
 
