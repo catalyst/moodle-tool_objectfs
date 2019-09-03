@@ -552,13 +552,51 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->filesystem->presigned_url_configured());
     }
 
-    public function test_presigned_url_should_redirect_method_return_false_as_disabled() {
-        $this->filesystem = new test_file_system();
-        $object = $this->create_local_object();
-        $this->assertFalse($this->filesystem->presigned_url_should_redirect($object->contenthash));
+    public function test_presigned_url_should_redirect_provider() {
+        $provider = array();
+
+        // Testing defaults.
+        $provider[] = array('Default', 'Default', false);
+
+        // Testing $enablepresignedurls.
+        $provider[] = array(1, 'Default', true);
+        $provider[] = array('1', 'Default', true);
+        $provider[] = array(0, 'Default', false);
+        $provider[] = array('0', 'Default', false);
+        $provider[] = array('', 'Default', false);
+        $provider[] = array(null, 'Default', false);
+
+        // Testing $presignedminfilesize.
+        $provider[] = array(1, 0, true);
+        $provider[] = array(1, '0', true);
+        $provider[] = array(1, '', true);
+        $provider[] = array(1, null, false);
+
+        // Testing minimum file size to be greater than file size = 10 (default).
+        $provider[] = array(1, 11, false);
+        $provider[] = array(1, '11', false);
+
+        // Testing minimum file size to be less than file size = 10 (default).
+        $provider[] = array(1, 9, true);
+        $provider[] = array(1, '9', true);
+
+        // Testing nulls and empty strings.
+        $provider[] = array(null, null, false);
+        $provider[] = array(null, '', false);
+        $provider[] = array('', null, false);
+        $provider[] = array('', '', false);
+
+        return $provider;
     }
 
-    public function test_presigned_url_should_redirect_method_return_true_regardless_filesize() {
+    /**
+     * @dataProvider test_presigned_url_should_redirect_provider
+     *
+     * @param $enablepresignedurls mixed enable pre-signed URLs.
+     * @param $presignedminfilesize mixed minimum file size to be redirected to pre-signed URL.
+     * @param $result boolean expected result.
+     */
+    public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls, $presignedminfilesize, $result) {
         $this->filesystem = new test_file_system();
         $externalclient = $this->filesystem->get_external_client();
 
@@ -566,41 +604,15 @@ class object_file_system_testcase extends tool_objectfs_testcase {
             $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
         }
 
-        $this->set_externalclient_config('enablepresignedurls', '1');
-        $this->set_externalclient_config('presignedminfilesize', 0);
-        $object = $this->create_local_object();
-        $this->assertTrue($this->filesystem->presigned_url_should_redirect($object->contenthash));
-    }
-
-    public function test_presigned_url_should_redirect_method_return_false_if_filesize_less_than_threshold() {
-        $this->filesystem = new test_file_system();
-        $externalclient = $this->filesystem->get_external_client();
-
-        if (!$externalclient->support_presigned_urls()) {
-            $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
+        if ($enablepresignedurls !== 'Default') {
+            $this->set_externalclient_config('enablepresignedurls', $enablepresignedurls);
         }
 
-        // Test files are created with file size = 10.
-        $object = $this->create_local_object();
-
-        // Set presignedminfilesize = 1000 to be greater than file size.
-        $this->set_externalclient_config('presignedminfilesize', 1000);
-        $this->set_externalclient_config('enablepresignedurls', '1');
-
-        $this->assertFalse($this->filesystem->presigned_url_should_redirect($object->contenthash));
-    }
-
-    public function test_presigned_url_should_redirect_method_return_true_if_filesize_greater_than_threshold() {
-        $this->filesystem = new test_file_system();
-        $externalclient = $this->filesystem->get_external_client();
-
-        if (!$externalclient->support_presigned_urls()) {
-            $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
+        if ($presignedminfilesize !== 'Default') {
+            $this->set_externalclient_config('presignedminfilesize', $presignedminfilesize);
         }
 
-        $this->set_externalclient_config('enablepresignedurls', '1');
-        $this->set_externalclient_config('presignedminfilesize', 1);
         $object = $this->create_local_object();
-        $this->assertTrue($this->filesystem->presigned_url_should_redirect($object->contenthash));
+        $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($object->contenthash));
     }
 }
