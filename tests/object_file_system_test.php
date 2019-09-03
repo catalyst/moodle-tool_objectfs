@@ -537,9 +537,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_presigned_url_configured_method() {
         $this->filesystem = new test_file_system();
-        $client = get_class($this->filesystem->get_external_client());
+        $externalclient = $this->filesystem->get_external_client();
 
-        if ($this->integration_client_supports_presigned_urls($client)) {
+        if ($externalclient->support_presigned_urls()) {
             $this->set_externalclient_config('enablepresignedurls', '1');
             $res = $this->filesystem->presigned_url_configured();
             $this->assertTrue($res);
@@ -561,9 +561,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_presigned_url_should_redirect_method_return_true_regardless_filesize() {
         $this->filesystem = new test_file_system();
-        $client = get_class($this->filesystem->get_external_client());
+        $externalclient = $this->filesystem->get_external_client();
 
-        if ($this->integration_client_supports_presigned_urls($client)) {
+        if ($externalclient->support_presigned_urls()) {
             $this->set_externalclient_config('enablepresignedurls', '1');
             $this->set_externalclient_config('presignedminfilesize', 0);
             $object = $this->create_local_object();
@@ -573,9 +573,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_presigned_url_should_redirect_method_return_false_if_filesize_less_than_threshold() {
         $this->filesystem = new test_file_system();
-        $client = get_class($this->filesystem->get_external_client());
+        $externalclient = $this->filesystem->get_external_client();
 
-        if ($this->integration_client_supports_presigned_urls($client)) {
+        if ($externalclient->support_presigned_urls()) {
             $this->set_externalclient_config('enablepresignedurls', '1');
             $this->set_externalclient_config('presignedminfilesize', 1000);
             $object = $this->create_local_object();
@@ -585,9 +585,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_presigned_url_should_redirect_method_return_true_if_filesize_greater_than_threshold() {
         $this->filesystem = new test_file_system();
-        $client = get_class($this->filesystem->get_external_client());
+        $externalclient = $this->filesystem->get_external_client();
 
-        if ($this->integration_client_supports_presigned_urls($client)) {
+        if ($externalclient->support_presigned_urls()) {
             $this->set_externalclient_config('enablepresignedurls', '1');
             $this->set_externalclient_config('presignedminfilesize', 1);
             $object = $this->create_local_object();
