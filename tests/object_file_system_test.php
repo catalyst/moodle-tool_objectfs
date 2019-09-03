@@ -535,22 +535,21 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         }
     }
 
-    public function test_presigned_url_configured_method() {
+    public function test_presigned_url_configured_method_returns_false_if_not_configured() {
+        $this->filesystem = new test_file_system();
+        $this->assertFalse($this->filesystem->presigned_url_configured());
+    }
+
+    public function test_presigned_url_configured_method_returns_true_if_configured() {
         $this->filesystem = new test_file_system();
         $externalclient = $this->filesystem->get_external_client();
 
-        if ($externalclient->support_presigned_urls()) {
-            $this->set_externalclient_config('enablepresignedurls', '1');
-            $res = $this->filesystem->presigned_url_configured();
-            $this->assertTrue($res);
-
-            $this->set_externalclient_config('enablepresignedurls', '0');
-            $res = $this->filesystem->presigned_url_configured();
-            $this->assertFalse($res);
-        } else {
-            $res = $this->filesystem->presigned_url_configured();
-            $this->assertFalse($res);
+        if (!$externalclient->support_presigned_urls()) {
+            $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
         }
+
+        $this->set_externalclient_config('enablepresignedurls', '1');
+        $this->assertTrue($this->filesystem->presigned_url_configured());
     }
 
     public function test_presigned_url_should_redirect_method_return_false_as_disabled() {
