@@ -373,25 +373,4 @@ class client extends object_client_base {
 
          return '';
     }
-
-    /**
-     * Does the storage support pre-signed URLs.
-     *
-     * @return bool.
-     */
-    public function support_signed_urls() {
-        return false;
-    }
-
-    /**
-     * Generates pre-signed URL to Azure blob from its hash.
-     *
-     * @param string $contenthash File content hash.
-     *
-     * @return string.
-     */
-    public function generate_signed_url($contenthash) {
-        return 'Not supported';
-    }
-
 }
