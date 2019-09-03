@@ -90,7 +90,7 @@ function get_objectfs_config() {
     $config->filesystem = '';
     $config->enablepresignedurls = 0;
     $config->expirationtime = 10 * MINSECS;
-    $config->presignedminfilesize = 1024 * 50;
+    $config->presignedminfilesize = 0;
 
     // S3 file system.
     $config->s3_key = '';
