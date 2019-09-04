@@ -63,43 +63,37 @@ class checker_testcase extends tool_objectfs_testcase {
     }
 
     public function test_checker_get_candidate_objects_will_not_get_objects() {
-        $this->delete_all_files_in_db();
-        $localobject = $this->create_local_object();
-        $remoteobject = $this->create_remote_object();
-        $duplicatedbject = $this->create_duplicated_object();
+        $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_not_get_objects_local');
+        $remoteobject = $this->create_remote_object('test_checker_get_candidate_objects_will_not_get_objects_remote');
+        $duplicatedbject = $this->create_duplicated_object('test_checker_get_candidate_objects_will_not_get_objects_duplicated');
         $candidateobjects = $this->checker->get_candidate_objects();
 
         $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
         $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
         $this->assertArrayNotHasKey($duplicatedbject->contenthash, $candidateobjects);
-        $this->assertCount(0, $candidateobjects);
     }
 
     public function test_checker_get_candidate_objects_will_get_object() {
         global $DB;
-        $this->delete_all_files_in_db();
-        $localobject = $this->create_local_object();
+        $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_get_object');
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
         $candidateobjects = $this->checker->get_candidate_objects();
 
         $this->assertNotCount(0, $candidateobjects);
-        foreach ($candidateobjects as $candidate) {
-            $this->assertEquals($localobject->contenthash, $candidate->contenthash);
-        }
+        $this->assertArrayHasKey($localobject->contenthash, $candidateobjects);
     }
 
     public function test_checker_can_update_object() {
         global $DB;
-        $this->delete_all_files_in_db();
-        $localobject = $this->create_local_object();
+        $localobject = $this->create_local_object('test_checker_can_update_object');
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
         $this->checker->execute(array($localobject));
         $candidateobjects = $this->checker->get_candidate_objects();
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $localobject->contenthash));
 
         $this->assertNotFalse($dblocation);
-        $this->assertCount(0, $candidateobjects);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
+        $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
     }
 
     public function test_checker_get_candidates_sql_params_method_will_get_empty_array() {
