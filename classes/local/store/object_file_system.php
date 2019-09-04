@@ -753,4 +753,28 @@ abstract class object_file_system extends \file_system_filedir {
 
         return $result;
     }
+
+    /**
+     * Returns information about image.
+     * Information is determined from the file content.
+     * If file is external get image info by remote path.
+     *
+     * @param stored_file $file The file to inspect
+     * @return mixed array with width, height and mimetype; false if not an image
+     */
+    public function get_imageinfo(stored_file $file) {
+        if (!$this->is_image_from_storedfile($file)) {
+            return false;
+        }
+
+        $contenthash = $file->get_contenthash();
+        $location = $this->get_object_location_from_hash($contenthash);
+
+        if ($location === OBJECT_LOCATION_EXTERNAL) {
+            $path = $this->externalclient->get_fullpath_from_hash($contenthash);
+            return $this->get_imageinfo_from_path($path);
+        } else {
+            return parent::get_imageinfo($file);
+        }
+    }
 }
