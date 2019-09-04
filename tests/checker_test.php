@@ -41,34 +41,25 @@ class checker_testcase extends tool_objectfs_testcase {
     public function test_checker_get_location_local_if_object_is_local() {
         global $DB;
         $file = $this->create_local_object();
-        $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
-        $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-
-        $this->assertNotFalse($dblocation);
-        $this->assertEquals(OBJECT_LOCATION_LOCAL, $fslocation);
-        $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $this->assertNotFalse($location);
+        $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
     public function test_checker_get_location_duplicated_if_object_is_duplicated() {
         global $DB;
         $file = $this->create_duplicated_object();
-        $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
-        $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-
-        $this->assertNotFalse($dblocation);
-        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $fslocation);
-        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $dblocation);
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $this->assertNotFalse($location);
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
     public function test_checker_get_location_external_if_object_is_external() {
         global $DB;
         $file = $this->create_remote_object();
-        $fslocation = $this->filesystem->get_object_location_from_hash($file->contenthash);
-        $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-
-        $this->assertNotFalse($dblocation);
-        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $fslocation);
-        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $dblocation);
+        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $this->assertNotFalse($location);
+        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
     public function test_checker_get_candidate_objects_will_not_get_objects() {
