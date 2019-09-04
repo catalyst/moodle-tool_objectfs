@@ -232,12 +232,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $DB->delete_records('files', array('contenthash' => $contenthash));
     }
 
-    protected function delete_all_files_in_db() {
-        global $DB;
-        $DB->delete_records('files');
-        $DB->delete_records('tool_objectfs_objects');
-    }
-
     protected function is_externally_readable_by_url($url) {
         try {
             $file = fopen($url, 'r');
