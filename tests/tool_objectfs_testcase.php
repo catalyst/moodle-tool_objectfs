@@ -60,6 +60,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
+        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
@@ -85,6 +86,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
+        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
