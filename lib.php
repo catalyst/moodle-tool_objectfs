@@ -79,28 +79,32 @@ function get_objectfs_config() {
     $config->enabletasks = 0;
     $config->enablelogging = 0;
     $config->sizethreshold = 1024 * 10;
-    $config->minimumage = 7 * 24 * 60 * 60;
+    $config->minimumage = 7 * DAYSECS;
     $config->deletelocal = 0;
-    $config->consistencydelay = 10 * 60;
-    $config->maxtaskruntime = 60;
+    $config->consistencydelay = 10 * MINSECS;
+    $config->maxtaskruntime = MINSECS;
     $config->logging = 0;
     $config->preferexternal = 0;
+    $config->batchsize = 10000;
 
     $config->filesystem = '';
+    $config->enablepresignedurls = 0;
+    $config->expirationtime = 10 * MINSECS;
+    $config->presignedminfilesize = 0;
 
-    // '\tool_objectfs\s3_file_system'
+    // S3 file system.
     $config->s3_key = '';
     $config->s3_secret = '';
     $config->s3_bucket = '';
     $config->s3_region = 'us-east-1';
 
-    // '\tool_objectfs\do_file_system'
+    // Digital ocean file system.
     $config->do_key = '';
     $config->do_secret = '';
     $config->do_space = '';
     $config->do_region = 'sfo2';
 
-    // '\tool_objectfs\azure_file_system'
+    // Azure file system.
     $config->azure_accountname = '';
     $config->azure_container = '';
     $config->azure_sastoken = '';
@@ -115,49 +119,23 @@ function get_objectfs_config() {
 }
 
 function tool_objectfs_get_client($config) {
-    global $CFG;
+    $fsclass = $config->filesystem;
+    $client = str_replace('_file_system', '', $fsclass);
+    $client = str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $client.'\\client');
 
-    $fsclass = $CFG->alternative_file_system_class;
-
-    $client = str_replace('file_system', 'client', $fsclass);
-    $client = str_replace('\\tool_objectfs\\', '\\tool_objectfs\\client\\', $client);
-
-    return new $client($config);
-}
-
-function tool_objectfs_get_client_components($type = 'base') {
-    global $CFG;
-
-    $found = [];
-
-    $path = $CFG->dirroot . '/admin/tool/objectfs/classes/client/*_client.php';
-
-    $clients = glob($path);
-
-    foreach ($clients as $client) {
-        $client = str_replace('_client.php', '', $client);
-        $basename = basename($client);
-
-        // Ignore the abstract class.
-        if ($basename == 'object') {
-            continue;
-        }
-
-        switch ($type) {
-            case 'file_system':
-                $found[$basename] = '\\tool_objectfs\\' . $basename . '_file_system';
-                break;
-            case 'client':
-                $found[$basename] = '\\tool_objectfs\\client\\' . $basename . '_client';
-                break;
-            case 'base':
-                $found[$basename] = $basename;
-                break;
-            default:
-                break;
-        }
+    if (class_exists($client)) {
+        return new $client($config);
     }
 
+    return false;
+}
+
+function tool_objectfs_get_fs_list() {
+    $found[''] = 'Please, select';
+    $found['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
+    $found['\tool_objectfs\do_file_system'] = '\tool_objectfs\do_file_system';
+    $found['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
+    $found['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
     return $found;
 }
 
@@ -167,6 +145,15 @@ function tool_objectfs_should_tasks_run() {
         return true;
     }
 
+    return false;
+}
+
+function tool_objectfs_filesystem_supports_presigned_urls($fs) {
+    $supportedlist = array();
+    $supportedlist[] = '\tool_objectfs\s3_file_system';
+    if (in_array($fs, $supportedlist)) {
+        return true;
+    }
     return false;
 }
 
@@ -186,7 +173,7 @@ function tool_objectfs_cron() {
             mtrace("Objectfs $manipulator successfully executed");
         }
 
-        \tool_objectfs\report\objectfs_report::generate_status_report();
+        \tool_objectfs\local\report\objectfs_report::generate_status_report();
     }
 
     return true;

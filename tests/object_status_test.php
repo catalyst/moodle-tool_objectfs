@@ -27,9 +27,8 @@
 
  defined('MOODLE_INTERNAL') || die();
 
- use tool_objectfs\object_file_system;
- use tool_objectfs\report\objectfs_report_builder;
- use tool_objectfs\report\objectfs_report;
+ use tool_objectfs\local\report\objectfs_report_builder;
+ use tool_objectfs\local\report\objectfs_report;
 
  require_once(__DIR__ . '/classes/test_client.php');
  require_once(__DIR__ . '/tool_objectfs_testcase.php');
@@ -39,7 +38,7 @@ class object_status_testcase extends tool_objectfs_testcase {
     public function test_report_builders () {
         $reporttypes = objectfs_report::get_report_types();
         foreach ($reporttypes as $reporttype) {
-            $reportbuilderclass = "tool_objectfs\\report\\{$reporttype}_report_builder";
+            $reportbuilderclass = "tool_objectfs\\local\\report\\{$reporttype}_report_builder";
             $reportbuilder = new $reportbuilderclass();
             $report = $reportbuilder->build_report();
             objectfs_report_builder::save_report_to_database($report);

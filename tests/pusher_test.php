@@ -18,8 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\object_file_system;
-use tool_objectfs\object_manipulator\pusher;
+use tool_objectfs\local\object_manipulator\pusher;
 
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
@@ -157,7 +156,7 @@ class pusher_testcase extends tool_objectfs_testcase {
 
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_mimetype() {
         global $DB;
-        // Push initial objects so they arnt candidates
+        // Push initial objects so they arnt candidates.
         $objects = $this->pusher->get_candidate_objects();
         $this->pusher->execute($objects);
 

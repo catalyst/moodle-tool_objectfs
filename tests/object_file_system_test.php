@@ -18,12 +18,25 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\object_file_system;
+use tool_objectfs\local\store\object_file_system;
 
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class object_file_system_testcase extends tool_objectfs_testcase {
+
+    public function set_externalclient_config($key, $value) {
+        // Get a reflection of externalclient object as a property.
+        $reflection = new \ReflectionClass($this->filesystem);
+        $externalclientref = $reflection->getParentClass()->getProperty('externalclient');
+        $externalclientref->setAccessible(true);
+
+        // Get a reflection of externalclient->$key property.
+        $property = new \ReflectionProperty($externalclientref->getValue($this->filesystem), $key);
+
+        // Set new value for externalclient->$key property.
+        $property->setValue($externalclientref->getValue($this->filesystem), $value);
+    }
 
     public function test_get_remote_path_from_storedfile_returns_local_path_if_local() {
         $file = $this->create_local_file();
@@ -508,5 +521,98 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->delete_draft_files($filehash);
         $this->filesystem->remove_file($filehash);
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
+    }
+
+    public function test_can_generate_signed_url_by_hash_if_object_is_external() {
+        $this->filesystem = new test_file_system();
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+        try {
+            $signedurl = $this->filesystem->generate_presigned_url_to_external_file($filehash);
+            $this->assertTrue($this->is_externally_readable_by_url($signedurl));
+        } catch (\coding_exception $e) {
+            $this->assertEquals($e->a, 'Pre-signed URLs not supported');
+        }
+    }
+
+    public function test_presigned_url_configured_method_returns_false_if_not_configured() {
+        $this->filesystem = new test_file_system();
+        $this->assertFalse($this->filesystem->presigned_url_configured());
+    }
+
+    public function test_presigned_url_configured_method_returns_true_if_configured() {
+        $this->filesystem = new test_file_system();
+        $externalclient = $this->filesystem->get_external_client();
+
+        if (!$externalclient->support_presigned_urls()) {
+            $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
+        }
+
+        $this->set_externalclient_config('enablepresignedurls', '1');
+        $this->assertTrue($this->filesystem->presigned_url_configured());
+    }
+
+    public function test_presigned_url_should_redirect_provider() {
+        $provider = array();
+
+        // Testing defaults.
+        $provider[] = array('Default', 'Default', false);
+
+        // Testing $enablepresignedurls.
+        $provider[] = array(1, 'Default', true);
+        $provider[] = array('1', 'Default', true);
+        $provider[] = array(0, 'Default', false);
+        $provider[] = array('0', 'Default', false);
+        $provider[] = array('', 'Default', false);
+        $provider[] = array(null, 'Default', false);
+
+        // Testing $presignedminfilesize.
+        $provider[] = array(1, 0, true);
+        $provider[] = array(1, '0', true);
+        $provider[] = array(1, '', true);
+        $provider[] = array(1, null, false);
+
+        // Testing minimum file size to be greater than file size = 10 (default).
+        $provider[] = array(1, 11, false);
+        $provider[] = array(1, '11', false);
+
+        // Testing minimum file size to be less than file size = 10 (default).
+        $provider[] = array(1, 9, true);
+        $provider[] = array(1, '9', true);
+
+        // Testing nulls and empty strings.
+        $provider[] = array(null, null, false);
+        $provider[] = array(null, '', false);
+        $provider[] = array('', null, false);
+        $provider[] = array('', '', false);
+
+        return $provider;
+    }
+
+    /**
+     * @dataProvider test_presigned_url_should_redirect_provider
+     *
+     * @param $enablepresignedurls mixed enable pre-signed URLs.
+     * @param $presignedminfilesize mixed minimum file size to be redirected to pre-signed URL.
+     * @param $result boolean expected result.
+     */
+    public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls, $presignedminfilesize, $result) {
+        $this->filesystem = new test_file_system();
+        $externalclient = $this->filesystem->get_external_client();
+
+        if (!$externalclient->support_presigned_urls()) {
+            $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
+        }
+
+        if ($enablepresignedurls !== 'Default') {
+            $this->set_externalclient_config('enablepresignedurls', $enablepresignedurls);
+        }
+
+        if ($presignedminfilesize !== 'Default') {
+            $this->set_externalclient_config('presignedminfilesize', $presignedminfilesize);
+        }
+
+        $object = $this->create_local_object();
+        $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($object->contenthash));
     }
 }

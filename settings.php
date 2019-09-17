@@ -39,4 +39,9 @@ if ($hassiteconfig) {
 
     $ADMIN->add('tools', $externalpage);
 
+    $externalpage = new admin_externalpage('tool_objectfs_presignedurl_testing',
+                                            get_string('presignedurl_testing:page', 'tool_objectfs'),
+                                            new moodle_url('/admin/tool/objectfs/presignedurl_tests.php'));
+
+    $ADMIN->add('tools', $externalpage);
 }

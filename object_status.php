@@ -24,11 +24,11 @@
  */
 
 require_once(__DIR__ . '/../../../config.php');
-require_once( __DIR__ . '/lib.php');
+require_once(__DIR__ . '/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-use tool_objectfs\report\objectfs_report;
-use tool_objectfs\report\objectfs_report_builder;
+use tool_objectfs\local\report\objectfs_report;
+use tool_objectfs\local\report\objectfs_report_builder;
 
 
 admin_externalpage_setup('tool_objectfs');

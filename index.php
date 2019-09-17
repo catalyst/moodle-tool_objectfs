@@ -23,10 +23,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_objectfs\form\settings_form;
+use tool_objectfs\local\form\settings_form;
 
 require_once(__DIR__ . '/../../../config.php');
-require_once( __DIR__ . '/lib.php');
+require_once(__DIR__ . '/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 admin_externalpage_setup('tool_objectfs_settings');
@@ -36,11 +36,13 @@ $output = $PAGE->get_renderer('tool_objectfs');
 $config = get_objectfs_config();
 
 $config->sizethreshold /= 1024; // Convert to KB.
+$config->presignedminfilesize /= 1024; // Convert to KB.
 
 $form = new settings_form(null, array('config' => $config));
 
 if ($data = $form->get_data()) {
     $data->sizethreshold *= 1024; // Convert back to Bytes.
+    $data->presignedminfilesize *= 1024; // Convert back to Bytes.
     set_objectfs_config($data);
     redirect(new moodle_url('/admin/tool/objectfs/index.php'));
 }

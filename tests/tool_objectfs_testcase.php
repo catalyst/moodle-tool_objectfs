@@ -18,7 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\object_file_system;
+use tool_objectfs\local\store\object_file_system;
 
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/classes/test_file_system.php');
@@ -60,8 +60,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
-
         return $file;
     }
 
@@ -87,7 +85,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
@@ -152,7 +149,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     }
 
     protected function rename_file($currentpath, $destinationpath) {
-        $reflection = new \ReflectionMethod(object_file_system::class, 'delete_file');
+        $reflection = new \ReflectionMethod(object_file_system::class, 'rename_file');
         $reflection->setAccessible(true);
         return $reflection->invokeArgs($this->filesystem, [$currentpath, $destinationpath]);
     }
@@ -234,5 +231,19 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         global $DB;
         $DB->delete_records('files', array('contenthash' => $contenthash));
     }
-}
 
+    protected function is_externally_readable_by_url($url) {
+        try {
+            $file = fopen($url, 'r');
+            if ($file === false) {
+                $result = false;
+            } else {
+                fclose($file);
+                $result = true;
+            }
+            return $result;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+}

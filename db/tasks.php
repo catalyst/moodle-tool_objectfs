@@ -71,5 +71,14 @@ $tasks = array(
         'dayofweek' => '*',
         'month'     => '*'
     ),
+    array(
+        'classname' => 'tool_objectfs\task\check_objects_location',
+        'blocking'  => 0,
+        'minute'    => 'R',
+        'hour'      => '*',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*'
+    ),
 );
 

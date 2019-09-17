@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_objectfs\report\objectfs_report;
+use tool_objectfs\local\report\objectfs_report;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -193,6 +193,103 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         // Adds bar chart styling for sizes and counts.
         $output .= "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
+
+        return $output;
+    }
+
+    public function presignedurl_tests_load_files($fs) {
+        global $CFG;
+        $filestorage = get_file_storage();
+        $fixturespath = $CFG->dirroot.'/admin/tool/objectfs/tests/fixtures/';
+        $fixturesfiles = glob($fixturespath.'*');
+        $syscontext = \context_system::instance();
+
+        foreach ($fixturesfiles as $fixturesfile) {
+            $testfilename = str_replace($fixturespath, '', $fixturesfile);
+
+            $contextid = $syscontext->id;
+            $component = 'tool_objectfs';
+            $filearea = 'settings';
+            $itemid = 0;
+            $filepath = '/';
+
+            $filerecord = array(
+                'contextid' => $contextid,
+                'component' => $component,
+                'filearea'  => $filearea,
+                'itemid'    => $itemid,
+                'filepath'  => $filepath,
+                'filename'  => $testfilename
+            );
+
+            $testfile = $filestorage->get_file($contextid, $component, $filearea, $itemid, $filepath, $testfilename);
+            if (!$testfile) {
+                $testfile = $filestorage->create_file_from_pathname($filerecord, $fixturesfile);
+            }
+
+            $contenthash = $testfile->get_contenthash();
+            $readable = $fs->is_file_readable_externally_by_hash($contenthash);
+            if (!$readable) {
+                $fs->copy_from_local_to_external($contenthash);
+            }
+            $testfiles[] = $testfile;
+        }
+
+        return $testfiles;
+    }
+
+    public function presignedurl_tests_content($fs, $testfiles) {
+        $output = '';
+
+        $output .= $this->box('');
+        $output .= $this->heading(get_string('presignedurl_testing:test1', 'tool_objectfs'), 4);
+        foreach ($testfiles as $file) {
+            $headers = array('Content-Disposition: attachment');
+            $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
+
+            $outputstring = get_string('presignedurl_testing:downloadfile', 'tool_objectfs').': '.
+                '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
+            $output .= $this->heading($outputstring, 5);
+        }
+
+        $output .= $this->box('');
+        $output .= $this->heading(get_string('presignedurl_testing:test2', 'tool_objectfs'), 4);
+        foreach ($testfiles as $file) {
+            $headers = array('Content-Disposition: attachment; filename="'.$file->get_filename().'"');
+            $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
+
+            $outputstring = get_string('presignedurl_testing:downloadfile', 'tool_objectfs').': '.
+                '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
+            $output .= $this->heading($outputstring, 5);
+        }
+
+        $output .= $this->box('');
+        $output .= $this->heading(get_string('presignedurl_testing:test3', 'tool_objectfs'), 4);
+        foreach ($testfiles as $file) {
+            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
+                '"', 'Content-Type: '.$file->get_mimetype());
+            $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
+
+            $outputstring = get_string('presignedurl_testing:openinbrowser', 'tool_objectfs').': '.
+                '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
+            $output .= $this->heading($outputstring, 5);
+        }
+
+        $output .= $this->box('');
+        $output .= $this->heading(get_string('presignedurl_testing:test4', 'tool_objectfs'), 4);
+        foreach ($testfiles as $file) {
+            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
+                '"', 'Content-Type: '.$file->get_mimetype());
+            $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
+
+            $outputstring = '"'.$file->get_filename().'" '.get_string('presignedurl_testing:fileiniframe', 'tool_objectfs').':';
+            $output .= $this->heading($outputstring, 5);
+
+            $outputstring = '<iframe height="400" width="100%" src="'.$presignedurl.'">'.
+                get_string('presignedurl_testing:iframesnotsupported', 'tool_objectfs').'</iframe>';
+            $output .= $this->box($outputstring);
+            $output .= $this->box('');
+        }
 
         return $output;
     }

@@ -18,9 +18,9 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\client\azure_client;
+use tool_objectfs\local\store\azure\client;
 
-class test_azure_integration_client extends azure_client {
+class test_azure_integration_client extends client {
 
     private $runidentifier;
 
