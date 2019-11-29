@@ -133,7 +133,7 @@ function tool_objectfs_get_client($config) {
 function tool_objectfs_get_fs_list() {
     $found[''] = 'Please, select';
     $found['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
-    $found['\tool_objectfs\do_file_system'] = '\tool_objectfs\do_file_system';
+    $found['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
     $found['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
     $found['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
     return $found;
