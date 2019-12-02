@@ -109,6 +109,15 @@ function get_objectfs_config() {
     $config->azure_container = '';
     $config->azure_sastoken = '';
 
+    // Cloudfront CDN with Signed URLS - canned policy.
+    $config->enablepresignedcloudfronturls = 0;
+    $config->cloudfront_resource_domain = '';
+    $config->cloudfront_key_pair_id = '';
+    $config->cloudfront_private_key_pem_file_pathname = '';
+
+    // Cloudfront CDN with Signed URLS - custom policy (optional - advanced usage).
+    $config->cloudfront_custom_policy_json = '';
+
     $storedconfig = get_config('tool_objectfs');
 
     // Override defaults if set.

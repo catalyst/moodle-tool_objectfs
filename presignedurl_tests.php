@@ -41,6 +41,11 @@ $settingslink = \html_writer::link(new \moodle_url('/admin/tool/objectfs/index.p
 
 if ($support) {
 
+    if (isset($config->enablepresignedcloudfronturls)) {
+        // We are here for signed S3 URL - remove Cloudfront enablement
+        $config->enablepresignedcloudfronturls = false;
+    }
+
     $client = tool_objectfs_get_client($config);
     if ($client and $client->get_availability()) {
 
@@ -49,6 +54,7 @@ if ($support) {
             $fs = new $config->filesystem();
             $testfiles = $output->presignedurl_tests_load_files($fs);
             echo $output->presignedurl_tests_content($fs, $testfiles);
+
         } else {
             echo $output->notification($connection->message, 'notifyproblem');
             echo $output->heading(get_string('presignedurl_testing:checkconnectionsettings', 'tool_objectfs').$settingslink, 5);

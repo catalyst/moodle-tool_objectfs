@@ -55,9 +55,11 @@ class settings_form extends \moodleform {
 
         if (tool_objectfs_filesystem_supports_presigned_urls($config->filesystem)) {
             $mform = $this->define_presignedurl_section($mform, $config);
+            $mform = $this->define_presignedcloudfronturl_section($mform, $config);
         } else {
             // TODO: set enablepresignedurls = 0.
             $mform->setDefault("enablepresignedurls", 0);
+            $mform->setDefault("enablepresignedcloudfronturls", 0);
         }
 
         $mform = $this->define_testing_section($mform, $config);
@@ -194,6 +196,48 @@ class settings_form extends \moodleform {
             get_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'));
         $mform->addHelpButton('presignedminfilesize', 'settings:presignedurl:presignedminfilesize', 'tool_objectfs');
         $mform->setType("presignedminfilesize", PARAM_INT);
+
+        return $mform;
+    }
+
+    public function define_presignedcloudfronturl_section($mform) {
+        global $CFG, $OUTPUT;
+
+        $mform->addElement('header', 'presignedcloudfronturl',
+            get_string('settings:presignedcloudfronturl:header', 'tool_objectfs'));
+        $mform->setExpanded('presignedcloudfronturl');
+
+        $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/presignedcloudfronturl_tests.php'),
+            get_string('presignedcloudfronturl_testing:page', 'tool_objectfs'));
+
+        $text = $OUTPUT->heading(get_string('settings:presignedcloudfronturl:warning', 'tool_objectfs').$link, 6);
+        $mform->addElement('html', $OUTPUT->notification($text, 'warning'));
+
+        $mform->addElement('advcheckbox', 'enablepresignedcloudfronturls',
+            get_string('settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs'));
+        $mform->addHelpButton('enablepresignedcloudfronturls', 'settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs');
+        $mform->setType("enablepresignedcloudfronturls", PARAM_INT);
+
+        $mform->addElement('text', 'cloudfront_resource_domain',
+            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'));
+        $mform->addHelpButton('cloudfront_resource_domain', 'settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs');
+        $mform->setType("cloudfront_resource_domain", PARAM_TEXT);
+
+        $mform->addElement('text', 'cloudfront_key_pair_id',
+            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'));
+        $mform->addHelpButton('cloudfront_key_pair_id', 'settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs');
+        $mform->setType("cloudfront_key_pair_id", PARAM_TEXT);
+
+        $mform->addElement('text', 'cloudfront_private_key_pem_file_pathname',
+            get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs'));
+        $mform->addHelpButton('cloudfront_private_key_pem_file_pathname', 'settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs');
+        $mform->setType("cloudfront_private_key_pem_file_pathname", PARAM_TEXT);
+
+        // TODO: potentially enable cloudfront "custom policy" - for now use "canned policy" as configured in the CF_Distribution at AWS.
+        // $mform->addElement('textarea', 'cloudfront_custom_policy_json',
+        // get_string('settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs'));
+        // $mform->addHelpButton('cloudfront_custom_policy_json', 'settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs');
+        // $mform->setType("cloudfront_custom_policy_json", PARAM_TEXT);
 
         return $mform;
     }
