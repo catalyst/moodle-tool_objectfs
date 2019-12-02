@@ -32,7 +32,9 @@ use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
+use Aws\CloudFront\CloudFrontClient;
 use tool_objectfs\local\store\object_client_base;
+
 
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
@@ -53,6 +55,7 @@ class client extends object_client_base {
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
+            $this->enablepresignedcloudfronturls = $config->enablepresignedcloudfronturls;
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -410,6 +413,11 @@ class client extends object_client_base {
      * @return string.
      */
     public function generate_presigned_url($contenthash, $headers) {
+        // Refactor this when CDN plugin exists (and/or Cloudfront is not the only CDN to use).
+        if ($this->enablepresignedcloudfronturls) {
+            return $this->generate_presigned_cdn_url($contenthash, $headers, 'cloudfront');
+        }
+
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $key;
@@ -430,10 +438,115 @@ class client extends object_client_base {
         if ($expirationtime !== '' and strtotime($expirationtime) != 0) {
             $request = $this->client->createPresignedRequest($command, $expirationtime);
         } else {
-            $request = $this->client->createPresignedRequest($command, '+'.$this->expirationtime.' seconds');
+            $request = $this->client->createPresignedRequest($command, '+' . $this->expirationtime . ' seconds');
         }
 
         $signedurl = (string)$request->getUri();
+
         return $signedurl;
     }
+
+    /**
+     * Generates pre-signed URL to CDN from its hash.
+     *
+     * @param string $contenthash file content hash.
+     * @param array $headers request headers.
+     * @param string $cdn CDN shortname (default: cloudfront).
+     * @param bool $nicefilename deliver original filename rather than origin hashed filename.
+     *
+     * @return string.
+     */
+    public function generate_presigned_cdn_url($contenthash = '', $headers = array(), $cdn = 'cloudfront', $nicefilename = true) {
+
+        switch ($cdn)
+        {
+            case 'cloudfront':
+
+                if (!$this->enablepresignedcloudfronturls) {
+                    return ''; // Throw an exception - called but not enabled.
+                }
+
+                $cdnconfig = get_objectfs_config();
+                $key = $this->get_filepath_from_hash($contenthash);
+                $cloudfrontclient = new CloudFrontClient(
+                    array(
+                        'profile' => 'default',
+                        'version' => 'latest', /* '2014-11-06' */
+                        'region' => $cdnconfig->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
+                    )
+                );
+
+                $resourcedomain = $cdnconfig->cloudfront_resource_domain;
+
+                $resourcekey = $resourcedomain . '/' . $key;
+
+                if ($nicefilename) {
+                    // We are trying to deliver original filename rather than hash filename to client.
+
+                    $contentdisposition = '';
+                    $originalfilename = '';
+                    $originalcontenttype = '';
+
+                    $contentdisposition = $this->get_header($headers, 'Content-Disposition');
+                    if ($contentdisposition !== '') {
+                        $contentdisposition = trim($contentdisposition); // S3 $params['ResponseContentDisposition'].
+                    }
+
+                    $contenttype = $this->get_header($headers, 'Content-Type');
+                    if ($contenttype !== '') {
+                        $originalcontenttype = trim($contenttype); // S3 $params['ResponseContentType'].
+                    }
+
+                    /*
+                        Need to get the filename and content-type from HEADERS array
+                        Without invoking more DB hits (the header array contains it already by now).
+                    */
+
+                    if (!empty($contentdisposition)) {
+                        $fparts = explode('; ', $contentdisposition);
+                        $originalfilename = str_replace('filename=', '', $fparts[1]); // Get the actual filename.
+                        $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
+                        $contentdisposition = $fparts[0];
+
+                        $newkey = $key .
+                            '?response-content-disposition='.rawurlencode(
+                                $contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"'
+                            ) .
+                            '&response-content-type=' . rawurlencode($originalcontenttype);
+
+                        // Alternative without filename: $newkey = $key . '?response-content-disposition='.rawurlencode($contentdisposition.';'.(utf8_encode($originalfilename)).'').'&response-content-type='.rawurlencode($originalcontenttype);.
+
+                        $resourcekey = $resourcedomain . '/' . $newkey;
+                    }
+                }
+
+                if (isset($cdnconfig->expirationtime) && !empty($cdnconfig->expirationtime)) {
+                    $expirationvalue = time() + $cdnconfig->expirationtime;
+                } else {
+                    $expirationvalue = 0; // Example: time()+300.
+                }
+                $expires = time() + $expirationvalue;
+
+                $signedurlcannedpolicy = $cloudfrontclient->getSignedUrl([
+                    'url' => $resourcekey,
+                    'expires' => $expires,
+                    'key_pair_id' => $cdnconfig->cloudfront_key_pair_id,
+                    'private_key' => realpath($cdnconfig->cloudfront_private_key_pem_file_pathname),
+                    'ResponseContentDisposition' => $contentdisposition . ';filename=' . $originalfilename . '',
+                    'ResponseFilename' => $originalfilename,
+                ]);
+
+                $signedurl = (string)$signedurlcannedpolicy;
+
+                $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example).
+                break;
+
+            default:
+                $signedurl = '';
+        }
+
+        return $signedurl;
+    }
+
+
 }
