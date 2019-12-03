@@ -58,13 +58,12 @@ class client extends s3_client {
         $mform->addElement('header', 'doheader', get_string('settings:do:header', 'tool_objectfs'));
         $mform->setExpanded('doheader');
 
-        $mform = $this->define_amazon_s3_check($mform, false);
-
         $regionoptions = array(
             'sfo2'      => 'sfo2 (San Fransisco)',
             'nyc3'      => 'nyc3 (New York City)',
             'ams3'      => 'ams3 (Amsterdam)',
             'sgp1'      => 'spg1 (Singapore)',
+            'fra1'      => 'fra1 (Frankfurt)',
         );
 
         $mform->addElement('text', 'do_key', get_string('settings:do:key', 'tool_objectfs'));
@@ -81,6 +80,8 @@ class client extends s3_client {
 
         $mform->addElement('select', 'do_region', get_string('settings:do:region', 'tool_objectfs'), $regionoptions);
         $mform->addHelpButton('do_region', 'settings:do:region', 'tool_objectfs');
+
+        $mform = $this->define_amazon_s3_check($mform, false);
 
         return $mform;
     }

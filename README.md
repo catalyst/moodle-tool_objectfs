@@ -80,7 +80,7 @@ $CFG->alternative_file_system_class = '\tool_objectfs\azure_file_system';
 
 * DigitalOcean Spaces
 ```php
-$CFG->alternative_file_system_class = '\tool_objectfs\do_file_system';
+$CFG->alternative_file_system_class = '\tool_objectfs\digitalocean_file_system';
 ```
 
 
