@@ -293,5 +293,4 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         return $output;
     }
-
 }

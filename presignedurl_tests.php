@@ -49,7 +49,6 @@ if ($support) {
             $fs = new $config->filesystem();
             $testfiles = $output->presignedurl_tests_load_files($fs);
             echo $output->presignedurl_tests_content($fs, $testfiles);
-
         } else {
             echo $output->notification($connection->message, 'notifyproblem');
             echo $output->heading(get_string('presignedurl_testing:checkconnectionsettings', 'tool_objectfs').$settingslink, 5);

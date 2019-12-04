@@ -44,5 +44,4 @@ if ($hassiteconfig) {
                                             new moodle_url('/admin/tool/objectfs/presignedurl_tests.php'));
 
     $ADMIN->add('tools', $externalpage);
-
 }

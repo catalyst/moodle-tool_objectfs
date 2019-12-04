@@ -94,13 +94,6 @@ function get_objectfs_config() {
 
     $config->presignurlschoices = array(0 => 'Disabled', 1 => 'S3', 2 => 'Cloudfront');
 
-/*
-    $config->presignurlsenabled = false;
-    $config->presignurlsdisabled = 0;
-    $config->presignurlss3 =  1;
-    $config->presignurlscloudfront = 2;
-*/
-
     // S3 file system.
     $config->s3_key = '';
     $config->s3_secret = '';
