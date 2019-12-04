@@ -58,7 +58,6 @@ class settings_form extends \moodleform {
         } else {
             // TODO: set enablepresignedurls = 0.
             $mform->setDefault("enablepresignedurls", 0);
-            $mform->setDefault("enablepresignedcloudfronturls", 0);
         }
 
         $mform = $this->define_testing_section($mform, $config);
@@ -172,7 +171,7 @@ class settings_form extends \moodleform {
         global $OUTPUT;
 
         $mform->addElement('header', 'presignedurlheader',
-            get_string('settings:presignedurls3:header', 'tool_objectfs'));
+            get_string('settings:presignedurl:header', 'tool_objectfs'));
         $mform->setExpanded('presignedurlheader');
 
         $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php'),
@@ -180,12 +179,7 @@ class settings_form extends \moodleform {
 
         $text = $OUTPUT->heading(get_string('settings:presignedurl:warning', 'tool_objectfs').$link, 6);
         $mform->addElement('html', $OUTPUT->notification($text, 'warning'));
-/*
-        $mform->addElement('advcheckbox', 'enablepresignedurls',
-            get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'));
-        $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:enablepresignedurls', 'tool_objectfs');
-        $mform->setType("enablepresignedurls", PARAM_INT);
-*/
+
         $mform->addElement('duration', 'expirationtime',
             get_string('settings:presignedurl:expirationtime', 'tool_objectfs'));
         $mform->addHelpButton('expirationtime', 'settings:presignedurl:expirationtime', 'tool_objectfs');

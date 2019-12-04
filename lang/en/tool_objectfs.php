@@ -133,9 +133,7 @@ $string['settings:preferexternal'] = 'Prefer external objects';
 $string['settings:preferexternal_help'] = 'If a file is stored both locally and in external object storage, read from external\. This is setting is mainly for testing purposes and introduces overhead to check the location.';
 
 $string['settings:presignedurl:header'] = 'Pre-Signed URLs Settings';
-$string['settings:presignedurl:enablepresignedurlschoice'] = 'Choose Mechanism';
-
-$string['settings:presignedurls3:header'] = 'Pre-Signed URL Common Settings';
+$string['settings:presignedurl:enablepresignedurlschoice'] = '';
 
 $string['settings:presignedurl:disablepresignedurls'] = 'Disabled';
 $string['settings:presignedurl:warning'] = 'Before enabling Pre-Signed URL, please, make sure that all tests are passed successfully: ';
@@ -158,22 +156,6 @@ $string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathnam
 $string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname_help'] = 'Full path and filename to the .pem file. Example: ' . $CFG->dataroot . '/ (CFG->dataroot) should be prepended to .pem filename. The actual .pem file must be available for file_get_content().';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'custom policy\' JSON (optional)';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
-
-$string['presignedcloudfronturl_testing:page'] = 'Pre-Signed Cloudfront URL Testing';
-$string['presignedcloudfronturl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLs are not supported by chosen storage file system.';
-$string['presignedcloudfronturl_testing:checkfssettings'] = 'Check filesystem settings at ';
-$string['presignedcloudfronturl_testing:test1'] = '1) Test links below to download file with contenthash as its name:';
-$string['presignedcloudfronturl_testing:test2'] = '2) Test links below to download file with original file name:';
-$string['presignedcloudfronturl_testing:test3'] = '3) Test links below to open content inline:';
-$string['presignedcloudfronturl_testing:test4'] = '4) In this block IFrames should be visible and workable:';
-$string['presignedcloudfronturl_testing:test5'] = '5) Without enabling Pre-Signed URLs, vary Minimum size for Pre-Signed URL and see how links below are generated:';
-$string['presignedcloudfronturl_testing:downloadfile'] = 'Download file';
-$string['presignedcloudfronturl_testing:openinbrowser'] = 'Open file in browser';
-$string['presignedcloudfronturl_testing:fileiniframe'] = 'file in Iframe';
-$string['presignedcloudfronturl_testing:iframesnotsupported'] = 'Your browser does not support IFrames';
-$string['presignedcloudfronturl_testing:objectfssettings'] = 'Objectfs settings';
-$string['presignedcloudfronturl_testing:checkconnectionsettings'] = 'Check connection settings at ';
-$string['presignedcloudfronturl_testing:checkclientsettings'] = 'Check client settings at ';
 
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
 $string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLs are not supported by chosen storage file system.';

@@ -41,11 +41,6 @@ $settingslink = \html_writer::link(new \moodle_url('/admin/tool/objectfs/index.p
 
 if ($support) {
 
-    if (isset($config->enablepresignedcloudfronturls)) {
-        // We are here for signed S3 URL - remove Cloudfront enablement
-        $config->enablepresignedcloudfronturls = false;
-    }
-
     $client = tool_objectfs_get_client($config);
     if ($client and $client->get_availability()) {
 

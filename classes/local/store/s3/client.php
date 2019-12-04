@@ -35,7 +35,6 @@ use Aws\S3\Exception\S3Exception;
 use Aws\CloudFront\CloudFrontClient;
 use tool_objectfs\local\store\object_client_base;
 
-
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
 define('AWS_CAN_WRITE_OBJECT', 1);
@@ -55,7 +54,7 @@ class client extends object_client_base {
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
-            $this->enablepresignedcloudfronturls = ($config->enablepresignedurls == 2);
+            $this->enablepresignedcloudfronturls = ($this->enablepresignedurls == 2);
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -369,54 +368,20 @@ class client extends object_client_base {
             get_string('settings:presignedurl:header', 'tool_objectfs'));
         $mform->setExpanded('presignedurlheader');
 
-        $connection = null;
-        $connection = $this->test_connection();
-
-        if (!$connection->success) {
-            $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/presignedcloudfronturl_tests.php'),
-                get_string('presignedcloudfronturl_testing:page', 'tool_objectfs'));
-
-            $text = $OUTPUT->heading(get_string('settings:presignedcloudfronturl:warning', 'tool_objectfs') . $link, 6);
-            $mform->addElement('html', $OUTPUT->notification($text, 'warning'));
-        }
-
         $radio = array();
         $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
             get_string('settings:presignedurl:disablepresignedurls', 'tool_objectfs'), 0);
-        // $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:disablepresignedurls', 'tool_objectfs');
-        // $mform->setType("enablepresignedurls", PARAM_INT);
 
         $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
             get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'), 1);
-        // $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:enablepresignedurls', 'tool_objectfs');
-        // $mform->setType("enablepresignedurls", PARAM_INT);
 
         $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
             get_string('settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs'), 2);
-        // $mform->addHelpButton('enablepresignedcloudfronturls', 'settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs');
-        // $mform->setType("enablepresignedurls", PARAM_INT);
 
         $mform->addGroup($radio, 'enablepresignedurls', get_string('settings:presignedurl:enablepresignedurlschoice', 'tool_objectfs'), ' ', false);
         $mform->setType("enablepresignedurls", PARAM_INT);
 
-        if (1==2) {
-            $mform->addElement('radio', 'enablepresignedurls', null,
-                get_string('settings:presignedurl:disablepresignedurls', 'tool_objectfs'), 0);
-            $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:disablepresignedurls', 'tool_objectfs');
-            $mform->setType("enablepresignedurls", PARAM_INT);
-
-            $mform->addElement('radio', 'enablepresignedurls', null,
-                get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'), 1);
-            $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:enablepresignedurls', 'tool_objectfs');
-            $mform->setType("enablepresignedurls", PARAM_INT);
-
-            $mform->addElement('radio', 'enablepresignedurls', null,
-                get_string('settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs'), 2);
-            $mform->addHelpButton('enablepresignedcloudfronturls', 'settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs');
-            $mform->setType("enablepresignedurls", PARAM_INT);
-        }
-
-        // Cloudfront settings
+        // Cloudfront settings.
         $mform->addElement('header', 'presignedcloudfronturl',
             get_string('settings:presignedcloudfronturl:header', 'tool_objectfs'));
         $mform->setExpanded('presignedcloudfronturl');
@@ -436,11 +401,13 @@ class client extends object_client_base {
         $mform->addHelpButton('cloudfront_private_key_pem_file_pathname', 'settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs');
         $mform->setType("cloudfront_private_key_pem_file_pathname", PARAM_TEXT);
 
-        // TODO: potentially enable cloudfront "custom policy" - for now use "canned policy" as configured in the CF_Distribution at AWS.
-        // $mform->addElement('textarea', 'cloudfront_custom_policy_json',
-        // get_string('settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs'));
-        // $mform->addHelpButton('cloudfront_custom_policy_json', 'settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs');
-        // $mform->setType("cloudfront_custom_policy_json", PARAM_TEXT);
+        /*
+            TODO: potentially enable cloudfront "custom policy" - for now use "canned policy" as configured in the CF_Distribution at AWS.
+            $mform->addElement('textarea', 'cloudfront_custom_policy_json',
+            get_string('settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs'), 'rows=10 cols=200');
+            $mform->addHelpButton('cloudfront_custom_policy_json', 'settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs');
+            $mform->setType("cloudfront_custom_policy_json", PARAM_TEXT);
+        */
 
         return $mform;
     }
