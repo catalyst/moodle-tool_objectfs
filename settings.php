@@ -45,10 +45,4 @@ if ($hassiteconfig) {
 
     $ADMIN->add('tools', $externalpage);
 
-    $externalpage = new admin_externalpage('tool_objectfs_presignedcloudfronturl_testing',
-                                            get_string('presignedcloudfronturl_testing:page', 'tool_objectfs'),
-                                            new moodle_url('/admin/tool/objectfs/presignedcloudfronturl_tests.php'));
-
-    $ADMIN->add('tools', $externalpage);
-
 }

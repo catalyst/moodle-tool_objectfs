@@ -677,9 +677,8 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function presigned_url_configured() {
         return $this->externalclient->support_presigned_urls()
-            && ($this->externalclient->enablepresignedurls
-            && isset($this->externalclient->presignedminfilesize))
-            || ($this->externalclient->enablepresignedcloudfronturls);
+            && $this->externalclient->enablepresignedurls
+            && isset($this->externalclient->presignedminfilesize);
     }
 
     public function presigned_url_should_redirect($contenthash) {

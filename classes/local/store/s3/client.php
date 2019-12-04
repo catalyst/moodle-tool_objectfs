@@ -35,7 +35,6 @@ use Aws\S3\Exception\S3Exception;
 use Aws\CloudFront\CloudFrontClient;
 use tool_objectfs\local\store\object_client_base;
 
-
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
 define('AWS_CAN_WRITE_OBJECT', 1);
@@ -55,7 +54,7 @@ class client extends object_client_base {
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
-            $this->enablepresignedcloudfronturls = $config->enablepresignedcloudfronturls;
+            $this->enablepresignedcloudfronturls = ($this->enablepresignedurls == 2);
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -322,6 +321,8 @@ class client extends object_client_base {
 
     public function define_client_section($mform, $config) {
 
+        global $OUTPUT;
+
         $mform->addElement('header', 'awsheader', get_string('settings:aws:header', 'tool_objectfs'));
         $mform->setExpanded('awsheader');
 
@@ -346,7 +347,7 @@ class client extends object_client_base {
             'sa-east-1'      => 'sa-east-1 (Sao Paulo)'
         );
 
-        $mform->addElement('text', 's3_key', get_string('settings:aws:key', 'tool_objectfs'));
+        $mform->addElement('text', 's3_key', get_string('settings:aws:key', 'tool_objectfs'), array('style'=>'width:90%'));
         $mform->addHelpButton('s3_key', 'settings:aws:key', 'tool_objectfs');
         $mform->setType("s3_key", PARAM_TEXT);
 
@@ -354,7 +355,7 @@ class client extends object_client_base {
         $mform->addHelpButton('s3_secret', 'settings:aws:secret', 'tool_objectfs');
         $mform->setType("s3_secret", PARAM_TEXT);
 
-        $mform->addElement('text', 's3_bucket', get_string('settings:aws:bucket', 'tool_objectfs'));
+        $mform->addElement('text', 's3_bucket', get_string('settings:aws:bucket', 'tool_objectfs'), array('style'=>'width:90%'));
         $mform->addHelpButton('s3_bucket', 'settings:aws:bucket', 'tool_objectfs');
         $mform->setType("s3_bucket", PARAM_TEXT);
 
@@ -362,6 +363,51 @@ class client extends object_client_base {
         $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
 
         $mform = $this->define_amazon_s3_check($mform);
+
+        $mform->addElement('header', 'presignedurlheader',
+            get_string('settings:presignedurl:header', 'tool_objectfs'));
+        $mform->setExpanded('presignedurlheader');
+
+        $radio = array();
+        $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
+            get_string('settings:presignedurl:disablepresignedurls', 'tool_objectfs'), 0);
+
+        $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
+            get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'), 1);
+
+        $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
+            get_string('settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs'), 2);
+
+        $mform->addGroup($radio, 'enablepresignedurls', get_string('settings:presignedurl:enablepresignedurlschoice', 'tool_objectfs'), ' ', false);
+        $mform->setType("enablepresignedurls", PARAM_INT);
+
+        // Cloudfront settings.
+        $mform->addElement('header', 'presignedcloudfronturl',
+            get_string('settings:presignedcloudfronturl:header', 'tool_objectfs'));
+        $mform->setExpanded('presignedcloudfronturl');
+
+        $mform->addElement('text', 'cloudfront_resource_domain',
+            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'), array('style'=>'width:90%'));
+        $mform->addHelpButton('cloudfront_resource_domain', 'settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs');
+        $mform->setType("cloudfront_resource_domain", PARAM_TEXT);
+
+        $mform->addElement('text', 'cloudfront_key_pair_id',
+            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'), array('style'=>'width:90%'));
+        $mform->addHelpButton('cloudfront_key_pair_id', 'settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs');
+        $mform->setType("cloudfront_key_pair_id", PARAM_TEXT);
+
+        $mform->addElement('textarea', 'cloudfront_private_key_pem_file_pathname',
+            get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs'), 'rows=2 cols=200');
+        $mform->addHelpButton('cloudfront_private_key_pem_file_pathname', 'settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs');
+        $mform->setType("cloudfront_private_key_pem_file_pathname", PARAM_TEXT);
+
+        /*
+            TODO: potentially enable cloudfront "custom policy" - for now use "canned policy" as configured in the CF_Distribution at AWS.
+            $mform->addElement('textarea', 'cloudfront_custom_policy_json',
+            get_string('settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs'), 'rows=10 cols=200');
+            $mform->addHelpButton('cloudfront_custom_policy_json', 'settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs');
+            $mform->setType("cloudfront_custom_policy_json", PARAM_TEXT);
+        */
 
         return $mform;
     }
@@ -405,7 +451,7 @@ class client extends object_client_base {
     }
 
     /**
-     * Generates pre-signed URL to S3 file from its hash.
+     * Generates pre-signed URL from its hash.
      *
      * @param string $contenthash file content hash.
      * @param array $headers request headers.
@@ -415,8 +461,24 @@ class client extends object_client_base {
     public function generate_presigned_url($contenthash, $headers) {
         // Refactor this when CDN plugin exists (and/or Cloudfront is not the only CDN to use).
         if ($this->enablepresignedcloudfronturls) {
-            return $this->generate_presigned_cdn_url($contenthash, $headers, 'cloudfront');
+            return $this->generate_presigned_cloudfront_url($contenthash, $headers);
+        } else {
+            // Check if ($this->enablepresignedurls) - just to be sure.
+            return $this->generate_presigned_s3_url($contenthash, $headers);
         }
+
+    }
+
+
+    /**
+     * Generates pre-signed URL to S3 file from its hash.
+     *
+     * @param string $contenthash file content hash.
+     * @param array $headers request headers.
+     *
+     * @return string.
+     */
+    private function generate_presigned_s3_url($contenthash, $headers) {
 
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
@@ -451,102 +513,91 @@ class client extends object_client_base {
      *
      * @param string $contenthash file content hash.
      * @param array $headers request headers.
-     * @param string $cdn CDN shortname (default: cloudfront).
      * @param bool $nicefilename deliver original filename rather than origin hashed filename.
      *
      * @return string.
      */
-    public function generate_presigned_cdn_url($contenthash = '', $headers = array(), $cdn = 'cloudfront', $nicefilename = true) {
+    private function generate_presigned_cloudfront_url($contenthash = '', $headers = array(), $nicefilename = true) {
 
-        switch ($cdn)
-        {
-            case 'cloudfront':
-
-                if (!$this->enablepresignedcloudfronturls) {
-                    return ''; // Throw an exception - called but not enabled.
-                }
-
-                $cdnconfig = get_objectfs_config();
-                $key = $this->get_filepath_from_hash($contenthash);
-                $cloudfrontclient = new CloudFrontClient(
-                    array(
-                        'profile' => 'default',
-                        'version' => 'latest', /* '2014-11-06' */
-                        'region' => $cdnconfig->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
-                    )
-                );
-
-                $resourcedomain = $cdnconfig->cloudfront_resource_domain;
-
-                $resourcekey = $resourcedomain . '/' . $key;
-
-                if ($nicefilename) {
-                    // We are trying to deliver original filename rather than hash filename to client.
-
-                    $contentdisposition = '';
-                    $originalfilename = '';
-                    $originalcontenttype = '';
-
-                    $contentdisposition = $this->get_header($headers, 'Content-Disposition');
-                    if ($contentdisposition !== '') {
-                        $contentdisposition = trim($contentdisposition); // S3 $params['ResponseContentDisposition'].
-                    }
-
-                    $contenttype = $this->get_header($headers, 'Content-Type');
-                    if ($contenttype !== '') {
-                        $originalcontenttype = trim($contenttype); // S3 $params['ResponseContentType'].
-                    }
-
-                    /*
-                        Need to get the filename and content-type from HEADERS array
-                        Without invoking more DB hits (the header array contains it already by now).
-                    */
-
-                    if (!empty($contentdisposition)) {
-                        $fparts = explode('; ', $contentdisposition);
-                        $originalfilename = str_replace('filename=', '', $fparts[1]); // Get the actual filename.
-                        $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
-                        $contentdisposition = $fparts[0];
-
-                        $newkey = $key .
-                            '?response-content-disposition='.rawurlencode(
-                                $contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"'
-                            ) .
-                            '&response-content-type=' . rawurlencode($originalcontenttype);
-
-                        // Alternative without filename: $newkey = $key . '?response-content-disposition='.rawurlencode($contentdisposition.';'.(utf8_encode($originalfilename)).'').'&response-content-type='.rawurlencode($originalcontenttype);.
-
-                        $resourcekey = $resourcedomain . '/' . $newkey;
-                    }
-                }
-
-                if (isset($cdnconfig->expirationtime) && !empty($cdnconfig->expirationtime)) {
-                    $expirationvalue = time() + $cdnconfig->expirationtime;
-                } else {
-                    $expirationvalue = 0; // Example: time()+300.
-                }
-                $expires = time() + $expirationvalue;
-
-                $signedurlcannedpolicy = $cloudfrontclient->getSignedUrl([
-                    'url' => $resourcekey,
-                    'expires' => $expires,
-                    'key_pair_id' => $cdnconfig->cloudfront_key_pair_id,
-                    'private_key' => realpath($cdnconfig->cloudfront_private_key_pem_file_pathname),
-                    'ResponseContentDisposition' => $contentdisposition . ';filename=' . $originalfilename . '',
-                    'ResponseFilename' => $originalfilename,
-                ]);
-
-                $signedurl = (string)$signedurlcannedpolicy;
-
-                $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example).
-                break;
-
-            default:
-                $signedurl = '';
+        if (!$this->enablepresignedcloudfronturls) {
+            return ''; // Throw an exception - called but not enabled.
         }
+
+        $cdnconfig = get_objectfs_config();
+        $key = $this->get_filepath_from_hash($contenthash);
+        $cloudfrontclient = new CloudFrontClient(
+            array(
+                'profile' => 'default',
+                'version' => 'latest', /* '2014-11-06' */
+                'region' => $cdnconfig->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
+            )
+        );
+
+        $resourcedomain = $cdnconfig->cloudfront_resource_domain;
+
+        $resourcekey = $resourcedomain . '/' . $key;
+
+        if ($nicefilename) {
+            // We are trying to deliver original filename rather than hash filename to client.
+
+            $contentdisposition = '';
+            $originalfilename = '';
+            $originalcontenttype = '';
+
+            $contentdisposition = $this->get_header($headers, 'Content-Disposition');
+            if ($contentdisposition !== '') {
+                $contentdisposition = trim($contentdisposition); // S3 $params['ResponseContentDisposition'].
+            }
+
+            $contenttype = $this->get_header($headers, 'Content-Type');
+            if ($contenttype !== '') {
+                $originalcontenttype = trim($contenttype); // S3 $params['ResponseContentType'].
+            }
+
+            /*
+                Need to get the filename and content-type from HEADERS array
+                Without invoking more DB hits (the header array contains it already by now).
+            */
+
+            if (!empty($contentdisposition)) {
+                $fparts = explode('; ', $contentdisposition);
+                $originalfilename = str_replace('filename=', '', $fparts[1]); // Get the actual filename.
+                $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
+                $contentdisposition = $fparts[0];
+
+                $newkey = $key .
+                    '?response-content-disposition='.rawurlencode(
+                        $contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"'
+                    ) .
+                    '&response-content-type=' . rawurlencode($originalcontenttype);
+
+                // Alternative without filename: $newkey = $key . '?response-content-disposition='.rawurlencode($contentdisposition.';'.(utf8_encode($originalfilename)).'').'&response-content-type='.rawurlencode($originalcontenttype);.
+
+                $resourcekey = $resourcedomain . '/' . $newkey;
+            }
+        }
+
+        if (isset($cdnconfig->expirationtime) && !empty($cdnconfig->expirationtime)) {
+            $expirationvalue = time() + $cdnconfig->expirationtime;
+        } else {
+            $expirationvalue = 0; // Example: time()+300.
+        }
+        $expires = time() + $expirationvalue;
+
+        $signedurlcannedpolicy = $cloudfrontclient->getSignedUrl([
+            'url' => $resourcekey,
+            'expires' => $expires,
+            'key_pair_id' => $cdnconfig->cloudfront_key_pair_id,
+            'private_key' => realpath($cdnconfig->cloudfront_private_key_pem_file_pathname),
+            'ResponseContentDisposition' => $contentdisposition . ';filename=' . $originalfilename . '',
+            'ResponseFilename' => $originalfilename,
+        ]);
+
+        $signedurl = (string)$signedurlcannedpolicy;
+
+        $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example).
 
         return $signedurl;
     }
-
 
 }
