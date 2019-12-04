@@ -32,7 +32,7 @@ abstract class object_client_base implements object_client {
     protected $expirationtime;
     public $presignedminfilesize;
     public $enablepresignedurls;
-    public $enablepresignedcloudfronturls;
+    // public $enablepresignedcloudfronturls;
 
     public function __construct($config) {
 
@@ -75,30 +75,6 @@ abstract class object_client_base implements object_client {
     public function generate_presigned_url($contenthash, $headers) {
         throw new \coding_exception("Pre-signed URLs not supported");
     }
-
-    /**
-     * Does the storage support pre-signed CDN URLs.
-     *
-     * @return bool.
-     */
-    public function support_presigned_cdn_urls() {
-        return false;
-    }
-
-    /**
-     * Generates pre-signed URL to CDN file from its hash.
-     *
-     * @param string $contenthash file content hash.
-     * @param array $headers request headers.
-     * @param string $cdn CDN shortname (default: cloudfront).
-     * @param bool $nicefilename deliver original filename rather than origin hashed filename.
-     *
-     * @throws \coding_exception
-     */
-    public function generate_presigned_cdn_url($contenthash, $headers, $cdn, $nicefilename) {
-        throw new \coding_exception("Pre-signed CDN URLs not supported");
-    }
-
 
     /**
      * Returns given header from headers set.
