@@ -118,7 +118,7 @@ function get_objectfs_config() {
     $config->cloudfront_custom_policy_json = '';
 
     // SigningMethod - determine whether S3 or Cloudfront etc should be used.
-    $config->signingmethod = 'S3';  // This will be the default if not otherwise set. Values ('S3' | 'CF').
+    $config->signingmethod = '';  // This will be the default if not otherwise set. Values ('' | 'CF').
 
     $storedconfig = get_config('tool_objectfs');
 
@@ -196,6 +196,5 @@ function tool_objectfs_cloudfront_pem_exists() {
     // Eg: '/var/lib/sitedata/objectfs/cloudfront.pem'.
 
     $cloudfrontpemfilepath = $config->cloudfront_private_key_pem_file_pathname;
-
     return ( file_exists($cloudfrontpemfilepath) && is_readable($cloudfrontpemfilepath) );
 }

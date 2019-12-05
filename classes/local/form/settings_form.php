@@ -211,12 +211,14 @@ class settings_form extends \moodleform {
 
         // Cloudfront settings.
         $mform->addElement('text', 'cloudfront_resource_domain',
-            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'), array('style'=>'width:90%'));
+            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'),
+            array('style' => 'width:90%'));
         $mform->addHelpButton('cloudfront_resource_domain', 'settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs');
         $mform->setType("cloudfront_resource_domain", PARAM_TEXT);
 
         $mform->addElement('text', 'cloudfront_key_pair_id',
-            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'), array('style'=>'width:90%'));
+            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'),
+            array('style' => 'width:90%'));
         $mform->addHelpButton('cloudfront_key_pair_id', 'settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs');
         $mform->setType("cloudfront_key_pair_id", PARAM_TEXT);
 
