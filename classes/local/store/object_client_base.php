@@ -32,6 +32,7 @@ abstract class object_client_base implements object_client {
     protected $expirationtime;
     public $presignedminfilesize;
     public $enablepresignedurls;
+    public $signingmethod;
 
     public function __construct($config) {
 

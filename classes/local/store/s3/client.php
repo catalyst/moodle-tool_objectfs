@@ -54,7 +54,7 @@ class client extends object_client_base {
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
-            $this->enablepresignedcloudfronturls = ($this->enablepresignedurls == 2);
+            $this->signingmethod = $config->signingmethod;  // (empty or S3) | CF.
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -364,50 +364,7 @@ class client extends object_client_base {
 
         $mform = $this->define_amazon_s3_check($mform);
 
-        $mform->addElement('header', 'presignedurlheader',
-            get_string('settings:presignedurl:header', 'tool_objectfs'));
-        $mform->setExpanded('presignedurlheader');
 
-        $radio = array();
-        $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
-            get_string('settings:presignedurl:disablepresignedurls', 'tool_objectfs'), 0);
-
-        $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
-            get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'), 1);
-
-        $radio[] = $mform->createElement('radio', 'enablepresignedurls', null,
-            get_string('settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs'), 2);
-
-        $mform->addGroup($radio, 'enablepresignedurls', get_string('settings:presignedurl:enablepresignedurlschoice', 'tool_objectfs'), ' ', false);
-        $mform->setType("enablepresignedurls", PARAM_INT);
-
-        // Cloudfront settings.
-        $mform->addElement('header', 'presignedcloudfronturl',
-            get_string('settings:presignedcloudfronturl:header', 'tool_objectfs'));
-        $mform->setExpanded('presignedcloudfronturl');
-
-        $mform->addElement('text', 'cloudfront_resource_domain',
-            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'), array('style'=>'width:90%'));
-        $mform->addHelpButton('cloudfront_resource_domain', 'settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs');
-        $mform->setType("cloudfront_resource_domain", PARAM_TEXT);
-
-        $mform->addElement('text', 'cloudfront_key_pair_id',
-            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'), array('style'=>'width:90%'));
-        $mform->addHelpButton('cloudfront_key_pair_id', 'settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs');
-        $mform->setType("cloudfront_key_pair_id", PARAM_TEXT);
-
-        $mform->addElement('textarea', 'cloudfront_private_key_pem_file_pathname',
-            get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs'), 'rows=2 cols=200');
-        $mform->addHelpButton('cloudfront_private_key_pem_file_pathname', 'settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs');
-        $mform->setType("cloudfront_private_key_pem_file_pathname", PARAM_TEXT);
-
-        /*
-            TODO: potentially enable cloudfront "custom policy" - for now use "canned policy" as configured in the CF_Distribution at AWS.
-            $mform->addElement('textarea', 'cloudfront_custom_policy_json',
-            get_string('settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs'), 'rows=10 cols=200');
-            $mform->addHelpButton('cloudfront_custom_policy_json', 'settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs');
-            $mform->setType("cloudfront_custom_policy_json", PARAM_TEXT);
-        */
 
         return $mform;
     }
@@ -459,11 +416,10 @@ class client extends object_client_base {
      * @return string.
      */
     public function generate_presigned_url($contenthash, $headers) {
-        // Refactor this when CDN plugin exists (and/or Cloudfront is not the only CDN to use).
-        if ($this->enablepresignedcloudfronturls) {
+        if ($this->signingmethod == 'CF') {
             return $this->generate_presigned_cloudfront_url($contenthash, $headers);
         } else {
-            // Check if ($this->enablepresignedurls) - just to be sure.
+            // Default is 'S3'
             return $this->generate_presigned_s3_url($contenthash, $headers);
         }
 
@@ -519,8 +475,8 @@ class client extends object_client_base {
      */
     private function generate_presigned_cloudfront_url($contenthash = '', $headers = array(), $nicefilename = true) {
 
-        if (!$this->enablepresignedcloudfronturls) {
-            return ''; // Throw an exception - called but not enabled.
+        if ($this->signingmethod != 'CF') {
+            throw new \Exception('Cloudfront signing method is not enabled.');
         }
 
         $cdnconfig = get_objectfs_config();
@@ -578,11 +534,10 @@ class client extends object_client_base {
         }
 
         if (isset($cdnconfig->expirationtime) && !empty($cdnconfig->expirationtime)) {
-            $expirationvalue = time() + $cdnconfig->expirationtime;
+            $expires = time() + $cdnconfig->expirationtime; // Example: time()+300.
         } else {
-            $expirationvalue = 0; // Example: time()+300.
+            $expires = 0;
         }
-        $expires = time() + $expirationvalue;
 
         $signedurlcannedpolicy = $cloudfrontclient->getSignedUrl([
             'url' => $resourcekey,

@@ -174,6 +174,15 @@ class settings_form extends \moodleform {
             get_string('settings:presignedurl:header', 'tool_objectfs'));
         $mform->setExpanded('presignedurlheader');
 
+        $mform->addElement('advcheckbox', 'enablepresignedurls',
+            get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'));
+        $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:enablepresignedurls', 'tool_objectfs');
+        $mform->setType("enablepresignedurls", PARAM_INT);
+/*
+        $mform->addElement('header', 'presignedurlheader',
+            get_string('settings:presignedurl:header', 'tool_objectfs'));
+        $mform->setExpanded('presignedurlheader');
+*/
         $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php'),
             get_string('presignedurl_testing:page', 'tool_objectfs'));
 
@@ -189,6 +198,44 @@ class settings_form extends \moodleform {
             get_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'));
         $mform->addHelpButton('presignedminfilesize', 'settings:presignedurl:presignedminfilesize', 'tool_objectfs');
         $mform->setType("presignedminfilesize", PARAM_INT);
+
+        $radio = array();
+        $radio[] = $mform->createElement('radio', 'signingmethod', null,
+            get_string('settings:presignedurl:enablepresigneds3urls', 'tool_objectfs'), '');
+        $radio[] = $mform->createElement('radio', 'signingmethod', null,
+            get_string('settings:presignedcloudfronturl:enablepresignedcloudfronturls', 'tool_objectfs'), 'CF');
+
+        $mform->addGroup($radio, 'signingmethod', get_string('settings:presignedurl:enablepresignedurlschoice', 'tool_objectfs'), ' ', false);
+        $mform->setType("signingmethod", PARAM_TEXT);
+
+        // Cloudfront settings.
+        $mform->addElement('header', 'presignedcloudfronturl',
+            get_string('settings:presignedcloudfronturl:header', 'tool_objectfs'));
+        $mform->setExpanded('presignedcloudfronturl');
+
+        // Cloudfront settings.
+        $mform->addElement('text', 'cloudfront_resource_domain',
+            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'), array('style'=>'width:90%'));
+        $mform->addHelpButton('cloudfront_resource_domain', 'settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs');
+        $mform->setType("cloudfront_resource_domain", PARAM_TEXT);
+
+        $mform->addElement('text', 'cloudfront_key_pair_id',
+            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'), array('style'=>'width:90%'));
+        $mform->addHelpButton('cloudfront_key_pair_id', 'settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs');
+        $mform->setType("cloudfront_key_pair_id", PARAM_TEXT);
+
+        $mform->addElement('textarea', 'cloudfront_private_key_pem_file_pathname',
+            get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs'), 'rows=2 cols=200');
+        $mform->addHelpButton('cloudfront_private_key_pem_file_pathname', 'settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs');
+        $mform->setType("cloudfront_private_key_pem_file_pathname", PARAM_TEXT);
+
+        /*
+            TODO: potentially enable cloudfront "custom policy" - for now use "canned policy" as configured in the CF_Distribution at AWS.
+            $mform->addElement('textarea', 'cloudfront_custom_policy_json',
+            get_string('settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs'), 'rows=10 cols=200');
+            $mform->addHelpButton('cloudfront_custom_policy_json', 'settings:presignedcloudfronturl:cloudfront_custom_policy_json', 'tool_objectfs');
+            $mform->setType("cloudfront_custom_policy_json", PARAM_TEXT);
+        */
 
         return $mform;
     }
