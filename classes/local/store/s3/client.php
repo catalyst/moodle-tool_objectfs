@@ -364,8 +364,6 @@ class client extends object_client_base {
 
         $mform = $this->define_amazon_s3_check($mform);
 
-
-
         return $mform;
     }
 
@@ -424,7 +422,6 @@ class client extends object_client_base {
         }
 
     }
-
 
     /**
      * Generates pre-signed URL to S3 file from its hash.
