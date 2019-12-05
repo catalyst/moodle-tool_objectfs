@@ -54,7 +54,7 @@ class client extends object_client_base {
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
-            $this->signingmethod = $config->signingmethod;  // (empty or S3) | CF.
+            $this->signingmethod = $config->signingmethod;
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -347,7 +347,7 @@ class client extends object_client_base {
             'sa-east-1'      => 'sa-east-1 (Sao Paulo)'
         );
 
-        $mform->addElement('text', 's3_key', get_string('settings:aws:key', 'tool_objectfs'), array('style'=>'width:90%'));
+        $mform->addElement('text', 's3_key', get_string('settings:aws:key', 'tool_objectfs'), array('style' => 'width:90%'));
         $mform->addHelpButton('s3_key', 'settings:aws:key', 'tool_objectfs');
         $mform->setType("s3_key", PARAM_TEXT);
 
@@ -355,7 +355,7 @@ class client extends object_client_base {
         $mform->addHelpButton('s3_secret', 'settings:aws:secret', 'tool_objectfs');
         $mform->setType("s3_secret", PARAM_TEXT);
 
-        $mform->addElement('text', 's3_bucket', get_string('settings:aws:bucket', 'tool_objectfs'), array('style'=>'width:90%'));
+        $mform->addElement('text', 's3_bucket', get_string('settings:aws:bucket', 'tool_objectfs'), array('style' => 'width:90%'));
         $mform->addHelpButton('s3_bucket', 'settings:aws:bucket', 'tool_objectfs');
         $mform->setType("s3_bucket", PARAM_TEXT);
 
@@ -417,7 +417,7 @@ class client extends object_client_base {
         if ($this->signingmethod == 'CF') {
             return $this->generate_presigned_cloudfront_url($contenthash, $headers);
         } else {
-            // Default is 'S3'
+            // Default is 'S3'.
             return $this->generate_presigned_s3_url($contenthash, $headers);
         }
 
@@ -481,31 +481,19 @@ class client extends object_client_base {
         $cloudfrontclient = new CloudFrontClient(
             array(
                 'profile' => 'default',
-                'version' => 'latest', /* '2014-11-06' */
+                'version' => 'latest', /* Latest: 2019-03-26 | AWS_API_VERSION */
                 'region' => $cdnconfig->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
             )
         );
 
         $resourcedomain = $cdnconfig->cloudfront_resource_domain;
-
         $resourcekey = $resourcedomain . '/' . $key;
 
         if ($nicefilename) {
             // We are trying to deliver original filename rather than hash filename to client.
-
-            $contentdisposition = '';
             $originalfilename = '';
-            $originalcontenttype = '';
-
-            $contentdisposition = $this->get_header($headers, 'Content-Disposition');
-            if ($contentdisposition !== '') {
-                $contentdisposition = trim($contentdisposition); // S3 $params['ResponseContentDisposition'].
-            }
-
-            $contenttype = $this->get_header($headers, 'Content-Type');
-            if ($contenttype !== '') {
-                $originalcontenttype = trim($contenttype); // S3 $params['ResponseContentType'].
-            }
+            $contentdisposition = trim($this->get_header($headers, 'Content-Disposition'));
+            $originalcontenttype = trim($this->get_header($headers, 'Content-Type'));
 
             /*
                 Need to get the filename and content-type from HEADERS array
@@ -523,8 +511,6 @@ class client extends object_client_base {
                         $contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"'
                     ) .
                     '&response-content-type=' . rawurlencode($originalcontenttype);
-
-                // Alternative without filename: $newkey = $key . '?response-content-disposition='.rawurlencode($contentdisposition.';'.(utf8_encode($originalfilename)).'').'&response-content-type='.rawurlencode($originalcontenttype);.
 
                 $resourcekey = $resourcedomain . '/' . $newkey;
             }

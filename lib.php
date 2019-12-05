@@ -75,6 +75,8 @@ function set_objectfs_config($config) {
 }
 
 function get_objectfs_config() {
+    global $CFG;
+
     $config = new stdClass;
     $config->enabletasks = 0;
     $config->enablelogging = 0;
@@ -112,13 +114,13 @@ function get_objectfs_config() {
     // Cloudfront CDN with Signed URLS - canned policy.
     $config->cloudfront_resource_domain = '';
     $config->cloudfront_key_pair_id = '';
-    $config->cloudfront_private_key_pem_file_pathname = '';
+    $config->cloudfront_private_key_pem_file_pathname = $CFG->dataroot . '/objectfs/cloudfront.pem';
 
     // Cloudfront CDN with Signed URLS - custom policy (optional - advanced usage).
     $config->cloudfront_custom_policy_json = '';
 
     // SigningMethod - determine whether S3 or Cloudfront etc should be used.
-    $config->signingmethod = 'S3';  // This will be the default if not otherwise set. Values ('S3' | 'CF').
+    $config->signingmethod = '';  // This will be the default if not otherwise set. Values ('' | 'CF').
 
     $storedconfig = get_config('tool_objectfs');
 
@@ -190,7 +192,23 @@ function tool_objectfs_cron() {
     return true;
 }
 
-function tool_objectfs_get_signingmethod_list() {
-    $availablemethods = array(''=>'S3', 'CF'=>'Cloudfront');
-    return $availablemethods;
+function tool_objectfs_cloudfront_pem_exists() {
+    global $config;
+    // This file is assumed to be called "cloudfront.pem" and exist at: {$CFG->dataroot}/objectfs/.
+    // Eg: '/var/lib/sitedata/objectfs/cloudfront.pem'.
+
+    $cloudfrontpemfilepath = $config->cloudfront_private_key_pem_file_pathname;
+    return (
+        file_exists($cloudfrontpemfilepath) && is_readable($cloudfrontpemfilepath)
+        && tool_objectfs_check_privatekey_format($cloudfrontpemfilepath)
+    );
+}
+
+function tool_objectfs_check_privatekey_format($pathtopemfile) {
+    $cert = file_get_contents($pathtopemfile);
+    if ((strpos($cert, '-----') !== 0) || openssl_pkey_get_private($cert) == false) {
+        return false;
+    }
+
+    return true;
 }

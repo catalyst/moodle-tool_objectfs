@@ -168,7 +168,7 @@ class settings_form extends \moodleform {
     }
 
     public function define_presignedurl_section($mform) {
-        global $OUTPUT;
+        global $OUTPUT, $config;
 
         $mform->addElement('header', 'presignedurlheader',
             get_string('settings:presignedurl:header', 'tool_objectfs'));
@@ -211,19 +211,26 @@ class settings_form extends \moodleform {
 
         // Cloudfront settings.
         $mform->addElement('text', 'cloudfront_resource_domain',
-            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'), array('style'=>'width:90%'));
+            get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs'),
+            array('style' => 'width:90%'));
         $mform->addHelpButton('cloudfront_resource_domain', 'settings:presignedcloudfronturl:cloudfront_resource_domain', 'tool_objectfs');
         $mform->setType("cloudfront_resource_domain", PARAM_TEXT);
 
         $mform->addElement('text', 'cloudfront_key_pair_id',
-            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'), array('style'=>'width:90%'));
+            get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs'),
+            array('style' => 'width:90%'));
         $mform->addHelpButton('cloudfront_key_pair_id', 'settings:presignedcloudfronturl:cloudfront_key_pair_id', 'tool_objectfs');
         $mform->setType("cloudfront_key_pair_id", PARAM_TEXT);
 
-        $mform->addElement('textarea', 'cloudfront_private_key_pem_file_pathname',
-            get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs'), 'rows=2 cols=200');
-        $mform->addHelpButton('cloudfront_private_key_pem_file_pathname', 'settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname', 'tool_objectfs');
-        $mform->setType("cloudfront_private_key_pem_file_pathname", PARAM_TEXT);
+        if ($config->signingmethod == 'CF') {
+            if (tool_objectfs_cloudfront_pem_exists()) {
+                $text = "Cloudfront private key .pem exists OK";
+                $mform->addElement('html', $OUTPUT->notification("{$text}", 'success'));
+            } else {
+                $text = "Cloudfront private key .pem not found";
+                $mform->addElement('html', $OUTPUT->notification("{$text}", 'warning'));
+            }
+        }
 
         /*
             TODO: potentially enable cloudfront "custom policy" - for now use "canned policy" as configured in the CF_Distribution at AWS.
