@@ -178,11 +178,7 @@ class settings_form extends \moodleform {
             get_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'));
         $mform->addHelpButton('enablepresignedurls', 'settings:presignedurl:enablepresignedurls', 'tool_objectfs');
         $mform->setType("enablepresignedurls", PARAM_INT);
-/*
-        $mform->addElement('header', 'presignedurlheader',
-            get_string('settings:presignedurl:header', 'tool_objectfs'));
-        $mform->setExpanded('presignedurlheader');
-*/
+
         $link = \html_writer::link(new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php'),
             get_string('presignedurl_testing:page', 'tool_objectfs'));
 

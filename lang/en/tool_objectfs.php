@@ -155,7 +155,7 @@ $string['settings:presignedcloudfronturl:cloudfront_resource_domain_help'] = 'En
 $string['settings:presignedcloudfronturl:cloudfront_key_pair_id'] = 'Key_Pair ID from AWS';
 $string['settings:presignedcloudfronturl:cloudfront_key_pair_id_help'] = 'This is generated using AWS account \'root\' user (along with the private key .pem file).';
 $string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname'] = 'PRIVATE Key .pem pathname';
-$string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname_help'] = 'Full path and filename to the .pem file. Example: {$CFG->dataroot}' . '/ (CFG->dataroot) should be prepended to .pem filename. The actual .pem file must be available for file_get_content().';
+$string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname_help'] = 'Full path and filename to the .pem file. Example: {$CFG->dataroot}' . '/objectfs/ (CFG->dataroot/objectfs/) should be prepended to .pem filename. The actual .pem file must be available for file_get_content().';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'custom policy\' JSON (optional)';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
 
