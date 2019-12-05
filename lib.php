@@ -92,8 +92,6 @@ function get_objectfs_config() {
     $config->expirationtime = 10 * MINSECS;
     $config->presignedminfilesize = 0;
 
-    $config->presignurlschoices = array(0 => 'Disabled', 1 => 'S3', 2 => 'Cloudfront');
-
     // S3 file system.
     $config->s3_key = '';
     $config->s3_secret = '';
@@ -112,13 +110,15 @@ function get_objectfs_config() {
     $config->azure_sastoken = '';
 
     // Cloudfront CDN with Signed URLS - canned policy.
-    $config->enablepresignedcloudfronturls = 0;
     $config->cloudfront_resource_domain = '';
     $config->cloudfront_key_pair_id = '';
     $config->cloudfront_private_key_pem_file_pathname = '';
 
     // Cloudfront CDN with Signed URLS - custom policy (optional - advanced usage).
     $config->cloudfront_custom_policy_json = '';
+
+    // SigningMethod - determine whether S3 or Cloudfront etc should be used.
+    $config->signingmethod = 'S3';  // This will be the default if not otherwise set. Values ('S3' | 'CF').
 
     $storedconfig = get_config('tool_objectfs');
 
@@ -188,4 +188,9 @@ function tool_objectfs_cron() {
     }
 
     return true;
+}
+
+function tool_objectfs_get_signingmethod_list() {
+    $availablemethods = array(''=>'S3', 'CF'=>'Cloudfront');
+    return $availablemethods;
 }
