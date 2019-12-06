@@ -481,7 +481,7 @@ class client extends object_client_base {
         $cloudfrontclient = new CloudFrontClient(
             array(
                 'profile' => 'default',
-                'version' => 'latest', /* AWS_API_VERSION */
+                'version' => 'latest', /* Latest: 2019-03-26 | AWS_API_VERSION */
                 'region' => $cdnconfig->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
             )
         );

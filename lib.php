@@ -196,5 +196,17 @@ function tool_objectfs_cloudfront_pem_exists() {
     // Eg: '/var/lib/sitedata/objectfs/cloudfront.pem'.
 
     $cloudfrontpemfilepath = $config->cloudfront_private_key_pem_file_pathname;
-    return ( file_exists($cloudfrontpemfilepath) && is_readable($cloudfrontpemfilepath) );
+    return (
+        file_exists($cloudfrontpemfilepath) && is_readable($cloudfrontpemfilepath)
+        && tool_objectfs_check_privatekey_format($cloudfrontpemfilepath)
+    );
+}
+
+function tool_objectfs_check_privatekey_format($pathtopemfile) {
+    $cert = file_get_contents($pathtopemfile);
+    if ((strpos($cert, '-----') !== 0) || openssl_pkey_get_private($cert) == false) {
+        return false;
+    }
+
+    return true;
 }
