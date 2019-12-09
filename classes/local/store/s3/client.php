@@ -533,7 +533,7 @@ class client extends object_client_base {
         $signedurlcannedpolicy = $cloudfrontclient->getSignedUrl($signingparameters);
         $signedurl = (string)$signedurlcannedpolicy;
 
-        //$headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example).
+        /* $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example). */
 
         return $signedurl;
     }
