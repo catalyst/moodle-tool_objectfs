@@ -478,16 +478,15 @@ class client extends object_client_base {
 
         $cdnconfig = get_objectfs_config();
         $key = $this->get_filepath_from_hash($contenthash);
-        $cloudfrontclient = new CloudFrontClient(
-            array(
-                'profile' => 'default',
-                'version' => 'latest', /* Latest: 2019-03-26 | AWS_API_VERSION */
-                'region' => $cdnconfig->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
-            )
-        );
-
         $resourcedomain = $cdnconfig->cloudfront_resource_domain;
-        $resourcekey = $resourcedomain . '/' . $key;
+
+        $signingparameters = array();
+        
+        if (isset($cdnconfig->expirationtime) && !empty($cdnconfig->expirationtime)) {
+            $expires = time() + $cdnconfig->expirationtime; // Example: time()+300.
+        } else {
+            $expires = 0;
+        }
 
         if ($nicefilename) {
             // We are trying to deliver original filename rather than hash filename to client.
@@ -506,34 +505,35 @@ class client extends object_client_base {
                 $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
                 $contentdisposition = $fparts[0];
 
-                $newkey = $key .
-                    '?response-content-disposition='.rawurlencode(
+                $key .=
+                    '?response-content-disposition=' . rawurlencode(
                         $contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"'
                     ) .
                     '&response-content-type=' . rawurlencode($originalcontenttype);
-
-                $resourcekey = $resourcedomain . '/' . $newkey;
             }
         }
 
-        if (isset($cdnconfig->expirationtime) && !empty($cdnconfig->expirationtime)) {
-            $expires = time() + $cdnconfig->expirationtime; // Example: time()+300.
-        } else {
-            $expires = 0;
-        }
+        $resourcekey = $resourcedomain . '/' . $key;
 
-        $signedurlcannedpolicy = $cloudfrontclient->getSignedUrl([
+        $signingparameters = array(
             'url' => $resourcekey,
             'expires' => $expires,
             'key_pair_id' => $cdnconfig->cloudfront_key_pair_id,
             'private_key' => realpath($cdnconfig->cloudfront_private_key_pem_file_pathname),
-            'ResponseContentDisposition' => $contentdisposition . ';filename=' . $originalfilename . '',
-            'ResponseFilename' => $originalfilename,
-        ]);
+        );
 
+        $cloudfrontclient = new CloudFrontClient(
+            array(
+                'profile' => 'default',
+                'version' => 'latest', /* Latest: 2019-03-26 | AWS_API_VERSION */
+                'region' => $cdnconfig->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
+            )
+        );
+
+        $signedurlcannedpolicy = $cloudfrontclient->getSignedUrl($signingparameters);
         $signedurl = (string)$signedurlcannedpolicy;
 
-        $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example).
+        //$headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example).
 
         return $signedurl;
     }
