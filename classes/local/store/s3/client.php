@@ -501,15 +501,21 @@ class client extends object_client_base {
 
             if (!empty($contentdisposition)) {
                 $fparts = explode('; ', $contentdisposition);
-                $originalfilename = str_replace('filename=', '', $fparts[1]); // Get the actual filename.
-                $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
-                $contentdisposition = $fparts[0];
+                if (!empty($fparts[1])) {
+                    $originalfilename = str_replace('filename=', '', $fparts[1]); // Get the actual filename.
+                    $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
+                }
+                if (!empty($fparts[0])) {
+                    $contentdisposition = $fparts[0];
+                }
 
-                $key .=
-                    '?response-content-disposition=' . rawurlencode(
-                        $contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"'
-                    ) .
-                    '&response-content-type=' . rawurlencode($originalcontenttype);
+                if (!empty($originalfilename)) {
+                    $key .=
+                        '?response-content-disposition=' . rawurlencode(
+                            $contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"'
+                        ) .
+                        '&response-content-type=' . rawurlencode($originalcontenttype);
+                }
             }
         }
 
