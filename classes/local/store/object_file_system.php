@@ -28,12 +28,16 @@
 
 namespace tool_objectfs\local\store;
 
+use ParentIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
 require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
 require_once($CFG->libdir . '/filestorage/file_storage.php');
 
@@ -317,6 +321,52 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
+     * @param string $dirpath
+     */
+    public function delete_empty_folders(string $rootpatch) {
+        $iterator = new RecursiveDirectoryIterator($rootpatch);
+        $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
+        $directories = new ParentIterator($iterator);
+
+        $toremove = [];
+        foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
+            $children = iterator_count($iterator->getChildren());
+            $rootname = $iterator->getRealPath();
+            $toremove[$rootname]['children'] = $children;
+            $dirpath = $dir->getPathname();
+            if ($children === 0) {
+                // Root directory is empty.
+                rmdir($rootname);
+            } else if ($rootname !== $dirpath && $this->is_dir_empty($dirpath)) {
+                // We found an empty directory.
+                $toremove[$rootname]['empty'][] = $dirpath;
+                rmdir($dirpath);
+            } else if ($rootname === $dirpath
+                && (isset($toremove[$rootname]['empty']) && ($children === count($toremove[$rootname]['empty'])))) {
+                // All children have been removed from root directory.
+                rmdir($rootname);
+            }
+        }
+    }
+
+    /**
+     * @param string $foldername
+     * @return bool
+     */
+    public function is_dir_empty(string $foldername) : bool {
+        if ($handle = opendir($foldername)) {
+            while (false !== ($file = readdir($handle))) {
+                if ($file !== '.' && $file !== '..') {
+                    closedir($handle);
+                    return false;
+                }
+            }
+            closedir($handle);
+        }
+        return true;
+    }
+
+    /**
      * Output the content of the specified stored file.
      *
      * Note, this is different to get_content() as it uses the built-in php
@@ -450,7 +500,6 @@ abstract class object_file_system extends \file_system_filedir {
             // Don't remove the file - it's still in use.
             return;
         }
-
         $this->delete_object_from_hash($contenthash);
     }
 
