@@ -302,11 +302,13 @@ abstract class object_file_system extends \file_system_filedir {
 
         if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {
             $localpath = $this->get_local_path_from_hash($contenthash);
-
+            $parentdir = dirname($localpath, 2);
             if ($this->verify_external_object_from_hash($contenthash)) {
                 $success = unlink($localpath);
 
                 if ($success) {
+                    // If file removed we attempt to remove its folder if empty.
+                    $this->delete_empty_folders($parentdir);
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }

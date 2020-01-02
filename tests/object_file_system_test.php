@@ -216,6 +216,8 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse(is_readable($localpath));
+        // If dir containing the file is empty it will be removed.
+        $this->assertFalse(is_readable(dirname($localpath)));
     }
 
     public function test_readfile_if_object_is_local() {

@@ -54,6 +54,7 @@ class tasks_testcase extends tool_objectfs_testcase {
         set_objectfs_config($config);
 
         $scheduledtasknames = array('delete_local_objects',
+                                    'delete_local_empty_directories',
                                     'generate_status_report',
                                     'pull_objects_from_storage',
                                     'push_objects_to_storage',
