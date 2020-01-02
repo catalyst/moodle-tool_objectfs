@@ -12,8 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http
-//://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Task that pushes files to S3.
@@ -28,7 +27,7 @@ namespace tool_objectfs\task;
 
 defined('MOODLE_INTERNAL') || die();
 
-include_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class delete_local_empty_directories  extends \core\task\scheduled_task {
 
