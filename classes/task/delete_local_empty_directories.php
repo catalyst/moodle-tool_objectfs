@@ -37,7 +37,7 @@ class delete_local_empty_directories  extends \core\task\scheduled_task {
      * @return string
      * @throws \coding_exception
      */
-    public function get_name() : string {
+    public function get_name() {
         return get_string('delete_local_empty_directories_task', 'tool_objectfs');
     }
 

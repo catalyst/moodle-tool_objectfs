@@ -353,7 +353,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @param string $foldername
      * @return bool
      */
-    public function is_dir_empty(string $foldername) : bool {
+    public function is_dir_empty(string $foldername) {
         if ($handle = opendir($foldername)) {
             while (false !== ($file = readdir($handle))) {
                 if ($file !== '.' && $file !== '..') {
