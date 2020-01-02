@@ -323,7 +323,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * @param string $dirpath
      */
-    public function delete_empty_folders(string $rootpatch) {
+    public function delete_empty_folders($rootpatch) {
         $iterator = new RecursiveDirectoryIterator($rootpatch);
         $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
         $directories = new ParentIterator($iterator);
@@ -353,7 +353,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @param string $foldername
      * @return bool
      */
-    public function is_dir_empty(string $foldername) {
+    public function is_dir_empty($foldername) {
         if ($handle = opendir($foldername)) {
             while (false !== ($file = readdir($handle))) {
                 if ($file !== '.' && $file !== '..') {
