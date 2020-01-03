@@ -306,7 +306,7 @@ abstract class object_file_system extends \file_system_filedir {
                 $success = unlink($localpath);
 
                 if ($success) {
-                    // If file removed we attempt to remove its folder if empty.
+                    // Remove dir if empty.
                     $this->delete_empty_folders(dirname($localpath));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
@@ -335,23 +335,15 @@ abstract class object_file_system extends \file_system_filedir {
         $iterator = new RecursiveDirectoryIterator($rootpath);
         $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
         $directories = new ParentIterator($iterator);
-        $toremove = [];
         foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
             $children = iterator_count($iterator->getChildren());
-            $rootname = $iterator->getRealPath();
-            $toremove[$rootname]['children'] = $children;
             $dirpath = $dir->getPathname();
             if ($children === 0) {
                 // Root directory is empty.
-                rmdir($rootname);
-            } else if ($rootname !== $dirpath && $this->is_dir_empty($dirpath)) {
+                rmdir($iterator->getRealPath());
+            } else if ($this->is_dir_empty($dirpath)) {
                 // We found an empty directory.
-                $toremove[$rootname]['empty'][] = $dirpath;
                 rmdir($dirpath);
-            } else if ($rootname === $dirpath
-                && (isset($toremove[$rootname]['empty']) && ($children === count($toremove[$rootname]['empty'])))) {
-                // All children have been removed from root directory.
-                rmdir($rootname);
             }
         }
     }
