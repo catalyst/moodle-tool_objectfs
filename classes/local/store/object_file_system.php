@@ -302,13 +302,12 @@ abstract class object_file_system extends \file_system_filedir {
 
         if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {
             $localpath = $this->get_local_path_from_hash($contenthash);
-            $parentdir = dirname($localpath, 2);
             if ($this->verify_external_object_from_hash($contenthash)) {
                 $success = unlink($localpath);
 
                 if ($success) {
                     // If file removed we attempt to remove its folder if empty.
-                    $this->delete_empty_folders($parentdir);
+                    $this->delete_empty_folders(dirname($localpath));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
@@ -323,13 +322,19 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * @param string $dirpath
+     * @param string $rootpath
      */
-    public function delete_empty_folders($rootpatch) {
-        $iterator = new RecursiveDirectoryIterator($rootpatch);
+    public function delete_empty_folders($rootpath) {
+        if (!is_dir($rootpath)) {
+            return;
+        }
+        if ($this->is_dir_empty($rootpath)) {
+            rmdir($rootpath);
+            return;
+        }
+        $iterator = new RecursiveDirectoryIterator($rootpath);
         $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
         $directories = new ParentIterator($iterator);
-
         $toremove = [];
         foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
             $children = iterator_count($iterator->getChildren());
