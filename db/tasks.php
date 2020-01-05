@@ -56,8 +56,8 @@ $tasks = array(
     array(
         'classname' => 'tool_objectfs\task\delete_local_empty_directories',
         'blocking'  => 0,
-        'minute'    => '*',
-        'hour'      => '*',
+        'minute'    => '0',
+        'hour'      => '1',
         'day'       => '*',
         'dayofweek' => '*',
         'month'     => '*'

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * Task that deletes empty dirs from $CFG->filedir.
  *
  * @package   tool_objectfs
  * @author    Gleimer Mora <gleimermora@catalyst-au.net>
@@ -53,7 +53,9 @@ class delete_local_empty_directories  extends \core\task\scheduled_task {
             return;
         }
         $filesystem = new $config->filesystem();
-        $filedirectory = $CFG->dataroot . '/filedir';
-        $filesystem->delete_empty_folders($filedirectory);
+        if (!isset($CFG->filedir)) {
+            $CFG->filedir = $CFG->dataroot . '/filedir';
+        }
+        $filesystem->delete_empty_folders($CFG->filedir);
     }
 }
