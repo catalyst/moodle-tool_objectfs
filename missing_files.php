@@ -27,7 +27,7 @@ require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/lib.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 
-admin_externalpage_setup("tool_objectfs_missing_files");
+admin_externalpage_setup('tool_objectfs_missing_files');
 
 use tool_objectfs\local\table\files_table;
 

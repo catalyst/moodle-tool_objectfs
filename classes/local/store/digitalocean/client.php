@@ -54,9 +54,9 @@ class client extends s3_client {
     }
 
     /**
-     * @param $settings
+     * @param $settings admin_settingpage
      * @param $config
-     * @return array
+     * @return admin_settingpage
      */
     public function define_client_section($settings, $config) {
 

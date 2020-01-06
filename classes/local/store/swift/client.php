@@ -265,9 +265,9 @@ class client extends object_client_base {
     /**
      * swift settings form with the following elements:
      *
-     * @param $settings
+     * @param $settings admin_settingpage
      * @param $config
-     * @return mixed
+     * @return admin_settingpage
      */
     public function define_client_section($settings, $config) {
 

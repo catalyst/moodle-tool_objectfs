@@ -293,7 +293,6 @@ class client extends object_client_base {
     }
 
     public function define_amazon_s3_check($testdelete = true) {
-        $connection = false;
         $connection = $this->test_connection();
         if ($connection->success) {
             \core\notification::success($connection->message);
@@ -308,15 +307,14 @@ class client extends object_client_base {
             }
         } else {
             \core\notification::error($connection->message);
-            $permissions = false;
         }
     }
 
 
     /**
-     * @param $settings
+     * @param $settings admin_settingpage
      * @param $config
-     * @return array
+     * @return admin_settingpage
      */
     public function define_client_section($settings, $config) {
 

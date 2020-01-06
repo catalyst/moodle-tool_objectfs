@@ -27,7 +27,7 @@ require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/lib.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 
-admin_externalpage_setup("tool_objectfs_object_status");
+admin_externalpage_setup('tool_objectfs_object_status');
 
 use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\report\objectfs_report_builder;
