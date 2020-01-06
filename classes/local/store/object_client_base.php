@@ -99,6 +99,8 @@ abstract class object_client_base implements object_client {
      * @param $client
      */
     public function define_client_check($client) {
+        global $SESSION;
+        $SESSION->notifications = [];
         $connection = $client->test_connection();
         if ($connection->success) {
             \core\notification::success($connection->message);

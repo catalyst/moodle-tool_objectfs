@@ -293,6 +293,8 @@ class client extends object_client_base {
     }
 
     public function define_amazon_s3_check($testdelete = true) {
+        global $SESSION;
+        $SESSION->notifications = [];
         $connection = $this->test_connection();
         if ($connection->success) {
             \core\notification::success($connection->message);
