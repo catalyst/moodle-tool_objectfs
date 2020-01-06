@@ -27,8 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/lib.php');
 
-use core_admin\local\settings\filesize;
-
 global $PAGE, $CFG;
 
 if (!$ADMIN->locate('tool_objectfs')) {
@@ -51,7 +49,7 @@ if ($ADMIN->fulltree) {
     $settings = new admin_settingpage('tool_objectfs', get_string('pluginname', 'tool_objectfs'));
     $ADMIN->add('tools', $settings);
 
-    $settings->add(new \admin_setting_heading('tool_objectfs/generalsettings',
+    $settings->add(new admin_setting_heading('tool_objectfs/generalsettings',
         new lang_string('settings:generalheader', 'tool_objectfs'), ''));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enabletasks',
@@ -64,11 +62,11 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:enablelogging', 'tool_objectfs'), '', '', '0', '1'));
 
 
-    $settings->add(new \admin_setting_heading('tool_objectfs/filetransfersettings',
+    $settings->add(new admin_setting_heading('tool_objectfs/filetransfersettings',
         new lang_string('settings:filetransferheader', 'tool_objectfs'), ''));
 
-    $settings->add(new filesize('tool_objectfs/sizethreshold',
-        new lang_string('settings:sizethreshold', 'tool_objectfs'), '', 1024 * filesize::UNIT_KB));
+    $settings->add(new admin_setting_configtext('tool_objectfs/sizethreshold',
+        new lang_string('settings:sizethreshold', 'tool_objectfs'), '', 1024 * 10, PARAM_INT));
 
     $settings->add(new admin_setting_configtext('tool_objectfs/batchsize',
         new lang_string('settings:batchsize', 'tool_objectfs'), '', 10000, PARAM_INT));
