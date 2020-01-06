@@ -25,9 +25,9 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/lib.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot . '/lib/adminlib.php');
 
-admin_externalpage_setup('tool_objectfs_presignedurl_testing');
+admin_externalpage_setup("tool_objectfs_presignedurl_testing");
 
 $output = $PAGE->get_renderer('tool_objectfs');
 
@@ -36,7 +36,7 @@ echo $output->heading(get_string('presignedurl_testing:page', 'tool_objectfs'));
 
 $config = get_objectfs_config();
 $support = tool_objectfs_filesystem_supports_presigned_urls($config->filesystem);
-$settingslink = \html_writer::link(new \moodle_url('/admin/tool/objectfs/index.php'),
+$settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs'),
     get_string('presignedurl_testing:objectfssettings', 'tool_objectfs'));
 
 if ($support) {

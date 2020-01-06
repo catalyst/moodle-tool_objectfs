@@ -292,35 +292,33 @@ class client extends object_client_base {
         return $details;
     }
 
-    public function define_amazon_s3_check($mform, $testdelete = true) {
-        global $OUTPUT;
+    public function define_amazon_s3_check($testdelete = true) {
         $connection = false;
-
         $connection = $this->test_connection();
-
         if ($connection->success) {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
-
+            \core\notification::success($connection->message);
             // Check permissions if we can connect.
             $permissions = $this->test_permissions($testdelete);
             if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification(key($permissions->messages), current($permissions->messages)));
+                \core\notification::success(key($permissions->messages), current($permissions->messages));
             } else {
                 foreach ($permissions->messages as $message => $type) {
-                    $mform->addElement('html', $OUTPUT->notification($message, $type));
+                    \core\notification::warning($message, $type);
                 }
             }
         } else {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
+            \core\notification::error($connection->message);
             $permissions = false;
         }
-        return $mform;
     }
 
-    public function define_client_section($mform, $config) {
 
-        $mform->addElement('header', 'awsheader', get_string('settings:aws:header', 'tool_objectfs'));
-        $mform->setExpanded('awsheader');
+    /**
+     * @param $settings
+     * @param $config
+     * @return array
+     */
+    public function define_client_section($settings, $config) {
 
         $regionoptions = array(
             'us-east-1'      => 'us-east-1 (N. Virginia)',
@@ -343,24 +341,28 @@ class client extends object_client_base {
             'sa-east-1'      => 'sa-east-1 (Sao Paulo)'
         );
 
-        $mform->addElement('text', 's3_key', get_string('settings:aws:key', 'tool_objectfs'));
-        $mform->addHelpButton('s3_key', 'settings:aws:key', 'tool_objectfs');
-        $mform->setType("s3_key", PARAM_TEXT);
+        $settings->add(new \admin_setting_heading('tool_objectfs/aws',
+            new \lang_string('settings:aws:header', 'tool_objectfs'), ''));
 
-        $mform->addElement('passwordunmask', 's3_secret', get_string('settings:aws:secret', 'tool_objectfs'), array('size' => 40));
-        $mform->addHelpButton('s3_secret', 'settings:aws:secret', 'tool_objectfs');
-        $mform->setType("s3_secret", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/s3_key',
+            new \lang_string('settings:aws:key', 'tool_objectfs'),
+            new \lang_string('settings:aws:key_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 's3_bucket', get_string('settings:aws:bucket', 'tool_objectfs'));
-        $mform->addHelpButton('s3_bucket', 'settings:aws:bucket', 'tool_objectfs');
-        $mform->setType("s3_bucket", PARAM_TEXT);
+        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/s3_secret',
+            new \lang_string('settings:aws:secret', 'tool_objectfs'),
+            new \lang_string('settings:aws:secret_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('select', 's3_region', get_string('settings:aws:region', 'tool_objectfs'), $regionoptions);
-        $mform->addHelpButton('s3_region', 'settings:aws:region', 'tool_objectfs');
+        $settings->add(new \admin_setting_configtext('tool_objectfs/s3_bucket',
+            new \lang_string('settings:aws:bucket', 'tool_objectfs'),
+            new \lang_string('settings:aws:bucket_help', 'tool_objectfs'), ''));
 
-        $mform = $this->define_amazon_s3_check($mform);
+        $settings->add(new \admin_setting_configselect('tool_objectfs/s3_region',
+            new \lang_string('settings:aws:region', 'tool_objectfs'),
+            new \lang_string('settings:aws:region_help', 'tool_objectfs'), '', $regionoptions));
 
-        return $mform;
+        $this->define_amazon_s3_check();
+
+        return $settings;
     }
 
     /**

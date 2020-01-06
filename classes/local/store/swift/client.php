@@ -265,47 +265,47 @@ class client extends object_client_base {
     /**
      * swift settings form with the following elements:
      *
-     * @param $mform
+     * @param $settings
      * @param $config
      * @return mixed
      */
-    public function define_client_section($mform, $config) {
+    public function define_client_section($settings, $config) {
 
-        $mform->addElement('header', 'openstackheader', get_string('settings:openstack:header', 'tool_objectfs'));
-        $mform->setExpanded('openstackheader');
+        $settings->add(new \admin_setting_heading('tool_objectfs/openstack',
+            new \lang_string('settings:openstack:header', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'openstack_username', get_string('settings:openstack:username', 'tool_objectfs'));
-        $mform->addHelpButton('openstack_username', 'settings:openstack:username', 'tool_objectfs');
-        $mform->setType("openstack_username", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_authurl',
+            new \lang_string('settings:openstack:authurl', 'tool_objectfs'),
+            new \lang_string('settings:openstack:authurl_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('password', 'openstack_password', get_string('settings:openstack:password', 'tool_objectfs'));
-        $mform->addHelpButton('openstack_password', 'settings:openstack:password', 'tool_objectfs');
-        $mform->setType("openstack_password", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_region',
+            new \lang_string('settings:openstack:region', 'tool_objectfs'),
+            new \lang_string('settings:openstack:region_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'openstack_authurl', get_string('settings:openstack:authurl', 'tool_objectfs'));
-        $mform->addHelpButton('openstack_authurl', 'settings:openstack:authurl', 'tool_objectfs');
-        $mform->setType("openstack_authurl", PARAM_URL);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_container',
+            new \lang_string('settings:openstack:container', 'tool_objectfs'),
+            new \lang_string('settings:openstack:container_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'openstack_region', get_string('settings:openstack:region', 'tool_objectfs'));
-        $mform->addHelpButton('openstack_region', 'settings:openstack:region', 'tool_objectfs');
-        $mform->setType("openstack_region", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_username',
+            new \lang_string('settings:openstack:username', 'tool_objectfs'),
+            new \lang_string('settings:openstack:username_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'openstack_tenantname', get_string('settings:openstack:tenantname', 'tool_objectfs'));
-        $mform->addHelpButton('openstack_tenantname', 'settings:openstack:tenantname', 'tool_objectfs');
-        $mform->setType("openstack_tenantname", PARAM_TEXT);
+        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/openstack_password',
+            new \lang_string('settings:openstack:password', 'tool_objectfs'),
+            new \lang_string('settings:openstack:password', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'openstack_projectid', get_string('settings:openstack:projectid', 'tool_objectfs'));
-        $mform->addHelpButton('openstack_projectid', 'settings:openstack:projectid', 'tool_objectfs');
-        $mform->setType("openstack_projectid", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_tenantname',
+            new \lang_string('settings:openstack:tenantname', 'tool_objectfs'),
+            new \lang_string('settings:openstack:tenantname_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'openstack_container', get_string('settings:openstack:container', 'tool_objectfs'));
-        $mform->addHelpButton('openstack_container', 'settings:openstack:container', 'tool_objectfs');
-        $mform->setType("openstack_container", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_projectid',
+            new \lang_string('settings:openstack:projectid', 'tool_objectfs'),
+            new \lang_string('settings:openstack:projectid_help', 'tool_objectfs'), ''));
 
         $client = new client($config);
-        $mform = $this->define_client_check($mform, $client);
+        $this->define_client_check($client);
 
-        return $mform;
+        return $settings;
     }
 
 

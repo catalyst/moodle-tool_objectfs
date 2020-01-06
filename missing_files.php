@@ -25,14 +25,17 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/lib.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot . '/lib/adminlib.php');
+
+admin_externalpage_setup("tool_objectfs_missing_files");
 
 use tool_objectfs\local\table\files_table;
 
 $download = optional_param('download', '', PARAM_ALPHA);
 
-admin_externalpage_setup('tool_objectfs');
-
+$PAGE->set_url('/admin/tool/objectfs/missing_files.php');
+$PAGE->set_context(context_system::instance());
+$PAGE->set_cacheable(false);
 $output = $PAGE->get_renderer('tool_objectfs');
 $table = new files_table('missing-files', OBJECT_LOCATION_ERROR);
 $table->define_baseurl('/admin/tool/objectfs/missing_files.php');

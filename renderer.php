@@ -174,7 +174,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     public function object_status_page_intro() {
         $output = '';
 
-        $url = new \moodle_url('/admin/tool/objectfs/index.php');
+        $url = new \moodle_url('/admin/settings.php?section=tool_objectfs');
         $urltext = get_string('settings', 'tool_objectfs');
         $output .= html_writer::tag('div', html_writer::link($url , $urltext));
 

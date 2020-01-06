@@ -325,31 +325,31 @@ class client extends object_client_base {
      * Container name.
      * Shared Access Signature.
      *
-     * @param $mform
+     * @param $settings
      * @param $config
      * @return mixed
      */
-    public function define_client_section($mform, $config) {
+    public function define_client_section($settings, $config) {
 
-        $mform->addElement('header', 'azureheader', get_string('settings:azure:header', 'tool_objectfs'));
-        $mform->setExpanded('azureheader');
+        $settings->add(new \admin_setting_heading('tool_objectfs/azure',
+            new \lang_string('settings:azure:header', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'azure_accountname', get_string('settings:azure:accountname', 'tool_objectfs'));
-        $mform->addHelpButton('azure_accountname', 'settings:azure:accountname', 'tool_objectfs');
-        $mform->setType("azure_accountname", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/azure_accountname',
+            new \lang_string('settings:azure:accountname', 'tool_objectfs'),
+            new \lang_string('settings:azure:accountname_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'azure_container', get_string('settings:azure:container', 'tool_objectfs'));
-        $mform->addHelpButton('azure_container', 'settings:azure:container', 'tool_objectfs');
-        $mform->setType("azure_container", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/azure_container',
+            new \lang_string('settings:azure:container', 'tool_objectfs'),
+            new \lang_string('settings:azure:container_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'azure_sastoken', get_string('settings:azure:sastoken', 'tool_objectfs'));
-        $mform->addHelpButton('azure_sastoken', 'settings:azure:sastoken', 'tool_objectfs');
-        $mform->setType("azure_sastoken", PARAM_RAW);
+        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/azure_sastoken',
+            new \lang_string('settings:azure:sastoken', 'tool_objectfs'),
+            new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'), ''));
 
         $client = new client($config);
-        $mform = $this->define_client_check($mform, $client);
+        $this->define_client_check($client);
 
-        return $mform;
+        return $settings;
     }
 
     /**
