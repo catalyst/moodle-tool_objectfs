@@ -156,7 +156,7 @@ matrix:
 
 before_install:
   - export MOODLE_VERSION=$(echo "$MOODLE_BRANCH" | cut -d'_' -f 2)
-  - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] && [ "$MOODLE_VERSION" = "master" ] && [ $DB == "pgsql" ]; then
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] && [ $DB == "pgsql" ] && [[ "$MOODLE_VERSION" -gt 38 || "$MOODLE_VERSION" == "master" ]] ; then
       sudo /etc/init.d/postgresql stop;
       sudo /etc/init.d/postgresql start 9.5;
     fi
