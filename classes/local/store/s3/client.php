@@ -314,7 +314,7 @@ class client extends object_client_base {
 
 
     /**
-     * @param $settings admin_settingpage
+     * @param admin_settingpage $settings
      * @param $config
      * @return admin_settingpage
      */

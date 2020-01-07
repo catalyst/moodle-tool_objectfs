@@ -265,7 +265,7 @@ class client extends object_client_base {
     /**
      * swift settings form with the following elements:
      *
-     * @param $settings admin_settingpage
+     * @param admin_settingpage $settings
      * @param $config
      * @return admin_settingpage
      */

@@ -110,7 +110,7 @@ if ($ADMIN->fulltree) {
     }
 
     $client = tool_objectfs_get_client($config);
-    if ($client and $client->get_availability() and $PAGE->url->compare(new moodle_url('/admin/settings.php?section=tool_objectfs'))) {
+    if ($client && $client->get_availability() && $PAGE->url->compare(new moodle_url('/admin/settings.php?section=tool_objectfs'))) {
         $settings = $client->define_client_section($settings, $config);
     }
 
