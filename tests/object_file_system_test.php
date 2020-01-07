@@ -252,11 +252,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      */
     public function test_delete_empty_folders($dirs, $files, $expectedparentreadable, $expectedgrandparentpathreadable) {
         global $CFG;
-        if (!isset($CFG->phpunit_filedir)) {
-            $CFG->phpunit_filedir = $CFG->phpunit_dataroot . '/filedir';
-        }
-        $filedir = $CFG->phpunit_filedir;
-        $testdir = $filedir . '/test';
+        $testdir = $CFG->filedir . '/test';
         foreach ($dirs as $key => $dir) {
             $fullpath = $testdir . $dir;
             mkdir($fullpath, 0777, true);
@@ -265,7 +261,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                 touch($fullpath . $file);
             }
         }
-        $this->filesystem->delete_empty_folders($filedir);
+        $this->filesystem->delete_empty_folders($CFG->filedir);
         foreach ($dirs as $key => $dir) {
              $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
         }

@@ -327,6 +327,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @param string $rootpath Full path to the dir.
      */
     public function delete_empty_folders($rootpath) {
+        global $CFG;
         if (!is_dir($rootpath)) {
             return;
         }
@@ -340,7 +341,7 @@ abstract class object_file_system extends \file_system_filedir {
             }
         }
         // Make sure we keep the 'filedir' dir.
-        if ('filedir' !== basename($rootpath) && $this->is_dir_empty($rootpath)) {
+        if ($CFG->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
             rmdir($rootpath);
         }
     }
@@ -631,7 +632,11 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function delete_local_file_from_hash($contenthash) {
         $path = $this->get_local_path_from_hash($contenthash);
-        unlink($path);
+        if (unlink($path)) {
+            // Check grandparent dir for empty dirs.
+            $dirpath = str_replace($contenthash, '', $path) . '..';
+            $this->delete_empty_folders(realpath($dirpath));
+        }
     }
 
     /**

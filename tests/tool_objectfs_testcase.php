@@ -27,6 +27,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
 
     protected function setUp() {
         global $CFG;
+        set_config('filedir', $CFG->dataroot . '/filedir');
         $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
         $CFG->tool_objectfs_delete_externally = 0;
         $this->filesystem = new test_file_system();
