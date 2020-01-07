@@ -206,18 +206,70 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
     public function test_delete_object_from_local_by_hash_if_can_verify_external_object() {
         $file = $this->create_duplicated_file();
-        $externalpath = $this->get_external_path_from_hash($file->get_contenthash());
+        $contenthash = $file->get_contenthash();
+        $externalpath = $this->get_external_path_from_hash($contenthash);
         $localpath = $this->get_local_path_from_storedfile($file);
 
         $differentfilepath = __DIR__ . '/fixtures/test.txt';
         copy($differentfilepath, $externalpath);
+        // Get the grandparent path.
+        $grandparentpath = realpath(str_replace($contenthash, '', $localpath) . '..');
 
-        $location = $this->filesystem->delete_object_from_local_by_hash($file->get_contenthash());
+        $location = $this->filesystem->delete_object_from_local_by_hash($contenthash);
 
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse(is_readable($localpath));
-        // If dir containing the file is empty it will be removed.
-        $this->assertFalse(is_readable(dirname($localpath)));
+        // If grandparent is empty it should be removed.
+        $this->assertFalse(is_readable($grandparentpath));
+    }
+
+    /**
+     * @return array
+     */
+    public function delete_empty_folders_provider() {
+        return [
+            [
+                ['/d1', '/d2'], ['/file1', '/file2'], [true, true],  true,
+            ],
+            [
+                ['/d1', '/d2'], ['/file1'], [true, false],  true,
+            ],
+            [
+                ['/d1', '/d2'], ['', '/file1'], [false, true],  true,
+            ],
+            [
+                ['/d1', '/d2'], [], [false, false],  false,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider delete_empty_folders_provider
+     * @param array $dirs Dirs to be created.
+     * @param array $files Files to be created.
+     * @param array $expectedparentreadable Indicates whether a dir will remain after calling 'delete_empty_folders'.
+     * @param bool $expectedgrandparentpathreadable If grandparent dir exists after calling 'delete_empty_folders'.
+     */
+    public function test_delete_empty_folders($dirs, $files, $expectedparentreadable, $expectedgrandparentpathreadable) {
+        global $CFG;
+        if (!isset($CFG->phpunit_filedir)) {
+            $CFG->phpunit_filedir = $CFG->phpunit_dataroot . '/filedir';
+        }
+        $filedir = $CFG->phpunit_filedir;
+        $testdir = $filedir . '/test';
+        foreach ($dirs as $key => $dir) {
+            $fullpath = $testdir . $dir;
+            mkdir($fullpath, 0777, true);
+            $file = !empty($files[$key]) ? $files[$key] : '';
+            if ($file !== '') {
+                touch($fullpath . $file);
+            }
+        }
+        $this->filesystem->delete_empty_folders($filedir);
+        foreach ($dirs as $key => $dir) {
+             $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
+        }
+        $this->assertEquals($expectedgrandparentpathreadable, is_readable($testdir));
     }
 
     public function test_readfile_if_object_is_local() {

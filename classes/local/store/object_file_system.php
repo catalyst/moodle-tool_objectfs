@@ -306,8 +306,9 @@ abstract class object_file_system extends \file_system_filedir {
                 $success = unlink($localpath);
 
                 if ($success) {
-                    // Remove dir if empty.
-                    $this->delete_empty_folders(dirname($localpath));
+                    // Check grandparent dir for empty dirs.
+                    $path = str_replace($contenthash, '', $localpath) . '..';
+                    $this->delete_empty_folders(realpath($path));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
@@ -322,34 +323,31 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * @param string $rootpath
+     * Recursively reads dirs from passed path and delete all empty dirs.
+     * @param string $rootpath Full path to the dir.
      */
     public function delete_empty_folders($rootpath) {
         if (!is_dir($rootpath)) {
-            return;
-        }
-        if ($this->is_dir_empty($rootpath)) {
-            rmdir($rootpath);
             return;
         }
         $iterator = new RecursiveDirectoryIterator($rootpath);
         $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
         $directories = new ParentIterator($iterator);
         foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
-            $children = iterator_count($iterator->getChildren());
             $dirpath = $dir->getPathname();
-            if ($children === 0) {
-                // Root directory is empty.
-                rmdir($iterator->getRealPath());
-            } else if ($this->is_dir_empty($dirpath)) {
-                // We found an empty directory.
+            if ($this->is_dir_empty($dirpath)) {
                 rmdir($dirpath);
             }
+        }
+        // Make sure we keep the 'filedir' dir.
+        if ('filedir' !== basename($rootpath) && $this->is_dir_empty($rootpath)) {
+            rmdir($rootpath);
         }
     }
 
     /**
-     * @param string $foldername
+     * Checks if provided path is an empty dir.
+     * @param string $foldername Full path to the dir.
      * @return bool
      */
     public function is_dir_empty($foldername) {
