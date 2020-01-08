@@ -346,9 +346,6 @@ class client extends object_client_base {
             new \lang_string('settings:azure:sastoken', 'tool_objectfs'),
             new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'), ''));
 
-        $client = new client($config);
-        $this->define_client_check($client);
-
         return $settings;
     }
 

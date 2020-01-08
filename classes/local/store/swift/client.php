@@ -302,9 +302,6 @@ class client extends object_client_base {
             new \lang_string('settings:openstack:projectid', 'tool_objectfs'),
             new \lang_string('settings:openstack:projectid_help', 'tool_objectfs'), ''));
 
-        $client = new client($config);
-        $this->define_client_check($client);
-
         return $settings;
     }
 

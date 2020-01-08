@@ -53,6 +53,26 @@ class client extends s3_client {
         ));
     }
 
+    public function define_client_check($client) {
+        global $SESSION;
+        $SESSION->notifications = [];
+        $connection = $this->test_connection();
+        if ($connection->success) {
+            \core\notification::success($connection->message);
+            // Check permissions if we can connect.
+            $permissions = $this->test_permissions(false);
+            if ($permissions->success) {
+                \core\notification::success(key($permissions->messages), current($permissions->messages));
+            } else {
+                foreach ($permissions->messages as $message => $type) {
+                    \core\notification::warning($message, $type);
+                }
+            }
+        } else {
+            \core\notification::error($connection->message);
+        }
+    }
+
     /**
      * @param admin_settingpage $settings
      * @param $config
@@ -86,8 +106,6 @@ class client extends s3_client {
         $settings->add(new \admin_setting_configselect('tool_objectfs/do_region',
             new \lang_string('settings:do:region', 'tool_objectfs'),
             new \lang_string('settings:do:region_help', 'tool_objectfs'), '', $regionoptions));
-
-        $this->define_amazon_s3_check(false);
 
         return $settings;
     }

@@ -217,7 +217,7 @@ class client extends object_client_base {
      *
      * @return boolean true on success, false on failure.
      */
-    public function test_permissions($testdelete) {
+    public function test_permissions($testdelete = true) {
         $permissions = new \stdClass();
         $permissions->success = true;
         $permissions->messages = array();
@@ -292,27 +292,6 @@ class client extends object_client_base {
         return $details;
     }
 
-    public function define_amazon_s3_check($testdelete = true) {
-        global $SESSION;
-        $SESSION->notifications = [];
-        $connection = $this->test_connection();
-        if ($connection->success) {
-            \core\notification::success($connection->message);
-            // Check permissions if we can connect.
-            $permissions = $this->test_permissions($testdelete);
-            if ($permissions->success) {
-                \core\notification::success(key($permissions->messages), current($permissions->messages));
-            } else {
-                foreach ($permissions->messages as $message => $type) {
-                    \core\notification::warning($message, $type);
-                }
-            }
-        } else {
-            \core\notification::error($connection->message);
-        }
-    }
-
-
     /**
      * @param admin_settingpage $settings
      * @param $config
@@ -359,8 +338,6 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_configselect('tool_objectfs/s3_region',
             new \lang_string('settings:aws:region', 'tool_objectfs'),
             new \lang_string('settings:aws:region_help', 'tool_objectfs'), '', $regionoptions));
-
-        $this->define_amazon_s3_check();
 
         return $settings;
     }
