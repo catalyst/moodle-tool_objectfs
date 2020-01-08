@@ -104,9 +104,9 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
             new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), '', 10 * MINSECS));
 
-        $settings->add(new filesize('tool_objectfs/presignedminfilesize',
+        $settings->add(new admin_setting_configtext('tool_objectfs/presignedminfilesize',
             new lang_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'),
-            new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0));
+            new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
     }
 
     $client = tool_objectfs_get_client($config);
