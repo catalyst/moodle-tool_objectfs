@@ -35,7 +35,7 @@ if (!$ADMIN->locate('tool_objectfs')) {
         get_string('presignedurl_testing:page', 'tool_objectfs'),
         new moodle_url('/admin/tool/objectfs/presignedurl_tests.php')));
 
-    $ADMIN->add('tools', new admin_externalpage('tool_objectfs_object_status',
+    $ADMIN->add('reports', new admin_externalpage('tool_objectfs_object_status',
         get_string('object_status:page', 'tool_objectfs'),
         new moodle_url('/admin/tool/objectfs/object_status.php')));
 
