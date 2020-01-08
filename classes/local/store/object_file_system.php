@@ -28,12 +28,16 @@
 
 namespace tool_objectfs\local\store;
 
+use ParentIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
 require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
 require_once($CFG->libdir . '/filestorage/file_storage.php');
 
@@ -298,11 +302,13 @@ abstract class object_file_system extends \file_system_filedir {
 
         if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {
             $localpath = $this->get_local_path_from_hash($contenthash);
-
             if ($this->verify_external_object_from_hash($contenthash)) {
                 $success = unlink($localpath);
 
                 if ($success) {
+                    // Check grandparent dir for empty dirs.
+                    $path = str_replace($contenthash, '', $localpath) . '..';
+                    $this->delete_empty_folders(realpath($path));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
@@ -314,6 +320,48 @@ abstract class object_file_system extends \file_system_filedir {
                                         $contenthash,
                                         $objectsize);
         return $finallocation;
+    }
+
+    /**
+     * Recursively reads dirs from passed path and delete all empty dirs.
+     * @param string $rootpath Full path to the dir.
+     */
+    public function delete_empty_folders($rootpath) {
+        global $CFG;
+        if (!is_dir($rootpath)) {
+            return;
+        }
+        $iterator = new RecursiveDirectoryIterator($rootpath);
+        $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
+        $directories = new ParentIterator($iterator);
+        foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
+            $dirpath = $dir->getPathname();
+            if ($this->is_dir_empty($dirpath)) {
+                rmdir($dirpath);
+            }
+        }
+        // Make sure we keep the 'filedir' dir.
+        if ($CFG->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
+            rmdir($rootpath);
+        }
+    }
+
+    /**
+     * Checks if provided path is an empty dir.
+     * @param string $foldername Full path to the dir.
+     * @return bool
+     */
+    public function is_dir_empty($foldername) {
+        if ($handle = opendir($foldername)) {
+            while (false !== ($file = readdir($handle))) {
+                if ($file !== '.' && $file !== '..') {
+                    closedir($handle);
+                    return false;
+                }
+            }
+            closedir($handle);
+        }
+        return true;
     }
 
     /**
@@ -450,7 +498,6 @@ abstract class object_file_system extends \file_system_filedir {
             // Don't remove the file - it's still in use.
             return;
         }
-
         $this->delete_object_from_hash($contenthash);
     }
 
@@ -585,7 +632,11 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function delete_local_file_from_hash($contenthash) {
         $path = $this->get_local_path_from_hash($contenthash);
-        unlink($path);
+        if (unlink($path)) {
+            // Check grandparent dir for empty dirs.
+            $dirpath = str_replace($contenthash, '', $path) . '..';
+            $this->delete_empty_folders(realpath($dirpath));
+        }
     }
 
     /**
