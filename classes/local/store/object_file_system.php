@@ -324,10 +324,12 @@ abstract class object_file_system extends \file_system_filedir {
 
     /**
      * Recursively reads dirs from passed path and delete all empty dirs.
-     * @param string $rootpath Full path to the dir.
+     * @param string|null $rootpath Full path to the dir.
      */
-    public function delete_empty_folders($rootpath) {
-        global $CFG;
+    public function delete_empty_folders($rootpath = null) {
+        if (empty($rootpath)) {
+            $rootpath = $this->filedir;
+        }
         if (!is_dir($rootpath)) {
             return;
         }
@@ -341,7 +343,7 @@ abstract class object_file_system extends \file_system_filedir {
             }
         }
         // Make sure we keep the 'filedir' dir.
-        if ($CFG->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
+        if ($this->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
             rmdir($rootpath);
         }
     }
