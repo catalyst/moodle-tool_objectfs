@@ -45,7 +45,6 @@ class delete_local_empty_directories  extends \core\task\scheduled_task {
      * @throws \coding_exception
      */
     public function execute() {
-        global $CFG;
         $config = get_objectfs_config();
 
         if (!tool_objectfs_should_tasks_run()) {
@@ -53,9 +52,6 @@ class delete_local_empty_directories  extends \core\task\scheduled_task {
             return;
         }
         $filesystem = new $config->filesystem();
-        if (!isset($CFG->filedir)) {
-            $CFG->filedir = $CFG->dataroot . '/filedir';
-        }
-        $filesystem->delete_empty_folders($CFG->filedir);
+        $filesystem->delete_empty_folders();
     }
 }
