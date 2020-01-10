@@ -15,18 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Object filedir size report builder.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Gleimer Mora <gleimermora@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_objectfs\local\report;
+
+use tool_objectfs\local\store\object_file_system;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2019082603;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2019082603;      // Same as version
-$plugin->requires  = 2013111811;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+class filedir_size_report_builder extends objectfs_report_builder {
+
+    /**
+     * @return objectfs_report
+     */
+    public function build_report() {
+        $report = new objectfs_report('filedir_size');
+        $config = get_objectfs_config();
+        /** @var object_file_system $filesystem */
+        $filesystem = new $config->filesystem();
+
+        $report->add_row('total', $filesystem->get_filedir_count(), $filesystem->get_filedir_size());
+        return $report;
+    }
+}

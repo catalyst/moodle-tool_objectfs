@@ -32,6 +32,7 @@ $string['delete_local_empty_directories_task'] = 'Object file system delete loca
 $string['pull_objects_from_storage_task'] = 'Object file system download objects task';
 $string['recover_error_objects_task'] = 'Object error recovery task';
 $string['check_objects_location_task'] = 'Object file system check objects location task';
+$string['check_filedir_size_task'] = 'Object file system checks the size of the filedir directory task';
 
 $string['generate_status_report_task'] = 'Object status report generator task';
 $string['not_enabled'] = 'The object file system background tasks are not enabled. No objects will move location until you do.';
@@ -52,6 +53,9 @@ $string['object_status:location:local'] = 'Only in filedir';
 $string['object_status:location:external'] = 'Only in external storage';
 $string['object_status:location:unknown'] = 'Unknown object location';
 $string['object_status:location:total'] = 'Total';
+
+$string['object_status:filedir'] = 'filedir';
+$string['object_status:filedir:count'] = 'File counting';
 
 
 $string['object_status:last_run'] = 'This report was generated on {$a}';

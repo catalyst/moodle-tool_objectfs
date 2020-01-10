@@ -41,6 +41,30 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    /**
+     * @param objectfs_report $report
+     * @return string
+     * @throws coding_exception
+     */
+    private function render_filedir_size_report(objectfs_report $report) {
+        $rows = $report->get_rows();
+        if (empty($rows)) {
+            return '';
+        }
+        $table = new html_table();
+        $table->head = [
+            get_string('object_status:filedir', 'tool_objectfs'),
+            get_string('object_status:filedir:count', 'tool_objectfs'),
+            get_string('object_status:size', 'tool_objectfs'),
+        ];
+        foreach ($rows as $row) {
+            $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
+            $table->data[] = [$filelocation, $row->objectcount, $row->objectsum];
+        }
+        $this->augment_barchart($table);
+        return html_writer::table($table);
+    }
+
     private function render_location_report($report) {
         $rows = $report->get_rows();
 
