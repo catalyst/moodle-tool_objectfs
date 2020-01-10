@@ -247,8 +247,15 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      * @param array $files Files to be created.
      * @param array $expectedparentreadable Indicates whether a dir will remain after calling 'delete_empty_folders'.
      * @param bool $expectedgrandparentpathreadable If grandparent dir exists after calling 'delete_empty_folders'.
+     * @param int $expecteddelectedcount expected amount of deleted directories.
      */
-    public function test_delete_empty_folders($dirs, $files, $expectedparentreadable, $expectedgrandparentpathreadable, $expecteddelectedcount) {
+    public function test_delete_empty_folders(
+        $dirs,
+        $files,
+        $expectedparentreadable,
+        $expectedgrandparentpathreadable,
+        $expecteddelectedcount
+    ) {
         global $CFG;
         $testdir = $CFG->dataroot . '/filedir/test';
         foreach ($dirs as $key => $dir) {
