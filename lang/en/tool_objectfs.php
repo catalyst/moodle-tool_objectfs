@@ -171,3 +171,4 @@ $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
 
 $string['settings:error:numeric'] = 'Please enter a number which is greater than or equal 0.';
+$string['total_deleted_dirs'] = 'Total number of deleted directories: ';

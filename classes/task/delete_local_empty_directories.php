@@ -52,6 +52,8 @@ class delete_local_empty_directories  extends \core\task\scheduled_task {
             return;
         }
         $filesystem = new $config->filesystem();
-        $filesystem->delete_empty_folders();
+        cron_trace_time_and_memory();
+        $deletedfiles = $filesystem->delete_empty_folders();
+        mtrace('... ' . get_string('total_deleted_dirs', 'tool_objectfs') . $deletedfiles);
     }
 }

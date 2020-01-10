@@ -212,15 +212,13 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $differentfilepath = __DIR__ . '/fixtures/test.txt';
         copy($differentfilepath, $externalpath);
-        // Get the grandparent path.
-        $grandparentpath = realpath(str_replace($contenthash, '', $localpath) . '..');
 
         $location = $this->filesystem->delete_object_from_local_by_hash($contenthash);
 
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse(is_readable($localpath));
         // If grandparent is empty it should be removed.
-        $this->assertFalse(is_readable($grandparentpath));
+        $this->assertFalse(is_readable(dirname(dirname($localpath))));
     }
 
     /**
