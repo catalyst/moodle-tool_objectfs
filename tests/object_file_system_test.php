@@ -227,16 +227,16 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function delete_empty_folders_provider() {
         return [
             [
-                ['/d1', '/d2'], ['/file1', '/file2'], [true, true],  true,
+                ['/d1', '/d2'], ['/file1', '/file2'], [true, true],  true, 0,
             ],
             [
-                ['/d1', '/d2'], ['/file1'], [true, false],  true,
+                ['/d1', '/d2'], ['/file1'], [true, false],  true, 1,
             ],
             [
-                ['/d1', '/d2'], ['', '/file1'], [false, true],  true,
+                ['/d1', '/d2'], ['', '/file1'], [false, true],  true, 1,
             ],
             [
-                ['/d1', '/d2'], [], [false, false],  false,
+                ['/d1', '/d2'], [], [false, false],  false, 3,
             ],
         ];
     }
@@ -248,7 +248,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      * @param array $expectedparentreadable Indicates whether a dir will remain after calling 'delete_empty_folders'.
      * @param bool $expectedgrandparentpathreadable If grandparent dir exists after calling 'delete_empty_folders'.
      */
-    public function test_delete_empty_folders($dirs, $files, $expectedparentreadable, $expectedgrandparentpathreadable) {
+    public function test_delete_empty_folders($dirs, $files, $expectedparentreadable, $expectedgrandparentpathreadable, $expecteddelectedcount) {
         global $CFG;
         $testdir = $CFG->dataroot . '/filedir/test';
         foreach ($dirs as $key => $dir) {
@@ -259,11 +259,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                 touch($fullpath . $file);
             }
         }
-        $this->filesystem->delete_empty_folders();
+        $deleteddirs = $this->filesystem->delete_empty_folders();
         foreach ($dirs as $key => $dir) {
              $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
         }
         $this->assertEquals($expectedgrandparentpathreadable, is_readable($testdir));
+        $this->assertEquals($expecteddelectedcount, $deleteddirs);
     }
 
     public function test_readfile_if_object_is_local() {
