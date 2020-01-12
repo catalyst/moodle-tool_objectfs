@@ -33,6 +33,7 @@ class filedir_size_report_builder extends objectfs_report_builder {
 
     /**
      * @return objectfs_report
+     * @throws \dml_exception
      */
     public function build_report() {
         $report = new objectfs_report('filedir_size');
@@ -40,7 +41,7 @@ class filedir_size_report_builder extends objectfs_report_builder {
         /** @var object_file_system $filesystem */
         $filesystem = new $config->filesystem();
 
-        $report->add_row('total', $filesystem->get_filedir_count(), $filesystem->get_filedir_size());
+        $report->add_row('filedir', $filesystem->get_filedir_count(), $filesystem->get_filedir_size());
         return $report;
     }
 }

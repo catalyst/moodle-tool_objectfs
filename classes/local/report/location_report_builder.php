@@ -29,24 +29,27 @@ defined('MOODLE_INTERNAL') || die();
 
 class location_report_builder extends objectfs_report_builder {
 
+    /**
+     * @return objectfs_report
+     * @throws \dml_exception
+     */
     public function build_report() {
         global $DB;
         $report = new objectfs_report('location');
-
-        $locations = array(OBJECT_LOCATION_LOCAL,
-                           OBJECT_LOCATION_DUPLICATED,
-                           OBJECT_LOCATION_EXTERNAL,
-                           OBJECT_LOCATION_ERROR);
+        $locations = [
+            OBJECT_LOCATION_LOCAL,
+            OBJECT_LOCATION_DUPLICATED,
+            OBJECT_LOCATION_EXTERNAL,
+            OBJECT_LOCATION_ERROR
+        ];
 
         $totalcount = 0;
         $totalsum = 0;
 
         foreach ($locations as $location) {
-
+            $localsql = '';
             if ($location == OBJECT_LOCATION_LOCAL) {
                 $localsql = ' or o.location IS NULL';
-            } else {
-                $localsql = '';
             }
 
             $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) AS objectcount,
@@ -69,8 +72,36 @@ class location_report_builder extends objectfs_report_builder {
         }
 
         $report->add_row('total', $totalcount, $totalsum);
-
+        $this->add_filedir_size_stats($report, $totalcount, $totalsum);
         return $report;
     }
 
+    /**
+     * Update location report with the filedir size stats.
+     * @param objectfs_report $report
+     * @param int $totalcount
+     * @param int $totalsum
+     * @throws \dml_exception
+     */
+    private function add_filedir_size_stats(objectfs_report &$report, $totalcount, $totalsum) {
+        global $DB;
+        $filedirrows = $DB->get_records('tool_objectfs_reports', ['reporttype' => 'filedir_size']);
+        $rowcount = 0;
+        $rowsum = 0;
+        $key = 'deltaa';
+        if (!empty($filedirrows)) {
+            $row = end($filedirrows);
+            $rowcount = $row->objectcount;
+            $rowsum = $row->objectsum;
+        }
+        $report->add_row('filedir', $rowcount, $rowsum);
+        $deltacount = $rowcount - $totalcount;
+        $deltasize = $rowsum - $totalsum;
+        if ($totalsum > $rowsum) {
+            $key = 'deltab';
+            $deltacount = $totalcount - $rowcount;
+            $deltasize = $totalsum - $rowsum;
+        }
+        $report->add_row($key, $deltacount, $deltasize);
+    }
 }

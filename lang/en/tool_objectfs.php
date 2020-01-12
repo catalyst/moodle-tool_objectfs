@@ -49,13 +49,16 @@ $string['filename:missingfiles'] = 'missingfiles';
 
 $string['object_status:location:error'] = 'Missing from filedir and external storage (<a href="/admin/tool/objectfs/missing_files.php">view files</a>)';
 $string['object_status:location:duplicated'] = 'Duplicated in filedir and external storage';
-$string['object_status:location:local'] = 'Only in filedir';
+$string['object_status:location:local'] = 'Marked as only in filedir';
 $string['object_status:location:external'] = 'Only in external storage';
 $string['object_status:location:unknown'] = 'Unknown object location';
 $string['object_status:location:total'] = 'Total';
 
-$string['object_status:filedir'] = 'filedir';
+$string['object_status:filedir'] = 'Filedir';
+$string['object_status:delta:a'] = 'Delta (filedir - objectfs)';
+$string['object_status:delta:b'] = 'Delta (objectfs - filedir)';
 $string['object_status:filedir:count'] = 'File counting';
+$string['object_status:filedir:update'] = 'Update stats';
 
 
 $string['object_status:last_run'] = 'This report was generated on {$a}';

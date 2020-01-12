@@ -812,7 +812,11 @@ abstract class object_file_system extends \file_system_filedir {
      * @return float|int
      */
     public function get_filedir_size() {
-        $output = $this->exec_command('/usr/bin/du -sk ' . escapeshellarg($this->filedir) . ' | cut -f1');
+        global $CFG;
+        if (empty($CFG->pathtodu)) {
+            return 0;
+        }
+        $output = $this->exec_command("{$CFG->pathtodu} -sk " . escapeshellarg($this->filedir) . ' | cut -f1');
         // Convert kilobytes to bytes.
         return $output * 1000;
     }

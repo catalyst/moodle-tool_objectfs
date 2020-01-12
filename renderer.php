@@ -41,30 +41,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    /**
-     * @param objectfs_report $report
-     * @return string
-     * @throws coding_exception
-     */
-    private function render_filedir_size_report(objectfs_report $report) {
-        $rows = $report->get_rows();
-        if (empty($rows)) {
-            return '';
-        }
-        $table = new html_table();
-        $table->head = [
-            get_string('object_status:filedir', 'tool_objectfs'),
-            get_string('object_status:filedir:count', 'tool_objectfs'),
-            get_string('object_status:size', 'tool_objectfs'),
-        ];
-        foreach ($rows as $row) {
-            $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
-            $table->data[] = [$filelocation, $row->objectcount, $row->objectsum];
-        }
-        $this->augment_barchart($table);
-        return html_writer::table($table);
-    }
-
     private function render_location_report($report) {
         $rows = $report->get_rows();
 
@@ -80,6 +56,9 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         foreach ($rows as $row) {
             $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
+            if ('filedir' === $row->datakey) {
+                $filelocation .= $this->get_check_file_size_task_update_stats_link();
+            }
             $table->data[] = array($filelocation, $row->objectcount, $row->objectsum);
         }
 
@@ -90,22 +69,50 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    /**
+     * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    private function get_check_file_size_task_update_stats_link() {
+        $classname = 'tool_objectfs\task\check_filedir_size';
+        $runnabletasks = tool_task\run_from_cli::is_runnable();
+        $task = \core\task\manager::get_scheduled_task($classname);
+        if (!$task->get_disabled() && get_config('tool_task', 'enablerunnow') && $runnabletasks) {
+            $link = html_writer::link(
+                new moodle_url(
+                    '/admin/tool/task/schedule_task.php',
+                    ['task' => 'tool_objectfs\task\check_filedir_size']
+                ),
+                get_string('object_status:filedir:update', 'tool_objectfs'),
+                ['style' => 'font-size:0.75rem;']
+            );
+            return " ($link)";
+        }
+        return '';
+    }
+
+    /**
+     * @param int|string $filelocation
+     * @return string
+     * @throws coding_exception
+     */
     private function get_file_location_string($filelocation) {
-        if ($filelocation == 'total') {
-            return get_string('object_status:location:total', 'tool_objectfs');
+        $locationstringmap = [
+            'total' => 'object_status:location:total',
+            'filedir' => 'object_status:filedir',
+            'deltaa' => 'object_status:delta:a',
+            'deltab' => 'object_status:delta:b',
+            OBJECT_LOCATION_ERROR => 'object_status:location:error',
+            OBJECT_LOCATION_LOCAL => 'object_status:location:local',
+            OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
+            OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
+        ];
+        if (isset($locationstringmap[$filelocation])) {
+            return get_string($locationstringmap[$filelocation], 'tool_objectfs');
         }
-        switch ($filelocation){
-            case OBJECT_LOCATION_ERROR:
-                return get_string('object_status:location:error', 'tool_objectfs');
-            case OBJECT_LOCATION_LOCAL:
-                return get_string('object_status:location:local', 'tool_objectfs');
-            case OBJECT_LOCATION_DUPLICATED:
-                return get_string('object_status:location:duplicated', 'tool_objectfs');
-            case OBJECT_LOCATION_EXTERNAL:
-                return get_string('object_status:location:external', 'tool_objectfs');
-            default:
-                return get_string('object_status:location:unknown', 'tool_objectfs');
-        }
+        return get_string('object_status:location:unknown', 'tool_objectfs');
     }
 
     private function render_log_size_report($report) {
