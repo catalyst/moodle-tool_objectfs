@@ -217,7 +217,7 @@ class client extends object_client_base {
      *
      * @return boolean true on success, false on failure.
      */
-    public function test_permissions($testdelete = true) {
+    public function test_permissions($testdelete) {
         $permissions = new \stdClass();
         $permissions->success = true;
         $permissions->messages = array();

@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 abstract class object_client_base implements object_client {
     protected $autoloader;
     protected $expirationtime;
+    protected $testdelete = true;
     public $presignedminfilesize;
     public $enablepresignedurls;
 
@@ -105,7 +106,7 @@ abstract class object_client_base implements object_client {
         if ($connection->success) {
             \core\notification::success($connection->message);
             // Check permissions if we can connect.
-            $permissions = $client->test_permissions();
+            $permissions = $client->test_permissions($this->testdelete);
             if ($permissions->success) {
                 \core\notification::success(key($permissions->messages), current($permissions->messages));
             } else {

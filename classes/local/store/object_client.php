@@ -40,6 +40,7 @@ interface object_client {
     public function verify_object($contenthash, $localpath);
     public function generate_presigned_url($contenthash, $headers);
     public function support_presigned_urls();
+    public function test_permissions($testdelete);
 }
 
 

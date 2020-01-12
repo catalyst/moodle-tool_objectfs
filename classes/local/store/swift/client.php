@@ -204,7 +204,7 @@ class client extends object_client_base {
         return $connection;
     }
 
-    public function test_permissions() {
+    public function test_permissions($testdelete) {
         $permissions = new \stdClass();
         $permissions->success = true;
         $permissions->messages = array();

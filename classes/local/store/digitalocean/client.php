@@ -34,6 +34,7 @@ class client extends s3_client {
     public function __construct($config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+        $this->testdelete = false;
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
@@ -51,26 +52,6 @@ class client extends s3_client {
             'endpoint' => 'https://' . $config->do_region . '.digitaloceanspaces.com',
             'version' => AWS_API_VERSION
         ));
-    }
-
-    public function define_client_check($client) {
-        global $SESSION;
-        $SESSION->notifications = [];
-        $connection = $this->test_connection();
-        if ($connection->success) {
-            \core\notification::success($connection->message);
-            // Check permissions if we can connect.
-            $permissions = $this->test_permissions(false);
-            if ($permissions->success) {
-                \core\notification::success(key($permissions->messages), current($permissions->messages));
-            } else {
-                foreach ($permissions->messages as $message => $type) {
-                    \core\notification::warning($message, $type);
-                }
-            }
-        } else {
-            \core\notification::error($connection->message);
-        }
     }
 
     /**
