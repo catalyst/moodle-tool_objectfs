@@ -47,7 +47,8 @@ class location_report_builder extends objectfs_report_builder {
 
         $totalcount = 0;
         $totalsum = 0;
-
+        $filedircount = 0;
+        $filedirsum = 0;
         foreach ($locations as $location) {
             $localsql = '';
             if ($location == OBJECT_LOCATION_LOCAL) {
@@ -69,12 +70,16 @@ class location_report_builder extends objectfs_report_builder {
 
             $report->add_row($result->datakey, $result->objectcount, $result->objectsum);
 
+            if (in_array($location, [OBJECT_LOCATION_LOCAL, OBJECT_LOCATION_DUPLICATED])) {
+                $filedircount += $result->objectcount;
+                $filedirsum += $result->objectsum;
+            }
             $totalcount += $result->objectcount;
             $totalsum += $result->objectsum;
         }
 
         $report->add_row('total', $totalcount, $totalsum);
-        $this->add_filedir_size_stats($report, $totalcount, $totalsum);
+        $this->add_filedir_size_stats($report, $filedircount, $filedirsum);
         return $report;
     }
 
