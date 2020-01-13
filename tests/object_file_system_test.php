@@ -227,15 +227,40 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function delete_empty_folders_provider() {
         return [
             [
-                ['/d1', '/d2'], ['/file1', '/file2'], [true, true],  true, 0,
+                /*
+                    /filedir/test/d1/file1
+                    /filedir/test/d2/file2
+                    deleted: 0 dirs
+                */
+                ['/d1', '/d2'], ['file1', 'file2'], [true, true],  true, 0,
             ],
             [
-                ['/d1', '/d2'], ['/file1'], [true, false],  true, 1,
+                /*
+                    /filedir/test/d1/file1
+                    /filedir/test/d2/
+                    deleted: 1dirs
+                        - /filedir/test/d2/
+                */
+                ['/d1', '/d2'], ['file1'], [true, false],  true, 1,
             ],
             [
-                ['/d1', '/d2'], ['', '/file1'], [false, true],  true, 1,
+                /*
+                    /filedir/test/d1/
+                    /filedir/test/d2/file2
+                    deleted: 1 dirs
+                        - /filedir/test/d1/
+                */
+                ['/d1', '/d2'], ['', 'file1'], [false, true],  true, 1,
             ],
             [
+                /*
+                    /filedir/test/d1/
+                    /filedir/test/d2/
+                    deleted: 3 dirs
+                        - /filedir/test/d1/
+                        - /filedir/test/d2/
+                        - /filedir/test/
+                */
                 ['/d1', '/d2'], [], [false, false],  false, 3,
             ],
         ];
@@ -263,7 +288,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
             mkdir($fullpath, 0777, true);
             $file = !empty($files[$key]) ? $files[$key] : '';
             if ($file !== '') {
-                touch($fullpath . $file);
+                touch($fullpath . '/' . $file);
             }
         }
         $deleteddirs = $this->filesystem->delete_empty_folders();
