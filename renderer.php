@@ -56,9 +56,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         foreach ($rows as $row) {
             $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
-            if ('filedir' === $row->datakey) {
-                $filelocation .= $this->get_check_file_size_task_update_stats_link();
-            }
             $table->data[] = array($filelocation, $row->objectcount, $row->objectsum);
         }
 
@@ -75,18 +72,18 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @throws dml_exception
      * @throws moodle_exception
      */
-    private function get_check_file_size_task_update_stats_link() {
-        $classname = 'tool_objectfs\task\check_filedir_size';
+    private function get_generate_status_report_update_stats_link() {
+        $classname = '\tool_objectfs\task\generate_status_report';
         $runnabletasks = tool_task\run_from_cli::is_runnable();
         $task = \core\task\manager::get_scheduled_task($classname);
         if (!$task->get_disabled() && get_config('tool_task', 'enablerunnow') && $runnabletasks) {
+
             $link = html_writer::link(
                 new moodle_url(
                     '/admin/tool/task/schedule_task.php',
-                    ['task' => 'tool_objectfs\task\check_filedir_size']
+                    ['task' => '\tool_objectfs\task\generate_status_report']
                 ),
-                get_string('object_status:filedir:update', 'tool_objectfs'),
-                ['style' => 'font-size:0.75rem;']
+                '<small>' . get_string('object_status:filedir:update', 'tool_objectfs') . '</small>'
             );
             return " ($link)";
         }
@@ -220,6 +217,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         } else {
             $lastruntext = get_string('object_status:never_run', 'tool_objectfs');
         }
+        $lastruntext .= $this->get_generate_status_report_update_stats_link();
         $output .= $this->box($lastruntext);
 
         // Adds bar chart styling for sizes and counts.

@@ -61,7 +61,6 @@ class tasks_testcase extends tool_objectfs_testcase {
             'push_objects_to_storage',
             'recover_error_objects',
             'check_objects_location',
-            'check_filedir_size',
         ];
 
         foreach ($scheduledtasknames as $taskname) {

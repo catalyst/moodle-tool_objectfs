@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\local\report;
 
+use tool_objectfs\local\store\object_file_system;
+
 defined('MOODLE_INTERNAL') || die();
 
 class location_report_builder extends objectfs_report_builder {
@@ -81,19 +83,15 @@ class location_report_builder extends objectfs_report_builder {
      * @param objectfs_report $report
      * @param int $totalcount
      * @param int $totalsum
-     * @throws \dml_exception
      */
     private function add_filedir_size_stats(objectfs_report &$report, $totalcount, $totalsum) {
-        global $DB;
-        $filedirrows = $DB->get_records('tool_objectfs_reports', ['reporttype' => 'filedir_size']);
-        $rowcount = 0;
-        $rowsum = 0;
+        $config = get_objectfs_config();
+        /** @var object_file_system $filesystem */
+        $filesystem = new $config->filesystem();
+
+        $rowcount = $filesystem->get_filedir_count();
+        $rowsum = $filesystem->get_filedir_size();
         $key = 'deltaa';
-        if (!empty($filedirrows)) {
-            $row = end($filedirrows);
-            $rowcount = $row->objectcount;
-            $rowsum = $row->objectsum;
-        }
         $report->add_row('filedir', $rowcount, $rowsum);
         $deltacount = $rowcount - $totalcount;
         $deltasize = $rowsum - $totalsum;
