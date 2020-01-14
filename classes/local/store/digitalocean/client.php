@@ -34,6 +34,7 @@ class client extends s3_client {
     public function __construct($config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+        $this->testdelete = false;
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
@@ -53,10 +54,12 @@ class client extends s3_client {
         ));
     }
 
-    public function define_client_section($mform, $config) {
-
-        $mform->addElement('header', 'doheader', get_string('settings:do:header', 'tool_objectfs'));
-        $mform->setExpanded('doheader');
+    /**
+     * @param admin_settingpage $settings
+     * @param $config
+     * @return admin_settingpage
+     */
+    public function define_client_section($settings, $config) {
 
         $regionoptions = array(
             'sfo2'      => 'sfo2 (San Fransisco)',
@@ -66,24 +69,26 @@ class client extends s3_client {
             'fra1'      => 'fra1 (Frankfurt)',
         );
 
-        $mform->addElement('text', 'do_key', get_string('settings:do:key', 'tool_objectfs'));
-        $mform->addHelpButton('do_key', 'settings:do:key', 'tool_objectfs');
-        $mform->setType("do_key", PARAM_TEXT);
+        $settings->add(new \admin_setting_heading('tool_objectfs/do',
+            new \lang_string('settings:do:header', 'tool_objectfs'), ''));
 
-        $mform->addElement('passwordunmask', 'do_secret', get_string('settings:do:secret', 'tool_objectfs'), array('size' => 40));
-        $mform->addHelpButton('do_secret', 'settings:do:secret', 'tool_objectfs');
-        $mform->setType("do_secret", PARAM_TEXT);
+        $settings->add(new \admin_setting_configtext('tool_objectfs/do_key',
+            new \lang_string('settings:do:key', 'tool_objectfs'),
+            new \lang_string('settings:do:key_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('text', 'do_space', get_string('settings:do:space', 'tool_objectfs'));
-        $mform->addHelpButton('do_space', 'settings:do:space', 'tool_objectfs');
-        $mform->setType("do_space", PARAM_TEXT);
+        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/do_secret',
+            new \lang_string('settings:do:secret', 'tool_objectfs'),
+            new \lang_string('settings:do:secret_help', 'tool_objectfs'), ''));
 
-        $mform->addElement('select', 'do_region', get_string('settings:do:region', 'tool_objectfs'), $regionoptions);
-        $mform->addHelpButton('do_region', 'settings:do:region', 'tool_objectfs');
+        $settings->add(new \admin_setting_configtext('tool_objectfs/do_space',
+            new \lang_string('settings:do:space', 'tool_objectfs'),
+            new \lang_string('settings:do:space_help', 'tool_objectfs'), ''));
 
-        $mform = $this->define_amazon_s3_check($mform, false);
+        $settings->add(new \admin_setting_configselect('tool_objectfs/do_region',
+            new \lang_string('settings:do:region', 'tool_objectfs'),
+            new \lang_string('settings:do:region_help', 'tool_objectfs'), '', $regionoptions));
 
-        return $mform;
+        return $settings;
     }
 
 }

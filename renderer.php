@@ -66,22 +66,50 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    /**
+     * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    private function get_generate_status_report_update_stats_link() {
+        $classname = '\tool_objectfs\task\generate_status_report';
+        $runnabletasks = tool_task\run_from_cli::is_runnable();
+        $task = \core\task\manager::get_scheduled_task($classname);
+        if (!$task->get_disabled() && get_config('tool_task', 'enablerunnow') && $runnabletasks) {
+
+            $link = html_writer::link(
+                new moodle_url(
+                    '/admin/tool/task/schedule_task.php',
+                    ['task' => '\tool_objectfs\task\generate_status_report']
+                ),
+                '<small>' . get_string('object_status:filedir:update', 'tool_objectfs') . '</small>'
+            );
+            return " ($link)";
+        }
+        return '';
+    }
+
+    /**
+     * @param int|string $filelocation
+     * @return string
+     * @throws coding_exception
+     */
     private function get_file_location_string($filelocation) {
-        if ($filelocation == 'total') {
-            return get_string('object_status:location:total', 'tool_objectfs');
+        $locationstringmap = [
+            'total' => 'object_status:location:total',
+            'filedir' => 'object_status:filedir',
+            'deltaa' => 'object_status:delta:a',
+            'deltab' => 'object_status:delta:b',
+            OBJECT_LOCATION_ERROR => 'object_status:location:error',
+            OBJECT_LOCATION_LOCAL => 'object_status:location:local',
+            OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
+            OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
+        ];
+        if (isset($locationstringmap[$filelocation])) {
+            return get_string($locationstringmap[$filelocation], 'tool_objectfs');
         }
-        switch ($filelocation){
-            case OBJECT_LOCATION_ERROR:
-                return get_string('object_status:location:error', 'tool_objectfs');
-            case OBJECT_LOCATION_LOCAL:
-                return get_string('object_status:location:local', 'tool_objectfs');
-            case OBJECT_LOCATION_DUPLICATED:
-                return get_string('object_status:location:duplicated', 'tool_objectfs');
-            case OBJECT_LOCATION_EXTERNAL:
-                return get_string('object_status:location:external', 'tool_objectfs');
-            default:
-                return get_string('object_status:location:unknown', 'tool_objectfs');
-        }
+        return get_string('object_status:location:unknown', 'tool_objectfs');
     }
 
     private function render_log_size_report($report) {
@@ -174,7 +202,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     public function object_status_page_intro() {
         $output = '';
 
-        $url = new \moodle_url('/admin/tool/objectfs/index.php');
+        $url = new \moodle_url('/admin/settings.php?section=tool_objectfs');
         $urltext = get_string('settings', 'tool_objectfs');
         $output .= html_writer::tag('div', html_writer::link($url , $urltext));
 
@@ -189,6 +217,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         } else {
             $lastruntext = get_string('object_status:never_run', 'tool_objectfs');
         }
+        $lastruntext .= $this->get_generate_status_report_update_stats_link();
         $output .= $this->box($lastruntext);
 
         // Adds bar chart styling for sizes and counts.

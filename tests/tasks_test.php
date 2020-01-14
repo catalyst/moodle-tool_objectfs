@@ -53,13 +53,15 @@ class tasks_testcase extends tool_objectfs_testcase {
         $config->filesystem = '\\tool_objectfs\\tests\\test_file_system';
         set_objectfs_config($config);
 
-        $scheduledtasknames = array('delete_local_objects',
-                                    'delete_local_empty_directories',
-                                    'generate_status_report',
-                                    'pull_objects_from_storage',
-                                    'push_objects_to_storage',
-                                    'recover_error_objects',
-                                    'check_objects_location');
+        $scheduledtasknames = [
+            'delete_local_objects',
+            'delete_local_empty_directories',
+            'generate_status_report',
+            'pull_objects_from_storage',
+            'push_objects_to_storage',
+            'recover_error_objects',
+            'check_objects_location',
+        ];
 
         foreach ($scheduledtasknames as $taskname) {
             $task = \core\task\manager::get_scheduled_task('\\tool_objectfs\\task\\' . $taskname);

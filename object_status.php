@@ -25,13 +25,12 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/lib.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot . '/lib/adminlib.php');
+
+admin_externalpage_setup('tool_objectfs_object_status');
 
 use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\report\objectfs_report_builder;
-
-
-admin_externalpage_setup('tool_objectfs');
 
 $output = $PAGE->get_renderer('tool_objectfs');
 
@@ -50,6 +49,3 @@ foreach ($reporttypes as $reporttype) {
 }
 
 echo $output->footer();
-
-
-

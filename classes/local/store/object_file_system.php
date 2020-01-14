@@ -811,4 +811,37 @@ abstract class object_file_system extends \file_system_filedir {
 
         return $result;
     }
+
+    /**
+     * Returns the total size of the filedir directory in bytes.
+     * @return float|int
+     */
+    public function get_filedir_size() {
+        global $CFG;
+        if (empty($CFG->pathtodu)) {
+            return 0;
+        }
+        $output = $this->exec_command("{$CFG->pathtodu} -sk " . escapeshellarg($this->filedir) . ' | cut -f1');
+        // Convert kilobytes to bytes.
+        return $output * 1000;
+    }
+
+    /**
+     * Returns the number of files in the filedir directory.
+     * @return int
+     */
+    public function get_filedir_count() {
+        return $this->exec_command('/usr/bin/find  ' . escapeshellarg($this->filedir) . ' -type f | grep -c /');
+    }
+
+    /**
+     * @param string $command
+     * @return int
+     */
+    private function exec_command($command) {
+        $io = popen($command, 'r');
+        $output = fgets($io, 4096);
+        pclose($io);
+        return (int)$output;
+    }
 }

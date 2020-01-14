@@ -93,7 +93,7 @@ class test_client extends object_client_base {
         return true;
     }
 
-    public function test_permissions() {
+    public function test_permissions($testdelete) {
         return true;
     }
 
