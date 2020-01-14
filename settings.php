@@ -29,6 +29,10 @@ require_once(__DIR__ . '/lib.php');
 
 global $PAGE, $CFG;
 
+if (!$hassiteconfig) {
+    return;
+}
+
 if (!$ADMIN->locate('tool_objectfs')) {
 
     $ADMIN->add('tools', new admin_externalpage('tool_objectfs_presignedurl_testing',
