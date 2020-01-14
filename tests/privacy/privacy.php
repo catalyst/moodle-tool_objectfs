@@ -70,7 +70,7 @@ foreach ($list->good as $component) {
     if (check_implements($component, \core_privacy\local\metadata\provider::class)) {
         $collection = new \core_privacy\local\metadata\collection($component);
         $classname::get_metadata($collection);
-        $count = count($collection);
+        $count = count($collection->get_collection());
         if (empty($count)) {
             echo "!!! No metadata found!!! This an error.\n";
             exit(1);

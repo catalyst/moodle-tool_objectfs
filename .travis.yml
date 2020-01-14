@@ -12,6 +12,7 @@ php:
   - 5.6
   - 7.0
   - 7.1
+  - 7.2
 
 dist: trusty
 
@@ -21,29 +22,33 @@ addons:
 env:
   - DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
   - DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=mysqli MOODLE_BRANCH=MOODLE_28_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=mysqli MOODLE_BRANCH=MOODLE_29_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
   - DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
   - DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=pgsql MOODLE_BRANCH=MOODLE_32_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=mysqli MOODLE_BRANCH=MOODLE_32_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=pgsql MOODLE_BRANCH=MOODLE_33_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE
-  - DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
   - DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
   - DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
   - DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
   - DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
   - DB=pgsql MOODLE_BRANCH=master
   - DB=mysqli MOODLE_BRANCH=master
 
 matrix:
   exclude:
+    - php: 7.2
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+    - php: 7.2
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+    - php: 7.2
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+    - php: 7.2
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+    - php: 7.1
+      env: DB=pgsql MOODLE_BRANCH=master
+    - php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=master
     - php: 7.1
       env: DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
     - php: 7.1
@@ -52,34 +57,18 @@ matrix:
       env: DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
     - php: 7.1
       env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_28_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_29_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
     - php: 7.0
       env: DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
     - php: 7.0
       env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
     - php: 7.0
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
     - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_28_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
     - php: 7.0
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
     - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_29_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.0
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
     - php: 7.0
       env: DB=pgsql MOODLE_BRANCH=master
     - php: 7.0
@@ -93,6 +82,14 @@ matrix:
     - php: 5.6
       env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
     - php: 5.6
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 5.6
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 5.6
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 5.6
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 5.6
       env: DB=pgsql MOODLE_BRANCH=master
     - php: 5.6
       env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
@@ -103,6 +100,10 @@ matrix:
 
 before_install:
   - export MOODLE_VERSION=$(echo "$MOODLE_BRANCH" | cut -d'_' -f 2)
+  - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] && [ $DB == "pgsql" ] && [[ "$MOODLE_VERSION" -gt 38 || "$MOODLE_VERSION" == "master" ]] ; then
+      sudo /etc/init.d/postgresql stop;
+      sudo /etc/init.d/postgresql start 9.5;
+    fi
   - if [ "$MOODLE_VERSION" = "master" ] || [ "$MOODLE_VERSION" -ge 32 ]; then export CI=2; else export CI=1; fi
   - echo $CI
   - phpenv config-rm xdebug.ini
