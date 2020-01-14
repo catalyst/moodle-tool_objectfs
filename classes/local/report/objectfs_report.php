@@ -28,14 +28,25 @@ namespace tool_objectfs\local\report;
 defined('MOODLE_INTERNAL') || die();
 
 class objectfs_report implements \renderable {
-    protected $reporttype;
-    protected $rows;
 
+    /** @var string $reporttype */
+    protected $reporttype = '';
+
+    /** @var array $rows */
+    protected $rows = [];
+
+    /**
+     * @param string $reporttype
+     */
     public function __construct($reporttype) {
         $this->reporttype = $reporttype;
-        $rows = array();
     }
 
+    /**
+     * @param string $datakey
+     * @param int $objectcount
+     * @param int $objectsum
+     */
     public function add_row($datakey, $objectcount, $objectsum) {
         $row = new \stdClass();
         $row->datakey = $datakey;
@@ -44,20 +55,33 @@ class objectfs_report implements \renderable {
         $this->rows[] = $row;
     }
 
-    public function add_rows($rows) {
+    /**
+     * @param array $rows
+     */
+    public function add_rows(array $rows) {
         foreach ($rows as $row) {
             $this->add_row($row->datakey, $row->objectcount, $row->objectsum);
         }
     }
 
+    /**
+     * @return array
+     */
     public function get_rows() {
         return $this->rows;
     }
 
+    /**
+     * @return string
+     */
     public function get_report_type() {
         return $this->reporttype;
     }
 
+    /**
+     * @return mixed
+     * @throws \dml_exception
+     */
     public static function get_last_generate_status_report_runtime() {
         global $DB, $CFG;
 
@@ -83,11 +107,14 @@ class objectfs_report implements \renderable {
         }
     }
 
+    /**
+     * @return array
+     */
     public static function get_report_types() {
-        $reporttypes = array('location',
-                              'log_size',
-                              'mime_type');
-
-        return $reporttypes;
+        return [
+            'location',
+            'log_size',
+            'mime_type',
+        ];
     }
 }
