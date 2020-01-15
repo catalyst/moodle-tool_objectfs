@@ -307,8 +307,7 @@ abstract class object_file_system extends \file_system_filedir {
 
                 if ($success) {
                     // Check grandparent dir for empty dirs.
-                    $path = str_replace($contenthash, '', $localpath) . '..';
-                    $this->delete_empty_folders(realpath($path));
+                    $this->delete_empty_folders(dirname(dirname($localpath)));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
@@ -325,27 +324,34 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * Recursively reads dirs from passed path and delete all empty dirs.
      * @param string|null $rootpath Full path to the dir.
+     * @return int
      */
     public function delete_empty_folders($rootpath = null) {
         if (empty($rootpath)) {
             $rootpath = $this->filedir;
         }
         if (!is_dir($rootpath)) {
-            return;
+            return 0;
         }
+        $deletedircount = 0;
         $iterator = new RecursiveDirectoryIterator($rootpath);
         $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
         $directories = new ParentIterator($iterator);
         foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
             $dirpath = $dir->getPathname();
             if ($this->is_dir_empty($dirpath)) {
-                rmdir($dirpath);
+                if (rmdir($dirpath)) {
+                    $deletedircount++;
+                }
             }
         }
         // Make sure we keep the 'filedir' dir.
         if ($this->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
-            rmdir($rootpath);
+            if (rmdir($rootpath)) {
+                $deletedircount++;
+            }
         }
+        return $deletedircount;
     }
 
     /**
@@ -636,8 +642,7 @@ abstract class object_file_system extends \file_system_filedir {
         $path = $this->get_local_path_from_hash($contenthash);
         if (unlink($path)) {
             // Check grandparent dir for empty dirs.
-            $dirpath = str_replace($contenthash, '', $path) . '..';
-            $this->delete_empty_folders(realpath($dirpath));
+            $this->delete_empty_folders(dirname(dirname($path)));
         }
     }
 
