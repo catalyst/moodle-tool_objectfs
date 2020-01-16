@@ -15,18 +15,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Task that deletes empty dirs from $CFG->filedir.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Gleimer Mora <gleimermora@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_objectfs\task;
+
+use tool_objectfs\local\object_manipulator\manipulator;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020011700;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2020011700;      // Same as version
-$plugin->requires  = 2013111811;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+class sync_filedir_location  extends \core\task\scheduled_task {
+
+    /**
+     * Get task name
+     * @return string
+     * @throws \coding_exception
+     */
+    public function get_name() {
+        return get_string('sync_filedir_location_task', 'tool_objectfs');
+    }
+
+    /**
+     * Execute task
+     */
+    public function execute() {
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\sync_filedir');
+    }
+}

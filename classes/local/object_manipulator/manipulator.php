@@ -105,7 +105,6 @@ abstract class manipulator {
         }
 
         $this->logger->start_timing();
-
         foreach ($objectrecords as $objectrecord) {
             if (time() >= $this->finishtime) {
                 break;
@@ -156,11 +155,14 @@ abstract class manipulator {
     }
 
     public static function get_all_manipulator_classnames() {
-        $manipulators = array('deleter',
-                              'puller',
-                              'pusher',
-                              'recoverer',
-                              'checker');
+        $manipulators = [
+            'deleter',
+            'puller',
+            'pusher',
+            'recoverer',
+            'checker',
+            'sync_filedir',
+        ];
 
         foreach ($manipulators as $key => $manipulator) {
             $manipulators[$key] = '\\tool_objectfs\\local\\object_manipulator\\' . $manipulator;

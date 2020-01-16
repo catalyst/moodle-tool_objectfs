@@ -89,5 +89,14 @@ $tasks = array(
         'dayofweek' => '*',
         'month'     => '*'
     ),
+    [
+        'classname' => 'tool_objectfs\task\sync_filedir_location',
+        'blocking'  => 0,
+        'minute'    => '0',
+        'hour'      => '*/8',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*'
+    ],
 );
 

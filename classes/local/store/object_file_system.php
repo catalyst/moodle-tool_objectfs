@@ -31,6 +31,7 @@ namespace tool_objectfs\local\store;
 use ParentIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
@@ -352,6 +353,27 @@ abstract class object_file_system extends \file_system_filedir {
             }
         }
         return $deletedircount;
+    }
+
+    /**
+     * Get the name of the files from a specific dir.
+     * @param string $dir
+     * @return array
+     */
+    public function get_filenames_from_dir($dir = '') {
+        if (empty($rootpath)) {
+            $dir = $this->filedir;
+        }
+        $iterator = new RecursiveDirectoryIterator($dir);
+        $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
+
+        $files = [];
+        foreach (new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST) as $file) {
+            if ($file->isFile() && $file->getExtension() === '') {
+                $files[] = $file->getFilename();
+            }
+        }
+        return $files;
     }
 
     /**
