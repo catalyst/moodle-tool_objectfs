@@ -25,6 +25,9 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use coding_exception;
+use dml_exception;
+use stdClass;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -35,31 +38,43 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 class sync_filedir extends manipulator {
 
     /**
+     * @var array $totalfiles
+     */
+    private $totalfiles = [];
+
+    /**
      * @var array $files
      */
     private $files = [];
 
+    private $firstrun = true;
+
     /**
+     * sync_filedir constructor.
      * @param object_file_system $filesystem
-     * @param object $config
+     * @param $config
      * @param aggregate_logger $logger
+     * @throws dml_exception
      */
     public function __construct(object_file_system $filesystem, $config, aggregate_logger $logger) {
         parent::__construct($filesystem, $config);
         $this->logger = $logger;
         // Inject our logger into the filesystem.
         $this->filesystem->set_logger($this->logger);
-        $this->files = $this->filesystem->get_filenames_from_dir();
+        $this->files = $this->filter_files();
     }
 
+    /**
+     * @return string
+     */
     protected function get_query_name() {
         return 'get_sync_filedir_candidates';
     }
 
     /**
      * @return string
-     * @throws \coding_exception
-     * @throws \dml_exception
+     * @throws coding_exception
+     * @throws dml_exception
      */
     protected function get_candidates_sql() {
         global $DB;
@@ -72,8 +87,8 @@ class sync_filedir extends manipulator {
 
     /**
      * @return array
-     * @throws \coding_exception
-     * @throws \dml_exception
+     * @throws coding_exception
+     * @throws dml_exception
      */
     protected function get_candidates_sql_params() {
         global $DB;
@@ -88,5 +103,52 @@ class sync_filedir extends manipulator {
      */
     protected function manipulate_object($objectrecord) {
         return OBJECT_LOCATION_DUPLICATED;
+    }
+
+    /**
+     * @param stdClass $lastprocessed
+     * @throws dml_exception
+     */
+    protected function set_last_processed($lastprocessed) {
+        global $DB;
+        $table = 'tool_objectfs_sync_location';
+        $lastcontenthash = end($this->files);
+        if (end($this->totalfiles) === $lastcontenthash) {
+            $DB->delete_records_select($table, 'id > 0');
+            return;
+        }
+        $obj = new stdClass();
+        $obj->id = $this->firstrun;
+        $obj->contenthash = $lastcontenthash;
+        if (!empty($lastprocessed->contenthash)) {
+            $obj->contenthash = $lastprocessed->contenthash;
+            $obj->id = $lastprocessed->id;
+        }
+        if ($this->firstrun === true) {
+            $DB->insert_record($table, $obj);
+        } else {
+            $DB->update_record($table, $obj);
+        }
+    }
+
+    /**
+     * @return array
+     * @throws dml_exception
+     */
+    private function filter_files() {
+        global $DB;
+        $sql = 'SELECT id, contenthash FROM {tool_objectfs_sync_location}';
+        $result = $DB->get_records_sql($sql);
+        $this->totalfiles = $this->filesystem->get_filenames_from_dir();
+        $files = $this->totalfiles;
+        if (!empty($result)) {
+            $obj = end($result);
+            $this->firstrun = $obj->id;
+            $lastprocessed = $obj->contenthash;
+            $files = array_filter($this->totalfiles, function ($name) use ($lastprocessed) {
+                return $name > $lastprocessed ? true : false;
+            });
+        }
+        return array_slice($files, 0, $this->batchsize);
     }
 }

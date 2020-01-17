@@ -373,6 +373,7 @@ abstract class object_file_system extends \file_system_filedir {
                 $files[] = $file->getFilename();
             }
         }
+        sort($files, SORT_STRING);
         return $files;
     }
 
