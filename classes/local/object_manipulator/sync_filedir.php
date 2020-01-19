@@ -106,6 +106,7 @@ class sync_filedir extends manipulator {
     }
 
     /**
+     * Set the las file name processed or clean the records if all have been processed.
      * @param stdClass $lastprocessed
      * @throws dml_exception
      */
@@ -132,6 +133,7 @@ class sync_filedir extends manipulator {
     }
 
     /**
+     * Get the file batch starting from the last processed file name and limited by the batchsize value.
      * @return array
      * @throws dml_exception
      */
