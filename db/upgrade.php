@@ -79,19 +79,5 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017111700, 'tool', 'objectfs');
     }
 
-    if ($oldversion < 2020012000) {
-        $table = new xmldb_table('tool_objectfs_sync_location');
-        if (!$dbman->table_exists($table)) {
-            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, true);
-            $table->add_field('contenthash', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL);
-            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-            $table->add_key('contenthash', XMLDB_KEY_UNIQUE, ['contenthash']);
-
-            $dbman->create_table($table);
-        }
-
-        upgrade_plugin_savepoint(true, 2020012000, 'tool', 'objectfs');
-    }
-
     return true;
 }

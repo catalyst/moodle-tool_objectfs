@@ -29,7 +29,7 @@ use tool_objectfs\local\object_manipulator\manipulator;
 
 defined('MOODLE_INTERNAL') || die();
 
-class sync_filedir_location  extends \core\task\scheduled_task {
+class check_filedir_location  extends \core\task\scheduled_task {
 
     /**
      * Get task name
@@ -37,13 +37,13 @@ class sync_filedir_location  extends \core\task\scheduled_task {
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('sync_filedir_location_task', 'tool_objectfs');
+        return get_string('check_filedir_location_task', 'tool_objectfs');
     }
 
     /**
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\sync_filedir');
+        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\checker_filedir');
     }
 }

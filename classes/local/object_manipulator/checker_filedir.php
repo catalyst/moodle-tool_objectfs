@@ -35,7 +35,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-class sync_filedir extends manipulator {
+class checker_filedir extends manipulator {
 
     /**
      * @var array $totalfiles
@@ -46,8 +46,6 @@ class sync_filedir extends manipulator {
      * @var array $files
      */
     private $files = [];
-
-    private $firstrun = true;
 
     /**
      * sync_filedir constructor.
@@ -68,7 +66,7 @@ class sync_filedir extends manipulator {
      * @return string
      */
     protected function get_query_name() {
-        return 'get_sync_filedir_candidates';
+        return 'get_checker_filedir_candidates';
     }
 
     /**
@@ -111,25 +109,17 @@ class sync_filedir extends manipulator {
      * @throws dml_exception
      */
     protected function set_last_processed($lastprocessed) {
-        global $DB;
-        $table = 'tool_objectfs_sync_location';
         $lastcontenthash = end($this->files);
         if (end($this->totalfiles) === $lastcontenthash) {
-            $DB->delete_records_select($table, 'id > 0');
+            set_config('lastprocessed', '', 'tool_objectfs');
             return;
         }
         $obj = new stdClass();
-        $obj->id = $this->firstrun;
         $obj->contenthash = $lastcontenthash;
         if (!empty($lastprocessed->contenthash)) {
             $obj->contenthash = $lastprocessed->contenthash;
-            $obj->id = $lastprocessed->id;
         }
-        if ($this->firstrun === true) {
-            $DB->insert_record($table, $obj);
-        } else {
-            $DB->update_record($table, $obj);
-        }
+        set_config('lastprocessed', $obj->contenthash, 'tool_objectfs');
     }
 
     /**
@@ -138,15 +128,10 @@ class sync_filedir extends manipulator {
      * @throws dml_exception
      */
     private function filter_files() {
-        global $DB;
-        $sql = 'SELECT id, contenthash FROM {tool_objectfs_sync_location}';
-        $result = $DB->get_records_sql($sql);
+        $lastprocessed = get_config('tool_objectfs', 'lastprocessed');
         $this->totalfiles = $this->filesystem->get_filenames_from_dir();
         $files = $this->totalfiles;
-        if (!empty($result)) {
-            $obj = end($result);
-            $this->firstrun = $obj->id;
-            $lastprocessed = $obj->contenthash;
+        if (!empty($lastprocessed)) {
             $files = array_filter($this->totalfiles, function ($name) use ($lastprocessed) {
                 return $name > $lastprocessed ? true : false;
             });

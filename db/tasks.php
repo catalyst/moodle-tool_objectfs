@@ -90,10 +90,10 @@ $tasks = array(
         'month'     => '*'
     ),
     [
-        'classname' => 'tool_objectfs\task\sync_filedir_location',
+        'classname' => 'tool_objectfs\task\check_filedir_location',
         'blocking'  => 0,
         'minute'    => '0',
-        'hour'      => '*/8',
+        'hour'      => '2',
         'day'       => '*',
         'dayofweek' => '*',
         'month'     => '*'

@@ -51,7 +51,7 @@ abstract class manipulator {
 
     protected $batchsize;
 
-    public $lastprocessed;
+    protected $lastprocessed;
 
     /**
      * Manipulator constructor
@@ -168,7 +168,7 @@ abstract class manipulator {
             'pusher',
             'recoverer',
             'checker',
-            'sync_filedir',
+            'checker_filedir',
         ];
 
         foreach ($manipulators as $key => $manipulator) {
