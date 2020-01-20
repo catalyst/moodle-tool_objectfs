@@ -91,11 +91,15 @@ class location_report_builder extends objectfs_report_builder {
      */
     private function add_filedir_size_stats(objectfs_report &$report, $totalcount, $totalsum) {
         $config = get_objectfs_config();
-        /** @var object_file_system $filesystem */
-        $filesystem = new $config->filesystem();
+        $rowcount = 0;
+        $rowsum = 0;
+        if (!empty($config->filesystem)) {
+            /** @var object_file_system $filesystem */
+            $filesystem = new $config->filesystem();
 
-        $rowcount = $filesystem->get_filedir_count();
-        $rowsum = $filesystem->get_filedir_size();
+            $rowcount = $filesystem->get_filedir_count();
+            $rowsum = $filesystem->get_filedir_size();
+        }
         $key = 'deltaa';
         $report->add_row('filedir', $rowcount, $rowsum);
         $deltacount = $rowcount - $totalcount;
