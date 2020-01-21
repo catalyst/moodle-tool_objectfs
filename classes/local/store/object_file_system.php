@@ -28,6 +28,7 @@
 
 namespace tool_objectfs\local\store;
 
+use Exception;
 use ParentIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -334,22 +335,30 @@ abstract class object_file_system extends \file_system_filedir {
             return 0;
         }
         $deletedircount = 0;
-        $iterator = new RecursiveDirectoryIterator($rootpath);
+        $iterator = new RecursiveDirectoryIterator($rootpath, RecursiveDirectoryIterator::FOLLOW_SYMLINKS);
         $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
         $directories = new ParentIterator($iterator);
-        foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
-            $dirpath = $dir->getPathname();
-            if ($this->is_dir_empty($dirpath)) {
-                if (rmdir($dirpath)) {
+        try {
+            foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
+                $dirpath = $dir->getPathname();
+                if ($this->is_dir_empty($dirpath)) {
+                    if (rmdir($dirpath)) {
+                        $deletedircount++;
+                    }
+                }
+            }
+            // Make sure we keep the 'filedir' dir.
+            $rootpath = is_link($rootpath) ? readlink($rootpath) : $rootpath;
+            if ($this->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
+                if (rmdir($rootpath)) {
                     $deletedircount++;
                 }
             }
-        }
-        // Make sure we keep the 'filedir' dir.
-        if ($this->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
-            if (rmdir($rootpath)) {
-                $deletedircount++;
-            }
+        } catch (Exception $e) {
+            $msg = substr($e->getMessage(), strrpos($e->getMessage(), '('));
+            $message = 'Delete empty dir failed: ' . $msg;
+            mtrace($message);
+            $this->logger->error_log($message);
         }
         return $deletedircount;
     }
