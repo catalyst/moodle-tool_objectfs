@@ -57,13 +57,13 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:generalheader', 'tool_objectfs'), ''));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enabletasks',
-        new lang_string('settings:enabletasks', 'tool_objectfs'), '', '', '0', '1'));
+        new lang_string('settings:enabletasks', 'tool_objectfs'), '', ''));
 
     $settings->add(new admin_setting_configduration('tool_objectfs/maxtaskruntime',
         new lang_string('settings:maxtaskruntime', 'tool_objectfs'), '', '', MINSECS));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablelogging',
-        new lang_string('settings:enablelogging', 'tool_objectfs'), '', '', '0', '1'));
+        new lang_string('settings:enablelogging', 'tool_objectfs'), '', ''));
 
 
     $settings->add(new admin_setting_heading('tool_objectfs/filetransfersettings',
@@ -79,7 +79,7 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:minimumage', 'tool_objectfs'), '', '', 7 * DAYSECS));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/deletelocal',
-        new lang_string('settings:deletelocal', 'tool_objectfs'), '', '', '0', '1'));
+        new lang_string('settings:deletelocal', 'tool_objectfs'), '', ''));
 
     $settings->add(new admin_setting_configduration('tool_objectfs/consistencydelay',
         new lang_string('settings:consistencydelay', 'tool_objectfs'), '', '', 10 * MINSECS));
@@ -102,7 +102,7 @@ if ($ADMIN->fulltree) {
 
         $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
             new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
-            new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs'), '', '0', '1'));
+            new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs'), ''));
 
         $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
             new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
@@ -126,5 +126,5 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:testingheader', 'tool_objectfs'), ''));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/preferexternal',
-        new lang_string('settings:preferexternal', 'tool_objectfs'), '', '', '0', '1'));
+        new lang_string('settings:preferexternal', 'tool_objectfs'), '', ''));
 }
