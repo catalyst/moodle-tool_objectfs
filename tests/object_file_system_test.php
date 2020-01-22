@@ -291,7 +291,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                 touch($fullpath . '/' . $file);
             }
         }
-        $deleteddirs = $this->filesystem->delete_empty_folders();
+        $deleteddirs = $this->filesystem->delete_empty_folders($testdir);
         foreach ($dirs as $key => $dir) {
              $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
         }
