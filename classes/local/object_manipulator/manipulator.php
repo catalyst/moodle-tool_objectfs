@@ -112,6 +112,7 @@ abstract class manipulator {
         $this->logger->start_timing();
         foreach ($objectrecords as $objectrecord) {
             if (time() >= $this->finishtime) {
+                $this->set_last_processed($objectrecord->contenthash);
                 break;
             }
 
@@ -127,8 +128,6 @@ abstract class manipulator {
             update_object_record($objectrecord->contenthash, $newlocation);
 
             $objectlock->release();
-            $this->lastprocessed->id = empty($objectrecord->id) ? 0 : $objectrecord->id;
-            $this->lastprocessed->contenthash = $objectrecord->contenthash;
         }
 
         $this->logger->end_timing();
@@ -197,11 +196,10 @@ abstract class manipulator {
         $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
         $candidatehashes = $manipulator->get_candidate_objects();
         $manipulator->execute($candidatehashes);
-        $manipulator->set_last_processed($manipulator->lastprocessed);
     }
 
     /**
-     * @param stdClass $lastprocessed
+     * @param string $lastprocessed
      */
     protected function set_last_processed($lastprocessed) {
         return;

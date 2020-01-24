@@ -25,16 +25,21 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\manipulator;
+use coding_exception;
+use dml_exception;
+use Generator;
+use tool_objectfs\local\object_manipulator\checker_filedir;
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class check_filedir_location  extends \core\task\scheduled_task {
 
     /**
      * Get task name
      * @return string
-     * @throws \coding_exception
+     * @throws coding_exception
      */
     public function get_name() {
         return get_string('check_filedir_location_task', 'tool_objectfs');
@@ -42,8 +47,35 @@ class check_filedir_location  extends \core\task\scheduled_task {
 
     /**
      * Execute task
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\checker_filedir');
+        $config = get_objectfs_config();
+        if (!tool_objectfs_should_tasks_run()) {
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
+            return;
+        }
+        $filesystem = new $config->filesystem();
+        if (!$filesystem->get_client_availability()) {
+            mtrace(get_string('client_not_available', 'tool_objectfs'));
+            return;
+        }
+        $logger = new \tool_objectfs\log\aggregate_logger();
+        $manipulator = new checker_filedir($filesystem, $config, $logger);
+        /** @var Generator $gen */
+        $gen = $filesystem->scan_dir();
+        foreach ($gen as $files) {
+            $manipulator->execute($files);
+            if ($manipulator->timeexceeded) {
+                mtrace('. Max execution time reached');
+                break;
+            }
+        }
+        if (!$gen->valid()) {
+            // We have processed all of the files.
+            set_config('lastprocessed', '', 'tool_objectfs');
+            mtrace('. All files completely processed');
+        }
     }
 }

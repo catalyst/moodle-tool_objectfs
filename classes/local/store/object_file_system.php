@@ -29,14 +29,15 @@
 namespace tool_objectfs\local\store;
 
 use Exception;
+use Generator;
 use ParentIterator;
-use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -46,10 +47,14 @@ require_once($CFG->libdir . '/filestorage/file_storage.php');
 
 abstract class object_file_system extends \file_system_filedir {
 
+    const MAX_ROOT_DIRS = 256;
+    const MAX_FILES_PER_DIR_BATCH = 1000;
+
     private $externalclient;
     private $preferexternal;
     private $deleteexternally;
     private $logger;
+    private $found = false;
 
     public function __construct() {
         global $CFG;
@@ -366,7 +371,7 @@ abstract class object_file_system extends \file_system_filedir {
             $emsg = $e->getMessage();
             $path = substr($emsg, strrpos($emsg, '(') + 1, strrpos($emsg, ')') - 1);
             $msg = substr($emsg, strrpos($emsg, ':') + 2);
-            $message = "Delete empty dir failed: $path $msg {$this->get_path_owner_info($path)}";
+            $message = "Delete empty dir failed: $path $msg";
             mtrace($message);
             $this->logger->error_log($message);
         }
@@ -376,23 +381,86 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * Get the name of the files from a specific dir.
      * @param string $dir
-     * @return array
+     * @param string $lastprocessed
+     * @return Generator
      */
-    public function get_filenames_from_dir($dir = '') {
+    public function get_filenames_from_dir($dir = '', $lastprocessed = '') {
         if (empty($dir)) {
             $dir = $this->filedir;
         }
-        $iterator = new RecursiveDirectoryIterator($dir);
-        $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
-
+        $filecount = 0;
         $files = [];
+        // Convert filename to object->contenthash.
+        $fileobjects = function () use (&$files) {
+            foreach ($files as $k => $file) {
+                $f = new \stdClass();
+                $f->contenthash = $file;
+                $files[$k] = $f;
+            }
+        };
+        $flags = (RecursiveDirectoryIterator::SKIP_DOTS | RecursiveDirectoryIterator::FOLLOW_SYMLINKS);
+        $iterator = new RecursiveDirectoryIterator($dir, $flags);
         foreach (new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST) as $file) {
             if ($file->isFile() && $file->getExtension() === '') {
-                $files[] = $file->getFilename();
+                if ($filecount > self::MAX_FILES_PER_DIR_BATCH) {
+                    // Send our first batch of files.
+                    $fileobjects();
+                    yield $files;
+                    $filecount = 0;
+                    $files = [];
+                }
+                if ($file->getFilename() === $lastprocessed) {
+                    $this->found = true;
+                }
+                if ($lastprocessed === '' || $this->found === true) {
+                    $files[] = $file->getFilename();
+                    $filecount++;
+                }
             }
         }
-        sort($files, SORT_STRING);
-        return $files;
+        if (!empty($files)) {
+            $fileobjects();
+            yield $files;
+        }
+    }
+
+
+    /**
+     * @param string $filedir
+     * @return Generator
+     * @throws \dml_exception
+     */
+    public function scan_dir($filedir = '') {
+        if (empty($dir)) {
+            $filedir = $this->filedir;
+        }
+        $lastprocessed = get_config('tool_objectfs', 'lastprocessed');
+        $dircount = 0;
+        $rootdirs = [];
+        foreach (new \FilesystemIterator($filedir) as $dir) {
+            if (!$dir->isDir()) {
+                continue;
+            }
+            if ($dircount >= self::MAX_ROOT_DIRS) {
+                // Get files from our first MAX_ROOT_DIRS batch.
+                foreach ($rootdirs as $dirname) {
+                    foreach ($this->get_filenames_from_dir($dirname, $lastprocessed) as $file) {
+                        yield $file;
+                    }
+                }
+                $rootdirs = [];
+                $dircount = 0;
+            }
+            $rootdirs[] = $dir->getPathname();
+            $dircount++;
+        }
+        if (!empty($rootdirs)) {
+            foreach ($rootdirs as $dirname) {
+                foreach ($this->get_filenames_from_dir($dirname, $lastprocessed) as $file) {
+                    yield $file;
+                }
+            }
+        }
     }
 
     /**
