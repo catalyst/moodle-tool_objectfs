@@ -232,7 +232,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                     /filedir/test/d2/file2
                     deleted: 0 dirs
                 */
-                ['/d1', '/d2'], ['file1', 'file2'], [true, true],  true, 0,
+                ['/d1', '/d2'], ['file1', 'file2'], [true, true],  true,
             ],
             [
                 /*
@@ -241,7 +241,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                     deleted: 1dirs
                         - /filedir/test/d2/
                 */
-                ['/d1', '/d2'], ['file1'], [true, false],  true, 1,
+                ['/d1', '/d2'], ['file1'], [true, false],  true,
             ],
             [
                 /*
@@ -250,7 +250,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                     deleted: 1 dirs
                         - /filedir/test/d1/
                 */
-                ['/d1', '/d2'], ['', 'file1'], [false, true],  true, 1,
+                ['/d1', '/d2'], ['', 'file1'], [false, true],  true,
             ],
             [
                 /*
@@ -261,7 +261,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                         - /filedir/test/d2/
                         - /filedir/test/
                 */
-                ['/d1', '/d2'], [], [false, false],  false, 3,
+                ['/d1', '/d2'], [], [false, false],  false,
             ],
         ];
     }
@@ -272,14 +272,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      * @param array $files Files to be created.
      * @param array $expectedparentreadable Indicates whether a dir will remain after calling 'delete_empty_folders'.
      * @param bool $expectedgrandparentpathreadable If grandparent dir exists after calling 'delete_empty_folders'.
-     * @param int $expecteddelectedcount expected amount of deleted directories.
      */
     public function test_delete_empty_folders(
         $dirs,
         $files,
         $expectedparentreadable,
-        $expectedgrandparentpathreadable,
-        $expecteddelectedcount
+        $expectedgrandparentpathreadable
     ) {
         global $CFG;
         $testdir = $CFG->dataroot . '/filedir/test';
@@ -291,12 +289,11 @@ class object_file_system_testcase extends tool_objectfs_testcase {
                 touch($fullpath . '/' . $file);
             }
         }
-        $deleteddirs = $this->filesystem->delete_empty_folders($testdir);
+        $this->filesystem->delete_empty_dirs($testdir);
         foreach ($dirs as $key => $dir) {
              $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
         }
         $this->assertEquals($expectedgrandparentpathreadable, is_readable($testdir));
-        $this->assertEquals($expecteddelectedcount, $deleteddirs);
     }
 
     public function test_readfile_if_object_is_local() {
