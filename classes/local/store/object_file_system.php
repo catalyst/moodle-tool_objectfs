@@ -339,7 +339,10 @@ abstract class object_file_system extends \file_system_filedir {
         foreach (glob($rootpath . DIRECTORY_SEPARATOR . '*') as $path) {
             $empty &= is_dir($path) && $this->delete_empty_dirs($path);
         }
-        return $empty && ($rootpath !== $this->filedir) && rmdir($rootpath);
+        if ($rootpath === $this->filedir) {
+            return false;
+        }
+        return $empty && rmdir($rootpath);
     }
 
     /**
