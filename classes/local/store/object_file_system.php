@@ -364,7 +364,7 @@ abstract class object_file_system extends \file_system_filedir {
         if (empty($dir)) {
             $dir = $this->filedir;
         }
-        $flags = (RecursiveDirectoryIterator::SKIP_DOTS | RecursiveDirectoryIterator::FOLLOW_SYMLINKS);
+        $flags = (RecursiveDirectoryIterator::FOLLOW_SYMLINKS | RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator = new RecursiveDirectoryIterator($dir, $flags);
         foreach (new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST) as $file) {
             if ($file->isFile() && $file->getExtension() === '') {
