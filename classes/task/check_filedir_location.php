@@ -26,7 +26,6 @@
 namespace tool_objectfs\task;
 
 use coding_exception;
-use dml_exception;
 use Generator;
 use tool_objectfs\local\object_manipulator\checker_filedir;
 
@@ -48,7 +47,6 @@ class check_filedir_location  extends \core\task\scheduled_task {
     /**
      * Execute task
      * @throws coding_exception
-     * @throws dml_exception
      */
     public function execute() {
         $config = get_objectfs_config();
@@ -65,13 +63,15 @@ class check_filedir_location  extends \core\task\scheduled_task {
         $manipulator = new checker_filedir($filesystem, $config, $logger);
         /** @var Generator $gen */
         $gen = $filesystem->scan_dir();
-        foreach ($gen as $files) {
-            $manipulator->execute($files);
-            if ($manipulator->timeexceeded) {
+        foreach ($gen as $obj) {
+            if ($manipulator->has_exceeded_run_time()) {
+                set_config('lastprocessed', $obj->contenthash, 'tool_objectfs');
                 mtrace('. Max execution time reached');
                 break;
             }
+            $manipulator->execute([$obj]);
         }
+
         if (!$gen->valid()) {
             // We have processed all of the files.
             set_config('lastprocessed', '', 'tool_objectfs');

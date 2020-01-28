@@ -48,13 +48,16 @@ require_once($CFG->libdir . '/filestorage/file_storage.php');
 abstract class object_file_system extends \file_system_filedir {
 
     const MAX_ROOT_DIRS = 256;
-    const MAX_FILES_PER_DIR_BATCH = 1000;
 
     private $externalclient;
     private $preferexternal;
     private $deleteexternally;
     private $logger;
-    private $found = false;
+
+    /**
+     * @var bool $processedhashfound
+     */
+    private $processedhashfound = false;
 
     public function __construct() {
         global $CFG;
@@ -379,51 +382,33 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Get the name of the files from a specific dir.
+     * Get the name of the file names from a specific dir.
      * @param string $dir
-     * @param string $lastprocessed
+     * @param string $lastprocessedhash
      * @return Generator
      */
-    public function get_filenames_from_dir($dir = '', $lastprocessed = '') {
+    public function get_filenames_from_dir($dir = '', $lastprocessedhash = '') {
         if (empty($dir)) {
             $dir = $this->filedir;
         }
-        $filecount = 0;
-        $files = [];
-        // Convert filename to object->contenthash.
-        $fileobjects = function () use (&$files) {
-            foreach ($files as $k => $file) {
-                $f = new \stdClass();
-                $f->contenthash = $file;
-                $files[$k] = $f;
-            }
-        };
         $flags = (RecursiveDirectoryIterator::SKIP_DOTS | RecursiveDirectoryIterator::FOLLOW_SYMLINKS);
         $iterator = new RecursiveDirectoryIterator($dir, $flags);
         foreach (new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST) as $file) {
             if ($file->isFile() && $file->getExtension() === '') {
-                if ($filecount > self::MAX_FILES_PER_DIR_BATCH) {
-                    // Send our first batch of files.
-                    $fileobjects();
-                    yield $files;
-                    $filecount = 0;
-                    $files = [];
+                if ($file->getFilename() === $lastprocessedhash) {
+                    // If check_filedir_location task has exceeded execution time we would have a $lastprocessedhash.
+                    // If so we want to start checking file names starting from  $lastprocessedhash.
+                    $this->processedhashfound = true;
                 }
-                if ($file->getFilename() === $lastprocessed) {
-                    $this->found = true;
-                }
-                if ($lastprocessed === '' || $this->found === true) {
-                    $files[] = $file->getFilename();
-                    $filecount++;
+
+                if ($lastprocessedhash === '' || $this->processedhashfound === true) {
+                    $obj = new \stdClass();
+                    $obj->contenthash = $file->getFilename();
+                    yield $obj;
                 }
             }
         }
-        if (!empty($files)) {
-            $fileobjects();
-            yield $files;
-        }
     }
-
 
     /**
      * @param string $filedir
@@ -434,7 +419,7 @@ abstract class object_file_system extends \file_system_filedir {
         if (empty($dir)) {
             $filedir = $this->filedir;
         }
-        $lastprocessed = get_config('tool_objectfs', 'lastprocessed');
+        $lastprocessedhash = get_config('tool_objectfs', 'lastprocessed');
         $dircount = 0;
         $rootdirs = [];
         foreach (new \FilesystemIterator($filedir) as $dir) {
@@ -442,10 +427,9 @@ abstract class object_file_system extends \file_system_filedir {
                 continue;
             }
             if ($dircount >= self::MAX_ROOT_DIRS) {
-                // Get files from our first MAX_ROOT_DIRS batch.
                 foreach ($rootdirs as $dirname) {
-                    foreach ($this->get_filenames_from_dir($dirname, $lastprocessed) as $file) {
-                        yield $file;
+                    foreach ($this->get_filenames_from_dir($dirname, $lastprocessedhash) as $files) {
+                        yield $files;
                     }
                 }
                 $rootdirs = [];
@@ -454,11 +438,9 @@ abstract class object_file_system extends \file_system_filedir {
             $rootdirs[] = $dir->getPathname();
             $dircount++;
         }
-        if (!empty($rootdirs)) {
-            foreach ($rootdirs as $dirname) {
-                foreach ($this->get_filenames_from_dir($dirname, $lastprocessed) as $file) {
-                    yield $file;
-                }
+        foreach ($rootdirs as $dirname) {
+            foreach ($this->get_filenames_from_dir($dirname, $lastprocessedhash) as $files) {
+                yield $files;
             }
         }
     }

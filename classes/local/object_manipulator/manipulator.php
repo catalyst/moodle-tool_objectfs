@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
-use stdClass;
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -51,8 +49,6 @@ abstract class manipulator {
 
     protected $batchsize;
 
-    protected $lastprocessed;
-
     /**
      * Manipulator constructor
      *
@@ -68,7 +64,6 @@ abstract class manipulator {
         } else {
             $this->batchsize = $config->batchsize;
         }
-        $this->lastprocessed = new stdClass;
     }
 
     /**
@@ -111,8 +106,7 @@ abstract class manipulator {
 
         $this->logger->start_timing();
         foreach ($objectrecords as $objectrecord) {
-            if (time() >= $this->finishtime) {
-                $this->set_last_processed($objectrecord->contenthash);
+            if ($this->has_exceeded_run_time()) {
                 break;
             }
 
@@ -199,9 +193,12 @@ abstract class manipulator {
     }
 
     /**
-     * @param string $lastprocessed
+     * @return bool
      */
-    protected function set_last_processed($lastprocessed) {
-        return;
+    public function has_exceeded_run_time() {
+        if (time() >= $this->finishtime) {
+            return true;
+        }
+        return false;
     }
 }

@@ -35,9 +35,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class checker_filedir extends manipulator {
 
-    /** @var bool $timeexceeded */
-    public $timeexceeded = false;
-
     /**
      * sync_filedir constructor.
      * @param object_file_system $filesystem
@@ -52,6 +49,7 @@ class checker_filedir extends manipulator {
     }
 
     /**
+     * Here to compliance abstract method from base class
      * @return string
      */
     protected function get_query_name() {
@@ -59,6 +57,7 @@ class checker_filedir extends manipulator {
     }
 
     /**
+     * Here to compliance abstract method from base class
      * @return string
      */
     protected function get_candidates_sql() {
@@ -66,6 +65,7 @@ class checker_filedir extends manipulator {
     }
 
     /**
+     * Here to compliance abstract method from base class
      * @return array
      */
     protected function get_candidates_sql_params() {
@@ -78,14 +78,5 @@ class checker_filedir extends manipulator {
      */
     protected function manipulate_object($objectrecord) {
         return $this->filesystem->get_object_location_from_hash($objectrecord->contenthash);
-    }
-
-    /**
-     * Set the las file name processed after exceeding the max exec time.
-     * @param string $lastprocessed
-     */
-    public function set_last_processed($lastprocessed) {
-        $this->timeexceeded = true;
-        set_config('lastprocessed', $lastprocessed, 'tool_objectfs');
     }
 }
