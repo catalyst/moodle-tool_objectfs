@@ -49,7 +49,7 @@ class checker_filedir extends manipulator {
     }
 
     /**
-     * Here to compliance abstract method from base class
+     * Here to compliance with abstract method from base class
      * @return string
      */
     protected function get_query_name() {
@@ -57,7 +57,7 @@ class checker_filedir extends manipulator {
     }
 
     /**
-     * Here to compliance abstract method from base class
+     * Here to compliance with abstract method from base class
      * @return string
      */
     protected function get_candidates_sql() {
@@ -65,7 +65,7 @@ class checker_filedir extends manipulator {
     }
 
     /**
-     * Here to compliance abstract method from base class
+     * Here to compliance with abstract method from base class
      * @return array
      */
     protected function get_candidates_sql_params() {
