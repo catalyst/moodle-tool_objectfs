@@ -38,10 +38,10 @@ class checker_filedir extends manipulator {
     /**
      * sync_filedir constructor.
      * @param object_file_system $filesystem
-     * @param $config
+     * @param stdClass $config
      * @param aggregate_logger $logger
      */
-    public function __construct(object_file_system $filesystem, $config, aggregate_logger $logger) {
+    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
         parent::__construct($filesystem, $config);
         $this->logger = $logger;
         // Inject our logger into the filesystem.

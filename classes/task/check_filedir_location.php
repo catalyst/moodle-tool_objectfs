@@ -61,8 +61,9 @@ class check_filedir_location  extends \core\task\scheduled_task {
         }
         $logger = new \tool_objectfs\log\aggregate_logger();
         $manipulator = new checker_filedir($filesystem, $config, $logger);
+
         /** @var Generator $gen */
-        $gen = $filesystem->scan_dir();
+        $gen = $filesystem->get_file_hashes_from_dir();
         foreach ($gen as $obj) {
             if ($manipulator->has_exceeded_run_time()) {
                 set_config('lastprocessed', $obj->contenthash, 'tool_objectfs');

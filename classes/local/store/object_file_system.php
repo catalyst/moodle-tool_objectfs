@@ -30,10 +30,8 @@ namespace tool_objectfs\local\store;
 
 use Exception;
 use Generator;
-use ParentIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use SplFileInfo;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
@@ -46,8 +44,6 @@ require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
 require_once($CFG->libdir . '/filestorage/file_storage.php');
 
 abstract class object_file_system extends \file_system_filedir {
-
-    const MAX_ROOT_DIRS = 256;
 
     private $externalclient;
     private $preferexternal;
@@ -355,69 +351,38 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Get the name of the file names from a specific dir.
-     * @param string $dir
-     * @param string $lastprocessedhash
-     * @return Generator
-     */
-    public function get_filenames_from_dir($dir = '', $lastprocessedhash = '') {
-        if (empty($dir)) {
-            $dir = $this->filedir;
-        }
-        $flags = (RecursiveDirectoryIterator::FOLLOW_SYMLINKS | RecursiveDirectoryIterator::SKIP_DOTS);
-        $iterator = new RecursiveDirectoryIterator($dir, $flags);
-        foreach (new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST) as $file) {
-            if ($file->isFile() && $file->getExtension() === '') {
-                if ($file->getFilename() === $lastprocessedhash) {
-                    // If check_filedir_location task has exceeded execution time we would have a $lastprocessedhash.
-                    // If so we want to start checking file names starting from  $lastprocessedhash.
-                    $this->processedhashfound = true;
-                }
-
-                if ($lastprocessedhash === '' || $this->processedhashfound === true) {
-                    $obj = new \stdClass();
-                    $obj->contenthash = $file->getFilename();
-                    yield $obj;
-                }
-            }
-        }
-    }
-
-    /**
      * @param string $filedir
      * @return Generator
      * @throws \dml_exception
      */
-    public function scan_dir($filedir = '') {
+    public function get_file_hashes_from_dir($filedir = '') {
         if (empty($dir)) {
             $filedir = $this->filedir;
         }
         $lastprocessedhash = get_config('tool_objectfs', 'lastprocessed');
-        $dircount = 0;
-        $rootdirs = [];
-        foreach (new \FilesystemIterator($filedir) as $dir) {
-            if (!$dir->isDir()) {
-                continue;
-            }
-            if ($dircount >= self::MAX_ROOT_DIRS) {
-                foreach ($rootdirs as $dirname) {
-                    foreach ($this->get_filenames_from_dir($dirname, $lastprocessedhash) as $files) {
-                        yield $files;
+        try {
+            $flags = (RecursiveDirectoryIterator::FOLLOW_SYMLINKS | RecursiveDirectoryIterator::SKIP_DOTS);
+            $iterator = new RecursiveDirectoryIterator($filedir, $flags);
+            foreach (new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST) as $file) {
+                if ($file->isFile() && $file->getExtension() === '') {
+                    if ($file->getFilename() === $lastprocessedhash) {
+                        // If check_filedir_location task has exceeded execution time we would have a $lastprocessedhash.
+                        // If so we want to start checking file names starting from  $lastprocessedhash.
+                        $this->processedhashfound = true;
+                    }
+
+                    if ($lastprocessedhash === '' || $this->processedhashfound === true) {
+                        $obj = new \stdClass();
+                        $obj->contenthash = $file->getFilename();
+                        yield $obj;
                     }
                 }
-                $rootdirs = [];
-                $dircount = 0;
             }
-            $rootdirs[] = $dir->getPathname();
-            $dircount++;
-        }
-        foreach ($rootdirs as $dirname) {
-            foreach ($this->get_filenames_from_dir($dirname, $lastprocessedhash) as $files) {
-                yield $files;
-            }
+        } catch (Exception $exception) {
+            $message = "Failed to read files: {$exception->getMessage()}";
+            mtrace($message);
         }
     }
-
 
     /**
      * Output the content of the specified stored file.
