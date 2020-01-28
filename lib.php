@@ -109,6 +109,15 @@ function get_objectfs_config() {
     $config->azure_container = '';
     $config->azure_sastoken = '';
 
+    // Swift(OpenStack) file system
+    $config->openstack_authurl = '';
+    $config->openstack_region = '';
+    $config->openstack_container = '';
+    $config->openstack_username = '';
+    $config->openstack_password = '';
+    $config->openstack_tenantname = '';
+    $config->openstack_projectid = '';
+
     $storedconfig = get_config('tool_objectfs');
 
     // Override defaults if set.
