@@ -309,7 +309,7 @@ abstract class object_file_system extends \file_system_filedir {
 
                 if ($success) {
                     // Check grandparent dir for empty dirs.
-                    $this->delete_empty_folders(dirname(dirname($localpath)));
+                    $this->delete_empty_dirs(dirname(dirname($localpath)));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
@@ -325,87 +325,24 @@ abstract class object_file_system extends \file_system_filedir {
 
     /**
      * Recursively reads dirs from passed path and delete all empty dirs.
-     * @param string|null $rootpath Full path to the dir.
-     * @return int
+     * @param string $rootpath
+     * @return bool
      */
-    public function delete_empty_folders($rootpath = null) {
+    public function delete_empty_dirs($rootpath = '') {
         if (empty($rootpath)) {
             $rootpath = $this->filedir;
         }
-        $rootpath = is_link($rootpath) ? readlink($rootpath) : $rootpath;
         if (!is_dir($rootpath) || !is_writable($rootpath)) {
-            mtrace("Dir is not writable: $rootpath {$this->get_path_owner_info($rootpath)}");
-            return 0;
+            return false;
         }
-        $deletedircount = 0;
-        try {
-            $flags = (RecursiveDirectoryIterator::SKIP_DOTS | RecursiveDirectoryIterator::FOLLOW_SYMLINKS);
-            $iterator = new RecursiveDirectoryIterator($rootpath, $flags);
-            $directories = new ParentIterator($iterator);
-            foreach (new RecursiveIteratorIterator($directories, RecursiveIteratorIterator::CHILD_FIRST) as $dir) {
-                $dirpath = $dir->getPathname();
-                if ($this->is_dir_empty($dirpath)) {
-                    if (!($it = $iterator->isWritable()) || !$dir->isWritable()) {
-                        $dirpath = !$it ? $iterator->getPathname() : $dirpath;
-                        mtrace("Dir is not writable: $dirpath {$this->get_path_owner_info($dirpath)}");
-                        continue;
-                    }
-                    if (rmdir($dirpath)) {
-                        $deletedircount++;
-                    }
-                }
-            }
-            // Make sure we keep the 'filedir' dir.
-            if ($this->filedir !== $rootpath && $this->is_dir_empty($rootpath)) {
-                if (rmdir($rootpath)) {
-                    $deletedircount++;
-                }
-            }
-        } catch (Exception $e) {
-            $emsg = $e->getMessage();
-            $path = substr($emsg, strrpos($emsg, '(') + 1, strrpos($emsg, ')') - 1);
-            $msg = substr($emsg, strrpos($emsg, ':') + 2);
-            $message = "Delete empty dir failed: $path $msg {$this->get_path_owner_info($path)}";
-            mtrace($message);
-            $this->logger->error_log($message);
+        $empty = true;
+        foreach (glob($rootpath . DIRECTORY_SEPARATOR . '*') as $path) {
+            $empty &= is_dir($path) && $this->delete_empty_dirs($path);
         }
-        return $deletedircount;
-    }
-
-    /**
-     * @param string $stringpath
-     * @return string
-     */
-    private function get_path_owner_info($stringpath) {
-        $permissions = substr(sprintf('%o', fileperms($stringpath)), -4);
-        $fileinfo = new SplFileInfo($stringpath);
-        $user = $fileinfo->getOwner();
-        if (function_exists('posix_getpwuid')) {
-            $user = posix_getpwuid($user)['name'];
+        if ($rootpath === $this->filedir) {
+            return false;
         }
-        $group = $fileinfo->getGroup();
-        if (function_exists('posix_getgrgid')) {
-            $group = posix_getgrgid($group)['name'];
-        }
-        return "(u: $user g: $group p: $permissions)";
-    }
-
-    /**
-     * Checks if provided path is an empty dir.
-     * @param string $foldername Full path to the dir.
-     * @return bool
-     */
-    public function is_dir_empty($foldername) {
-        if ($handle = opendir($foldername)) {
-            while (false !== ($file = readdir($handle))) {
-                if ($file !== '.' && $file !== '..') {
-                    closedir($handle);
-                    return false;
-                }
-            }
-            closedir($handle);
-        }
-        return true;
+        return $empty && rmdir($rootpath);
     }
 
     /**
@@ -678,7 +615,7 @@ abstract class object_file_system extends \file_system_filedir {
         $path = $this->get_local_path_from_hash($contenthash);
         if (unlink($path)) {
             // Check grandparent dir for empty dirs.
-            $this->delete_empty_folders(dirname(dirname($path)));
+            $this->delete_empty_dirs(dirname(dirname($path)));
         }
     }
 
