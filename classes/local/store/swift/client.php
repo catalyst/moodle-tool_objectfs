@@ -26,6 +26,7 @@ namespace tool_objectfs\local\store\swift;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\store\swift\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
 class client extends object_client_base {
@@ -317,15 +318,47 @@ class client extends object_client_base {
         return $e->getResponse()->getStatusCode();
     }
 
+    /**
+     * Deletes a file (object) within openstack swift storage.
+     *
+     * @param string $fullpath full path to file to be deleted
+     */
     public function delete_file($fullpath) {
-        // TODO: Implement delete_file() method.
+        unlink($fullpath);
     }
 
+    /**
+     * Moves file (object) within openstack swift storage.
+     *
+     * @param string $currentpath     current path to file to be moved.
+     * @param string $destinationpath destination path to file.
+     */
     public function rename_file($currentpath, $destinationpath) {
-        // TODO: Implement rename_file() method.
+        rename($currentpath, $destinationpath);
     }
 
+    /**
+     * Returns swift trash fullpath to use with php file functions.
+     *
+     * @param string $contenthash contenthash used as key in swift.
+     * @return string
+     * @throws \Exception if fails
+     */
     public function get_trash_fullpath_from_hash($contenthash) {
-        // TODO: Implement get_trash_fullpath_from_hash() method.
+        $container = $this->get_container();
+        $filepath = $this->get_filepath_from_hash($contenthash);
+        return "swift://$container->name/trash/$filepath";
+    }
+
+    /**
+     * Returns relative path to blob from fullpath to use with php file functions.
+     *
+     * @param string $fullpath full path to azure blob.
+     * @return   string    relative path to azure blob.
+     * @throws \Exception if fails
+     */
+    public function get_relative_path_from_fullpath($fullpath) {
+        $container = $this->get_container();
+        return str_replace("swift://$container->name/", '', $fullpath);
     }
 }
