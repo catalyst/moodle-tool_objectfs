@@ -35,6 +35,9 @@ if (!$hassiteconfig) {
 
 if (!$ADMIN->locate('tool_objectfs')) {
 
+    $settings = new admin_settingpage('tool_objectfs', get_string('pluginname', 'tool_objectfs'));
+    $ADMIN->add('tools', $settings);
+
     $ADMIN->add('tools', new admin_externalpage('tool_objectfs_presignedurl_testing',
         get_string('presignedurl_testing:page', 'tool_objectfs'),
         new moodle_url('/admin/tool/objectfs/presignedurl_tests.php')));
@@ -50,8 +53,10 @@ if (!$ADMIN->locate('tool_objectfs')) {
 
 if ($ADMIN->fulltree) {
 
-    $settings = new admin_settingpage('tool_objectfs', get_string('pluginname', 'tool_objectfs'));
-    $ADMIN->add('tools', $settings);
+    if($settings == null) {
+        $settings = new admin_settingpage('tool_objectfs', get_string('pluginname', 'tool_objectfs'));
+        $ADMIN->add('tools', $settings);
+    }
 
     $settings->add(new admin_setting_heading('tool_objectfs/generalsettings',
         new lang_string('settings:generalheader', 'tool_objectfs'), ''));
