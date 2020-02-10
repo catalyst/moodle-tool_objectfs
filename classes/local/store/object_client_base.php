@@ -101,6 +101,10 @@ abstract class object_client_base implements object_client {
      */
     public function define_client_check($client) {
         global $SESSION;
+        if (CLI_SCRIPT) {
+            // Running from CLI and there is no session.
+            return;
+        }
         $SESSION->notifications = [];
         $connection = $client->test_connection();
         if ($connection->success) {
