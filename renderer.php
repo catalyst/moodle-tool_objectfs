@@ -74,7 +74,12 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      */
     private function get_generate_status_report_update_stats_link() {
         $classname = '\tool_objectfs\task\generate_status_report';
-        $runnabletasks = tool_task\run_from_cli::is_runnable();
+        if (class_exists('tool_task\run_from_cli')) {
+            $runnabletasks = tool_task\run_from_cli::is_runnable();
+        } else {
+            $runnabletasks = false;
+        }
+
         $task = \core\task\manager::get_scheduled_task($classname);
         if (!$task->get_disabled() && get_config('tool_task', 'enablerunnow') && $runnabletasks) {
 
