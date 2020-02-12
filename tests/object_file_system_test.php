@@ -294,6 +294,8 @@ class object_file_system_testcase extends tool_objectfs_testcase {
              $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
         }
         $this->assertEquals($expectedgrandparentpathreadable, is_readable($testdir));
+        // Make sure we clean up $testdir after each test case.
+        remove_dir($testdir);
     }
 
     public function test_readfile_if_object_is_local() {
