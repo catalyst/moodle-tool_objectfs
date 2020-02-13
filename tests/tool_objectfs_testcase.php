@@ -34,6 +34,17 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $this->resetAfterTest(true);
     }
 
+    protected function tearDown() {
+        $this->clear_file_dir();
+        parent::tearDown();
+    }
+
+    protected function clear_file_dir() {
+        global $CFG;
+        $filedir = $CFG->dataroot . '/filedir';
+        remove_dir($filedir);
+    }
+
     protected function reset_file_system() {
         $this->filesystem = new test_file_system();
     }
