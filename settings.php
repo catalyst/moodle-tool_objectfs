@@ -102,7 +102,7 @@ if ($ADMIN->fulltree) {
 
         $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
             new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
-            new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), '', 10 * MINSECS));
+            new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), 2 * HOURSECS, HOURSECS));
 
         $settings->add(new admin_setting_configtext('tool_objectfs/presignedminfilesize',
             new lang_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'),
