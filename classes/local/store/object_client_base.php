@@ -108,20 +108,39 @@ abstract class object_client_base implements object_client {
         $SESSION->notifications = [];
         $connection = $client->test_connection();
         if ($connection->success) {
-            \core\notification::success($connection->message);
+            $this->notification($connection->message);
             // Check permissions if we can connect.
             $permissions = $client->test_permissions($this->testdelete);
             if ($permissions->success) {
-                \core\notification::success(key($permissions->messages), current($permissions->messages));
+                $message = key($permissions->messages) . ' ' . current($permissions->messages);
+                $this->notification($message);
             } else {
                 foreach ($permissions->messages as $message => $type) {
-                    \core\notification::warning($message, $type);
+                    $this->notification($message . ' - ' . $type, 'warning');
                 }
             }
         } else {
-            \core\notification::error($connection->message);
+            $this->notification($connection->message, 'error');
         }
     }
 
-
+    /**
+     * Class \core\notification is only available for moodle versions > 3.1
+     * @param $message
+     * @param string $type
+     */
+    private function notification($message, $type = 'success') {
+        global $CFG, $OUTPUT;
+        $methodsmap = [
+            'success' => 'notify_success',
+            'warning' => 'notify_problem',
+            'error' => 'notify_problem',
+        ];
+        if (!empty($CFG->branch) && $CFG->branch < '31' && isset($methodsmap[$type])) {
+            $method = $methodsmap[$type];
+            $OUTPUT->$method($message);
+        } else {
+            call_user_func(['\core\notification::' . $type, $message]);
+        }
+    }
 }
