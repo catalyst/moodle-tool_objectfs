@@ -100,28 +100,46 @@ abstract class object_client_base implements object_client {
      * @param $client
      */
     public function define_client_check($client) {
-        global $SESSION;
         if (CLI_SCRIPT) {
             // Running from CLI and there is no session.
             return;
         }
-        $SESSION->notifications = [];
         $connection = $client->test_connection();
         if ($connection->success) {
-            \core\notification::success($connection->message);
+            $this->notification($connection->message);
             // Check permissions if we can connect.
             $permissions = $client->test_permissions($this->testdelete);
             if ($permissions->success) {
-                \core\notification::success(key($permissions->messages), current($permissions->messages));
+                $message = key($permissions->messages) . ' ' . current($permissions->messages);
+                $this->notification($message);
             } else {
                 foreach ($permissions->messages as $message => $type) {
-                    \core\notification::warning($message, $type);
+                    $this->notification($message . ' - ' . $type, 'warning');
                 }
             }
         } else {
-            \core\notification::error($connection->message);
+            $this->notification($connection->message, 'error');
         }
     }
 
-
+    /**
+     * Class \core\notification is only available for moodle versions > 3.1
+     * @param $message
+     * @param string $type
+     */
+    public function notification($message, $type = 'success') {
+        global $CFG, $OUTPUT, $SESSION;;
+        $methodsmap = [
+            'success' => 'notifysuccess',
+            'warning' => 'notifyproblem',
+            'error' => 'notifyproblem',
+        ];
+        if (!empty($CFG->branch) && $CFG->branch < '31' && isset($methodsmap[$type])) {
+            $type = $methodsmap[$type];
+            echo $OUTPUT->notification($message, $type);
+        } else {
+            $SESSION->notifications = [];
+            call_user_func('\core\notification::' . $type, $message);
+        }
+    }
 }

@@ -14,19 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version information.
- *
- * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020030500;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2020030500;      // Same as version
-$plugin->requires  = 2013111811;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+use advanced_testcase;
+
+require_once(__DIR__ . '/../lib.php');
+require_once(__DIR__ . '/classes/test_client.php');
+
+class object_client_testcase extends advanced_testcase {
+
+    protected function setUp() {
+        $this->resetAfterTest(true);
+    }
+
+    public function test_notification() {
+        global $CFG, $SESSION;
+        $config = get_objectfs_config();
+        $client = new test_client($config);
+        $client->notification('Success');
+        if ($CFG->branch > 30) {
+            self::assertObjectHasAttribute('notifications', $SESSION);
+            self::assertCount(1, $SESSION->notifications);
+        }
+    }
+}
