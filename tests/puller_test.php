@@ -25,6 +25,9 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class puller_testcase extends tool_objectfs_testcase {
 
+    /** @var string $manipulator */
+    protected $manipulator = 'puller';
+
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
@@ -59,10 +62,8 @@ class puller_testcase extends tool_objectfs_testcase {
         $localobject = $this->create_local_object();
         $duplicatedobject = $this->create_duplicated_object();
 
-        $candidateobjects = $this->puller->get_candidate_objects();
-
-        $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
-        $this->assertArrayNotHasKey($duplicatedobject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($localobject->contenthash));
+        self::assertFalse($this->objects_contain_hash($duplicatedobject->contenthash));
     }
 
     public function test_puller_get_candidate_objects_will_not_get_objects_over_sizethreshold() {
@@ -71,9 +72,7 @@ class puller_testcase extends tool_objectfs_testcase {
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $remoteobject->contenthash));
         $this->set_puller_config('sizethreshold', 0);
 
-        $candidateobjects = $this->puller->get_candidate_objects();
-
-        $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
     public function test_puller_can_pull_remote_file() {

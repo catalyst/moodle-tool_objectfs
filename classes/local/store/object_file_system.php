@@ -122,7 +122,7 @@ abstract class object_file_system extends \file_system_filedir {
             if ($objectlock && !is_readable($path)) {
                 $location = $this->copy_object_from_external_to_local_by_hash($contenthash);
                 // We want this file to be deleted again later.
-                update_object_record($contenthash, $location);
+                update_object_by_hash($contenthash, $location);
 
             }
             if ($objectlock) {
@@ -220,7 +220,7 @@ abstract class object_file_system extends \file_system_filedir {
             return OBJECT_LOCATION_EXTERNAL;
         } else {
             // Object is not anywhere - we toggle an error state in the DB.
-            update_object_record($contenthash, OBJECT_LOCATION_ERROR);
+            update_object_by_hash($contenthash, OBJECT_LOCATION_ERROR);
             return OBJECT_LOCATION_ERROR;
         }
     }
@@ -364,7 +364,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->logger->log_object_read('readfile', $path, $file->get_filesize());
 
         if (!$success) {
-            update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         }
     }
 
@@ -393,7 +393,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->logger->log_object_read('file_get_contents', $path, $file->get_filesize());
 
         if (!$contents) {
-            update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         }
 
         return $contents;
@@ -436,7 +436,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->logger->log_object_read('get_file_handle_for_path', $path, $file->get_filesize());
 
         if (!$filehandle) {
-            update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         }
 
         return $filehandle;
@@ -765,7 +765,7 @@ abstract class object_file_system extends \file_system_filedir {
         $result = parent::add_file_from_path($pathname, $contenthash);
 
         $location = $this->get_object_location_from_hash($result[0]);
-        update_object_record($result[0], $location);
+        update_object_by_hash($result[0], $location);
 
         return $result;
     }
@@ -780,7 +780,7 @@ abstract class object_file_system extends \file_system_filedir {
         $result = parent::add_file_from_string($content);
 
         $location = $this->get_object_location_from_hash($result[0]);
-        update_object_record($result[0], $location);
+        update_object_by_hash($result[0], $location);
 
         return $result;
     }

@@ -36,36 +36,55 @@ define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
 define('OBJECTFS_BYTES_IN_TERABYTE', 1099511627776);
 
-function update_object_record($contenthash, $location) {
+
+/**
+ * @param string $contenthash
+ * @param int $newlocation
+ * @return stdClass
+ * @throws dml_exception
+ */
+function update_object_by_hash($contenthash, $newlocation) {
     global $DB;
-
-    $newobject = new \stdClass();
+    $newobject = new stdClass();
     $newobject->contenthash = $contenthash;
-    $newobject->timeduplicated = time();
-    $newobject->location = $location;
 
-    $oldobject = $DB->get_record('tool_objectfs_objects', array('contenthash' => $contenthash));
-
+    $oldobject = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash]);
     if ($oldobject) {
+        $newobject->timeduplicated = $oldobject->timeduplicated;
+        $newobject->id = $oldobject->id;
 
         // If location hasn't changed we do not need to update.
-        if ($oldobject->location === $newobject->location) {
+        if ((int)$oldobject->location === $newlocation) {
             return $oldobject;
         }
 
-        // If location change is not to duplicated we do not update timeduplicated.
-        if ($newobject->location !== OBJECT_LOCATION_DUPLICATED) {
-            $newobject->timeduplicated = $oldobject->timeduplicated;
-        }
-
-        $newobject->id = $oldobject->id;
-
-        $DB->update_record('tool_objectfs_objects', $newobject);
-    } else {
-        $DB->insert_record('tool_objectfs_objects', $newobject);
+        return update_object($newobject, $newlocation);
     }
+    $newobject->timeduplicated = time();
+    $newobject->location = $newlocation;
+    $DB->insert_record('tool_objectfs_objects', $newobject);
 
     return $newobject;
+}
+
+/**
+ * @param stdClass $object
+ * @param int $newlocation
+ * @return stdClass
+ * @throws dml_exception
+ */
+function update_object(stdClass $object, $newlocation) {
+    global $DB;
+
+    // If location change is 'duplicated' we update timeduplicated.
+    if ($newlocation === OBJECT_LOCATION_DUPLICATED) {
+        $object->timeduplicated = time();
+    }
+
+    $object->location = $newlocation;
+    $DB->update_record('tool_objectfs_objects', $object);
+
+    return $object;
 }
 
 function set_objectfs_config($config) {
@@ -109,7 +128,7 @@ function get_objectfs_config() {
     $config->azure_container = '';
     $config->azure_sastoken = '';
 
-    // Swift(OpenStack) file system
+    // Swift(OpenStack) file system.
     $config->openstack_authurl = '';
     $config->openstack_region = '';
     $config->openstack_container = '';
