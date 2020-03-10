@@ -45,6 +45,9 @@ class file_system extends object_file_system {
 
     protected function initialise_external_client($config) {
         $s3client = new client($config);
+        if (!$this->supports_xsendfile()) {
+            $s3client->enablepresignedurls = false;
+        }
 
         return $s3client;
     }
