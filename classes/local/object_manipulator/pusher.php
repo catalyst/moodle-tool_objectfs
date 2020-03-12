@@ -72,8 +72,12 @@ class pusher extends manipulator {
         return 'get_push_candidates';
     }
 
+    /**
+     * @return string
+     */
     protected function get_candidates_sql() {
-        $sql = 'SELECT MAX(f.id),
+        return 'SELECT MAX(f.id) AS fid,
+                       o.id,
                        f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
@@ -82,9 +86,7 @@ class pusher extends manipulator {
                    AND f.filesize < :maximum_file_size
                    AND f.timecreated <= :maxcreatedtimstamp
                    AND o.location = :object_location
-              GROUP BY f.contenthash, o.location';
-
-        return $sql;
+              GROUP BY o.id, f.contenthash, o.location';
     }
 
     protected function get_candidates_sql_params() {

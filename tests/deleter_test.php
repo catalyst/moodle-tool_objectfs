@@ -25,6 +25,9 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class deleter_testcase extends tool_objectfs_testcase {
 
+    /** @var string $manipulator */
+    protected $manipulator = 'deleter';
+
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
@@ -61,19 +64,15 @@ class deleter_testcase extends tool_objectfs_testcase {
         $localobject = $this->create_local_object();
         $remoteobject = $this->create_remote_object();
 
-        $candidateobjects = $this->deleter->get_candidate_objects();
-
-        $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
-        $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($localobject->contenthash));
+        self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
     public function test_deleter_get_candidate_objects_will_not_get_objects_which_havent_been_duplicated_for_consistancy_delay() {
         $duplicatedbject = $this->create_duplicated_object();
         $this->set_deleter_config('consistencydelay', 100);
 
-        $candidateobjects = $this->deleter->get_candidate_objects();
-
-        $this->assertArrayNotHasKey($duplicatedbject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
     public function test_deleter_can_delete_object() {

@@ -59,7 +59,7 @@ class file_system extends object_file_system {
         $this->get_logger()->log_object_read('readfile', $path, $file->get_filesize());
 
         if (!$success) {
-            update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         }
     }
 

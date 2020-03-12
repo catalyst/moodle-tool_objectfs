@@ -49,15 +49,22 @@ class checker extends manipulator {
         return 'get_check_candidates';
     }
 
+    /**
+     * @return string
+     */
     protected function get_candidates_sql() {
-        $sql = 'SELECT f.contenthash
+        return 'SELECT MAX(f.id) AS fid,
+                       o.id,
+                       f.contenthash,
+                       MAX(f.filesize) AS filesize
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE f.filesize > 0
                    AND o.location is NULL
-              GROUP BY f.contenthash';
-
-        return $sql;
+              GROUP BY o.id,
+                       f.contenthash,
+                       f.filesize,
+                       o.location';
     }
 
     protected function get_candidates_sql_params() {

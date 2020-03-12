@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use dml_exception;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -90,9 +92,10 @@ abstract class manipulator {
     /**
      * Pushes files from local file system to remote.
      *
-     * @param  array $candidatehashes content hashes to push
+     * @param  array $objectrecords content hashes to push
+     * @throws dml_exception
      */
-    public function execute($objectrecords) {
+    public function execute(array $objectrecords) {
 
         if (!$this->manipulator_can_execute()) {
             mtrace('Objectfs manipulator exiting early');
@@ -119,9 +122,11 @@ abstract class manipulator {
             }
 
             $newlocation = $this->manipulate_object($objectrecord);
-
-            update_object_record($objectrecord->contenthash, $newlocation);
-
+            if (!empty($objectrecord->id)) {
+                update_object($objectrecord, $newlocation);
+            } else {
+                update_object_by_hash($objectrecord->contenthash, $newlocation);
+            }
             $objectlock->release();
         }
 

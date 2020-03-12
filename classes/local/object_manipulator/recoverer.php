@@ -48,18 +48,21 @@ class recoverer extends manipulator {
         return 'get_recover_candidates';
     }
 
+    /**
+     * @return string
+     */
     protected function get_candidates_sql() {
-        $sql = 'SELECT MAX(f.id),
+        return 'SELECT MAX(f.id) AS fid,
+                       o.id,
                        f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
                   JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE o.location = ?
-              GROUP BY f.contenthash,
+              GROUP BY o.id,
+                       f.contenthash,
                        f.filesize,
                        o.location';
-
-        return $sql;
     }
 
     protected function get_candidates_sql_params() {

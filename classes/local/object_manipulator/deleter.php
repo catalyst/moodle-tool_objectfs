@@ -73,9 +73,13 @@ class deleter extends manipulator {
         return 'get_delete_candidates';
     }
 
+    /**
+     * @return string
+     */
     protected function get_candidates_sql() {
 
-        $sql = 'SELECT MAX(f.id),
+        return 'SELECT MAX(f.id) AS fid,
+                       o.id,
                        f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
@@ -83,11 +87,10 @@ class deleter extends manipulator {
                  WHERE o.timeduplicated <= ?
                    AND o.location = ?
                    AND f.filesize > ?
-              GROUP BY f.contenthash,
+              GROUP BY o.id,
+                       f.contenthash,
                        f.filesize,
                        o.location';
-
-        return $sql;
     }
 
     protected function get_candidates_sql_params() {

@@ -18,6 +18,9 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use dml_exception;
+use stdClass;
+use stored_file;
 use tool_objectfs\local\store\object_file_system;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -71,7 +74,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
+        update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
@@ -97,7 +100,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_record($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
+        update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
@@ -105,7 +108,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_local_file($content);
         $contenthash = $file->get_contenthash();
         $this->filesystem->copy_object_from_local_to_external_by_hash($contenthash);
-        update_object_record($contenthash, OBJECT_LOCATION_DUPLICATED);
+        update_object_by_hash($contenthash, OBJECT_LOCATION_DUPLICATED);
         return $file;
     }
 
@@ -113,7 +116,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_duplicated_file($content);
         $contenthash = $file->get_contenthash();
         $this->filesystem->delete_object_from_local_by_hash($contenthash);
-        update_object_record($contenthash, OBJECT_LOCATION_EXTERNAL);
+        update_object_by_hash($contenthash, OBJECT_LOCATION_EXTERNAL);
         return $file;
     }
 
@@ -121,7 +124,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_local_file();
         $path = $this->get_local_path_from_storedfile($file);
         unlink($path);
-        update_object_record($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+        update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         return $file;
     }
 
@@ -180,38 +183,22 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
 
     protected function create_local_object($content = 'local object content') {
         $file = $this->create_local_file($content);
-        $objectrecord = new \stdClass();
-        $objectrecord->contenthash = $file->get_contenthash();
-        $objectrecord->location = OBJECT_LOCATION_LOCAL;
-        $objectrecord->filesize = $file->get_filesize();
-        return $objectrecord;
+        return $this->create_object_record($file, OBJECT_LOCATION_LOCAL);
     }
 
     protected function create_duplicated_object($content = 'duplicated object content') {
         $file = $this->create_duplicated_file($content);
-        $objectrecord = new \stdClass();
-        $objectrecord->contenthash = $file->get_contenthash();
-        $objectrecord->location = OBJECT_LOCATION_DUPLICATED;
-        $objectrecord->filesize = $file->get_filesize();
-        return $objectrecord;
+        return $this->create_object_record($file, OBJECT_LOCATION_DUPLICATED);
     }
 
     protected function create_remote_object($content = 'remote object content') {
         $file = $this->create_remote_file($content);
-        $objectrecord = new \stdClass();
-        $objectrecord->contenthash = $file->get_contenthash();
-        $objectrecord->location = OBJECT_LOCATION_EXTERNAL;
-        $objectrecord->filesize = $file->get_filesize();
-        return $objectrecord;
+        return $this->create_object_record($file, OBJECT_LOCATION_EXTERNAL);
     }
 
     protected function create_error_object($content = 'error object content') {
         $file = $this->create_error_file($content);
-        $objectrecord = new \stdClass();
-        $objectrecord->contenthash = $file->get_contenthash();
-        $objectrecord->location = OBJECT_LOCATION_ERROR;
-        $objectrecord->filesize = $file->get_filesize();
-        return $objectrecord;
+        return $this->create_object_record($file, OBJECT_LOCATION_ERROR);
     }
 
     protected function is_locally_readable_by_hash($contenthash) {
@@ -258,5 +245,36 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * @param stored_file $file
+     * @param $location
+     * @return stdClass
+     * @throws dml_exception
+     */
+    private function create_object_record(stored_file $file, $location) {
+        global $DB;
+        $contenthash = $file->get_contenthash();
+        $objectrecord = new stdClass();
+        $objectrecord->contenthash = $contenthash;
+        $objectrecord->location = $location;
+        $objectrecord->filesize = $file->get_filesize();
+        $objectrecord->id = $DB->get_field('tool_objectfs_objects', 'id', ['contenthash' => $contenthash]);
+        return $objectrecord;
+    }
+
+    /**
+     * @param string $contenthash
+     * @return bool
+     */
+    protected function objects_contain_hash($contenthash) {
+        $candidateobjects = $this->{$this->manipulator}->get_candidate_objects();
+        foreach ($candidateobjects as $candidateobject) {
+            if ($contenthash === $candidateobject->contenthash) {
+                return true;
+            }
+        }
+        return false;
     }
 }
