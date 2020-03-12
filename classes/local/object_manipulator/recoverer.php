@@ -25,52 +25,17 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use stdClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 class recoverer extends manipulator {
 
     /**
-     * recoverer constructor.
-     *
-     * @param sss_client $client S3 client
-     * @param object_file_system $filesystem S3 file system
-     * @param object $config sssfs config.
+     * @param stdClass $objectrecord
+     * @return int
      */
-    public function __construct($filesystem, $config, $logger) {
-        parent::__construct($filesystem, $config);
-
-        $this->logger = $logger;
-        // Inject our logger into the filesystem.
-        $this->filesystem->set_logger($this->logger);
+    public function manipulate_object(stdClass $objectrecord) {
+        return $this->filesystem->get_object_location_from_hash($objectrecord->contenthash);
     }
-
-    protected function get_query_name() {
-        return 'get_recover_candidates';
-    }
-
-    protected function get_candidates_sql() {
-        $sql = 'SELECT MAX(f.id),
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
-                  FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE o.location = ?
-              GROUP BY f.contenthash,
-                       f.filesize,
-                       o.location';
-
-        return $sql;
-    }
-
-    protected function get_candidates_sql_params() {
-        $params = array(OBJECT_LOCATION_ERROR);
-
-        return $params;
-    }
-
-    protected function manipulate_object($objectrecord) {
-        $newlocation = $this->filesystem->get_object_location_from_hash($objectrecord->contenthash, $objectrecord->filesize);
-        return $newlocation;
-    }
-
 }

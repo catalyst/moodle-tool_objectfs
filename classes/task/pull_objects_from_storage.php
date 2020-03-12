@@ -25,7 +25,8 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\manipulator;
+use tool_objectfs\local\object_manipulator\manipulator_builder;
+use tool_objectfs\local\object_manipulator\puller;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -44,8 +45,6 @@ class pull_objects_from_storage extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\puller');
+        (new manipulator_builder())->build(puller::class)->execute();
     }
 }
-
-

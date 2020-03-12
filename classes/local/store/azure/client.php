@@ -38,6 +38,7 @@ use tool_objectfs\local\store\azure\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
 class client extends object_client_base {
+    const MAX_UPLOAD = Resources::MAX_BLOCK_BLOB_SIZE;
 
     /** @var BlobRestProxy $client The Blob client. */
     protected $client;
@@ -69,7 +70,7 @@ class client extends object_client_base {
      * @return int
      */
     public function get_maximum_upload_size() {
-        return Resources::MAX_BLOCK_BLOB_SIZE;
+        return self::MAX_UPLOAD;
     }
 
     /**

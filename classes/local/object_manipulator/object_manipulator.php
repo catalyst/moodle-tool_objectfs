@@ -15,36 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that pushes files to S3.
+ * Object manipulator interface class.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Gleimer Mora <gleimermora@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\task;
+namespace tool_objectfs\local\object_manipulator;
 
-use tool_objectfs\local\object_manipulator\deleter;
-use tool_objectfs\local\object_manipulator\manipulator_builder;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/filestorage/file_system.php');
+interface object_manipulator {
 
-class delete_local_objects extends \core\task\scheduled_task {
-
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('delete_local_objects_task', 'tool_objectfs');
-    }
 
     /**
-     * Execute task
+     * @param array $objects
+     * @return mixed
      */
-    public function execute() {
-        (new manipulator_builder())->build(deleter::class)->execute();
-    }
+    public function execute(array $objects);
+
+    /**
+     * @param stdClass $objectrecord
+     * @return int
+     */
+    public function manipulate_object(stdClass $objectrecord);
 }

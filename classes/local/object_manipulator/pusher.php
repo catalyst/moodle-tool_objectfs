@@ -25,16 +25,13 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use stdClass;
+use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\log\aggregate_logger;
+
 defined('MOODLE_INTERNAL') || die();
 
 class pusher extends manipulator {
-
-    /**
-     * Size threshold for pushing files to remote in bytes.
-     *
-     * @var int
-     */
-    private $sizethreshold;
 
     /**
      * Minimum age of a file to be pushed to remote in seconds.
@@ -51,60 +48,25 @@ class pusher extends manipulator {
     private $maximumfilesize;
 
     /**
-     * Pusher constructor.
-     *
-     * @param object_client $client remote object client
-     * @param object_file_system $filesystem objectfs file system
-     * @param object $config objectfs config.
+     * pusher constructor.
+     * @param object_file_system $filesystem
+     * @param stdClass $config
+     * @param aggregate_logger $logger
      */
-    public function __construct($filesystem, $config, $logger) {
-        parent::__construct($filesystem, $config);
+    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
+        parent::__construct($filesystem, $config, $logger);
         $this->sizethreshold = $config->sizethreshold;
         $this->minimumage = $config->minimumage;
         $this->maximumfilesize = $this->filesystem->get_maximum_upload_filesize();
-
-        $this->logger = $logger;
-        // Inject our logger into the filesystem.
-        $this->filesystem->set_logger($this->logger);
     }
 
-    protected function get_query_name() {
-        return 'get_push_candidates';
-    }
-
-    protected function get_candidates_sql() {
-        $sql = 'SELECT MAX(f.id),
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
-                  FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE f.filesize > :threshold
-                   AND f.filesize < :maximum_file_size
-                   AND f.timecreated <= :maxcreatedtimstamp
-                   AND o.location = :object_location
-              GROUP BY f.contenthash, o.location';
-
-        return $sql;
-    }
-
-    protected function get_candidates_sql_params() {
-        $params = array(
-            'maxcreatedtimstamp' => time() - $this->minimumage,
-            'threshold' => $this->sizethreshold,
-            'maximum_file_size' => $this->maximumfilesize,
-            'object_location' => OBJECT_LOCATION_LOCAL,
-        );
-
-        return $params;
-    }
-
-    protected function manipulate_object($objectrecord) {
+    /**
+     * @param stdClass $objectrecord
+     * @return int
+     */
+    public function manipulate_object(stdClass $objectrecord) {
         $contenthash = $objectrecord->contenthash;
         $filesize = $objectrecord->filesize;
-        $newlocation = $this->filesystem->copy_object_from_local_to_external_by_hash($contenthash, $filesize);
-        return $newlocation;
+        return $this->filesystem->copy_object_from_local_to_external_by_hash($contenthash, $filesize);
     }
-
 }
-
-

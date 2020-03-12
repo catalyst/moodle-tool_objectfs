@@ -25,7 +25,8 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\manipulator;
+use tool_objectfs\local\object_manipulator\manipulator_builder;
+use tool_objectfs\local\object_manipulator\pusher;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -44,8 +45,6 @@ class push_objects_to_storage extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\pusher');
+        (new manipulator_builder())->build(pusher::class)->execute();
     }
 }
-
-

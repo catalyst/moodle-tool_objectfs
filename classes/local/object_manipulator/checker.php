@@ -25,6 +25,10 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use stdClass;
+use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\log\aggregate_logger;
+
 defined('MOODLE_INTERNAL') || die();
 
 class checker extends manipulator {
@@ -33,40 +37,20 @@ class checker extends manipulator {
      * Checker constructor.
      * This manipulator adds location for files that do not have records in {tool_objectfs_objects} table.
      *
-     * @param object_client $client remote object client
      * @param object_file_system $filesystem objectfs file system
-     * @param object $config objectfs config.
+     * @param stdClass $config objectfs config.
+     * @param aggregate_logger $logger
      */
-    public function __construct($filesystem, $config, $logger) {
-        parent::__construct($filesystem, $config);
-
-        $this->logger = $logger;
-        // Inject our logger into the filesystem.
-        $this->filesystem->set_logger($this->logger);
+    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
+        parent::__construct($filesystem, $config, $logger);
+        $this->batchsize = $this->batchsize * 10;
     }
 
-    protected function get_query_name() {
-        return 'get_check_candidates';
-    }
-
-    protected function get_candidates_sql() {
-        $sql = 'SELECT f.contenthash
-                  FROM {files} f
-             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE f.filesize > 0
-                   AND o.location is NULL
-              GROUP BY f.contenthash';
-
-        return $sql;
-    }
-
-    protected function get_candidates_sql_params() {
-        $params = array();
-        return $params;
-    }
-
-    protected function manipulate_object($objectrecord) {
-        $location = $this->filesystem->get_object_location_from_hash($objectrecord->contenthash);
-        return $location;
+    /**
+     * @param stdClass $objectrecord
+     * @return int
+     */
+    public function manipulate_object(stdClass $objectrecord) {
+        return $this->filesystem->get_object_location_from_hash($objectrecord->contenthash);
     }
 }

@@ -25,7 +25,9 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\manipulator;
+use coding_exception;
+use tool_objectfs\local\object_manipulator\checker;
+use tool_objectfs\local\object_manipulator\manipulator_builder;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -35,6 +37,7 @@ class check_objects_location extends \core\task\scheduled_task {
 
     /**
      * Get task name
+     * @throws coding_exception
      */
     public function get_name() {
         return get_string('check_objects_location_task', 'tool_objectfs');
@@ -44,8 +47,6 @@ class check_objects_location extends \core\task\scheduled_task {
      * Execute task
      */
     public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\checker');
+        (new manipulator_builder())->build(checker::class)->execute();
     }
 }
-
-

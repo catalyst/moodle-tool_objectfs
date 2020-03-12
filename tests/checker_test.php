@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\checker;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -28,6 +29,7 @@ class checker_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
+        $this->candidatesfinder = new candidates_finder(checker::class, $config);
         set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->checker = new checker($this->filesystem, $config, $this->logger);
@@ -66,7 +68,7 @@ class checker_testcase extends tool_objectfs_testcase {
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_not_get_objects_local');
         $remoteobject = $this->create_remote_object('test_checker_get_candidate_objects_will_not_get_objects_remote');
         $duplicatedbject = $this->create_duplicated_object('test_checker_get_candidate_objects_will_not_get_objects_duplicated');
-        $candidateobjects = $this->checker->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
         $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
@@ -77,7 +79,7 @@ class checker_testcase extends tool_objectfs_testcase {
         global $DB;
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_get_object');
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
-        $candidateobjects = $this->checker->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertNotCount(0, $candidateobjects);
         $this->assertArrayHasKey($localobject->contenthash, $candidateobjects);
@@ -88,20 +90,12 @@ class checker_testcase extends tool_objectfs_testcase {
         $localobject = $this->create_local_object('test_checker_can_update_object');
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
         $this->checker->execute(array($localobject));
-        $candidateobjects = $this->checker->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $localobject->contenthash));
 
         $this->assertNotFalse($dblocation);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
         $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
-    }
-
-    public function test_checker_get_candidates_sql_params_method_will_get_empty_array() {
-        $reflection = new \ReflectionMethod(checker::class, "get_candidates_sql_params");
-        $reflection->setAccessible(true);
-        $result = $reflection->invokeArgs($this->checker, array());
-
-        $this->assertCount(0, $result);
     }
 
     public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_local() {

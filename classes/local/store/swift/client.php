@@ -34,7 +34,7 @@ class client extends object_client_base {
     /** @var string $containername The current container. */
     protected $containername;
 
-    protected $maxbytes = 5368709120; // 5GiB.
+    const MAX_UPLOAD = 5368709120; // 5GiB.
 
     protected $config;
 
@@ -93,7 +93,7 @@ class client extends object_client_base {
      * @return int
      */
     public function get_maximum_upload_size() {
-        return $this->maxbytes;
+        return self::MAX_UPLOAD;
     }
 
 

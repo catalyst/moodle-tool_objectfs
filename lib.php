@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\local\object_manipulator\manipulator_builder;
+
 defined('MOODLE_INTERNAL') || die;
 
 define('OBJECT_LOCATION_ERROR', -1);
@@ -109,7 +111,7 @@ function get_objectfs_config() {
     $config->azure_container = '';
     $config->azure_sastoken = '';
 
-    // Swift(OpenStack) file system
+    // Swift(OpenStack) file system.
     $config->openstack_authurl = '';
     $config->openstack_region = '';
     $config->openstack_container = '';
@@ -171,16 +173,9 @@ function tool_objectfs_cron() {
     mtrace('RUNNING legacy cron objectfs');
     global $CFG;
     if ($CFG->branch <= 26) {
-
-        $manipulators = \tool_objectfs\object_manipulator\manipulator::get_all_manipulator_classnames();
-
         // Unlike the task system, we do not get fine grained control over
         // when tasks/manipulators run. Every cron we just run all the manipulators.
-        foreach ($manipulators as $manipulator) {
-            mtrace("Executing objectfs $manipulator");
-            \tool_objectfs\object_manipulator\manipulator::setup_and_run_object_manipulator($manipulator);
-            mtrace("Objectfs $manipulator successfully executed");
-        }
+        (new manipulator_builder())->execute_all();
 
         \tool_objectfs\local\report\objectfs_report::generate_status_report();
     }

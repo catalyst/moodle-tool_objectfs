@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\pusher;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -28,6 +29,7 @@ class pusher_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
+        $this->candidatesfinder = new candidates_finder(pusher::class, $config);
         $config->sizethreshold = 0;
         $config->minimumage = 0;
         set_objectfs_config($config);
@@ -49,7 +51,7 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_pusher_get_candidate_objects_will_get_local_objects() {
         $object = $this->create_local_object();
 
-        $candidateobjects = $this->pusher->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
         $objectfound = false;
         foreach ($candidateobjects as $candidate) {
             if ($object->contenthash === $candidate->contenthash) {
@@ -63,7 +65,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $duplicatedobject = $this->create_duplicated_object();
         $remoteobject = $this->create_remote_object();
 
-        $candidateobjects = $this->pusher->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($duplicatedobject->contenthash, $candidateobjects);
         $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
@@ -75,7 +77,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $maximumfilesize = $this->filesystem->get_maximum_upload_filesize() + 1;
         $DB->set_field('files', 'filesize', $maximumfilesize, array('contenthash' => $object->contenthash));
 
-        $candidateobjects = $this->pusher->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($object->contenthash, $candidateobjects);
     }
@@ -86,7 +88,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $object = $this->create_local_object();
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $object->contenthash));
 
-        $candidateobjects = $this->pusher->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($object->contenthash, $candidateobjects);
     }
@@ -96,7 +98,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $this->set_pusher_config('minimumage', 100);
         $object = $this->create_local_object();
 
-        $candidateobjects = $this->pusher->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($object->contenthash, $candidateobjects);
     }
@@ -157,7 +159,7 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_mimetype() {
         global $DB;
         // Push initial objects so they arnt candidates.
-        $objects = $this->pusher->get_candidate_objects();
+        $objects = $this->candidatesfinder->get();
         $this->pusher->execute($objects);
 
         $object = $this->create_local_object();
@@ -168,7 +170,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $file->pathnamehash = '1234';
         $DB->insert_record('files', $file);
 
-        $objects = $this->pusher->get_candidate_objects();
+        $objects = $this->candidatesfinder->get();
 
         $this->assertEquals(1, count($objects));
     }
@@ -176,7 +178,7 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_filesize() {
         global $DB;
         // Push initial objects so they arnt candidates.
-        $objects = $this->pusher->get_candidate_objects();
+        $objects = $this->candidatesfinder->get();
         $this->pusher->execute($objects);
 
         $object = $this->create_local_object();
@@ -191,11 +193,10 @@ class pusher_testcase extends tool_objectfs_testcase {
         $file->pathnamehash = '12345';
         $DB->insert_record('files', $file);
 
-        $objects = $this->pusher->get_candidate_objects();
+        $objects = $this->candidatesfinder->get();
 
         $this->assertEquals(1, count($objects));
         $this->assertEquals($this->filesystem->get_maximum_upload_filesize() - 100, reset($objects)->filesize);
         $this->assertEquals($file->contenthash, reset($objects)->contenthash);
     }
 }
-

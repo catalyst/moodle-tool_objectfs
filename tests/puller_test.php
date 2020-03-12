@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\puller;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -28,6 +29,7 @@ class puller_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
+        $this->candidatesfinder = new candidates_finder(puller::class, $config);
         $config->sizethreshold = 100;
         set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
@@ -48,7 +50,7 @@ class puller_testcase extends tool_objectfs_testcase {
     public function test_puller_get_candidate_objects_will_get_remote_objects() {
         $remoteobject = $this->create_remote_object();
 
-        $candidateobjects = $this->puller->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         foreach ($candidateobjects as $candidate) {
             $this->assertEquals($remoteobject->contenthash, $candidate->contenthash);
@@ -59,7 +61,7 @@ class puller_testcase extends tool_objectfs_testcase {
         $localobject = $this->create_local_object();
         $duplicatedobject = $this->create_duplicated_object();
 
-        $candidateobjects = $this->puller->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
         $this->assertArrayNotHasKey($duplicatedobject->contenthash, $candidateobjects);
@@ -71,7 +73,7 @@ class puller_testcase extends tool_objectfs_testcase {
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $remoteobject->contenthash));
         $this->set_puller_config('sizethreshold', 0);
 
-        $candidateobjects = $this->puller->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
     }
@@ -111,7 +113,4 @@ class puller_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertFalse($this->is_externally_readable_by_hash($object->contenthash));
     }
-
-
 }
-

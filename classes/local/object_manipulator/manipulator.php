@@ -25,11 +25,16 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use stdClass;
+use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
+use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\log\aggregate_logger;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
-abstract class manipulator {
+abstract class manipulator implements object_manipulator {
 
     /**
      * object file system
@@ -45,61 +50,47 @@ abstract class manipulator {
      */
     protected $finishtime;
 
+    /** @var aggregate_logger $logger */
     protected $logger;
 
+    /** @var int $batchsize */
     protected $batchsize;
+
+    /**
+     * Size threshold for pulling files from remote in bytes.
+     *
+     * @var int
+     */
+    protected $sizethreshold;
 
     /**
      * Manipulator constructor
      *
      * @param object_file_system $filesystem object file system
-     * @param int $maxruntime What time the file manipulator should finish execution by
+     * @param stdClass $config
+     * @param aggregate_logger $logger
      */
-    public function __construct($filesystem, $config) {
+    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
         $this->finishtime = time() + $config->maxtaskruntime;
         $this->filesystem = $filesystem;
-
-        if (get_class($this) === 'tool_objectfs\\local\\object_manipulator\\checker') {
-            $this->batchsize = $config->batchsize * 10;
-        } else {
-            $this->batchsize = $config->batchsize;
-        }
+        $this->batchsize = $config->batchsize;
+        $this->sizethreshold = $config->sizethreshold;
+        $this->logger = $logger;
+        // Inject our logger into the filesystem.
+        $this->filesystem->set_logger($this->logger);
     }
 
     /**
-     * Returns a manipulator query name for logging.
-     *
-     * @return string
+     * manipulate objects
+     * @param  array $objectrecords
      */
-    abstract protected function get_query_name();
-
-    /**
-     * Returns SQL to retrieve objects for manipulation.
-     *
-     * @return string
-     */
-    abstract protected function get_candidates_sql();
-
-    /**
-     * Returns a list of parameters for SQL from get_candidates_sql.
-     *
-     * @return array
-     */
-    abstract protected function get_candidates_sql_params();
-
-    /**
-     * Pushes files from local file system to remote.
-     *
-     * @param  array $candidatehashes content hashes to push
-     */
-    public function execute($objectrecords) {
-
+    public function execute(array $objectrecords) {
         if (!$this->manipulator_can_execute()) {
             mtrace('Objectfs manipulator exiting early');
             return;
         }
 
-        if (count($objectrecords) == 0) {
+        if (count($objectrecords) === 0) {
             mtrace('No candidate objects found.');
             return;
         }
@@ -130,63 +121,15 @@ abstract class manipulator {
     }
 
     /**
-     * get candidate content hashes for execution.
-     *
-     * @return array $candidatehashes candidate content hashes
+     * @param stdClass $objectrecord
+     * @return int
      */
-    public final function get_candidate_objects() {
-        global $DB;
+    abstract public function manipulate_object(stdClass $objectrecord);
 
-        $sql = $this->get_candidates_sql();
-        $params = $this->get_candidates_sql_params();
-
-        $this->logger->start_timing();
-        $objects = $DB->get_records_sql($sql, $params, 0, $this->batchsize);
-        $this->logger->end_timing();
-
-        $totalobjectsfound = count($objects);
-
-        $this->logger->log_object_query($this->get_query_name(), $totalobjectsfound);
-
-        return $objects;
-    }
-
+    /**
+     * @return bool
+     */
     protected function manipulator_can_execute() {
         return true;
-    }
-
-    public static function get_all_manipulator_classnames() {
-        $manipulators = array('deleter',
-                              'puller',
-                              'pusher',
-                              'recoverer',
-                              'checker');
-
-        foreach ($manipulators as $key => $manipulator) {
-            $manipulators[$key] = '\\tool_objectfs\\local\\object_manipulator\\' . $manipulator;
-        }
-
-        return $manipulators;
-    }
-
-    public static function setup_and_run_object_manipulator($manipulatorclassname) {
-        $config = get_objectfs_config();
-
-        if (!tool_objectfs_should_tasks_run()) {
-            mtrace(get_string('not_enabled', 'tool_objectfs'));
-            return;
-        }
-
-        $filesystem = new $config->filesystem();
-
-        if (!$filesystem->get_client_availability()) {
-            mtrace(get_string('client_not_available', 'tool_objectfs'));
-            return;
-        }
-
-        $logger = new \tool_objectfs\log\aggregate_logger();
-        $manipulator = new $manipulatorclassname($filesystem, $config, $logger);
-        $candidatehashes = $manipulator->get_candidate_objects();
-        $manipulator->execute($candidatehashes);
     }
 }

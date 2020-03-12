@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\deleter;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -28,6 +29,7 @@ class deleter_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
+        $this->candidatesfinder = new candidates_finder(deleter::class, $config);
         $config->deletelocal = true;
         $config->consistencydelay = 0;
         $config->sizethreshold = 0;
@@ -50,7 +52,7 @@ class deleter_testcase extends tool_objectfs_testcase {
     public function test_deleter_get_candidate_objects_will_get_duplicated_objects() {
         $duplicatedbject = $this->create_duplicated_object();
 
-        $candidateobjects = $this->deleter->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         foreach ($candidateobjects as $candidate) {
             $this->assertEquals($duplicatedbject->contenthash, $candidate->contenthash);
@@ -61,7 +63,7 @@ class deleter_testcase extends tool_objectfs_testcase {
         $localobject = $this->create_local_object();
         $remoteobject = $this->create_remote_object();
 
-        $candidateobjects = $this->deleter->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
         $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
@@ -71,7 +73,7 @@ class deleter_testcase extends tool_objectfs_testcase {
         $duplicatedbject = $this->create_duplicated_object();
         $this->set_deleter_config('consistencydelay', 100);
 
-        $candidateobjects = $this->deleter->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertArrayNotHasKey($duplicatedbject->contenthash, $candidateobjects);
     }
