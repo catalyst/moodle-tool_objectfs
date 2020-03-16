@@ -114,6 +114,36 @@ if ($ADMIN->fulltree) {
         $settings->add(new admin_setting_configtext('tool_objectfs/presignedminfilesize',
             new lang_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'),
             new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
+
+        $settings->add(
+            new admin_setting_configselect(
+                'tool_objectfs/signingmethod',
+                get_string('settings:presignedurl:enablepresignedurlschoice', OBJECTFS_PLUGIN_NAME),
+                '',
+                's3',
+                ['s3' => 'S3', 'cf' => 'CloudFront']
+            )
+        );
+
+        if ('cf' === $config->signingmethod) {
+            $settings->add(
+                new admin_setting_configtext('tool_objectfs/cloudfrontresourcedomain',
+                    get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', OBJECTFS_PLUGIN_NAME),
+                    get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', OBJECTFS_PLUGIN_NAME),
+                    '',
+                    PARAM_TEXT
+                )
+            );
+
+            $settings->add(
+                new admin_setting_configtext('tool_objectfs/cloudfrontkeypairid',
+                    get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', OBJECTFS_PLUGIN_NAME),
+                    get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', OBJECTFS_PLUGIN_NAME),
+                    '',
+                    PARAM_TEXT
+                )
+            );
+        }
     }
 
     $client = \tool_objectfs\local\manager::get_client($config);
