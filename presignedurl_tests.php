@@ -35,7 +35,10 @@ echo $output->header();
 echo $output->heading(get_string('presignedurl_testing:page', 'tool_objectfs'));
 
 $config = get_objectfs_config();
-$support = tool_objectfs_filesystem_supports_presigned_urls($config->filesystem);
+$support = false;
+if (!empty($config->filesystem)) {
+    $support = (new $config->filesystem())->supports_presigned_urls();
+}
 $settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs'),
     get_string('presignedurl_testing:objectfssettings', 'tool_objectfs'));
 
@@ -46,7 +49,6 @@ if ($support) {
 
         $connection = $client->test_connection();
         if ($connection->success) {
-            $fs = new $config->filesystem();
             $testfiles = $output->presignedurl_tests_load_files($fs);
             echo $output->presignedurl_tests_content($fs, $testfiles);
         } else {

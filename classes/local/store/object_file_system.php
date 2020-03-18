@@ -706,6 +706,15 @@ abstract class object_file_system extends \file_system_filedir {
         return false;
     }
 
+
+    /**
+     * Return if the file system supports presigned_urls.
+     * @return bool
+     */
+    public function supports_presigned_urls() {
+        return false;
+    }
+
     public function presigned_url_configured() {
         return $this->externalclient->support_presigned_urls()
             && $this->externalclient->enablepresignedurls

@@ -79,4 +79,11 @@ class file_system extends object_file_system {
             return false;
         }
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function supports_presigned_urls() {
+        return true;
+    }
 }

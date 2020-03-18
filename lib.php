@@ -176,15 +176,6 @@ function tool_objectfs_should_tasks_run() {
     return false;
 }
 
-function tool_objectfs_filesystem_supports_presigned_urls($fs) {
-    $supportedlist = array();
-    $supportedlist[] = '\tool_objectfs\s3_file_system';
-    if (in_array($fs, $supportedlist)) {
-        return true;
-    }
-    return false;
-}
-
 // Legacy cron function.
 function tool_objectfs_cron() {
     mtrace('RUNNING legacy cron objectfs');
