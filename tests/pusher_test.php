@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\object_manipulator\candidates\candidates_factory;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\pusher;
 
@@ -29,10 +30,10 @@ class pusher_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
-        $this->candidatesfinder = new candidates_finder(pusher::class, $config);
         $config->sizethreshold = 0;
         $config->minimumage = 0;
         set_objectfs_config($config);
+        $this->candidatesfinder = new candidates_finder(pusher::class, $config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->pusher = new pusher($this->filesystem, $config, $this->logger);
         ob_start();

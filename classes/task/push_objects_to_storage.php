@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\task;
 
+use coding_exception;
+use moodle_exception;
 use tool_objectfs\local\object_manipulator\manipulator_builder;
 use tool_objectfs\local\object_manipulator\pusher;
 
@@ -43,8 +45,10 @@ class push_objects_to_storage extends \core\task\scheduled_task {
 
     /**
      * Execute task
+     * @throws moodle_exception
+     * @throws coding_exception
      */
     public function execute() {
-        (new manipulator_builder())->build(pusher::class)->execute();
+        (new manipulator_builder())->execute(pusher::class);
     }
 }

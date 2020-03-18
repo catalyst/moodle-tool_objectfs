@@ -26,7 +26,6 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use coding_exception;
-use dml_exception;
 use moodle_exception;
 use stdClass;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
@@ -54,36 +53,20 @@ class manipulator_builder {
     /** @var stdClass $config  */
     private $config;
 
-
     /**
      * @param string $manipulator
-     * @return self|void
      * @throws coding_exception
      * @throws moodle_exception
      */
-    public function build($manipulator) {
-        if (!tool_objectfs_should_tasks_run()) {
-            mtrace(get_string('not_enabled', 'tool_objectfs'));
+    public function execute($manipulator) {
+        if (!$this->build($manipulator)) {
             return;
         }
-
-        $this->manipulatorclass = $manipulator;
-        $this->config = get_objectfs_config();
-        $this->finder = new candidates_finder($manipulator, $this->config);
-        return $this;
-    }
-
-    /**
-     * @throws dml_exception
-     * @throws coding_exception
-     * @throws moodle_exception
-     */
-    public function execute() {
         $logger = new aggregate_logger();
         $candidates = $this->finder->get();
         $countcandidates = count($candidates);
-        $logger->log_object_query('', $countcandidates);
-        if ($countcandidates == 0) {
+        $logger->log_object_query($this->finder->get_query_name(), $countcandidates);
+        if ($countcandidates === 0) {
             mtrace('No candidate objects found.');
             return;
         }
@@ -99,14 +82,31 @@ class manipulator_builder {
 
     /**
      * @throws coding_exception
-     * @throws dml_exception
      * @throws moodle_exception
      */
     public function execute_all() {
         foreach ($this->manipulators as $manipulator) {
             mtrace("Executing objectfs $manipulator");
-            $this->build($manipulator)->execute();
+            $this->execute($manipulator);
             mtrace("Objectfs $manipulator successfully executed");
         }
+    }
+
+    /**
+     * @param string $manipulator
+     * @return bool
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    private function build($manipulator) {
+        if (!tool_objectfs_should_tasks_run()) {
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
+            return false;
+        }
+
+        $this->manipulatorclass = $manipulator;
+        $this->config = get_objectfs_config();
+        $this->finder = new candidates_finder($manipulator, $this->config);
+        return true;
     }
 }

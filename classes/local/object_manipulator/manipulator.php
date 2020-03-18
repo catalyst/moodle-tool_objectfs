@@ -26,7 +26,6 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 

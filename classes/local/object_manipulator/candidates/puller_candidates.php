@@ -46,8 +46,8 @@ class puller_candidates extends manipulator_candidates_base {
                        MAX(f.filesize) AS filesize
                   FROM {files} f
                   JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE f.filesize <= ?
-                   AND o.location = ?
+                 WHERE f.filesize <= :sizethreshold
+                   AND o.location = :location
               GROUP BY f.contenthash,
                        f.filesize,
                        o.location';
@@ -58,6 +58,6 @@ class puller_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        return [$this->config->sizethreshold, OBJECT_LOCATION_EXTERNAL];
+        return ['sizethreshold' => $this->config->sizethreshold, 'location' => OBJECT_LOCATION_EXTERNAL];
     }
 }

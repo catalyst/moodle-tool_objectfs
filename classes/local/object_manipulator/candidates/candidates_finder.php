@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class candidates_factory
+ * Class candidates_finder
  * @package tool_objectfs
  * @author Gleimer Mora <gleimermora@catalyst-au.net>
  * @copyright Catalyst IT
@@ -24,16 +24,12 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
-use dml_exception;
 use moodle_exception;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
 class candidates_finder {
-
-    /** @var candidates_factory $factory */
-    private $factory;
 
     /** @var string $finder */
     private $finder = '';
@@ -45,21 +41,17 @@ class candidates_finder {
      * @throws moodle_exception
      */
     public function __construct($manipulator, stdClass $config) {
-        $this->factory = new candidates_factory($manipulator, $config);
+        $this->finder = candidates_factory::finder($manipulator, $config);
     }
 
     /**
      * @return array
-     * @throws moodle_exception
-     * @throws dml_exception
      */
     public function get() {
-        $this->finder = $this->factory->finder();
         return $this->finder->get();
     }
 
     /**
-     * @inheritDoc
      * @return string
      */
     public function get_query_name() {

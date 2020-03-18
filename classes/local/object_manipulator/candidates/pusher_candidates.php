@@ -35,21 +35,14 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/tests/classes/test_client.php
 
 class pusher_candidates extends manipulator_candidates_base {
 
-    /**
-     * pusher_candidates constructor.
-     * @param stdClass $config
-     */
-    public function __construct(stdClass $config) {
-        parent::__construct($config);
-        $this->config->maximumfilesize = \tool_objectfs\tests\test_client::MAX_UPLOAD;
-        if (in_array($config->filesystem, ['tool_objectfs\digitalocean_file_system', 'tool_objectfs\s3_file_system'])) {
-            $this->config->maximumfilesize = object_client_base::MAX_UPLOAD;
-        } else if ($config->filesystem === '\tool_objectfs\swift') {
-            $this->config->maximumfilesize = swift_client::MAX_UPLOAD;
-        } else if ($config->filesystem === '\tool_objectfs\azure_client') {
-            $this->config->maximumfilesize = azure_client::MAX_UPLOAD;
-        }
-    }
+    /** @var array $filesystemmaxfilesizemap */
+    private $filesystemmaxfilesizemap = [
+        '\tool_objectfs\tests\test_client' => \tool_objectfs\tests\test_client::MAX_UPLOAD,
+        '\tool_objectfs\digitalocean_file_system' => object_client_base::MAX_UPLOAD,
+        '\tool_objectfs\s3_file_system' => object_client_base::MAX_UPLOAD,
+        '\tool_objectfs\swift' => swift_client::MAX_UPLOAD,
+        '\tool_objectfs\azure_client' => azure_client::MAX_UPLOAD,
+    ];
 
     /**
      * @inheritDoc
@@ -84,7 +77,7 @@ class pusher_candidates extends manipulator_candidates_base {
         return [
             'maxcreatedtimstamp' => time() - $this->config->minimumage,
             'threshold' => $this->config->sizethreshold,
-            'maximum_file_size' => $this->config->maximumfilesize, // TODO fetch by client.
+            'maximum_file_size' => $this->filesystemmaxfilesizemap[$this->config->filesystem],
             'object_location' => OBJECT_LOCATION_LOCAL,
         ];
     }

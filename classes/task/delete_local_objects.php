@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\task;
 
+use coding_exception;
+use moodle_exception;
 use tool_objectfs\local\object_manipulator\deleter;
 use tool_objectfs\local\object_manipulator\manipulator_builder;
 
@@ -43,8 +45,10 @@ class delete_local_objects extends \core\task\scheduled_task {
 
     /**
      * Execute task
+     * @throws moodle_exception
+     * @throws coding_exception
      */
     public function execute() {
-        (new manipulator_builder())->build(deleter::class)->execute();
+        (new manipulator_builder())->execute(deleter::class);
     }
 }

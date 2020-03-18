@@ -46,7 +46,7 @@ class recoverer_candidates extends manipulator_candidates_base {
                        MAX(f.filesize) AS filesize
                   FROM {files} f
                   JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE o.location = ?
+                 WHERE o.location = :location
               GROUP BY f.contenthash,
                        f.filesize,
                        o.location';
@@ -57,6 +57,6 @@ class recoverer_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        return [OBJECT_LOCATION_ERROR];
+        return ['location' => OBJECT_LOCATION_ERROR];
     }
 }

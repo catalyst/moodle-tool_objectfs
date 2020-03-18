@@ -46,9 +46,9 @@ class deleter_candidates extends manipulator_candidates_base {
                        MAX(f.filesize) AS filesize
                   FROM {files} f
                   JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE o.timeduplicated <= ?
-                   AND o.location = ?
-                   AND f.filesize > ?
+                 WHERE o.timeduplicated <= :consistancythrehold
+                   AND o.location = :location
+                   AND f.filesize > :sizethreshold
               GROUP BY f.contenthash,
                        f.filesize,
                        o.location';
@@ -60,6 +60,10 @@ class deleter_candidates extends manipulator_candidates_base {
      */
     public function get_candidates_sql_params() {
         $consistancythrehold = time() - $this->config->consistencydelay;
-        return [$consistancythrehold, OBJECT_LOCATION_DUPLICATED, $this->config->sizethreshold];
+        return [
+            'consistancythrehold' => $consistancythrehold,
+            'location' => OBJECT_LOCATION_DUPLICATED,
+            'sizethreshold' => $this->config->sizethreshold
+        ];
     }
 }

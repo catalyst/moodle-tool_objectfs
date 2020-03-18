@@ -26,6 +26,7 @@
 namespace tool_objectfs\task;
 
 use coding_exception;
+use moodle_exception;
 use tool_objectfs\local\object_manipulator\checker;
 use tool_objectfs\local\object_manipulator\manipulator_builder;
 
@@ -34,6 +35,8 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filestorage/file_system.php');
 
 class check_objects_location extends \core\task\scheduled_task {
+
+    use task_helper;
 
     /**
      * Get task name
@@ -45,8 +48,10 @@ class check_objects_location extends \core\task\scheduled_task {
 
     /**
      * Execute task
+     * @throws moodle_exception
+     * @throws coding_exception
      */
     public function execute() {
-        (new manipulator_builder())->build(checker::class)->execute();
+        (new manipulator_builder())->execute(checker::class);
     }
 }

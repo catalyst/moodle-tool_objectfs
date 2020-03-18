@@ -36,11 +36,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class candidates_factory {
 
-    /** @var manipulator_candidates_base $finder  */
-    private $finder;
-
     /** @var array $manipulatormap */
-    private $manipulatormap = [
+    private static $manipulatormap = [
         checker::class => checker_candidates::class,
         deleter::class => deleter_candidates::class,
         puller::class => puller_candidates::class,
@@ -49,24 +46,16 @@ class candidates_factory {
     ];
 
     /**
-     * candidates_factory constructor.
-     * @param string $manipulator
+     * @param $manipulator
      * @param stdClass $config
+     * @return mixed
      * @throws moodle_exception
      */
-    public function __construct($manipulator, stdClass $config) {
-        if (isset($this->manipulatormap[$manipulator])) {
-            $classname = $this->manipulatormap[$manipulator];
-            $this->finder = new $classname($config);
-        } else {
-            throw new moodle_exception('invalidclass', 'error', '', 'Invalid manipulator class');
+    public static function finder($manipulator, stdClass $config) {
+        if (isset(self::$manipulatormap[$manipulator])) {
+            $classname = self::$manipulatormap[$manipulator];
+            return new $classname($config);
         }
-    }
-
-    /**
-     * @return manipulator_candidates_base
-     */
-    public function finder() {
-        return $this->finder;
+        throw new moodle_exception('invalidclass', 'error', '', 'Invalid manipulator class');
     }
 }
