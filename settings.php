@@ -91,8 +91,12 @@ if ($ADMIN->fulltree) {
 
 
     $config = get_objectfs_config();
+    $support = false;
+    if (!empty($config->filesystem)) {
+        $support = (new $config->filesystem())->supports_presigned_urls();
+    }
 
-    if (tool_objectfs_filesystem_supports_presigned_urls($config->filesystem)) {
+    if ($support) {
         $settings->add(new admin_setting_heading('tool_objectfs/presignedurls',
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), ''));
 
