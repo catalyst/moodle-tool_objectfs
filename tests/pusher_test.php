@@ -18,8 +18,6 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\object_manipulator\candidates\candidates_factory;
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\pusher;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -27,13 +25,15 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class pusher_testcase extends tool_objectfs_testcase {
 
+    /** @var string $manipulator */
+    protected $manipulator = pusher::class;
+
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
         $config->sizethreshold = 0;
         $config->minimumage = 0;
         set_objectfs_config($config);
-        $this->candidatesfinder = new candidates_finder(pusher::class, $config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->pusher = new pusher($this->filesystem, $config, $this->logger);
         ob_start();
@@ -52,24 +52,15 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_pusher_get_candidate_objects_will_get_local_objects() {
         $object = $this->create_local_object();
 
-        $candidateobjects = $this->candidatesfinder->get();
-        $objectfound = false;
-        foreach ($candidateobjects as $candidate) {
-            if ($object->contenthash === $candidate->contenthash) {
-                $objectfound = true;
-            }
-        }
-        $this->assertTrue($objectfound);
+        self::assertTrue($this->objects_contain_hash($object->contenthash));;
     }
 
     public function test_pusher_get_candidate_objects_wont_get_duplicated_or_remote_objects() {
         $duplicatedobject = $this->create_duplicated_object();
         $remoteobject = $this->create_remote_object();
 
-        $candidateobjects = $this->candidatesfinder->get();
-
-        $this->assertArrayNotHasKey($duplicatedobject->contenthash, $candidateobjects);
-        $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($duplicatedobject->contenthash));
+        self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
     public function test_pusher_get_candidate_objects_wont_get_objects_bigger_than_maximum_filesize() {
@@ -78,9 +69,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $maximumfilesize = $this->filesystem->get_maximum_upload_filesize() + 1;
         $DB->set_field('files', 'filesize', $maximumfilesize, array('contenthash' => $object->contenthash));
 
-        $candidateobjects = $this->candidatesfinder->get();
-
-        $this->assertArrayNotHasKey($object->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
 
     public function test_pusher_get_candidate_objects_wont_get_objects_under_size_threshold() {
@@ -89,9 +78,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $object = $this->create_local_object();
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $object->contenthash));
 
-        $candidateobjects = $this->candidatesfinder->get();
-
-        $this->assertArrayNotHasKey($object->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
 
     public function test_pusher_get_candidate_objects_wont_get_objects_younger_than_minimum_age() {
@@ -99,9 +86,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         $this->set_pusher_config('minimumage', 100);
         $object = $this->create_local_object();
 
-        $candidateobjects = $this->candidatesfinder->get();
-
-        $this->assertArrayNotHasKey($object->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
 
     public function test_pusher_can_push_local_file() {

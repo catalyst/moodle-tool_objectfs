@@ -79,5 +79,15 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017111700, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2020030900) {
+        $table = new xmldb_table('tool_objectfs_objects');
+        $index = new xmldb_index('toolobjeobje_con_idu_ix', XMLDB_INDEX_UNIQUE, ['contenthash, location']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2020030900, 'tool', 'objectfs');
+    }
+
     return true;
 }

@@ -18,7 +18,6 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\deleter;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -26,10 +25,12 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class deleter_testcase extends tool_objectfs_testcase {
 
+    /** @var string $manipulator */
+    protected $manipulator = deleter::class;
+
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
-        $this->candidatesfinder = new candidates_finder(deleter::class, $config);
         $config->deletelocal = true;
         $config->consistencydelay = 0;
         $config->sizethreshold = 0;
@@ -46,36 +47,29 @@ class deleter_testcase extends tool_objectfs_testcase {
     protected function set_deleter_config($key, $value) {
         $config = get_objectfs_config();
         $config->$key = $value;
+        set_objectfs_config($config);
         $this->deleter = new deleter($this->filesystem, $config, $this->logger);
     }
 
     public function test_deleter_get_candidate_objects_will_get_duplicated_objects() {
         $duplicatedbject = $this->create_duplicated_object();
 
-        $candidateobjects = $this->candidatesfinder->get();
-
-        foreach ($candidateobjects as $candidate) {
-            $this->assertEquals($duplicatedbject->contenthash, $candidate->contenthash);
-        }
+        self::assertTrue($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
     public function test_deleter_get_candidate_objects_will_not_get_local_or_remote_objects() {
         $localobject = $this->create_local_object();
         $remoteobject = $this->create_remote_object();
 
-        $candidateobjects = $this->candidatesfinder->get();
-
-        $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
-        $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($localobject->contenthash));
+        self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
     public function test_deleter_get_candidate_objects_will_not_get_objects_which_havent_been_duplicated_for_consistancy_delay() {
         $duplicatedbject = $this->create_duplicated_object();
         $this->set_deleter_config('consistencydelay', 100);
 
-        $candidateobjects = $this->candidatesfinder->get();
-
-        $this->assertArrayNotHasKey($duplicatedbject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
     public function test_deleter_can_delete_object() {
@@ -144,4 +138,3 @@ class deleter_testcase extends tool_objectfs_testcase {
         }
     }
 }
-

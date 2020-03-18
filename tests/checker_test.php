@@ -18,7 +18,6 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\checker;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -26,10 +25,12 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class checker_testcase extends tool_objectfs_testcase {
 
+    /** @var string $manipulator */
+    protected $manipulator = checker::class;
+
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
-        $this->candidatesfinder = new candidates_finder(checker::class, $config);
         set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->checker = new checker($this->filesystem, $config, $this->logger);
@@ -68,11 +69,10 @@ class checker_testcase extends tool_objectfs_testcase {
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_not_get_objects_local');
         $remoteobject = $this->create_remote_object('test_checker_get_candidate_objects_will_not_get_objects_remote');
         $duplicatedbject = $this->create_duplicated_object('test_checker_get_candidate_objects_will_not_get_objects_duplicated');
-        $candidateobjects = $this->candidatesfinder->get();
 
-        $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
-        $this->assertArrayNotHasKey($remoteobject->contenthash, $candidateobjects);
-        $this->assertArrayNotHasKey($duplicatedbject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($localobject->contenthash));
+        self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
+        self::assertFalse($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
     public function test_checker_get_candidate_objects_will_get_object() {
@@ -82,20 +82,20 @@ class checker_testcase extends tool_objectfs_testcase {
         $candidateobjects = $this->candidatesfinder->get();
 
         $this->assertNotCount(0, $candidateobjects);
-        $this->assertArrayHasKey($localobject->contenthash, $candidateobjects);
+        self::assertTrue($this->objects_contain_hash($localobject->contenthash));
     }
 
     public function test_checker_can_update_object() {
         global $DB;
         $localobject = $this->create_local_object('test_checker_can_update_object');
-        $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
-        $this->checker->execute(array($localobject));
-        $candidateobjects = $this->candidatesfinder->get();
-        $dblocation = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $localobject->contenthash));
+        $localobject->id = null;
+        $DB->delete_records('tool_objectfs_objects', ['contenthash' => $localobject->contenthash]);
+        $this->checker->execute([$localobject]);
+        $dblocation = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $localobject->contenthash]);
 
         $this->assertNotFalse($dblocation);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
-        $this->assertArrayNotHasKey($localobject->contenthash, $candidateobjects);
+        self::assertFalse($this->objects_contain_hash($localobject->contenthash));
     }
 
     public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_local() {

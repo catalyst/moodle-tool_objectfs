@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use dml_exception;
 use stdClass;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
@@ -80,20 +81,15 @@ abstract class manipulator implements object_manipulator {
     }
 
     /**
-     * manipulate objects
-     * @param  array $objectrecords
+     * @param array $objectrecords
+     * @return mixed|void
+     * @throws dml_exception
      */
     public function execute(array $objectrecords) {
         if (!$this->manipulator_can_execute()) {
             mtrace('Objectfs manipulator exiting early');
             return;
         }
-
-        if (count($objectrecords) === 0) {
-            mtrace('No candidate objects found.');
-            return;
-        }
-
         $this->logger->start_timing();
 
         foreach ($objectrecords as $objectrecord) {
@@ -109,9 +105,11 @@ abstract class manipulator implements object_manipulator {
             }
 
             $newlocation = $this->manipulate_object($objectrecord);
-
-            update_object_record($objectrecord->contenthash, $newlocation);
-
+            if (!empty($objectrecord->id)) {
+                update_object($objectrecord, $newlocation);
+            } else {
+                update_object_by_hash($objectrecord->contenthash, $newlocation);
+            }
             $objectlock->release();
         }
 
