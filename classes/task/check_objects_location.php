@@ -36,8 +36,6 @@ require_once($CFG->libdir . '/filestorage/file_system.php');
 
 class check_objects_location extends \core\task\scheduled_task {
 
-    use task_helper;
-
     /**
      * Get task name
      * @throws coding_exception
