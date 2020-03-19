@@ -169,15 +169,6 @@ function tool_objectfs_get_fs_list() {
     return $found;
 }
 
-function tool_objectfs_should_tasks_run() {
-    $config = get_objectfs_config();
-    if (isset($config->enabletasks) && $config->enabletasks) {
-        return true;
-    }
-
-    return false;
-}
-
 // Legacy cron function.
 function tool_objectfs_cron() {
     mtrace('RUNNING legacy cron objectfs');
