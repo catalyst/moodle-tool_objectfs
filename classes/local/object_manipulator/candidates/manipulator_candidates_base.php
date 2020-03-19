@@ -43,6 +43,14 @@ abstract class manipulator_candidates_base implements manipulator_candidates {
     }
 
     /**
+     * @inheritDoc
+     * @return string
+     */
+    public function get_query_name() {
+        return $this->queryname;
+    }
+
+    /**
      * @return array
      * @throws dml_exception
      */

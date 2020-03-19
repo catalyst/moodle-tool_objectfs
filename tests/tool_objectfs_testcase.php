@@ -23,6 +23,7 @@ use moodle_exception;
 use stdClass;
 use stored_file;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
+use tool_objectfs\local\object_manipulator\pusher;
 use tool_objectfs\local\store\object_file_system;
 
 require_once(__DIR__ . '/classes/test_client.php');

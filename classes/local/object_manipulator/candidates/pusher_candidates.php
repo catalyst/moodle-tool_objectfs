@@ -24,7 +24,6 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
-use stdClass;
 use tool_objectfs\local\store\azure\client as azure_client;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\store\swift\client as swift_client;
@@ -37,20 +36,14 @@ class pusher_candidates extends manipulator_candidates_base {
 
     /** @var array $filesystemmaxfilesizemap */
     private $filesystemmaxfilesizemap = [
-        '\tool_objectfs\tests\test_client' => \tool_objectfs\tests\test_client::MAX_UPLOAD,
+        '\tool_objectfs\tests\test_file_system' => \tool_objectfs\tests\test_client::MAX_UPLOAD,
         '\tool_objectfs\digitalocean_file_system' => object_client_base::MAX_UPLOAD,
         '\tool_objectfs\s3_file_system' => object_client_base::MAX_UPLOAD,
-        '\tool_objectfs\swift' => swift_client::MAX_UPLOAD,
-        '\tool_objectfs\azure_client' => azure_client::MAX_UPLOAD,
+        '\tool_objectfs\swift_file_system' => swift_client::MAX_UPLOAD,
     ];
 
-    /**
-     * @inheritDoc
-     * @return string
-     */
-    public function get_query_name() {
-        return 'get_push_candidates';
-    }
+    /** @var string $queryname */
+    protected $queryname = 'get_push_candidates';
 
     /**
      * @inheritDoc
@@ -77,8 +70,23 @@ class pusher_candidates extends manipulator_candidates_base {
         return [
             'maxcreatedtimstamp' => time() - $this->config->minimumage,
             'threshold' => $this->config->sizethreshold,
-            'maximum_file_size' => $this->filesystemmaxfilesizemap[$this->config->filesystem],
+            'maximum_file_size' => $this->get_mmaxfilesize(),
             'object_location' => OBJECT_LOCATION_LOCAL,
         ];
+    }
+
+    /**
+     * @return float|int
+     */
+    private function get_mmaxfilesize() {
+        if (empty($this->config->filesystem)) {
+            return \tool_objectfs\tests\test_client::MAX_UPLOAD;
+        }
+
+        if (class_exists('\MicrosoftAzure\Storage\Common\Internal\Resources')) {
+            $this->filesystemmaxfilesizemap['\tool_objectfs\azure_file_system'] = azure_client::MAX_UPLOAD;
+        }
+
+        return $this->filesystemmaxfilesizemap[$this->config->filesystem];
     }
 }

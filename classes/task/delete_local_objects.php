@@ -25,30 +25,16 @@
 
 namespace tool_objectfs\task;
 
-use coding_exception;
-use moodle_exception;
 use tool_objectfs\local\object_manipulator\deleter;
-use tool_objectfs\local\object_manipulator\manipulator_builder;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/filestorage/file_system.php');
 
-class delete_local_objects extends \core\task\scheduled_task {
+class delete_local_objects extends task {
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('delete_local_objects_task', 'tool_objectfs');
-    }
+    /** @var string $manipulator */
+    protected $manipulator = deleter::class;
 
-    /**
-     * Execute task
-     * @throws moodle_exception
-     * @throws coding_exception
-     */
-    public function execute() {
-        (new manipulator_builder())->execute(deleter::class);
-    }
+    /** @var string $stringname */
+    protected $stringname = 'delete_local_objects_task';
 }

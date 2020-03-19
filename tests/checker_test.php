@@ -79,9 +79,7 @@ class checker_testcase extends tool_objectfs_testcase {
         global $DB;
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_get_object');
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
-        $candidateobjects = $this->candidatesfinder->get();
 
-        $this->assertNotCount(0, $candidateobjects);
         self::assertTrue($this->objects_contain_hash($localobject->contenthash));
     }
 

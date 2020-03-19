@@ -25,30 +25,15 @@
 
 namespace tool_objectfs\task;
 
-use coding_exception;
-use moodle_exception;
-use tool_objectfs\local\object_manipulator\manipulator_builder;
 use tool_objectfs\local\object_manipulator\puller;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/filestorage/file_system.php');
+class pull_objects_from_storage extends task {
 
-class pull_objects_from_storage extends \core\task\scheduled_task {
+    /** @var string $manipulator */
+    protected $manipulator = puller::class;
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('pull_objects_from_storage_task', 'tool_objectfs');
-    }
-
-    /**
-     * Execute task
-     * @throws moodle_exception
-     * @throws coding_exception
-     */
-    public function execute() {
-        (new manipulator_builder())->execute(puller::class);
-    }
+    /** @var string $stringname */
+    protected $stringname = 'pull_objects_from_storage_task';
 }

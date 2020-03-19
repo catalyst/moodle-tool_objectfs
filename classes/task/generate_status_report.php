@@ -27,19 +27,14 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\report\objectfs_report;
 
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../lib.php');
 
-class generate_status_report extends \core\task\scheduled_task {
+class generate_status_report extends task {
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('generate_status_report_task', 'tool_objectfs');
-    }
+    /** @var string $stringname */
+    protected $stringname = 'generate_status_report_task';
 
     /**
      * Execute task

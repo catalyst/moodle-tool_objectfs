@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that deletes empty dirs from $CFG->filedir.
+ * Base abstract class for objectfs tasks.
  *
  * @package   tool_objectfs
  * @author    Gleimer Mora <gleimermora@catalyst-au.net>
@@ -27,27 +27,18 @@ namespace tool_objectfs\task;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
-require_once($CFG->libdir.'/cronlib.php');
-
-class delete_local_empty_directories  extends task {
-
-    /** @var string $stringname  */
-    protected $stringname = 'delete_local_empty_directories_task';
+interface objectfs_task {
 
     /**
-     * Execute task
-     * @throws \coding_exception
+     * Get a descriptive name for this task (shown to admins).
+     *
+     * @return string
      */
-    public function execute() {
-        $config = get_objectfs_config();
+    public function get_name();
 
-        if (!tool_objectfs_should_tasks_run()) {
-            mtrace(get_string('not_enabled', 'tool_objectfs'));
-            return;
-        }
-        $filesystem = new $config->filesystem();
-        cron_trace_time_and_memory();
-        $filesystem->delete_empty_dirs();
-    }
+    /**
+     * Do the job.
+     * Throw exceptions on errors (the job will be retried).
+     */
+    public function execute();
 }

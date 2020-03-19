@@ -28,13 +28,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class recoverer_candidates extends manipulator_candidates_base {
 
-    /**
-     * @inheritDoc
-     * @return string
-     */
-    public function get_query_name() {
-        return 'get_recover_candidates';
-    }
+    /** @var string $queryname */
+    protected $queryname = 'get_recover_candidates';
 
     /**
      * @inheritDoc

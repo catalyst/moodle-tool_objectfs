@@ -25,30 +25,15 @@
 
 namespace tool_objectfs\task;
 
-use coding_exception;
-use moodle_exception;
-use tool_objectfs\local\object_manipulator\manipulator_builder;
 use tool_objectfs\local\object_manipulator\recoverer;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/filestorage/file_system.php');
+class recover_error_objects extends task {
 
-class recover_error_objects extends \core\task\scheduled_task {
+    /** @var string $manipulator */
+    protected $manipulator = recoverer::class;
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('recover_error_objects_task', 'tool_objectfs');
-    }
-
-    /**
-     * Execute task
-     * @throws moodle_exception
-     * @throws coding_exception
-     */
-    public function execute() {
-        (new manipulator_builder())->execute(recoverer::class);
-    }
+    /** @var string $stringname */
+    protected $stringname = 'recover_error_objects_task';
 }
