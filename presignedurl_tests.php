@@ -37,7 +37,8 @@ echo $output->heading(get_string('presignedurl_testing:page', 'tool_objectfs'));
 $config = get_objectfs_config();
 $support = false;
 if (!empty($config->filesystem)) {
-    $support = (new $config->filesystem())->supports_presigned_urls();
+    $fs = new $config->filesystem();
+    $support = $fs->supports_presigned_urls();
 }
 $settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs'),
     get_string('presignedurl_testing:objectfssettings', 'tool_objectfs'));
