@@ -36,6 +36,7 @@ use SplFileInfo;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');

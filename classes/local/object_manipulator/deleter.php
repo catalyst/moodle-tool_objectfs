@@ -25,6 +25,10 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use stdClass;
+use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\log\aggregate_logger;
+
 defined('MOODLE_INTERNAL') || die();
 
 class deleter extends manipulator {
@@ -46,65 +50,30 @@ class deleter extends manipulator {
     private $deletelocal;
 
     /**
-     * Size threshold for pushing files to remote in bytes.
-     *
-     * @var int
-     */
-    private $sizethreshold;
-
-    /**
      * deleter constructor.
-     *
-     * @param sss_client $client S3 client
-     * @param object_file_system $filesystem S3 file system
-     * @param object $config sssfs config.
+     * @param object_file_system $filesystem
+     * @param stdClass $config
+     * @param aggregate_logger $logger
      */
-    public function __construct($filesystem, $config, $logger) {
-        parent::__construct($filesystem, $config);
+    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
+        parent::__construct($filesystem, $config, $logger);
         $this->consistencydelay = $config->consistencydelay;
         $this->deletelocal = $config->deletelocal;
         $this->sizethreshold = $config->sizethreshold;
-        $this->logger = $logger;
-        // Inject our logger into the filesystem.
-        $this->filesystem->set_logger($this->logger);
-    }
-
-    protected function get_query_name() {
-        return 'get_delete_candidates';
     }
 
     /**
-     * @return string
+     * @param stdClass $objectrecord
+     * @return int
      */
-    protected function get_candidates_sql() {
-
-        return 'SELECT MAX(f.id) AS fid,
-                       o.id,
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
-                  FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE o.timeduplicated <= ?
-                   AND o.location = ?
-                   AND f.filesize > ?
-              GROUP BY o.id,
-                       f.contenthash,
-                       f.filesize,
-                       o.location';
-    }
-
-    protected function get_candidates_sql_params() {
-        $consistancythrehold = time() - $this->consistencydelay;
-        $params = array($consistancythrehold, OBJECT_LOCATION_DUPLICATED, $this->sizethreshold);
-
-        return $params;
-    }
-
-    protected function manipulate_object($objectrecord) {
+    public function manipulate_object(stdClass $objectrecord) {
         $newlocation = $this->filesystem->delete_object_from_local_by_hash($objectrecord->contenthash, $objectrecord->filesize);
         return $newlocation;
     }
 
+    /**
+     * @return bool
+     */
     protected function manipulator_can_execute() {
         if ($this->deletelocal == 0) {
             mtrace("Delete local disabled \n");
@@ -113,5 +82,4 @@ class deleter extends manipulator {
 
         return true;
     }
-
 }

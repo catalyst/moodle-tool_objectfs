@@ -36,6 +36,13 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class file_system extends object_file_system {
 
+    /**
+     * @return float|int
+     */
+    static public function get_maximum_upload_size() {
+        return client::MAX_UPLOAD;
+    }
+
     protected function initialise_external_client($config) {
         $s3client = new client($config);
 

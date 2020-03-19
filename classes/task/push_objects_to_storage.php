@@ -25,27 +25,15 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\manipulator;
+use tool_objectfs\local\object_manipulator\pusher;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/filestorage/file_system.php');
+class push_objects_to_storage extends task {
 
-class push_objects_to_storage extends \core\task\scheduled_task {
+    /** @var string $manipulator */
+    protected $manipulator = pusher::class;
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('push_objects_to_storage_task', 'tool_objectfs');
-    }
-
-    /**
-     * Execute task
-     */
-    public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\pusher');
-    }
+    /** @var string $stringname */
+    protected $stringname = 'push_objects_to_storage_task';
 }
-
-

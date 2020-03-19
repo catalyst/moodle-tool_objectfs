@@ -26,7 +26,7 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 class checker_testcase extends tool_objectfs_testcase {
 
     /** @var string $manipulator */
-    protected $manipulator = 'checker';
+    protected $manipulator = checker::class;
 
     protected function setUp() {
         parent::setUp();
@@ -79,9 +79,7 @@ class checker_testcase extends tool_objectfs_testcase {
         global $DB;
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_get_object');
         $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
-        $candidateobjects = $this->checker->get_candidate_objects();
 
-        $this->assertNotCount(0, $candidateobjects);
         self::assertTrue($this->objects_contain_hash($localobject->contenthash));
     }
 
@@ -96,14 +94,6 @@ class checker_testcase extends tool_objectfs_testcase {
         $this->assertNotFalse($dblocation);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
         self::assertFalse($this->objects_contain_hash($localobject->contenthash));
-    }
-
-    public function test_checker_get_candidates_sql_params_method_will_get_empty_array() {
-        $reflection = new \ReflectionMethod(checker::class, "get_candidates_sql_params");
-        $reflection->setAccessible(true);
-        $result = $reflection->invokeArgs($this->checker, array());
-
-        $this->assertCount(0, $result);
     }
 
     public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_local() {

@@ -25,25 +25,16 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\manipulator;
+use tool_objectfs\local\object_manipulator\deleter;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/filestorage/file_system.php');
 
-class delete_local_objects extends \core\task\scheduled_task {
+class delete_local_objects extends task {
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('delete_local_objects_task', 'tool_objectfs');
-    }
+    /** @var string $manipulator */
+    protected $manipulator = deleter::class;
 
-    /**
-     * Execute task
-     */
-    public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\deleter');
-    }
+    /** @var string $stringname */
+    protected $stringname = 'delete_local_objects_task';
 }

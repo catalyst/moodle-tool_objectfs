@@ -25,67 +25,19 @@
 
 namespace tool_objectfs\local\object_manipulator;
 
+use stdClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 class puller extends manipulator {
 
     /**
-     * Size threshold for pulling files from remote in bytes.
-     *
-     * @var int
+     * @param stdClass $objectrecord
+     * @return int
      */
-    private $sizethreshold;
-
-    /**
-     * Puller constructor.
-     *
-     * @param object_client $client object client
-     * @param object_file_system $filesystem object file system
-     * @param object $config objectfs config.
-     */
-    public function __construct($filesystem, $config, $logger) {
-        parent::__construct($filesystem, $config);
-        $this->sizethreshold = $config->sizethreshold;
-
-        $this->logger = $logger;
-        // Inject our logger into the filesystem.
-        $this->filesystem->set_logger($this->logger);
-    }
-
-    protected function get_query_name() {
-        return 'get_pull_candidates';
-    }
-
-    /**
-     * @return string
-     */
-    protected function get_candidates_sql() {
-        return 'SELECT MAX(f.id) AS fid,
-                       o.id,
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
-                  FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE f.filesize <= ?
-                   AND o.location = ?
-              GROUP BY o.id,
-                       f.contenthash,
-                       f.filesize,
-                       o.location';
-    }
-
-    protected function get_candidates_sql_params() {
-        $params = array($this->sizethreshold, OBJECT_LOCATION_EXTERNAL);
-
-        return $params;
-    }
-
-    protected function manipulate_object($objectrecord) {
+    public function manipulate_object(stdClass $objectrecord) {
         $contenthash = $objectrecord->contenthash;
         $filesize = $objectrecord->filesize;
-        $newlocation = $this->filesystem->copy_object_from_external_to_local_by_hash($contenthash, $filesize);
-        return $newlocation;
+        return $this->filesystem->copy_object_from_external_to_local_by_hash($contenthash, $filesize);
     }
 }
-
-

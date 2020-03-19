@@ -26,7 +26,7 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 class deleter_testcase extends tool_objectfs_testcase {
 
     /** @var string $manipulator */
-    protected $manipulator = 'deleter';
+    protected $manipulator = deleter::class;
 
     protected function setUp() {
         parent::setUp();
@@ -47,17 +47,14 @@ class deleter_testcase extends tool_objectfs_testcase {
     protected function set_deleter_config($key, $value) {
         $config = get_objectfs_config();
         $config->$key = $value;
+        set_objectfs_config($config);
         $this->deleter = new deleter($this->filesystem, $config, $this->logger);
     }
 
     public function test_deleter_get_candidate_objects_will_get_duplicated_objects() {
         $duplicatedbject = $this->create_duplicated_object();
 
-        $candidateobjects = $this->deleter->get_candidate_objects();
-
-        foreach ($candidateobjects as $candidate) {
-            $this->assertEquals($duplicatedbject->contenthash, $candidate->contenthash);
-        }
+        self::assertTrue($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
     public function test_deleter_get_candidate_objects_will_not_get_local_or_remote_objects() {
@@ -141,4 +138,3 @@ class deleter_testcase extends tool_objectfs_testcase {
         }
     }
 }
-

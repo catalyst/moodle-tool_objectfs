@@ -25,27 +25,15 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\manipulator;
+use tool_objectfs\local\object_manipulator\checker;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/filestorage/file_system.php');
+class check_objects_location extends task {
 
-class check_objects_location extends \core\task\scheduled_task {
+    /** @var string $manipulator */
+    protected $manipulator = checker::class;
 
-    /**
-     * Get task name
-     */
-    public function get_name() {
-        return get_string('check_objects_location_task', 'tool_objectfs');
-    }
-
-    /**
-     * Execute task
-     */
-    public function execute() {
-        manipulator::setup_and_run_object_manipulator('\\tool_objectfs\\local\\object_manipulator\\checker');
-    }
+    /** @var string $stringname */
+    protected $stringname = 'check_objects_location_task';
 }
-
-

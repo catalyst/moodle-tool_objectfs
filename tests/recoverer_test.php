@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\recoverer;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -28,6 +29,7 @@ class recoverer_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $config = get_objectfs_config();
+        $this->candidatesfinder = new candidates_finder(recoverer::class, $config);
         set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->recoverer = new recoverer($this->filesystem, $config, $this->logger);
@@ -40,8 +42,7 @@ class recoverer_testcase extends tool_objectfs_testcase {
 
     public function test_recoverer_get_candidate_objects_will_get_error_objects() {
         $recovererobject = $this->create_error_object();
-
-        $candidateobjects = $this->recoverer->get_candidate_objects();
+        $candidateobjects = $this->candidatesfinder->get();
 
         foreach ($candidateobjects as $candidate) {
             $this->assertEquals($recovererobject->contenthash, $candidate->contenthash);

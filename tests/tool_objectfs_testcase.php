@@ -19,8 +19,11 @@ namespace tool_objectfs\tests;
 defined('MOODLE_INTERNAL') || die();
 
 use dml_exception;
+use moodle_exception;
 use stdClass;
 use stored_file;
+use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
+use tool_objectfs\local\object_manipulator\pusher;
 use tool_objectfs\local\store\object_file_system;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -267,9 +270,13 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     /**
      * @param string $contenthash
      * @return bool
+     * @throws moodle_exception
      */
     protected function objects_contain_hash($contenthash) {
-        $candidateobjects = $this->{$this->manipulator}->get_candidate_objects();
+        $config = get_objectfs_config();
+        $config->filesystem = get_class($this->filesystem);
+        $candidatesfinder = new candidates_finder($this->manipulator, $config);
+        $candidateobjects = $candidatesfinder->get();
         foreach ($candidateobjects as $candidateobject) {
             if ($contenthash === $candidateobject->contenthash) {
                 return true;

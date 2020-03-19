@@ -26,7 +26,7 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 class puller_testcase extends tool_objectfs_testcase {
 
     /** @var string $manipulator */
-    protected $manipulator = 'puller';
+    protected $manipulator = puller::class;
 
     protected function setUp() {
         parent::setUp();
@@ -45,17 +45,14 @@ class puller_testcase extends tool_objectfs_testcase {
     protected function set_puller_config($key, $value) {
         $config = get_objectfs_config();
         $config->$key = $value;
+        set_objectfs_config($config);
         $this->puller = new puller($this->filesystem, $config, $this->logger);
     }
 
     public function test_puller_get_candidate_objects_will_get_remote_objects() {
         $remoteobject = $this->create_remote_object();
 
-        $candidateobjects = $this->puller->get_candidate_objects();
-
-        foreach ($candidateobjects as $candidate) {
-            $this->assertEquals($remoteobject->contenthash, $candidate->contenthash);
-        }
+        self::assertTrue($this->objects_contain_hash($remoteobject->contenthash));
     }
 
     public function test_puller_get_candidate_objects_will_not_get_duplicated_or_local_objects() {
@@ -110,7 +107,4 @@ class puller_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertFalse($this->is_externally_readable_by_hash($object->contenthash));
     }
-
-
 }
-
