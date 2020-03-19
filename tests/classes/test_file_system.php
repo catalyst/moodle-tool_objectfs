@@ -37,6 +37,8 @@ require_once(__DIR__ . '/test_azure_integration_client.php');
 
 class test_file_system extends object_file_system {
 
+    static private $uploadsize;
+
     protected function initialise_external_client($config) {
         global $CFG;
         if (isset($CFG->phpunit_objectfs_s3_integration_test_credentials)) {
@@ -68,7 +70,14 @@ class test_file_system extends object_file_system {
         } else {
             $client = new test_client($config);
         }
-
+        self::$uploadsize = $client->get_maximum_upload_size();
         return $client;
+    }
+
+    /**
+     * @return float|int
+     */
+    static public function get_maximum_upload_size() {
+        return self::$uploadsize;
     }
 }

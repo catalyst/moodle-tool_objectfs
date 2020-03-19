@@ -146,7 +146,9 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_mimetype() {
         global $DB;
         // Push initial objects so they arnt candidates.
-        $finder = new candidates_finder($this->manipulator, get_objectfs_config());
+        $config = get_objectfs_config();
+        $config->filesystem = get_class($this->filesystem);
+        $finder = new candidates_finder($this->manipulator, $config);
         $objects = $finder->get();
         $this->pusher->execute($objects);
 
@@ -166,7 +168,9 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_filesize() {
         global $DB;
         // Push initial objects so they arnt candidates.
-        $finder = new candidates_finder($this->manipulator, get_objectfs_config());
+        $config = get_objectfs_config();
+        $config->filesystem = get_class($this->filesystem);
+        $finder = new candidates_finder($this->manipulator, $config);
         $objects = $finder->get();
         $this->pusher->execute($objects);
 

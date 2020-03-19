@@ -273,7 +273,9 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
      * @throws moodle_exception
      */
     protected function objects_contain_hash($contenthash) {
-        $candidatesfinder = new candidates_finder($this->manipulator, get_objectfs_config());
+        $config = get_objectfs_config();
+        $config->filesystem = get_class($this->filesystem);
+        $candidatesfinder = new candidates_finder($this->manipulator, $config);
         $candidateobjects = $candidatesfinder->get();
         foreach ($candidateobjects as $candidateobject) {
             if ($contenthash === $candidateobject->contenthash) {
