@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\manager;
 use tool_objectfs\local\object_manipulator\puller;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -30,9 +31,9 @@ class puller_testcase extends tool_objectfs_testcase {
 
     protected function setUp() {
         parent::setUp();
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $config->sizethreshold = 100;
-        set_objectfs_config($config);
+        manager::set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->puller = new puller($this->filesystem, $config, $this->logger);
         ob_start();
@@ -43,9 +44,9 @@ class puller_testcase extends tool_objectfs_testcase {
     }
 
     protected function set_puller_config($key, $value) {
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $config->$key = $value;
-        set_objectfs_config($config);
+        manager::set_objectfs_config($config);
         $this->puller = new puller($this->filesystem, $config, $this->logger);
     }
 

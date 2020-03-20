@@ -28,6 +28,7 @@ namespace tool_objectfs\local\object_manipulator;
 use coding_exception;
 use moodle_exception;
 use stdClass;
+use tool_objectfs\local\manager;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\log\aggregate_logger;
 
@@ -97,7 +98,7 @@ class manipulator_builder {
      * @throws moodle_exception
      */
     private function build($manipulator) {
-        $this->config = get_objectfs_config();
+        $this->config = manager::get_objectfs_config();
         $this->manipulatorclass = $manipulator;
         $this->logger = new aggregate_logger();
         $this->finder = new candidates_finder($manipulator, $this->config);

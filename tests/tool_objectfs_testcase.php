@@ -22,8 +22,8 @@ use dml_exception;
 use moodle_exception;
 use stdClass;
 use stored_file;
+use tool_objectfs\local\manager;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
-use tool_objectfs\local\object_manipulator\pusher;
 use tool_objectfs\local\store\object_file_system;
 
 require_once(__DIR__ . '/classes/test_client.php');
@@ -77,7 +77,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
+        manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
@@ -103,7 +103,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         // Above method does not set a file size, we do this it has a positive filesize.
         $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
-        update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
+        manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
     }
 
@@ -111,7 +111,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_local_file($content);
         $contenthash = $file->get_contenthash();
         $this->filesystem->copy_object_from_local_to_external_by_hash($contenthash);
-        update_object_by_hash($contenthash, OBJECT_LOCATION_DUPLICATED);
+        manager::update_object_by_hash($contenthash, OBJECT_LOCATION_DUPLICATED);
         return $file;
     }
 
@@ -119,7 +119,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_duplicated_file($content);
         $contenthash = $file->get_contenthash();
         $this->filesystem->delete_object_from_local_by_hash($contenthash);
-        update_object_by_hash($contenthash, OBJECT_LOCATION_EXTERNAL);
+        manager::update_object_by_hash($contenthash, OBJECT_LOCATION_EXTERNAL);
         return $file;
     }
 
@@ -127,7 +127,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $file = $this->create_local_file();
         $path = $this->get_local_path_from_storedfile($file);
         unlink($path);
-        update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+        manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         return $file;
     }
 
@@ -273,7 +273,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
      * @throws moodle_exception
      */
     protected function objects_contain_hash($contenthash) {
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $config->filesystem = get_class($this->filesystem);
         $candidatesfinder = new candidates_finder($this->manipulator, $config);
         $candidateobjects = $candidatesfinder->get();

@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\local\manager;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/lib.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
@@ -34,7 +36,7 @@ $output = $PAGE->get_renderer('tool_objectfs');
 echo $output->header();
 echo $output->heading(get_string('presignedurl_testing:page', 'tool_objectfs'));
 
-$config = get_objectfs_config();
+$config = manager::get_objectfs_config();
 $support = false;
 if (!empty($config->filesystem)) {
     $fs = new $config->filesystem();
@@ -45,7 +47,7 @@ $settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=
 
 if ($support) {
 
-    $client = tool_objectfs_get_client($config);
+    $client = manager::get_client($config);
     if ($client and $client->get_availability()) {
 
         $connection = $client->test_connection();
