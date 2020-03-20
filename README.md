@@ -343,12 +343,12 @@ git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
 ### Allow support for xsendfile in alternative File System
 
 1. Cherry pick the file system API patch: [MDL-66304](https://tracker.moodle.org/browse/MDL-66304):
-<pre>
+```sh
 git remote add upstream git@github.com:moodle/moodle.git
 git fetch upstream
 git cherry-pick 1a159252405e85394d241922a5244309e9ad14f4
 // Solve conflicts and git cherry-pick --continue as needed.
-</pre>
+```
 
 ### PHPUnit test compatibility
 The file system API patch introduces tests that use:
