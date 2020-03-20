@@ -25,9 +25,10 @@
 
 namespace tool_objectfs\task;
 
+use coding_exception;
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 require_once($CFG->libdir.'/cronlib.php');
 
 class delete_local_empty_directories  extends task {
@@ -37,16 +38,13 @@ class delete_local_empty_directories  extends task {
 
     /**
      * Execute task
-     * @throws \coding_exception
+     * @throws coding_exception
      */
     public function execute() {
-        $config = get_objectfs_config();
-
-        if (!tool_objectfs_should_tasks_run()) {
-            mtrace(get_string('not_enabled', 'tool_objectfs'));
+        if (!$this->enabled_tasks()) {
             return;
         }
-        $filesystem = new $config->filesystem();
+        $filesystem = new $this->config->filesystem();
         cron_trace_time_and_memory();
         $filesystem->delete_empty_dirs();
     }
