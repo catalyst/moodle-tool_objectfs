@@ -97,17 +97,11 @@ class manipulator_builder {
     /**
      * @param string $manipulator
      * @return bool
-     * @throws coding_exception
      * @throws moodle_exception
      */
     private function build($manipulator) {
-        if (!tool_objectfs_should_tasks_run()) {
-            mtrace(get_string('not_enabled', 'tool_objectfs'));
-            return false;
-        }
-
-        $this->manipulatorclass = $manipulator;
         $this->config = get_objectfs_config();
+        $this->manipulatorclass = $manipulator;
         $this->finder = new candidates_finder($manipulator, $this->config);
         return true;
     }
