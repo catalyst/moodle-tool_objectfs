@@ -84,10 +84,17 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('tool_objectfs/storagefilesystemselection',
         new lang_string('settings:clientselection:header', 'tool_objectfs'), ''));
 
+    $filesystemoptions = [
+        '' => 'Please, select',
+        '\tool_objectfs\azure_file_system' => '\tool_objectfs\azure_file_system',
+        '\tool_objectfs\digitalocean_file_system' => '\tool_objectfs\digitalocean_file_system',
+        '\tool_objectfs\s3_file_system' => '\tool_objectfs\s3_file_system',
+        '\tool_objectfs\swift_file_system' => '\tool_objectfs\swift_file_system',
+    ];
     $settings->add(new admin_setting_configselect('tool_objectfs/filesystem',
         new lang_string('settings:clientselection:title', 'tool_objectfs'),
         new lang_string('settings:clientselection:title_help', 'tool_objectfs'), '',
-        tool_objectfs_get_fs_list()));
+        $filesystemoptions));
 
 
     $config = get_objectfs_config();
