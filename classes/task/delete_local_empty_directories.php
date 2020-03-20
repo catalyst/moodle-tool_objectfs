@@ -29,7 +29,6 @@ use coding_exception;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 require_once($CFG->libdir.'/cronlib.php');
 
 class delete_local_empty_directories  extends task {
