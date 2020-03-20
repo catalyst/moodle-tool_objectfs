@@ -761,14 +761,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      */
     public function supports_xsendfile() {
-        $parents = class_parents(self::class);
-        unset($parents[self::class]);
-        foreach ($parents as $parent) {
-            if (method_exists($parent, __FUNCTION__)) {
-                return parent::supports_xsendfile();
-            }
-        }
-        return false;
+        return true;
     }
 
     /**
