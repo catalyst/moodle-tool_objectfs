@@ -95,10 +95,11 @@ if ($ADMIN->fulltree) {
     if (!empty($config->filesystem)) {
         $support = (new $config->filesystem())->supports_presigned_urls();
     }
-
+    $warning = !method_exists('file_system', 'supports_xsendfile');
+    $coresupport = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
     if ($support) {
         $settings->add(new admin_setting_heading('tool_objectfs/presignedurls',
-            new lang_string('settings:presignedurl:header', 'tool_objectfs'), ''));
+            new lang_string('settings:presignedurl:header', 'tool_objectfs'), $coresupport));
 
         $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
             new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
