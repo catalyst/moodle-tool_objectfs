@@ -27,26 +27,13 @@ namespace tool_objectfs\task;
 
 use coding_exception;
 use moodle_exception;
-use stdClass;
 use tool_objectfs\local\object_manipulator\manipulator_builder;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
+require_once($CFG->libdir . '/filestorage/file_system.php');
 
 abstract class task extends \core\task\scheduled_task implements objectfs_task {
-
-    const PLUGIN_NAME = 'tool_objectfs';
-
-    /** @var stdClass $config */
-    protected $config;
-
-    /**
-     * task constructor.
-     */
-    public function __construct() {
-        $this->config = get_objectfs_config();
-    }
 
     /**
      * Get task name
@@ -54,7 +41,7 @@ abstract class task extends \core\task\scheduled_task implements objectfs_task {
      * @throws coding_exception
      */
     public function get_name() {
-        return get_string($this->stringname, self::PLUGIN_NAME);
+        return get_string($this->stringname, 'tool_objectfs');
     }
 
     /**
@@ -63,20 +50,6 @@ abstract class task extends \core\task\scheduled_task implements objectfs_task {
      * @throws moodle_exception
      */
     public function execute() {
-        if ($this->enabled_tasks()) {
-            (new manipulator_builder())->execute($this->manipulator);
-        }
-    }
-
-    /**
-     * @return bool
-     * @throws coding_exception
-     */
-    protected function enabled_tasks() {
-        $enabletasks = (bool)$this->config->enabletasks;
-        if (!$enabletasks) {
-            mtrace(get_string('not_enabled', self::PLUGIN_NAME));
-        }
-        return $enabletasks;
+        (new manipulator_builder())->execute($this->manipulator);
     }
 }

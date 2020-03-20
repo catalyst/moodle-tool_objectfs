@@ -55,25 +55,30 @@ class manipulator_builder {
     /** @var stdClass $config  */
     private $config;
 
-    /** @var aggregate_logger $logger */
-    private $logger;
-
     /**
      * @param string $manipulator
      * @throws coding_exception
      * @throws moodle_exception
      */
     public function execute($manipulator) {
-        $candidates = $this->build($manipulator);
-        if (empty($candidates)) {
+        if (!$this->build($manipulator)) {
             return;
         }
+        $logger = new aggregate_logger();
+        $candidates = $this->finder->get();
+        $countcandidates = count($candidates);
+        $logger->log_object_query($this->finder->get_query_name(), $countcandidates);
+        if ($countcandidates === 0) {
+            mtrace('No candidate objects found.');
+            return;
+        }
+
         $filesystem = new $this->config->filesystem();
         if (!$filesystem->get_client_availability()) {
             mtrace(get_string('client_not_available', 'tool_objectfs'));
             return;
         }
-        $manipulator = new $this->manipulatorclass($filesystem, $this->config, $this->logger);
+        $manipulator = new $this->manipulatorclass($filesystem, $this->config, $logger);
         $manipulator->execute($candidates);
     }
 
@@ -91,21 +96,19 @@ class manipulator_builder {
 
     /**
      * @param string $manipulator
-     * @return array
+     * @return bool
+     * @throws coding_exception
      * @throws moodle_exception
      */
     private function build($manipulator) {
-        $this->config = get_objectfs_config();
-        $this->manipulatorclass = $manipulator;
-        $this->finder = new candidates_finder($manipulator, $this->config);
-        $this->logger = new aggregate_logger();
-        $candidates = $this->finder->get();
-        $countcandidates = count($candidates);
-        $this->logger->log_object_query($this->finder->get_query_name(), $countcandidates);
-        if ($countcandidates === 0) {
-            mtrace('No candidate objects found.');
-            return [];
+        if (!tool_objectfs_should_tasks_run()) {
+            mtrace(get_string('not_enabled', 'tool_objectfs'));
+            return false;
         }
-        return $candidates;
+
+        $this->manipulatorclass = $manipulator;
+        $this->config = get_objectfs_config();
+        $this->finder = new candidates_finder($manipulator, $this->config);
+        return true;
     }
 }
