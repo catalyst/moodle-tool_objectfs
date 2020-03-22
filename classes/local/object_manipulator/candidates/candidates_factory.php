@@ -25,7 +25,7 @@
 namespace tool_objectfs\local\object_manipulator\candidates;
 
 use moodle_exception;
-use stdClass;
+use tool_objectfs\config\config;
 use tool_objectfs\local\object_manipulator\checker;
 use tool_objectfs\local\object_manipulator\deleter;
 use tool_objectfs\local\object_manipulator\puller;
@@ -47,11 +47,11 @@ class candidates_factory {
 
     /**
      * @param $manipulator
-     * @param stdClass $config
+     * @param config $config
      * @return mixed
      * @throws moodle_exception
      */
-    public static function finder($manipulator, stdClass $config) {
+    public static function finder($manipulator, config $config) {
         if (isset(self::$manipulatormap[$manipulator])) {
             $classname = self::$manipulatormap[$manipulator];
             return new $classname($config);

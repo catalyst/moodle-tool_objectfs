@@ -54,11 +54,11 @@ class deleter_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        $consistancythreshold = time() - $this->config->consistencydelay;
+        $consistancythreshold = time() - $this->config->get('consistencydelay');
         return [
             'consistancythreshold' => $consistancythreshold,
             'location' => OBJECT_LOCATION_DUPLICATED,
-            'sizethreshold' => $this->config->sizethreshold
+            'sizethreshold' => $this->config->get('sizethreshold')
         ];
     }
 }

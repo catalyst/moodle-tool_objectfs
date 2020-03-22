@@ -25,7 +25,7 @@
 namespace tool_objectfs\local\object_manipulator\candidates;
 
 use moodle_exception;
-use stdClass;
+use tool_objectfs\config\config;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,10 +37,10 @@ class candidates_finder {
     /**
      * candidates_finder constructor.
      * @param string $manipulator
-     * @param stdClass $config
+     * @param config $config
      * @throws moodle_exception
      */
-    public function __construct($manipulator, stdClass $config) {
+    public function __construct($manipulator, config $config) {
         $this->finder = candidates_factory::finder($manipulator, $config);
     }
 

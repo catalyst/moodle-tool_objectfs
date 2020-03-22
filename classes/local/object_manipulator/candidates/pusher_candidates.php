@@ -56,9 +56,9 @@ class pusher_candidates extends manipulator_candidates_base {
      */
     public function get_candidates_sql_params() {
         return [
-            'maxcreatedtimstamp' => time() - $this->config->minimumage,
-            'threshold' => $this->config->sizethreshold,
-            'maximum_file_size' => call_user_func($this->config->filesystem . '::get_maximum_upload_size'),
+            'maxcreatedtimstamp' => time() - $this->config->get('minimumage'),
+            'threshold' => $this->config->get('sizethreshold'),
+            'maximum_file_size' => call_user_func([$this->config->get('filesystem'), 'get_maximum_upload_size']),
             'object_location' => OBJECT_LOCATION_LOCAL,
         ];
     }

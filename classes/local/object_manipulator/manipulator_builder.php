@@ -28,6 +28,7 @@ namespace tool_objectfs\local\object_manipulator;
 use coding_exception;
 use moodle_exception;
 use stdClass;
+use tool_objectfs\config\config;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\log\aggregate_logger;
 
@@ -52,7 +53,7 @@ class manipulator_builder {
     /** @var candidates_finder $finder */
     private $finder;
 
-    /** @var stdClass $config  */
+    /** @var config $config  */
     private $config;
 
     /** @var aggregate_logger $logger */
@@ -71,7 +72,8 @@ class manipulator_builder {
         if (empty($this->candidates)) {
             return;
         }
-        $filesystem = new $this->config->filesystem();
+        $classname = $this->config->get('filesystem');
+        $filesystem = new $classname();
         if (!$filesystem->get_client_availability()) {
             mtrace(get_string('client_not_available', 'tool_objectfs'));
             return;
@@ -97,7 +99,7 @@ class manipulator_builder {
      * @throws moodle_exception
      */
     private function build($manipulator) {
-        $this->config = get_objectfs_config();
+        $this->config = config::instance();
         $this->manipulatorclass = $manipulator;
         $this->logger = new aggregate_logger();
         $this->finder = new candidates_finder($manipulator, $this->config);

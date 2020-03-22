@@ -25,20 +25,20 @@
 namespace tool_objectfs\local\object_manipulator\candidates;
 
 use dml_exception;
-use stdClass;
+use tool_objectfs\config\config;
 
 defined('MOODLE_INTERNAL') || die();
 
 abstract class manipulator_candidates_base implements manipulator_candidates {
 
-    /** @var stdClass $config */
+    /** @var config $config */
     protected $config;
 
     /**
      * manipulator_candidates_base constructor.
-     * @param stdClass $config
+     * @param config $config
      */
-    public function __construct(stdClass $config) {
+    public function __construct(config $config) {
         $this->config = $config;
     }
 
@@ -60,7 +60,7 @@ abstract class manipulator_candidates_base implements manipulator_candidates {
             $this->get_candidates_sql(),
             $this->get_candidates_sql_params(),
             0,
-            $this->config->batchsize
+            $this->config->get('batchsize')
         );
     }
 }

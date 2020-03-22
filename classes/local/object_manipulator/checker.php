@@ -26,6 +26,7 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -38,10 +39,10 @@ class checker extends manipulator {
      * This manipulator adds location for files that do not have records in {tool_objectfs_objects} table.
      *
      * @param object_file_system $filesystem objectfs file system
-     * @param stdClass $config objectfs config.
+     * @param config $config objectfs config.
      * @param aggregate_logger $logger
      */
-    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
+    public function __construct(object_file_system $filesystem, config $config, aggregate_logger $logger) {
         parent::__construct($filesystem, $config, $logger);
         $this->batchsize = $this->batchsize * 10;
     }

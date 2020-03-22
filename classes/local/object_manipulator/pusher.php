@@ -26,6 +26,7 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -50,13 +51,13 @@ class pusher extends manipulator {
     /**
      * pusher constructor.
      * @param object_file_system $filesystem
-     * @param stdClass $config
+     * @param config $config
      * @param aggregate_logger $logger
      */
-    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
+    public function __construct(object_file_system $filesystem, config $config, aggregate_logger $logger) {
         parent::__construct($filesystem, $config, $logger);
-        $this->sizethreshold = $config->sizethreshold;
-        $this->minimumage = $config->minimumage;
+        $this->sizethreshold = $config->get('sizethreshold');
+        $this->minimumage = $config->get('minimumage');
         $this->maximumfilesize = $this->filesystem->get_maximum_upload_filesize();
     }
 

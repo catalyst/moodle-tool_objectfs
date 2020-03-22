@@ -27,6 +27,7 @@ namespace tool_objectfs\local\object_manipulator;
 
 use dml_exception;
 use stdClass;
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -67,14 +68,14 @@ abstract class manipulator implements object_manipulator {
      * Manipulator constructor
      *
      * @param object_file_system $filesystem object file system
-     * @param stdClass $config
+     * @param config $config
      * @param aggregate_logger $logger
      */
-    public function __construct(object_file_system $filesystem, stdClass $config, aggregate_logger $logger) {
-        $this->finishtime = time() + $config->maxtaskruntime;
+    public function __construct(object_file_system $filesystem, config $config, aggregate_logger $logger) {
+        $this->finishtime = time() + $config->get('maxtaskruntime');
         $this->filesystem = $filesystem;
-        $this->batchsize = $config->batchsize;
-        $this->sizethreshold = $config->sizethreshold;
+        $this->batchsize = $config->get('batchsize');
+        $this->sizethreshold = $config->get('sizethreshold');
         $this->logger = $logger;
         // Inject our logger into the filesystem.
         $this->filesystem->set_logger($this->logger);

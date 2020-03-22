@@ -53,6 +53,6 @@ class puller_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        return ['sizethreshold' => $this->config->sizethreshold, 'location' => OBJECT_LOCATION_EXTERNAL];
+        return ['sizethreshold' => $this->config->get('sizethreshold'), 'location' => OBJECT_LOCATION_EXTERNAL];
     }
 }

@@ -26,6 +26,7 @@
 namespace tool_objectfs\task;
 
 use coding_exception;
+use tool_objectfs\config\config as cfg;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -44,7 +45,8 @@ class delete_local_empty_directories  extends task {
         if (!$this->enabled_tasks()) {
             return;
         }
-        $filesystem = new $this->config->filesystem();
+        $classname = cfg::instance()->get('filesystem');
+        $filesystem = new $classname();
         cron_trace_time_and_memory();
         $filesystem->delete_empty_dirs();
     }
