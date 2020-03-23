@@ -27,7 +27,6 @@ namespace tool_objectfs\local\object_manipulator;
 
 use coding_exception;
 use moodle_exception;
-use stdClass;
 use tool_objectfs\config\config;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\log\aggregate_logger;

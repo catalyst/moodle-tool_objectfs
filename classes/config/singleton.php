@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die;
 abstract class singleton {
 
     /** @var array $instances */
-    private static $instances = [];
+    protected static $instances = [];
 
     /**
      * singleton constructor.

@@ -21,6 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\pusher;
 
+require_once(__DIR__ . '/classes/config.php');
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
@@ -31,12 +32,11 @@ class pusher_testcase extends tool_objectfs_testcase {
 
     protected function setUp() {
         parent::setUp();
-        $config = get_objectfs_config();
-        $config->sizethreshold = 0;
-        $config->minimumage = 0;
-        set_objectfs_config($config);
+        $config['sizethreshold'] = 0;
+        $config['minimumage'] = 0;
+        config::set_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
-        $this->pusher = new pusher($this->filesystem, $config, $this->logger);
+        $this->pusher = new pusher($this->filesystem, config::instance(), $this->logger);
         ob_start();
     }
 
@@ -45,10 +45,8 @@ class pusher_testcase extends tool_objectfs_testcase {
     }
 
     protected function set_pusher_config($key, $value) {
-        $config = get_objectfs_config();
-        $config->$key = $value;
-        set_objectfs_config($config);
-        $this->pusher = new pusher($this->filesystem, $config, $this->logger);
+        config::set_config([$key => $value]);
+        $this->pusher = new pusher($this->filesystem, config::instance(), $this->logger);
     }
 
     public function test_pusher_get_candidate_objects_will_get_local_objects() {
@@ -146,9 +144,8 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_mimetype() {
         global $DB;
         // Push initial objects so they arnt candidates.
-        $config = get_objectfs_config();
-        $config->filesystem = get_class($this->filesystem);
-        $finder = new candidates_finder($this->manipulator, $config);
+        config::set_config(['filesystem' => get_class($this->filesystem)]);
+        $finder = new candidates_finder($this->manipulator, config::instance());
         $objects = $finder->get();
         $this->pusher->execute($objects);
 
@@ -168,9 +165,8 @@ class pusher_testcase extends tool_objectfs_testcase {
     public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_filesize() {
         global $DB;
         // Push initial objects so they arnt candidates.
-        $config = get_objectfs_config();
-        $config->filesystem = get_class($this->filesystem);
-        $finder = new candidates_finder($this->manipulator, $config);
+        config::set_config(['filesystem' => get_class($this->filesystem)]);
+        $finder = new candidates_finder($this->manipulator, config::instance());
         $objects = $finder->get();
         $this->pusher->execute($objects);
 

@@ -23,13 +23,22 @@ use moodle_exception;
 use stdClass;
 use stored_file;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
-use tool_objectfs\local\object_manipulator\pusher;
 use tool_objectfs\local\store\object_file_system;
 
+require_once(__DIR__ . '/classes/config.php');
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/classes/test_file_system.php');
 
 abstract class tool_objectfs_testcase extends \advanced_testcase {
+
+//    /**
+//     * @param $config
+//     */
+//    static public function set_objectfs_config($config) {
+//        foreach ($config as $key => $value) {
+//            set_config($key, $value, 'tool_objectfs');
+//        }
+//    }
 
     protected function setUp() {
         global $CFG;
@@ -251,6 +260,24 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     }
 
     /**
+     * @param string $contenthash
+     * @return bool
+     * @throws moodle_exception
+     */
+    protected function objects_contain_hash($contenthash) {
+        $config['filesystem'] = get_class($this->filesystem);
+        config::set_config($config);
+        $candidatesfinder = new candidates_finder($this->manipulator, config::instance());
+        $candidateobjects = $candidatesfinder->get();
+        foreach ($candidateobjects as $candidateobject) {
+            if ($contenthash === $candidateobject->contenthash) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param stored_file $file
      * @param $location
      * @return stdClass
@@ -265,23 +292,5 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $objectrecord->filesize = $file->get_filesize();
         $objectrecord->id = $DB->get_field('tool_objectfs_objects', 'id', ['contenthash' => $contenthash]);
         return $objectrecord;
-    }
-
-    /**
-     * @param string $contenthash
-     * @return bool
-     * @throws moodle_exception
-     */
-    protected function objects_contain_hash($contenthash) {
-        $config = get_objectfs_config();
-        $config->filesystem = get_class($this->filesystem);
-        $candidatesfinder = new candidates_finder($this->manipulator, $config);
-        $candidateobjects = $candidatesfinder->get();
-        foreach ($candidateobjects as $candidateobject) {
-            if ($contenthash === $candidateobject->contenthash) {
-                return true;
-            }
-        }
-        return false;
     }
 }

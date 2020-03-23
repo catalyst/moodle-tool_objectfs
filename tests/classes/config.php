@@ -16,27 +16,29 @@
 
 namespace tool_objectfs\tests;
 
+use tool_objectfs\config\config as config_base;
+
 defined('MOODLE_INTERNAL') || die();
 
-use advanced_testcase;
+class config extends config_base {
 
-require_once(__DIR__ . '/classes/config.php');
-require_once(__DIR__ . '/../lib.php');
-require_once(__DIR__ . '/classes/test_client.php');
-
-class object_client_testcase extends advanced_testcase {
-
-    protected function setUp() {
-        $this->resetAfterTest(true);
+    /**
+     * @param array $config
+     */
+    static public function set_config(array $config) {
+        foreach ($config as $key => $value) {
+            set_config($key, $value, 'tool_objectfs');
+            call_user_func_array([self::class, 'reset_config'], [$key, $value]);
+        }
     }
 
-    public function test_notification() {
-        global $CFG, $SESSION;
-        $client = new test_client(config::instance());
-        $client->notification('Success');
-        if ($CFG->branch > 30) {
-            self::assertObjectHasAttribute('notifications', $SESSION);
-            self::assertCount(1, $SESSION->notifications);
+    /**
+     * @param string $key
+     * @param mixed $value
+     */
+    static private function reset_config($key, $value) {
+        if (isset(self::$instances[self::class])) {
+            self::$instances[self::class]->config->$key = $value;
         }
     }
 }

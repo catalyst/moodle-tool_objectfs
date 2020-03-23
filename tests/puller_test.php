@@ -20,6 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\local\object_manipulator\puller;
 
+require_once(__DIR__ . '/classes/config.php');
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
@@ -30,11 +31,9 @@ class puller_testcase extends tool_objectfs_testcase {
 
     protected function setUp() {
         parent::setUp();
-        $config = get_objectfs_config();
-        $config->sizethreshold = 100;
-        set_objectfs_config($config);
+        config::set_config(['sizethreshold' => 100]);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
-        $this->puller = new puller($this->filesystem, $config, $this->logger);
+        $this->puller = new puller($this->filesystem, config::instance(), $this->logger);
         ob_start();
     }
 
@@ -43,10 +42,9 @@ class puller_testcase extends tool_objectfs_testcase {
     }
 
     protected function set_puller_config($key, $value) {
-        $config = get_objectfs_config();
-        $config->$key = $value;
-        set_objectfs_config($config);
-        $this->puller = new puller($this->filesystem, $config, $this->logger);
+        $config[$key] = $value;
+        config::set_config($config);
+        $this->puller = new puller($this->filesystem, config::instance(), $this->logger);
     }
 
     public function test_puller_get_candidate_objects_will_get_remote_objects() {
