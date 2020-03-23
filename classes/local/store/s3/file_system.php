@@ -30,6 +30,7 @@ namespace tool_objectfs\local\store\s3;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\object_file_system;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -43,7 +44,7 @@ class file_system extends object_file_system {
         return client::MAX_UPLOAD;
     }
 
-    protected function initialise_external_client($config) {
+    protected function initialise_external_client(config $config) {
         $s3client = new client($config);
 
         return $s3client;

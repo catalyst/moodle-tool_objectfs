@@ -25,10 +25,12 @@
 
 namespace tool_objectfs\local\store;
 
+use tool_objectfs\config\config;
+
 defined('MOODLE_INTERNAL') || die();
 
 interface object_client {
-    public function __construct($config);
+    public function __construct(config $config);
     public function register_stream_wrapper();
     public function get_fullpath_from_hash($contenthash);
     public function get_trash_fullpath_from_hash($contenthash);

@@ -34,6 +34,7 @@ use MicrosoftAzure\Storage\Common\ServicesBuilder;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use SimpleXMLElement;
 use stdClass;
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\azure\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
@@ -51,13 +52,13 @@ class client extends object_client_base {
      *
      * @param $config
      */
-    public function __construct($config) {
+    public function __construct(config $config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/azure_storage/vendor/autoload.php';
 
-        if ($this->get_availability() && !empty($config)) {
+        if ($this->get_availability()) {
             require_once($this->autoloader);
-            $this->container = $config->azure_container;
+            $this->container = $config->get('azure_container');
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -76,11 +77,11 @@ class client extends object_client_base {
     /**
      * Configures the BlobRestProxy client for access with the SAS token provided.
      *
-     * @param stdClass $config
+     * @param config $config
      */
-    public function set_client($config) {
-        $accountname = $config->azure_accountname;
-        $sastoken = $this->clean_sastoken($config->azure_sastoken);
+    public function set_client(config $config) {
+        $accountname = $config->get('azure_accountname');
+        $sastoken = $this->clean_sastoken($config->get('azure_sastoken'));
 
         // If the account name is specified, append a period to create a valid url.
         // When $accountname is not set, prevent the general exception validation error.

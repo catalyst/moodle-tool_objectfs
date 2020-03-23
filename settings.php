@@ -23,6 +23,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\config\config;
+use tool_objectfs\local\store\client_factory;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/lib.php');
@@ -97,10 +100,11 @@ if ($ADMIN->fulltree) {
         $filesystemoptions));
 
 
-    $config = get_objectfs_config();
+    $config = config::instance();
     $support = false;
-    if (!empty($config->filesystem)) {
-        $support = (new $config->filesystem())->supports_presigned_urls();
+    if (!empty($config->get('filesystem'))) {
+        $fs = $config->get('filesystem');
+        $support = (new $fs())->supports_presigned_urls();
     }
     $warning = !method_exists('file_system', 'supports_xsendfile');
     $coresupport = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
@@ -121,7 +125,7 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
     }
 
-    $client = tool_objectfs_get_client($config);
+    $client = client_factory::get();
     if ($client && $client->get_availability()) {
         $settings = $client->define_client_section($settings, $config);
 

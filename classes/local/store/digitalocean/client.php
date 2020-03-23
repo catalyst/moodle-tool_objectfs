@@ -27,29 +27,30 @@ namespace tool_objectfs\local\store\digitalocean;
 defined('MOODLE_INTERNAL') || die();
 
 use Aws\S3\S3Client;
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\s3\client as s3_client;
 
 class client extends s3_client {
 
-    public function __construct($config) {
+    public function __construct(config $config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
         $this->testdelete = false;
 
-        if ($this->get_availability() && !empty($config)) {
+        if ($this->get_availability()) {
             require_once($this->autoloader);
-            $this->bucket = $config->do_space;
+            $this->bucket = $config->get('do_space');
             $this->set_client($config);
         } else {
             parent::__construct($config);
         }
     }
 
-    public function set_client($config) {
+    public function set_client(config$config) {
         $this->client = S3Client::factory(array(
-            'credentials' => array('key' => $config->do_key, 'secret' => $config->do_secret),
-            'region' => $config->do_region,
-            'endpoint' => 'https://' . $config->do_region . '.digitaloceanspaces.com',
+            'credentials' => ['key' => $config->get('do_key'), 'secret' => $config->get('do_secret')],
+            'region' => $config->get('do_region'),
+            'endpoint' => 'https://' . $config->get('do_region') . '.digitaloceanspaces.com',
             'version' => AWS_API_VERSION
         ));
     }

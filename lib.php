@@ -148,18 +148,6 @@ function get_objectfs_config() {
     return $config;
 }
 
-function tool_objectfs_get_client($config) {
-    $fsclass = $config->filesystem;
-    $client = str_replace('_file_system', '', $fsclass);
-    $client = str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $client.'\\client');
-
-    if (class_exists($client)) {
-        return new $client($config);
-    }
-
-    return false;
-}
-
 // Legacy cron function.
 function tool_objectfs_cron() {
     mtrace('RUNNING legacy cron objectfs');

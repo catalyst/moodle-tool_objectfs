@@ -33,8 +33,6 @@ use tool_objectfs\log\aggregate_logger;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/../../../lib.php');
-
 class manipulator_builder {
 
     /** @var array $manipulators */

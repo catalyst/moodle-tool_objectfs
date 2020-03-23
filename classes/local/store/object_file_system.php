@@ -36,6 +36,7 @@ use SplFileInfo;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
+use tool_objectfs\config\config;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -55,18 +56,17 @@ abstract class object_file_system extends \file_system_filedir {
         global $CFG;
         parent::__construct(); // Setup filedir.
 
-        $config = get_objectfs_config();
-
+        $config = config::instance();
         $this->externalclient = $this->initialise_external_client($config);
         $this->externalclient->register_stream_wrapper();
-        $this->preferexternal = $config->preferexternal;
+        $this->preferexternal = $config->get('preferexternal');
         $this->filepermissions = $CFG->filepermissions;
         $this->dirpermissions = $CFG->directorypermissions;
         if (isset($CFG->tool_objectfs_delete_externally)) {
             $this->deleteexternally = $CFG->tool_objectfs_delete_externally;
         }
 
-        if ($config->enablelogging) {
+        if ($config->get('enablelogging')) {
             $this->set_logger(new \tool_objectfs\log\real_time_logger());
         } else {
             $this->set_logger(new \tool_objectfs\log\null_logger());
@@ -95,7 +95,7 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient;
     }
 
-    protected abstract function initialise_external_client($config);
+    protected abstract function initialise_external_client(config $config);
 
     /**
      * Get the full path for the specified hash, including the path to the filedir.

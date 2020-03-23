@@ -32,6 +32,7 @@ use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\object_client_base;
 
 define('AWS_API_VERSION', '2006-03-01');
@@ -43,16 +44,16 @@ class client extends object_client_base {
     protected $client;
     protected $bucket;
 
-    public function __construct($config) {
+    public function __construct(config $config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
 
-        if ($this->get_availability() && !empty($config)) {
+        if ($this->get_availability()) {
             require_once($this->autoloader);
-            $this->bucket = $config->s3_bucket;
-            $this->expirationtime = $config->expirationtime;
-            $this->presignedminfilesize = $config->presignedminfilesize;
-            $this->enablepresignedurls = $config->enablepresignedurls;
+            $this->bucket = $config->get('s3_bucket');
+            $this->expirationtime = $config->get('expirationtime');
+            $this->presignedminfilesize = $config->get('presignedminfilesize');
+            $this->enablepresignedurls = $config->get('enablepresignedurls');
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -66,15 +67,14 @@ class client extends object_client_base {
     public function __wakeup() {
         // We dont want to store credentials in the client itself as
         // it will be serialised, so re-retrive them now.
-        $config = get_objectfs_config();
-        $this->set_client($config);
+        $this->set_client(config::instance());
         $this->client->registerStreamWrapper();
     }
 
-    public function set_client($config) {
+    public function set_client(config $config) {
         $this->client = S3Client::factory(array(
-        'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
-        'region' => $config->s3_region,
+        'credentials' => ['key' => $config->get('s3_key'), 'secret' => $config->get('s3_secret')],
+        'region' => $config->get('s3_region'),
         'version' => AWS_API_VERSION
         ));
     }

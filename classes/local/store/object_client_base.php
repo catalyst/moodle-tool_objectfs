@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\local\store;
 
+use tool_objectfs\config\config;
+
 defined('MOODLE_INTERNAL') || die();
 
 abstract class object_client_base implements object_client {
@@ -36,7 +38,7 @@ abstract class object_client_base implements object_client {
     public $presignedminfilesize;
     public $enablepresignedurls;
 
-    public function __construct($config) {
+    public function __construct(config $config) {
 
     }
 

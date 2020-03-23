@@ -26,6 +26,7 @@ namespace tool_objectfs\local\store\swift;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\config\config;
 use tool_objectfs\local\store\swift\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
@@ -41,16 +42,16 @@ class client extends object_client_base {
     /**
      * The swift client constructor.
      *
-     * @param $config
+     * @param config $config
      */
-    public function __construct($config) {
+    public function __construct(config $config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/openstack/vendor/autoload.php';
 
-        if ($this->get_availability() && !empty($config)) {
+        if ($this->get_availability()) {
             require_once($this->autoloader);
-            $this->containername = $config->openstack_container;
             $this->config = $config;
+            $this->containername = $this->config->get('openstack_container');
         } else {
             parent::__construct($config);
         }
@@ -60,19 +61,19 @@ class client extends object_client_base {
 
         static $token;
 
-        if (empty($this->config->openstack_authurl)) {
+        if (empty($this->config->get('openstack_authurl'))) {
             throw new \Exception("Invalid authenticaiton URL");
         }
 
         $params = [
-            'authUrl' => $this->config->openstack_authurl,
-            'region'  => $this->config->openstack_region,
+            'authUrl' => $this->config->get('openstack_authurl'),
+            'region'  => $this->config->get('openstack_region'),
             'user'    => [
-                'name' => $this->config->openstack_username,
-                'password' => $this->config->openstack_password,
+                'name' => $this->config->get('openstack_username'),
+                'password' => $this->config->get('openstack_password'),
                 'domain' => ['id' => 'default'],
             ],
-            'scope'   => ['project' => ['id' => $this->config->openstack_projectid]]
+            'scope'   => ['project' => ['id' => $this->config->get('openstack_projectid')]]
         ];
 
         if (!isset($token['expires_at']) || (new \DateTimeImmutable($token['expires_at'])) < (new \DateTimeImmutable('now'))) {
@@ -83,7 +84,7 @@ class client extends object_client_base {
             $openstack = new \OpenStack\OpenStack($params);
         }
 
-        return $openstack->objectStoreV1()->getContainer($this->containername);
+        return $openstack->objectStoreV1()->getContainer($this->config->get('openstack_container'));
 
     }
 
@@ -123,18 +124,18 @@ class client extends object_client_base {
     public function get_fullpath_from_hash($contenthash) {
         $filepath = $this->get_filepath_from_hash($contenthash);
 
-        return "swift://$this->containername/$filepath";
+        return "swift://{$this->config->get('openstack_container')}/$filepath";
     }
 
     public function get_seekable_stream_context() {
         $context = stream_context_create([
             "swift" => [
-                'username' => $this->config->openstack_username,
-                'password' => $this->config->openstack_password,
-                'projectid' => $this->config->openstack_projectid,
-                'tenantname' => $this->config->openstack_tenantname,
-                'endpoint' => $this->config->openstack_authurl,
-                'region' => $this->config->openstack_region,
+                'username' => $this->config->get('openstack_username'),
+                'password' => $this->config->get('openstack_password'),
+                'projectid' => $this->config->get('openstack_projectid'),
+                'tenantname' => $this->config->get('openstack_tenantname'),
+                'endpoint' => $this->config->get('openstack_authurl'),
+                'region' => $this->config->get('openstack_region'),
             ]
         ]);
         return $context;

@@ -45,28 +45,28 @@ defined('MOODLE_INTERNAL') || die;
  * @param int logging 0
  * @param int preferexternal 0
  * @param int batchsize 10000
- * @param string filesystem ''
+ * @param string filesystem  .
  * @param int enablepresignedurls 0
  * @param int expirationtime 600
  * @param int presignedminfilesize 0
- * @param string s3_key ''
- * @param string s3_secret ''
- * @param string s3_bucket ''
- * @param string s3_region 'us-east-1'
- * @param string do_key ''
- * @param string do_secret ''
- * @param string do_space ''
- * @param string do_region 'sfo2'
- * @param string azure_accountname ''
- * @param string azure_container ''
- * @param string azure_sastoken ''
- * @param string openstack_authurl ''
- * @param string openstack_region ''
- * @param string openstack_container ''
- * @param string openstack_username ''
- * @param string openstack_password ''
- * @param string openstack_tenantname ''
- * @param string openstack_projectid ''
+ * @param string s3_key  .
+ * @param string s3_secret  .
+ * @param string s3_bucket  .
+ * @param string s3_region us-east-1
+ * @param string do_key  .
+ * @param string do_secret  .
+ * @param string do_space  .
+ * @param string do_region sfo2
+ * @param string azure_accountname  .
+ * @param string azure_container  .
+ * @param string azure_sastoken  .
+ * @param string openstack_authurl  .
+ * @param string openstack_region  .
+ * @param string openstack_container  .
+ * @param string openstack_username  .
+ * @param string openstack_password  .
+ * @param string openstack_tenantname  .
+ * @param string openstack_projectid  .
  */
 class config extends singleton {
 
