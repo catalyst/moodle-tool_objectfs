@@ -30,14 +30,14 @@
  use tool_objectfs\local\report\objectfs_report_builder;
  use tool_objectfs\local\report\objectfs_report;
 
- require_once(__DIR__ . '/classes/config.php');
  require_once(__DIR__ . '/classes/test_client.php');
+ require_once(__DIR__ . '/classes/test_config.php');
  require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class object_status_testcase extends tool_objectfs_testcase {
 
     public function test_report_builders () {
-        config::set_config(['filesystem', get_class($this->filesystem)]);
+        test_config::set_config(['filesystem', get_class($this->filesystem)]);
         $reporttypes = objectfs_report::get_report_types();
         foreach ($reporttypes as $reporttype) {
             $reportbuilderclass = "tool_objectfs\\local\\report\\{$reporttype}_report_builder";

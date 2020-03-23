@@ -20,7 +20,7 @@ use tool_objectfs\config\config as config_base;
 
 defined('MOODLE_INTERNAL') || die();
 
-class config extends config_base {
+class test_config extends config_base {
 
     /**
      * @param array $config

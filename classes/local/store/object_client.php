@@ -25,7 +25,7 @@
 
 namespace tool_objectfs\local\store;
 
-use tool_objectfs\config\config;
+use tool_objectfs\config\singleton as config;
 
 defined('MOODLE_INTERNAL') || die();
 

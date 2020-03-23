@@ -89,12 +89,6 @@ function update_object(stdClass $object, $newlocation) {
     return $object;
 }
 
-function set_objectfs_config($config) {
-    foreach ($config as $key => $value) {
-        set_config($key, $value, 'tool_objectfs');
-    }
-}
-
 function get_objectfs_config() {
     $config = new stdClass;
     $config->enabletasks = 0;

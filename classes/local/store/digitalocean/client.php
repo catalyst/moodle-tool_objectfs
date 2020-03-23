@@ -27,7 +27,7 @@ namespace tool_objectfs\local\store\digitalocean;
 defined('MOODLE_INTERNAL') || die();
 
 use Aws\S3\S3Client;
-use tool_objectfs\config\config;
+use tool_objectfs\config\singleton as config;
 use tool_objectfs\local\store\s3\client as s3_client;
 
 class client extends s3_client {
@@ -46,7 +46,7 @@ class client extends s3_client {
         }
     }
 
-    public function set_client(config$config) {
+    public function set_client(config $config) {
         $this->client = S3Client::factory(array(
             'credentials' => ['key' => $config->get('do_key'), 'secret' => $config->get('do_secret')],
             'region' => $config->get('do_region'),

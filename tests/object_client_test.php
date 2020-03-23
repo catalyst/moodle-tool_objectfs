@@ -20,8 +20,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
 
-require_once(__DIR__ . '/classes/config.php');
 require_once(__DIR__ . '/../lib.php');
+require_once(__DIR__ . '/classes/test_config.php');
 require_once(__DIR__ . '/classes/test_client.php');
 
 class object_client_testcase extends advanced_testcase {
@@ -32,7 +32,7 @@ class object_client_testcase extends advanced_testcase {
 
     public function test_notification() {
         global $CFG, $SESSION;
-        $client = new test_client(config::instance());
+        $client = new test_client(test_config::instance());
         $client->notification('Success');
         if ($CFG->branch > 30) {
             self::assertObjectHasAttribute('notifications', $SESSION);

@@ -27,13 +27,14 @@ namespace tool_objectfs\local\store\azure;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\config\singleton as config;
 use tool_objectfs\local\store\object_file_system;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class file_system extends object_file_system {
 
-    protected function initialise_external_client($config) {
+    protected function initialise_external_client(config $config) {
         $asclient = new client($config);
         return $asclient;
     }

@@ -32,7 +32,7 @@ use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
-use tool_objectfs\config\config;
+use tool_objectfs\config\singleton as config;
 use tool_objectfs\local\store\object_client_base;
 
 define('AWS_API_VERSION', '2006-03-01');

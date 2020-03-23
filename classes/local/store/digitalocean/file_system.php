@@ -29,13 +29,14 @@ namespace tool_objectfs\local\store\digitalocean;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\config\singleton as config;
 use tool_objectfs\local\store\s3\file_system as s3_file_system;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 class file_system extends s3_file_system {
 
-    protected function initialise_external_client($config) {
+    protected function initialise_external_client(config $config) {
         $doclient = new client($config);
 
         return $doclient;

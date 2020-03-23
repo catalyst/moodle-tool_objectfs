@@ -18,13 +18,14 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\config\singleton as cfg;
 use tool_objectfs\local\store\swift\client;
 
 class test_swift_integration_client extends client {
 
     private $runidentifier;
 
-    public function __construct($config) {
+    public function __construct(cfg $config) {
         parent::__construct($config);
         $time = microtime();
         $this->runidentifier = md5($time);

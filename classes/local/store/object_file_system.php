@@ -37,6 +37,7 @@ use stored_file;
 use file_storage;
 use BlobRestProxy;
 use tool_objectfs\config\config;
+use tool_objectfs\config\singleton;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -52,11 +53,12 @@ abstract class object_file_system extends \file_system_filedir {
     private $deleteexternally;
     private $logger;
 
-    public function __construct() {
+    public function __construct($config = null) {
         global $CFG;
         parent::__construct(); // Setup filedir.
-
-        $config = config::instance();
+        if (empty($config)) {
+            $config = config::instance();
+        }
         $this->externalclient = $this->initialise_external_client($config);
         $this->externalclient->register_stream_wrapper();
         $this->preferexternal = $config->get('preferexternal');
@@ -95,7 +97,7 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient;
     }
 
-    protected abstract function initialise_external_client(config $config);
+    protected abstract function initialise_external_client(singleton $config);
 
     /**
      * Get the full path for the specified hash, including the path to the filedir.

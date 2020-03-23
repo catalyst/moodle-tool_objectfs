@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\config\singleton as cf;
 use tool_objectfs\local\store\object_client_base;
 
 class test_client extends object_client_base {
@@ -25,7 +26,7 @@ class test_client extends object_client_base {
 
     private $bucketpath;
 
-    public function __construct($config) {
+    public function __construct(cf $config) {
         global $CFG;
         $dataroot = $CFG->phpunit_dataroot;
         if (defined('PHPUNIT_INSTANCE') && PHPUNIT_INSTANCE !== null) {

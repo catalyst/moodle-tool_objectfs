@@ -20,7 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\local\object_manipulator\deleter;
 
-require_once(__DIR__ . '/classes/config.php');
+require_once(__DIR__ . '/classes/test_config.php');
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
@@ -34,9 +34,9 @@ class deleter_testcase extends tool_objectfs_testcase {
         $config['deletelocal'] = true;
         $config['consistencydelay'] = 0;
         $config['sizethreshold'] = 0;
-        config::set_config($config);
+        test_config::set_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
-        $this->deleter = new deleter($this->filesystem, config::instance(), $this->logger);
+        $this->deleter = new deleter($this->filesystem, test_config::instance(), $this->logger);
         ob_start();
     }
 
@@ -45,8 +45,8 @@ class deleter_testcase extends tool_objectfs_testcase {
     }
 
     protected function set_deleter_config($key, $value) {
-        config::set_config([$key => $value]);
-        $this->deleter = new deleter($this->filesystem, config::instance(), $this->logger);
+        test_config::set_config([$key => $value]);
+        $this->deleter = new deleter($this->filesystem, test_config::instance(), $this->logger);
     }
 
     public function test_deleter_get_candidate_objects_will_get_duplicated_objects() {

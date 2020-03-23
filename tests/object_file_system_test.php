@@ -61,8 +61,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     }
 
     public function test_get_remote_path_from_storedfile_returns_external_path_if_duplicated_and_preferexternal() {
-        set_config('preferexternal', true, 'tool_objectfs');
-        $this->reset_file_system(); // Needed to load new config.
+        $this->reset_file_system(['preferexternal' => true]); // Needed to load new config.
         $file = $this->create_duplicated_file();
         $expectedpath = $this->get_external_path_from_storedfile($file);
 

@@ -25,7 +25,7 @@ use stored_file;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\store\object_file_system;
 
-require_once(__DIR__ . '/classes/config.php');
+require_once(__DIR__ . '/classes/test_config.php');
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/classes/test_file_system.php');
 
@@ -51,8 +51,9 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         remove_dir($filedir);
     }
 
-    protected function reset_file_system() {
-        $this->filesystem = new test_file_system();
+    protected function reset_file_system(array $config) {
+        test_config::set_config($config);
+        $this->filesystem = new test_file_system(test_config::instance());
     }
 
     protected function create_local_file_from_path($pathname) {
@@ -256,9 +257,8 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
      * @throws moodle_exception
      */
     protected function objects_contain_hash($contenthash) {
-        $config['filesystem'] = get_class($this->filesystem);
-        config::set_config($config);
-        $candidatesfinder = new candidates_finder($this->manipulator, config::instance());
+        test_config::set_config(['filesystem' => get_class($this->filesystem)]);
+        $candidatesfinder = new candidates_finder($this->manipulator, test_config::instance());
         $candidateobjects = $candidatesfinder->get();
         foreach ($candidateobjects as $candidateobject) {
             if ($contenthash === $candidateobject->contenthash) {

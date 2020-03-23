@@ -34,7 +34,7 @@ use MicrosoftAzure\Storage\Common\ServicesBuilder;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use SimpleXMLElement;
 use stdClass;
-use tool_objectfs\config\config;
+use tool_objectfs\config\singleton as config;
 use tool_objectfs\local\store\azure\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 

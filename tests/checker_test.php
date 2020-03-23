@@ -20,7 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\local\object_manipulator\checker;
 
-require_once(__DIR__ . '/classes/config.php');
+require_once(__DIR__ . '/classes/test_config.php');
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
@@ -32,7 +32,7 @@ class checker_testcase extends tool_objectfs_testcase {
     protected function setUp() {
         parent::setUp();
         $this->logger = new \tool_objectfs\log\aggregate_logger();
-        $this->checker = new checker($this->filesystem, config::instance(), $this->logger);
+        $this->checker = new checker($this->filesystem, test_config::instance(), $this->logger);
         ob_start();
     }
 
