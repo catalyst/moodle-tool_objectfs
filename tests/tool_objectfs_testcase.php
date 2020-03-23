@@ -31,15 +31,6 @@ require_once(__DIR__ . '/classes/test_file_system.php');
 
 abstract class tool_objectfs_testcase extends \advanced_testcase {
 
-//    /**
-//     * @param $config
-//     */
-//    static public function set_objectfs_config($config) {
-//        foreach ($config as $key => $value) {
-//            set_config($key, $value, 'tool_objectfs');
-//        }
-//    }
-
     protected function setUp() {
         global $CFG;
         $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
