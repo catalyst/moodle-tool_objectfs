@@ -23,6 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\config\config;
 use tool_objectfs\local\report\objectfs_report;
 
 defined('MOODLE_INTERNAL') || die();
@@ -211,8 +212,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $urltext = get_string('settings', 'tool_objectfs');
         $output .= html_writer::tag('div', html_writer::link($url , $urltext));
 
-        $config = get_objectfs_config();
-        if (!isset($config->enabletasks) || !$config->enabletasks) {
+        if (!config::instance()->get('enabletasks')) {
             $output .= $this->box(get_string('not_enabled', 'tool_objectfs'));
         }
 

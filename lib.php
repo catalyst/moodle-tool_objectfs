@@ -89,59 +89,6 @@ function update_object(stdClass $object, $newlocation) {
     return $object;
 }
 
-function get_objectfs_config() {
-    $config = new stdClass;
-    $config->enabletasks = 0;
-    $config->enablelogging = 0;
-    $config->sizethreshold = 1024 * 10;
-    $config->minimumage = 7 * DAYSECS;
-    $config->deletelocal = 0;
-    $config->consistencydelay = 10 * MINSECS;
-    $config->maxtaskruntime = MINSECS;
-    $config->logging = 0;
-    $config->preferexternal = 0;
-    $config->batchsize = 10000;
-
-    $config->filesystem = '';
-    $config->enablepresignedurls = 0;
-    $config->expirationtime = 10 * MINSECS;
-    $config->presignedminfilesize = 0;
-
-    // S3 file system.
-    $config->s3_key = '';
-    $config->s3_secret = '';
-    $config->s3_bucket = '';
-    $config->s3_region = 'us-east-1';
-
-    // Digital ocean file system.
-    $config->do_key = '';
-    $config->do_secret = '';
-    $config->do_space = '';
-    $config->do_region = 'sfo2';
-
-    // Azure file system.
-    $config->azure_accountname = '';
-    $config->azure_container = '';
-    $config->azure_sastoken = '';
-
-    // Swift(OpenStack) file system.
-    $config->openstack_authurl = '';
-    $config->openstack_region = '';
-    $config->openstack_container = '';
-    $config->openstack_username = '';
-    $config->openstack_password = '';
-    $config->openstack_tenantname = '';
-    $config->openstack_projectid = '';
-
-    $storedconfig = get_config('tool_objectfs');
-
-    // Override defaults if set.
-    foreach ($storedconfig as $key => $value) {
-        $config->$key = $value;
-    }
-    return $config;
-}
-
 // Legacy cron function.
 function tool_objectfs_cron() {
     mtrace('RUNNING legacy cron objectfs');
