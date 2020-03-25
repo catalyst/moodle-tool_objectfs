@@ -27,6 +27,7 @@ namespace tool_objectfs\local\store\s3;
 
 defined('MOODLE_INTERNAL') || die();
 
+use Aws\CloudFront\CloudFrontClient;
 use Aws\Exception\MultipartUploadException;
 use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
@@ -396,8 +397,7 @@ class client extends object_client_base {
      */
     public function generate_presigned_url($contenthash, $headers) {
         if ($this->signingmethod == 'cf') {
-            $client = new cf_client($this->config);
-            return $client->generate_presigned_url($contenthash, $headers);
+            return $this->cf_generate_presigned_url($contenthash, $headers);
         }
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
@@ -423,6 +423,38 @@ class client extends object_client_base {
         }
 
         $signedurl = (string)$request->getUri();
+        return $signedurl;
+    }
+
+    private function get_cloudfront_client() {
+        return new CloudFrontClient([
+            'profile' => 'default',
+            'version' => 'latest',
+            'region' => $this->config->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
+        ]);
+    }
+
+    private function cf_generate_presigned_url($contenthash, $headers = []) {
+        $client = $this->get_cloudfront_client();
+        $key = $this->get_filepath_from_hash($contenthash);
+
+        $expires = 0;
+        if (!empty($this->expirationtime)) {
+            $expires = time() + $this->expirationtime; // Example: time()+300.
+        }
+
+        $resourcekey = $this->config->cloudfrontresourcedomain . '/' . $key;
+
+        $signingparameters = [
+            'url' => $resourcekey,
+            'expires' => $expires,
+            'key_pair_id' => $this->config->cloudfrontkeypairid,
+            'private_key' => realpath($this->config->cloudfrontprivatekeypemfilepathname),
+        ];
+        $signedurlcannedpolicy = $client->getSignedUrl($signingparameters);
+        $signedurl = (string)$signedurlcannedpolicy;
+
+        /* $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example). */
         return $signedurl;
     }
 }
