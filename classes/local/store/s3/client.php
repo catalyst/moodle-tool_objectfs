@@ -396,6 +396,16 @@ class client extends object_client_base {
      * @return string.
      */
     public function generate_presigned_url($contenthash, $headers) {
+        $contentdisposition = $this->get_header($headers, 'Content-Disposition');
+        if ($contentdisposition !== '') {
+            $params['ResponseContentDisposition'] = $contentdisposition;
+        }
+
+        $contenttype = $this->get_header($headers, 'Content-Type');
+        if ($contenttype !== '') {
+            $params['ResponseContentType'] = $contenttype;
+        }
+
         if ($this->signingmethod == 'cf') {
             return $this->cf_generate_presigned_url($contenthash, $headers);
         }
@@ -434,17 +444,20 @@ class client extends object_client_base {
         ]);
     }
 
-    private function cf_generate_presigned_url($contenthash, $headers = []) {
+    private function cf_generate_presigned_url($contenthash, $headers = [], $nicefilename = true) {
         $client = $this->get_cloudfront_client();
         $key = $this->get_filepath_from_hash($contenthash);
 
-        $expires = 0;
+        $expires = time();
         if (!empty($this->expirationtime)) {
-            $expires = time() + $this->expirationtime; // Example: time()+300.
+            $expires += $this->expirationtime; // Example: time()+300.
+        }
+
+        if ($nicefilename) {
+            $key .= $this->get_nice_filename($headers);
         }
 
         $resourcekey = $this->config->cloudfrontresourcedomain . '/' . $key;
-
         $signingparameters = [
             'url' => $resourcekey,
             'expires' => $expires,
@@ -456,5 +469,35 @@ class client extends object_client_base {
 
         /* $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example). */
         return $signedurl;
+    }
+
+    private function get_nice_filename($headers) {
+        // We are trying to deliver original filename rather than hash filename to client.
+        $originalfilename = '';
+        $contentdisposition = trim($this->get_header($headers, 'Content-Disposition'));
+        $originalcontenttype = trim($this->get_header($headers, 'Content-Type'));
+
+        /*
+            Need to get the filename and content-type from HEADERS array
+            Without invoking more DB hits (the header array contains it already by now).
+        */
+
+        if (!empty($contentdisposition)) {
+            $fparts = explode('; ', $contentdisposition);
+            if (!empty($fparts[1])) {
+                $originalfilename = str_replace('filename=', '', $fparts[1]); // Get the actual filename.
+                $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
+            }
+            if (!empty($fparts[0])) {
+                $contentdisposition = $fparts[0];
+            }
+
+            if (!empty($originalfilename)) {
+                return '?response-content-disposition=' .
+                    rawurlencode($contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"') .
+                    '&response-content-type=' . rawurlencode($originalcontenttype);
+            }
+        }
+        return '';
     }
 }
