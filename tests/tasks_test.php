@@ -16,6 +16,8 @@
 
 namespace tool_objectfs\tests;
 
+use tool_objectfs\local\manager;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
@@ -35,9 +37,9 @@ class tasks_testcase extends tool_objectfs_testcase {
     }
 
     public function test_run_legacy_cron() {
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $config->enabletasks = true;
-        set_objectfs_config($config);
+        manager::set_objectfs_config($config);
         tool_objectfs_cron();
     }
 
@@ -48,10 +50,10 @@ class tasks_testcase extends tool_objectfs_testcase {
             return true;
         }
 
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $config->enabletasks = true;
         $config->filesystem = '\\tool_objectfs\\tests\\test_file_system';
-        set_objectfs_config($config);
+        manager::set_objectfs_config($config);
 
         $scheduledtasknames = [
             'delete_local_objects',

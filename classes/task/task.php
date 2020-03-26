@@ -28,6 +28,7 @@ namespace tool_objectfs\task;
 use coding_exception;
 use moodle_exception;
 use stdClass;
+use tool_objectfs\local\manager;
 use tool_objectfs\local\object_manipulator\manipulator_builder;
 
 defined('MOODLE_INTERNAL') || die();
@@ -43,7 +44,7 @@ abstract class task extends \core\task\scheduled_task implements objectfs_task {
      * task constructor.
      */
     public function __construct() {
-        $this->config = get_objectfs_config();
+        $this->config = manager::get_objectfs_config();
     }
 
     /**

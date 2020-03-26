@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\report;
 
+use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
@@ -90,7 +91,7 @@ class location_report_builder extends objectfs_report_builder {
      * @param int $totalsum
      */
     private function add_filedir_size_stats(objectfs_report &$report, $totalcount, $totalsum) {
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $rowcount = 0;
         $rowsum = 0;
         if (!empty($config->filesystem)) {

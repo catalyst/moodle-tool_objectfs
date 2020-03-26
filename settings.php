@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\local\manager;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/lib.php');
@@ -87,10 +89,10 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('tool_objectfs/filesystem',
         new lang_string('settings:clientselection:title', 'tool_objectfs'),
         new lang_string('settings:clientselection:title_help', 'tool_objectfs'), '',
-        tool_objectfs_get_fs_list()));
+        manager::get_fs_list()));
 
 
-    $config = get_objectfs_config();
+    $config = manager::get_objectfs_config();
     $support = false;
     if (!empty($config->filesystem)) {
         $support = (new $config->filesystem())->supports_presigned_urls();
@@ -114,7 +116,7 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
     }
 
-    $client = tool_objectfs_get_client($config);
+    $client = \tool_objectfs\local\manager::get_client($config);
     if ($client && $client->get_availability()) {
         $settings = $client->define_client_section($settings, $config);
 

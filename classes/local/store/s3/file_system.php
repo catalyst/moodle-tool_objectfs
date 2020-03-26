@@ -30,6 +30,7 @@ namespace tool_objectfs\local\store\s3;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
@@ -66,7 +67,7 @@ class file_system extends object_file_system {
         $this->get_logger()->log_object_read('readfile', $path, $file->get_filesize());
 
         if (!$success) {
-            update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
         }
     }
 

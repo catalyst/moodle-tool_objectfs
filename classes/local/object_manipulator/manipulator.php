@@ -27,6 +27,7 @@ namespace tool_objectfs\local\object_manipulator;
 
 use dml_exception;
 use stdClass;
+use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -106,9 +107,9 @@ abstract class manipulator implements object_manipulator {
 
             $newlocation = $this->manipulate_object($objectrecord);
             if (!empty($objectrecord->id)) {
-                update_object($objectrecord, $newlocation);
+                manager::update_object($objectrecord, $newlocation);
             } else {
-                update_object_by_hash($objectrecord->contenthash, $newlocation);
+                manager::update_object_by_hash($objectrecord->contenthash, $newlocation);
             }
             $objectlock->release();
         }

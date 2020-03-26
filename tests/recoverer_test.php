@@ -18,6 +18,7 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\manager;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\object_manipulator\recoverer;
 
@@ -28,9 +29,9 @@ class recoverer_testcase extends tool_objectfs_testcase {
 
     protected function setUp() {
         parent::setUp();
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $this->candidatesfinder = new candidates_finder(recoverer::class, $config);
-        set_objectfs_config($config);
+        manager::set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->recoverer = new recoverer($this->filesystem, $config, $this->logger);
         ob_start();

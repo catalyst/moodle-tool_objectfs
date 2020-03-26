@@ -32,6 +32,7 @@ use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
+use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 
 define('AWS_API_VERSION', '2006-03-01');
@@ -66,7 +67,7 @@ class client extends object_client_base {
     public function __wakeup() {
         // We dont want to store credentials in the client itself as
         // it will be serialised, so re-retrive them now.
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $this->set_client($config);
         $this->client->registerStreamWrapper();
     }

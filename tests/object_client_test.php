@@ -19,6 +19,7 @@ namespace tool_objectfs\tests;
 defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
+use tool_objectfs\local\manager;
 
 require_once(__DIR__ . '/../lib.php');
 require_once(__DIR__ . '/classes/test_client.php');
@@ -31,7 +32,7 @@ class object_client_testcase extends advanced_testcase {
 
     public function test_notification() {
         global $CFG, $SESSION;
-        $config = get_objectfs_config();
+        $config = manager::get_objectfs_config();
         $client = new test_client($config);
         $client->notification('Success');
         if ($CFG->branch > 30) {
