@@ -23,11 +23,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_objectfs\local\manager;
-
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/lib.php');
+require_once(__DIR__ . '/classes/local/manager.php');
 
 global $PAGE, $CFG;
 
@@ -89,19 +87,22 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('tool_objectfs/filesystem',
         new lang_string('settings:clientselection:title', 'tool_objectfs'),
         new lang_string('settings:clientselection:title_help', 'tool_objectfs'), '',
-        manager::get_fs_list()));
+        \tool_objectfs\local\manager::get_fs_list()));
 
 
-    $config = manager::get_objectfs_config();
+    $config = \tool_objectfs\local\manager::get_objectfs_config();
     $support = false;
     if (!empty($config->filesystem)) {
         $support = (new $config->filesystem())->supports_presigned_urls();
     }
     $warning = !method_exists('file_system', 'supports_xsendfile');
-    $coresupport = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
+    $warningtext = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
+    if ( '' === $warningtext) {
+        $warningtext = \tool_objectfs\local\manager::cloudfront_pem_exists();
+    }
     if ($support) {
         $settings->add(new admin_setting_heading('tool_objectfs/presignedurls',
-            new lang_string('settings:presignedurl:header', 'tool_objectfs'), $coresupport));
+            new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
 
         $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
             new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
@@ -129,7 +130,7 @@ if ($ADMIN->fulltree) {
             $settings->add(
                 new admin_setting_configtext('tool_objectfs/cloudfrontresourcedomain',
                     get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', OBJECTFS_PLUGIN_NAME),
-                    get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', OBJECTFS_PLUGIN_NAME),
+                    get_string('settings:presignedcloudfronturl:cloudfront_resource_domain_help', OBJECTFS_PLUGIN_NAME),
                     '',
                     PARAM_TEXT
                 )
@@ -138,7 +139,7 @@ if ($ADMIN->fulltree) {
             $settings->add(
                 new admin_setting_configtext('tool_objectfs/cloudfrontkeypairid',
                     get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', OBJECTFS_PLUGIN_NAME),
-                    get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', OBJECTFS_PLUGIN_NAME),
+                    get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id_help', OBJECTFS_PLUGIN_NAME),
                     '',
                     PARAM_TEXT
                 )

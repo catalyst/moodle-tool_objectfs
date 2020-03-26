@@ -165,6 +165,8 @@ $string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathnam
 $string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname_help'] = 'Full path and filename to the .pem file. Example: {$CFG->dataroot}' . '/objectfs/ (CFG->dataroot/objectfs/) should be prepended to .pem filename. The actual .pem file must be available for file_get_content().';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'custom policy\' JSON (optional)';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
+$string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key .pem exists OK';
+$string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key .pem not found';
 
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
 $string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLa are not supported by chosen storage file system.';

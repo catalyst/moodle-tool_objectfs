@@ -34,7 +34,6 @@ use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
 use tool_objectfs\local\manager;
-use tool_objectfs\local\store\cf_client;
 use tool_objectfs\local\store\object_client_base;
 
 define('AWS_API_VERSION', '2006-03-01');

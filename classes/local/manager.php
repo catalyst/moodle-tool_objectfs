@@ -29,6 +29,7 @@ class manager {
     }
 
     public static function get_objectfs_config() {
+        global $CFG;
         $config = new stdClass;
         $config->enabletasks = 0;
         $config->enablelogging = 0;
@@ -71,6 +72,14 @@ class manager {
         $config->openstack_password = '';
         $config->openstack_tenantname = '';
         $config->openstack_projectid = '';
+
+        // Cloudfront CDN with Signed URLS - canned policy.
+        $config->cloudfrontresourcedomain = '';
+        $config->cloudfrontkeypairid = '';
+        $config->cloudfrontprivatekeypemfilepathname = $CFG->dataroot . '/objectfs/cloudfront.pem';
+
+        // SigningMethod - determine whether S3 or Cloudfront etc should be used.
+        $config->signingmethod = '';  // This will be the default if not otherwise set. Values ('s3' | 'cf').
 
         $storedconfig = get_config('tool_objectfs');
 
@@ -139,5 +148,28 @@ class manager {
         $DB->update_record('tool_objectfs_objects', $object);
 
         return $object;
+    }
+
+    static public function cloudfront_pem_exists() {
+        global $OUTPUT;
+        $config = self::get_objectfs_config();
+        if ('cf' !== $config->signingmethod) {
+            return '';
+        }
+        $path = $config->cloudfrontprivatekeypemfilepathname;
+        $fileformatted = true;
+        $text = 'settings:presignedcloudfronturl:cloudfront_pem_found';
+        $type = 'notifysuccess';
+
+        $cert = file_get_contents($path);
+        if ((strpos($cert, '-----') !== 0) || openssl_pkey_get_private($cert) == false) {
+            $fileformatted = false;
+        }
+        $exits = file_exists($path) && is_readable($path) && $fileformatted;
+        if (false === $exits) {
+            $text = 'settings:presignedcloudfronturl:cloudfront_pem_not_found';
+            $type = 'notifyproblem';
+        }
+        return $OUTPUT->notification(get_string($text, OBJECTFS_PLUGIN_NAME), $type);
     }
 }
