@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * manager class.
+ *
+ * @package   tool_objectfs
+ * @author    Gleimer Mora <gleimermora@catalyst-au.net>
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_objectfs\local;
 
 use stdClass;
@@ -22,13 +31,21 @@ defined('MOODLE_INTERNAL') || die();
 
 class manager {
 
+    /**
+     * @param $config
+     */
     public static function set_objectfs_config($config) {
         foreach ($config as $key => $value) {
             set_config($key, $value, 'tool_objectfs');
         }
     }
 
+    /**
+     * @return stdClass
+     * @throws \dml_exception
+     */
     public static function get_objectfs_config() {
+        global $CFG;
         $config = new stdClass;
         $config->enabletasks = 0;
         $config->enablelogging = 0;
@@ -72,6 +89,14 @@ class manager {
         $config->openstack_tenantname = '';
         $config->openstack_projectid = '';
 
+        // Cloudfront CDN with Signed URLS - canned policy.
+        $config->cloudfrontresourcedomain = '';
+        $config->cloudfrontkeypairid = '';
+        $config->cloudfrontprivatekeypemfilepathname = $CFG->dataroot . '/objectfs/cloudfront.pem';
+
+        // SigningMethod - determine whether S3 or Cloudfront etc should be used.
+        $config->signingmethod = '';  // This will be the default if not otherwise set. Values ('s3' | 'cf').
+
         $storedconfig = get_config('tool_objectfs');
 
         // Override defaults if set.
@@ -81,6 +106,10 @@ class manager {
         return $config;
     }
 
+    /**
+     * @param $config
+     * @return bool
+     */
     public static function get_client($config) {
         $fsclass = $config->filesystem;
         $client = str_replace('_file_system', '', $fsclass);
@@ -93,6 +122,9 @@ class manager {
         return false;
     }
 
+    /**
+     * @return mixed
+     */
     public static function get_fs_list() {
         $found[''] = 'Please, select';
         $found['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
@@ -103,6 +135,12 @@ class manager {
     }
 
 
+    /**
+     * @param $contenthash
+     * @param $newlocation
+     * @return mixed|stdClass
+     * @throws \dml_exception
+     */
     public static function update_object_by_hash($contenthash, $newlocation) {
         global $DB;
         $newobject = new stdClass();
@@ -127,6 +165,12 @@ class manager {
         return $newobject;
     }
 
+    /**
+     * @param stdClass $object
+     * @param $newlocation
+     * @return stdClass
+     * @throws \dml_exception
+     */
     public static function update_object(stdClass $object, $newlocation) {
         global $DB;
 
@@ -139,5 +183,33 @@ class manager {
         $DB->update_record('tool_objectfs_objects', $object);
 
         return $object;
+    }
+
+    /**
+     * @return string
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    static public function cloudfront_pem_exists() {
+        global $OUTPUT;
+        $config = self::get_objectfs_config();
+        if ('cf' !== $config->signingmethod) {
+            return '';
+        }
+        $path = $config->cloudfrontprivatekeypemfilepathname;
+        $fileformatted = true;
+        $text = 'settings:presignedcloudfronturl:cloudfront_pem_found';
+        $type = 'notifysuccess';
+
+        $cert = file_get_contents($path);
+        if ((strpos($cert, '-----') !== 0) || openssl_pkey_get_private($cert) == false) {
+            $fileformatted = false;
+        }
+        $exits = file_exists($path) && is_readable($path) && $fileformatted;
+        if (false === $exits) {
+            $text = 'settings:presignedcloudfronturl:cloudfront_pem_not_found';
+            $type = 'notifyproblem';
+        }
+        return $OUTPUT->notification(get_string($text, OBJECTFS_PLUGIN_NAME), $type);
     }
 }

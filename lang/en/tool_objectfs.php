@@ -141,6 +141,7 @@ $string['settings:preferexternal_help'] = 'If a file is stored both locally and 
 
 $string['settings:presignedurl:header'] = 'Pre-Signed URLs Settings';
 $string['settings:presignedurl:coresupport'] = 'Feature is not supported by core, you need to cherry pick: <a href="https://github.com/catalyst/moodle-tool_objectfs#allow-support-for-xsendfile-in-alternative-file-system">xsendfile support</a>';
+$string['settings:presignedurl:enablepresignedurlschoice'] = 'Signing method';
 $string['settings:presignedurl:warning'] = 'Before enabling Pre-Signed URL, please, make sure that all tests are passed successfully: ';
 $string['settings:presignedurl:enablepresignedurls'] = 'Enable Pre-Signed URLs';
 $string['settings:presignedurl:enablepresignedurls_help'] = 'Enable Pre-Signed URLs to request content directly from external storage.';
@@ -148,6 +149,24 @@ $string['settings:presignedurl:expirationtime'] = 'Pre-Signed URL expiration tim
 $string['settings:presignedurl:expirationtime_help'] = 'The time after which the Pre-Signed URL should expire.';
 $string['settings:presignedurl:presignedminfilesize'] = 'Minimum size for Pre-Signed URL (KB)';
 $string['settings:presignedurl:presignedminfilesize_help'] = 'Minimum file size to be redirected to Pre-Signed URL.';
+
+$string['settings:presignedurl:enablepresigneds3urls'] = 'S3 Pre-Signed URLs';
+$string['settings:presignedurl:enablepresigneds3urls_help'] = 'Enable Pre-Signed S3 URLs to request content directly from external storage.';
+
+$string['settings:presignedcloudfronturl:header'] = 'Cloudfront Settings (Experimental)';
+$string['settings:presignedcloudfronturl:warning'] = 'Before enabling Cloudfront Pre-Signed URL, please, make sure that all tests are passed successfully: ';
+$string['settings:presignedcloudfronturl:enablepresignedcloudfronturls'] = 'Cloudfront Pre-Signed URLs';
+$string['settings:presignedcloudfronturl:enablepresignedcloudfronturls_help'] = 'Enable Cloudfront Pre-Signed URLs by setting up a Cloudfront Distribution profile at AWS.';
+$string['settings:presignedcloudfronturl:cloudfront_resource_domain'] = 'DOMAIN (inc. https://)';
+$string['settings:presignedcloudfronturl:cloudfront_resource_domain_help'] = 'Enter the domain name from which resources are requested at Cloudfront (refer to AWS Cloudfront Distribution)';
+$string['settings:presignedcloudfronturl:cloudfront_key_pair_id'] = 'Key_Pair ID from AWS';
+$string['settings:presignedcloudfronturl:cloudfront_key_pair_id_help'] = 'This is generated using AWS account \'root\' user (along with the private key .pem file).';
+$string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname'] = 'PRIVATE Key .pem pathname';
+$string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname_help'] = 'Full path and filename to the .pem file. Example: {$CFG->dataroot}' . '/objectfs/ (CFG->dataroot/objectfs/) should be prepended to .pem filename. The actual .pem file must be available for file_get_content().';
+$string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'custom policy\' JSON (optional)';
+$string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
+$string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key .pem exists OK';
+$string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key .pem not found';
 
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
 $string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLa are not supported by chosen storage file system.';

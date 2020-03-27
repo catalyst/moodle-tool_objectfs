@@ -49,7 +49,6 @@ if ($support) {
 
     $client = manager::get_client($config);
     if ($client and $client->get_availability()) {
-
         $connection = $client->test_connection();
         if ($connection->success) {
             $testfiles = $output->presignedurl_tests_load_files($fs);

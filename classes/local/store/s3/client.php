@@ -27,6 +27,7 @@ namespace tool_objectfs\local\store\s3;
 
 defined('MOODLE_INTERNAL') || die();
 
+use Aws\CloudFront\CloudFrontClient;
 use Aws\Exception\MultipartUploadException;
 use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
@@ -43,10 +44,13 @@ define('AWS_CAN_DELETE_OBJECT', 2);
 class client extends object_client_base {
     protected $client;
     protected $bucket;
+    private $signingmethod;
+    private $config;
 
     public function __construct($config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+        $this->config = $config;
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
@@ -54,6 +58,7 @@ class client extends object_client_base {
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
+            $this->signingmethod = $config->signingmethod;
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -390,6 +395,28 @@ class client extends object_client_base {
      * @return string.
      */
     public function generate_presigned_url($contenthash, $headers) {
+        if ('cf' === $this->signingmethod) {
+            return  $this->generate_presigned_url_cloudfront($contenthash, $headers);
+        }
+        return  $this->generate_presigned_url_s3($contenthash, $headers);
+    }
+
+    /**
+     * @param string $contenthash
+     * @param array $headers
+     * @return string
+     */
+    private function generate_presigned_url_s3($contenthash, $headers) {
+        $contentdisposition = $this->get_header($headers, 'Content-Disposition');
+        if ($contentdisposition !== '') {
+            $params['ResponseContentDisposition'] = $contentdisposition;
+        }
+
+        $contenttype = $this->get_header($headers, 'Content-Type');
+        if ($contenttype !== '') {
+            $params['ResponseContentType'] = $contenttype;
+        }
+
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $key;
@@ -407,13 +434,90 @@ class client extends object_client_base {
         $command = $this->client->getCommand('GetObject', $params);
         $expirationtime = $this->get_header($headers, 'Expires');
 
-        if ($expirationtime !== '' and strtotime($expirationtime) != 0) {
-            $request = $this->client->createPresignedRequest($command, $expirationtime);
-        } else {
-            $request = $this->client->createPresignedRequest($command, '+'.$this->expirationtime.' seconds');
+        if (empty($expirationtime)) {
+            $expirationtime = '+' . $this->expirationtime . ' seconds';
         }
+        $request = $this->client->createPresignedRequest($command, $expirationtime);
 
         $signedurl = (string)$request->getUri();
         return $signedurl;
+    }
+
+    /**
+     * @return CloudFrontClient
+     */
+    private function get_cloudfront_client() {
+        return new CloudFrontClient([
+            'profile' => 'default',
+            'version' => 'latest',
+            'region' => $this->config->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
+        ]);
+    }
+
+    /**
+     * @param string $contenthash
+     * @param array $headers
+     * @param bool $nicefilename
+     * @return string
+     */
+    private function generate_presigned_url_cloudfront($contenthash, $headers = [], $nicefilename = true) {
+        $client = $this->get_cloudfront_client();
+        $key = $this->get_filepath_from_hash($contenthash);
+
+        $expires = time();
+        if (!empty($this->expirationtime)) {
+            $expires += $this->expirationtime; // Example: time()+300.
+        }
+
+        if ($nicefilename) {
+            $key .= $this->get_nice_filename($headers);
+        }
+
+        $resourcekey = $this->config->cloudfrontresourcedomain . '/' . $key;
+        $signingparameters = [
+            'url' => $resourcekey,
+            'expires' => $expires,
+            'key_pair_id' => $this->config->cloudfrontkeypairid,
+            'private_key' => realpath($this->config->cloudfrontprivatekeypemfilepathname),
+        ];
+        $signedurlcannedpolicy = $client->getSignedUrl($signingparameters);
+        $signedurl = (string)$signedurlcannedpolicy;
+
+        /* $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example). */
+        return $signedurl;
+    }
+
+    /**
+     * @param $headers
+     * @return string
+     */
+    private function get_nice_filename($headers) {
+        // We are trying to deliver original filename rather than hash filename to client.
+        $originalfilename = '';
+        $contentdisposition = trim($this->get_header($headers, 'Content-Disposition'));
+        $originalcontenttype = trim($this->get_header($headers, 'Content-Type'));
+
+        /*
+            Need to get the filename and content-type from HEADERS array
+            Without invoking more DB hits (the header array contains it already by now).
+        */
+
+        if (!empty($contentdisposition)) {
+            $fparts = explode('; ', $contentdisposition);
+            if (!empty($fparts[1])) {
+                $originalfilename = str_replace('filename=', '', $fparts[1]); // Get the actual filename.
+                $originalfilename = str_replace('"', '', $originalfilename); // Remove the quotes.
+            }
+            if (!empty($fparts[0])) {
+                $contentdisposition = $fparts[0];
+            }
+
+            if (!empty($originalfilename)) {
+                return '?response-content-disposition=' .
+                    rawurlencode($contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"') .
+                    '&response-content-type=' . rawurlencode($originalcontenttype);
+            }
+        }
+        return '';
     }
 }
