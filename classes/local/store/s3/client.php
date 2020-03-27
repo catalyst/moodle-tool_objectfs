@@ -435,6 +435,9 @@ class client extends object_client_base {
         return $signedurl;
     }
 
+    /**
+     * @return CloudFrontClient
+     */
     private function get_cloudfront_client() {
         return new CloudFrontClient([
             'profile' => 'default',
@@ -443,6 +446,12 @@ class client extends object_client_base {
         ]);
     }
 
+    /**
+     * @param $contenthash
+     * @param array $headers
+     * @param bool $nicefilename
+     * @return string
+     */
     private function cf_generate_presigned_url($contenthash, $headers = [], $nicefilename = true) {
         $client = $this->get_cloudfront_client();
         $key = $this->get_filepath_from_hash($contenthash);
@@ -470,6 +479,10 @@ class client extends object_client_base {
         return $signedurl;
     }
 
+    /**
+     * @param $headers
+     * @return string
+     */
     private function get_nice_filename($headers) {
         // We are trying to deliver original filename rather than hash filename to client.
         $originalfilename = '';

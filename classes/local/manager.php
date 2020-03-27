@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * manager class.
+ *
+ * @package   tool_objectfs
+ * @author    Gleimer Mora <gleimermora@catalyst-au.net>
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_objectfs\local;
 
 use stdClass;
@@ -22,12 +31,19 @@ defined('MOODLE_INTERNAL') || die();
 
 class manager {
 
+    /**
+     * @param $config
+     */
     public static function set_objectfs_config($config) {
         foreach ($config as $key => $value) {
             set_config($key, $value, 'tool_objectfs');
         }
     }
 
+    /**
+     * @return stdClass
+     * @throws \dml_exception
+     */
     public static function get_objectfs_config() {
         global $CFG;
         $config = new stdClass;
@@ -90,6 +106,10 @@ class manager {
         return $config;
     }
 
+    /**
+     * @param $config
+     * @return bool
+     */
     public static function get_client($config) {
         $fsclass = $config->filesystem;
         $client = str_replace('_file_system', '', $fsclass);
@@ -102,6 +122,9 @@ class manager {
         return false;
     }
 
+    /**
+     * @return mixed
+     */
     public static function get_fs_list() {
         $found[''] = 'Please, select';
         $found['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
@@ -112,6 +135,12 @@ class manager {
     }
 
 
+    /**
+     * @param $contenthash
+     * @param $newlocation
+     * @return mixed|stdClass
+     * @throws \dml_exception
+     */
     public static function update_object_by_hash($contenthash, $newlocation) {
         global $DB;
         $newobject = new stdClass();
@@ -136,6 +165,12 @@ class manager {
         return $newobject;
     }
 
+    /**
+     * @param stdClass $object
+     * @param $newlocation
+     * @return stdClass
+     * @throws \dml_exception
+     */
     public static function update_object(stdClass $object, $newlocation) {
         global $DB;
 
@@ -150,6 +185,11 @@ class manager {
         return $object;
     }
 
+    /**
+     * @return string
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     static public function cloudfront_pem_exists() {
         global $OUTPUT;
         $config = self::get_objectfs_config();
