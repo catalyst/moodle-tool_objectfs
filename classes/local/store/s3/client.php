@@ -395,6 +395,16 @@ class client extends object_client_base {
      * @return string.
      */
     public function generate_presigned_url($contenthash, $headers) {
+        $client = 'cf' === $this->signingmethod ? 'cloudfront' : 's3';
+        return  $this->{"generate_presigned_url_$client"}($contenthash, $headers);
+    }
+
+    /**
+     * @param string $contenthash
+     * @param array $headers
+     * @return string
+     */
+    private function generate_presigned_url_s3($contenthash, $headers) {
         $contentdisposition = $this->get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
             $params['ResponseContentDisposition'] = $contentdisposition;
@@ -405,9 +415,6 @@ class client extends object_client_base {
             $params['ResponseContentType'] = $contenttype;
         }
 
-        if ($this->signingmethod == 'cf') {
-            return $this->cf_generate_presigned_url($contenthash, $headers);
-        }
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $key;
@@ -425,11 +432,10 @@ class client extends object_client_base {
         $command = $this->client->getCommand('GetObject', $params);
         $expirationtime = $this->get_header($headers, 'Expires');
 
-        if ($expirationtime !== '' and strtotime($expirationtime) != 0) {
-            $request = $this->client->createPresignedRequest($command, $expirationtime);
-        } else {
-            $request = $this->client->createPresignedRequest($command, '+'.$this->expirationtime.' seconds');
+        if (empty($expirationtime)) {
+            $expirationtime = '+' . $this->expirationtime . ' seconds';
         }
+        $request = $this->client->createPresignedRequest($command, $expirationtime);
 
         $signedurl = (string)$request->getUri();
         return $signedurl;
@@ -447,12 +453,12 @@ class client extends object_client_base {
     }
 
     /**
-     * @param $contenthash
+     * @param string $contenthash
      * @param array $headers
      * @param bool $nicefilename
      * @return string
      */
-    private function cf_generate_presigned_url($contenthash, $headers = [], $nicefilename = true) {
+    private function generate_presigned_url_cloudfront($contenthash, $headers = [], $nicefilename = true) {
         $client = $this->get_cloudfront_client();
         $key = $this->get_filepath_from_hash($contenthash);
 
