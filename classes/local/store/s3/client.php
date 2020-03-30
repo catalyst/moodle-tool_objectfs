@@ -471,12 +471,12 @@ class client extends object_client_base {
         // Create the private key.
         $key = openssl_get_privatekey($this->config->cloudfrontprivatekey);
         if (!$key) {
-            throw new \Exception('Loading private key failed');
+            throw new \moodle_exception(OBJECTFS_PLUGIN_NAME . ': could not load cloudfront signing key.');
         }
 
         // Sign the policy with the private key.
         if (!openssl_sign($json, $signedpolicy, $key, OPENSSL_ALGO_SHA1)) {
-            throw new \Exception('Signing policy failed, ' . openssl_error_string());
+            throw new \moodle_exception(OBJECTFS_PLUGIN_NAME . ': signing policy failed, ' . openssl_error_string());
         }
 
         // Create url safe signed policy.
@@ -484,8 +484,8 @@ class client extends object_client_base {
         $signature = str_replace(['+', '=', '/'], ['-', '_', '~'], $base64signedpolicy);
 
         // Construct the URL.
-        return $resource . (strpos($resource, '?') === false ? '?' : '&') . 'Expires=' . $expires .
-            '&Signature=' . $signature . '&Key-Pair-Id=' . $keypairid;
+        $params = ['Expires' => $expires, 'Signature' => $signature, 'Key-Pair-Id' => $keypairid];
+        return new \moodle_url($resource, $params);
     }
 
     /**
