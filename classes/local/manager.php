@@ -184,32 +184,4 @@ class manager {
 
         return $object;
     }
-
-    /**
-     * @return string
-     * @throws \coding_exception
-     * @throws \dml_exception
-     */
-    static public function cloudfront_pem_exists() {
-        global $OUTPUT;
-        $config = self::get_objectfs_config();
-        if ('cf' !== $config->signingmethod) {
-            return '';
-        }
-        $path = $config->cloudfrontprivatekeypemfilepathname;
-        $fileformatted = true;
-        $text = 'settings:presignedcloudfronturl:cloudfront_pem_found';
-        $type = 'notifysuccess';
-
-        $cert = file_get_contents($path);
-        if ((strpos($cert, '-----') !== 0) || openssl_pkey_get_private($cert) == false) {
-            $fileformatted = false;
-        }
-        $exits = file_exists($path) && is_readable($path) && $fileformatted;
-        if (false === $exits) {
-            $text = 'settings:presignedcloudfronturl:cloudfront_pem_not_found';
-            $type = 'notifyproblem';
-        }
-        return $OUTPUT->notification(get_string($text, OBJECTFS_PLUGIN_NAME), $type);
-    }
 }
