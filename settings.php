@@ -142,6 +142,15 @@ if ($ADMIN->fulltree) {
                     PARAM_TEXT
                 )
             );
+
+            $settings->add(
+                new admin_setting_configtextarea('tool_objectfs/cloudfrontprivatekey',
+                    get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem', OBJECTFS_PLUGIN_NAME),
+                    get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_help', OBJECTFS_PLUGIN_NAME),
+                    '',
+                    PARAM_TEXT
+                )
+            );
         }
     }
 
