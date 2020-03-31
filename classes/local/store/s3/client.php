@@ -469,7 +469,7 @@ class client extends object_client_base {
         $json = '{"Statement":[{"Resource":"' . $resource . '","Condition":{"DateLessThan":{"AWS:EpochTime":' . $expires . '}}}]}';
 
         // Create the private key.
-        $key = openssl_get_privatekey($this->config->cloudfrontprivatekey);
+        $key = manager::parse_cloudfront_private_key($this->config->cloudfrontprivatekey);
         if (!$key) {
             throw new \moodle_exception(OBJECTFS_PLUGIN_NAME . ': could not load cloudfront signing key.');
         }

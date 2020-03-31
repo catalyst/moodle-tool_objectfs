@@ -165,8 +165,8 @@ $string['settings:presignedcloudfronturl:cloudfront_private_key_pem'] = 'PRIVATE
 $string['settings:presignedcloudfronturl:cloudfront_private_key_pem_help'] = 'Private key content (.pem file).';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'custom policy\' JSON (optional)';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
-$string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key .pem exists OK';
-$string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key .pem not found';
+$string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key content (.pem) is valid. OK';
+$string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key (.pem) is invalid.';
 
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
 $string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLa are not supported by chosen storage file system.';

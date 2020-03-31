@@ -92,7 +92,6 @@ class manager {
         // Cloudfront CDN with Signed URLS - canned policy.
         $config->cloudfrontresourcedomain = '';
         $config->cloudfrontkeypairid = '';
-        $config->cloudfrontprivatekeypemfilepathname = $CFG->dataroot . '/objectfs/cloudfront.pem';
 
         // SigningMethod - determine whether S3 or Cloudfront etc should be used.
         $config->signingmethod = '';  // This will be the default if not otherwise set. Values ('s3' | 'cf').
@@ -196,20 +195,24 @@ class manager {
         if ('cf' !== $config->signingmethod) {
             return '';
         }
-        $path = $config->cloudfrontprivatekeypemfilepathname;
-        $fileformatted = true;
+        $path = $config->cloudfrontprivatekey;
         $text = 'settings:presignedcloudfronturl:cloudfront_pem_found';
         $type = 'notifysuccess';
-
-        $cert = file_get_contents($path);
-        if ((strpos($cert, '-----') !== 0) || openssl_pkey_get_private($cert) == false) {
-            $fileformatted = false;
-        }
-        $exits = file_exists($path) && is_readable($path) && $fileformatted;
-        if (false === $exits) {
+        if (false === self::parse_cloudfront_private_key($path)) {
             $text = 'settings:presignedcloudfronturl:cloudfront_pem_not_found';
             $type = 'notifyproblem';
         }
         return $OUTPUT->notification(get_string($text, OBJECTFS_PLUGIN_NAME), $type);
+    }
+
+    /**
+     * @param string $cloudfrontprivatekey
+     * @return bool|resource
+     */
+    static public function parse_cloudfront_private_key($cloudfrontprivatekey) {
+        if (file_exists($cloudfrontprivatekey) && is_readable($cloudfrontprivatekey)) {
+            $cloudfrontprivatekey = file_get_contents($cloudfrontprivatekey);
+        }
+        return openssl_pkey_get_private($cloudfrontprivatekey);
     }
 }

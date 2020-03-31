@@ -97,6 +97,7 @@ if ($ADMIN->fulltree) {
     }
     $warning = !method_exists('file_system', 'supports_xsendfile');
     $warningtext = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
+    $warningtext .= \tool_objectfs\local\manager::cloudfront_pem_exists();
     if ($support) {
         $settings->add(new admin_setting_heading('tool_objectfs/presignedurls',
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
