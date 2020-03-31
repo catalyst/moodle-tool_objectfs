@@ -466,7 +466,15 @@ class client extends object_client_base {
         // This is the id of the Cloudfront key pair you generated.
         $keypairid = $this->config->cloudfrontkeypairid;
 
-        $json = '{"Statement":[{"Resource":"' . $resource . '","Condition":{"DateLessThan":{"AWS:EpochTime":' . $expires . '}}}]}';
+        $signingpolicy = [
+            'Statement' => [[
+                'Resource' => $resource,
+                'Condition' => [
+                    'DateLessThan' => ['AWS:EpochTime' => $expires],
+                ],
+            ]],
+        ];
+        $json = json_encode($signingpolicy, JSON_UNESCAPED_SLASHES);
 
         // Create the private key.
         $key = manager::parse_cloudfront_private_key($this->config->cloudfrontprivatekey);
