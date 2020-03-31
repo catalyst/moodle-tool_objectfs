@@ -97,7 +97,6 @@ if ($ADMIN->fulltree) {
     }
     $warning = !method_exists('file_system', 'supports_xsendfile');
     $warningtext = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
-    $warningtext .= \tool_objectfs\local\manager::cloudfront_pem_exists();
     if ($support) {
         $settings->add(new admin_setting_heading('tool_objectfs/presignedurls',
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
@@ -138,6 +137,15 @@ if ($ADMIN->fulltree) {
                 new admin_setting_configtext('tool_objectfs/cloudfrontkeypairid',
                     get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', OBJECTFS_PLUGIN_NAME),
                     get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id_help', OBJECTFS_PLUGIN_NAME),
+                    '',
+                    PARAM_TEXT
+                )
+            );
+
+            $settings->add(
+                new admin_setting_configtextarea('tool_objectfs/cloudfrontprivatekey',
+                    get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem', OBJECTFS_PLUGIN_NAME),
+                    get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_help', OBJECTFS_PLUGIN_NAME),
                     '',
                     PARAM_TEXT
                 )
