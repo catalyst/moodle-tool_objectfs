@@ -736,17 +736,19 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
-        // If file MIME type is whitelisted we do not generate a presigned_url for it.
-        if ($this->is_white_listed($contenthash)) {
-            return false;
-        }
-
         // Redirect only files that bigger than configured value.
+        // And if file MIME type is not whitelisted.
         if ($this->externalclient->presignedminfilesize > 0) {
-            $sql = "SELECT MAX(filesize) FROM {files} WHERE contenthash = ? AND filesize > ?";
-            $filesize = $DB->get_field_sql($sql, [$contenthash, 0]);
-            return ($filesize > $this->externalclient->presignedminfilesize);
+            $sql = "SELECT MAX(filesize), mimetype
+                      FROM {files}
+                     WHERE contenthash = :contenthash
+                       AND filesize > :filesize
+                  GROUP BY mimetype";
+            $result = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
+            return ($result->max > $this->externalclient->presignedminfilesize &&
+                !$this->is_mimetype_whitelisted($result->mimetype));
         }
+        return false;
     }
 
     /**
@@ -763,11 +765,11 @@ abstract class object_file_system extends \file_system_filedir {
 
     /**
      * Check if file MIME type is whitelisted.
-     * @param string $contenthash
+     * @param string $mimetype
      * @return bool
      * @throws \dml_exception
      */
-    public function is_white_listed($contenthash) {
+    public function is_mimetype_whitelisted($mimetype) {
         $config = manager::get_objectfs_config();
         if (empty($config->signingwhitelist)) {
             return false;
@@ -777,8 +779,6 @@ abstract class object_file_system extends \file_system_filedir {
             return false;
         }
         $whitelisted = false;
-        $path = $this->get_local_path_from_hash($contenthash);
-        $mimetype = \file_storage::mimetype($path);
         $extension = '.' . \core_filetypes::get_file_extension($mimetype);
         if (in_array($extension, $whitelist)) {
             $whitelisted = true;

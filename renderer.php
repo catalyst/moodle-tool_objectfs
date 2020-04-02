@@ -338,27 +338,16 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @throws dml_exception
      */
     public function generate_presigned_url($fs, $file, array $headers = []) {
-        $contenthash = $file->get_contenthash();
-        if ($fs->is_white_listed($contenthash)) {
-            return $this->get_url_by_filename($file->get_filename());
+        if ($fs->is_mimetype_whitelisted($file->get_mimetype())) {
+            return \moodle_url::make_pluginfile_url(
+                \context_system::instance()->id,
+                OBJECTFS_PLUGIN_NAME,
+                'settings',
+                0,
+                '/',
+                $file->get_filename()
+            )->out();
         }
-        return $fs->generate_presigned_url_to_external_file($contenthash, $headers);
-    }
-
-    /**
-     * Get file local url by filename.
-     * @param string $filename
-     * @return string
-     * @throws dml_exception
-     */
-    private function get_url_by_filename($filename) {
-        return \moodle_url::make_pluginfile_url(
-            \context_system::instance()->id,
-            OBJECTFS_PLUGIN_NAME,
-            'settings',
-            0,
-            '/',
-            $filename
-        )->out();
+        return $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
     }
 }
