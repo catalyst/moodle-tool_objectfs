@@ -280,7 +280,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= $this->heading(get_string('presignedurl_testing:test1', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
             $headers = array('Content-Disposition: attachment');
-            $presignedurl = $this->generate_presigned_url($fs, $file->get_contenthash(), $headers);
+            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
 
             $outputstring = get_string('presignedurl_testing:downloadfile', 'tool_objectfs').': '.
                 '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
@@ -291,7 +291,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= $this->heading(get_string('presignedurl_testing:test2', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
             $headers = array('Content-Disposition: attachment; filename="'.$file->get_filename().'"');
-            $presignedurl = $this->generate_presigned_url($fs, $file->get_contenthash(), $headers);
+            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
 
             $outputstring = get_string('presignedurl_testing:downloadfile', 'tool_objectfs').': '.
                 '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
@@ -303,7 +303,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         foreach ($testfiles as $file) {
             $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
                 '"', 'Content-Type: '.$file->get_mimetype());
-            $presignedurl = $this->generate_presigned_url($fs, $file->get_contenthash(), $headers);
+            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
 
             $outputstring = get_string('presignedurl_testing:openinbrowser', 'tool_objectfs').': '.
                 '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
@@ -315,7 +315,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         foreach ($testfiles as $file) {
             $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
                 '"', 'Content-Type: '.$file->get_mimetype());
-            $presignedurl = $this->generate_presigned_url($fs, $file->get_contenthash(), $headers);
+            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
 
             $outputstring = '"'.$file->get_filename().'" '.get_string('presignedurl_testing:fileiniframe', 'tool_objectfs').':';
             $output .= $this->heading($outputstring, 5);
@@ -332,41 +332,33 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     /**
      * Returns a presigned_url for a file, if the file's mime type is whitelisted it returns a local url.
      * @param $fs
-     * @param $contenthash
+     * @param \stored_file $file
      * @param array $headers
      * @return string
      * @throws dml_exception
      */
-    public function generate_presigned_url($fs, $contenthash, array $headers = []) {
+    public function generate_presigned_url($fs, $file, array $headers = []) {
+        $contenthash = $file->get_contenthash();
         if ($fs->is_white_listed($contenthash)) {
-            return $this->get_url_by_contenthash($contenthash);
+            return $this->get_url_by_filename($file->get_filename());
         }
         return $fs->generate_presigned_url_to_external_file($contenthash, $headers);
     }
 
     /**
-     * Get file local url by contenthash.
-     * @param string $contenthash
+     * Get file local url by filename.
+     * @param string $filename
      * @return string
-     * @throws \dml_exception
+     * @throws dml_exception
      */
-    private function get_url_by_contenthash($contenthash) {
-        global $DB;
-        $sql = 'SELECT MAX(id)
-                  FROM {files}
-                 WHERE contenthash = :contenthash
-                   AND contextid = :contextid
-                   AND filesize > :filesize';
-        $params = ['contenthash' => $contenthash, 'contextid' => \context_system::instance()->id, 'filesize' => 0];
-        $id = $DB->get_field_sql($sql, $params);
-        $file = (new file_storage())->get_file_by_id($id);
+    private function get_url_by_filename($filename) {
         return \moodle_url::make_pluginfile_url(
-            $file->get_contextid(),
-            $file->get_component(),
-            $file->get_filearea(),
-            $file->get_itemid(),
-            $file->get_filepath(),
-            $file->get_filename()
+            \context_system::instance()->id,
+            OBJECTFS_PLUGIN_NAME,
+            'settings',
+            0,
+            '/',
+            $filename
         )->out();
     }
 }
