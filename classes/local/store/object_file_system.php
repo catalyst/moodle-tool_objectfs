@@ -779,7 +779,8 @@ abstract class object_file_system extends \file_system_filedir {
         $whitelisted = false;
         $path = $this->get_local_path_from_hash($contenthash);
         $mimetype = \file_storage::mimetype($path);
-        if (in_array($mimetype, $whitelist)) {
+        $extension = '.' . \core_filetypes::get_file_extension($mimetype);
+        if (in_array($extension, $whitelist)) {
             $whitelisted = true;
         }
         return $whitelisted;
