@@ -56,7 +56,7 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:enabletasks', 'tool_objectfs'), '', ''));
 
     $settings->add(new admin_setting_configduration('tool_objectfs/maxtaskruntime',
-        new lang_string('settings:maxtaskruntime', 'tool_objectfs'), '', '', MINSECS));
+        new lang_string('settings:maxtaskruntime', 'tool_objectfs'), '', HOURSECS, MINSECS));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablelogging',
         new lang_string('settings:enablelogging', 'tool_objectfs'), '', ''));
@@ -72,7 +72,7 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:batchsize', 'tool_objectfs'), '', 10000, PARAM_INT));
 
     $settings->add(new admin_setting_configduration('tool_objectfs/minimumage',
-        new lang_string('settings:minimumage', 'tool_objectfs'), '', '', 7 * DAYSECS));
+        new lang_string('settings:minimumage', 'tool_objectfs'), '', 10 * MINSECS, 7 * DAYSECS));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/deletelocal',
         new lang_string('settings:deletelocal', 'tool_objectfs'), '', ''));
