@@ -736,6 +736,11 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
+        // If file MIME type is whitelisted we do not generate a presigned_url for it.
+        if ($this->is_white_listed($contenthash)) {
+            return false;
+        }
+
         // Redirect only files that bigger than configured value.
         if ($this->externalclient->presignedminfilesize > 0) {
             $sql = "SELECT MAX(filesize) FROM {files} WHERE contenthash = ? AND filesize > ?";
@@ -751,9 +756,63 @@ abstract class object_file_system extends \file_system_filedir {
      * @param array $headers request headers.
      *
      * @return string.
+     * @throws \dml_exception
      */
     public function generate_presigned_url_to_external_file($contenthash, $headers = array()) {
+        if ($this->is_white_listed($contenthash)) {
+            return $this->get_url_by_contenthash($contenthash);
+        }
         return $this->externalclient->generate_presigned_url($contenthash, $headers);
+    }
+
+    /**
+     * Check if file MIME type is whitelisted.
+     * @param string $contenthash
+     * @return bool
+     * @throws \dml_exception
+     */
+    public function is_white_listed($contenthash) {
+        $config = manager::get_objectfs_config();
+        if (empty($config->signingwhitelist)) {
+            return false;
+        }
+        $whitelist = explode(',',  $config->signingwhitelist);
+        if (empty($whitelist)) {
+            return false;
+        }
+        $whitelisted = false;
+        $path = $this->get_local_path_from_hash($contenthash);
+        $mimetype = \file_storage::mimetype($path);
+        if (in_array($mimetype, $whitelist)) {
+            $whitelisted = true;
+        }
+        return $whitelisted;
+    }
+
+    /**
+     * Get file local url by contenthash.
+     * @param $contenthash
+     * @return string
+     * @throws \dml_exception
+     */
+    public function get_url_by_contenthash($contenthash) {
+        global $DB;
+        $sql = 'SELECT MAX(id)
+                  FROM {files}
+                 WHERE contenthash = :contenthash
+                   AND contextid = :contextid
+                   AND filesize > :filesize';
+        $params = ['contenthash' => $contenthash, 'contextid' => \context_system::instance()->id, 'filesize' => 0];
+        $id = $DB->get_field_sql($sql, $params);
+        $file = (new file_storage())->get_file_by_id($id);
+        return \moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $file->get_component(),
+            $file->get_filearea(),
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out();
     }
 
     /**
