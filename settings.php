@@ -114,6 +114,24 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'),
             new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
 
+        $options = [
+            'video/mp4' => 'video/mp4',
+            'text/plain' => 'text/plain',
+            'image/png' => 'image/png',
+            'text/html' => 'text/html',
+            'text/css' => 'text/css',
+            'application/pdf' => 'application/pdf'
+        ];
+        $settings->add(
+            new admin_setting_configmulticheckbox(
+                'tool_objectfs/signingwhitelist',
+                get_string('settings:presignedurl:whitelist', OBJECTFS_PLUGIN_NAME),
+                get_string('settings:presignedurl:whitelist_help', OBJECTFS_PLUGIN_NAME),
+                [],
+                $options
+            )
+        );
+
         $settings->add(
             new admin_setting_configselect(
                 'tool_objectfs/signingmethod',

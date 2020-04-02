@@ -153,6 +153,9 @@ $string['settings:presignedurl:presignedminfilesize_help'] = 'Minimum file size 
 $string['settings:presignedurl:enablepresigneds3urls'] = 'S3 Pre-Signed URLs';
 $string['settings:presignedurl:enablepresigneds3urls_help'] = 'Enable Pre-Signed S3 URLs to request content directly from external storage.';
 
+$string['settings:presignedurl:whitelist'] = 'Pre-Signed URL whitelist.';
+$string['settings:presignedurl:whitelist_help'] = 'Files with the selected MIME types will generate a local url.';
+
 $string['settings:presignedcloudfronturl:header'] = 'Cloudfront Settings (Experimental)';
 $string['settings:presignedcloudfronturl:warning'] = 'Before enabling Cloudfront Pre-Signed URL, please, make sure that all tests are passed successfully: ';
 $string['settings:presignedcloudfronturl:enablepresignedcloudfronturls'] = 'Cloudfront Pre-Signed URLs';
