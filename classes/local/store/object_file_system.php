@@ -756,12 +756,8 @@ abstract class object_file_system extends \file_system_filedir {
      * @param array $headers request headers.
      *
      * @return string.
-     * @throws \dml_exception
      */
     public function generate_presigned_url_to_external_file($contenthash, $headers = array()) {
-        if ($this->is_white_listed($contenthash)) {
-            return $this->get_url_by_contenthash($contenthash);
-        }
         return $this->externalclient->generate_presigned_url($contenthash, $headers);
     }
 
@@ -787,32 +783,6 @@ abstract class object_file_system extends \file_system_filedir {
             $whitelisted = true;
         }
         return $whitelisted;
-    }
-
-    /**
-     * Get file local url by contenthash.
-     * @param $contenthash
-     * @return string
-     * @throws \dml_exception
-     */
-    public function get_url_by_contenthash($contenthash) {
-        global $DB;
-        $sql = 'SELECT MAX(id)
-                  FROM {files}
-                 WHERE contenthash = :contenthash
-                   AND contextid = :contextid
-                   AND filesize > :filesize';
-        $params = ['contenthash' => $contenthash, 'contextid' => \context_system::instance()->id, 'filesize' => 0];
-        $id = $DB->get_field_sql($sql, $params);
-        $file = (new file_storage())->get_file_by_id($id);
-        return \moodle_url::make_pluginfile_url(
-            $file->get_contextid(),
-            $file->get_component(),
-            $file->get_filearea(),
-            $file->get_itemid(),
-            $file->get_filepath(),
-            $file->get_filename()
-        )->out();
     }
 
     /**

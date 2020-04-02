@@ -55,6 +55,7 @@ function tool_objectfs_cron() {
 }
 
 /**
+ * Sends a plugin file to the browser.
  * @param $course
  * @param $cm
  * @param \context $context
