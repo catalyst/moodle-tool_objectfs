@@ -72,7 +72,7 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:batchsize', 'tool_objectfs'), '', 10000, PARAM_INT));
 
     $settings->add(new admin_setting_configduration('tool_objectfs/minimumage',
-        new lang_string('settings:minimumage', 'tool_objectfs'), '', WEEKSECS, 7 * DAYSECS));
+        new lang_string('settings:minimumage', 'tool_objectfs'), '', 10 * MINSECS, 7 * DAYSECS));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/deletelocal',
         new lang_string('settings:deletelocal', 'tool_objectfs'), '', ''));
