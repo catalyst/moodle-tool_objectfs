@@ -736,19 +736,18 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
-        // Redirect only files that bigger than configured value.
-        // And if file MIME type is not whitelisted.
-        if ($this->externalclient->presignedminfilesize > 0) {
-            $sql = "SELECT MAX(filesize), mimetype
-                      FROM {files}
-                     WHERE contenthash = :contenthash
-                       AND filesize > :filesize
-                  GROUP BY mimetype";
-            $result = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
-            return ($result->max > $this->externalclient->presignedminfilesize &&
-                !$this->is_mimetype_whitelisted($result->mimetype));
+        // If file MIME type is whitelisted we do not generate a presigned_url for it.
+        $mimetype = $this->get_mimetype_from_headers(headers_list());
+        if ($mimetype && $this->is_mimetype_whitelisted($mimetype)) {
+            return false;
         }
-        return false;
+
+        // Redirect only files that bigger than configured value.
+        if ($this->externalclient->presignedminfilesize > 0) {
+            $sql = "SELECT MAX(filesize) FROM {files} WHERE contenthash = ? AND filesize > ?";
+            $filesize = $DB->get_field_sql($sql, [$contenthash, 0]);
+            return ($filesize > $this->externalclient->presignedminfilesize);
+        }
     }
 
     /**
@@ -857,5 +856,20 @@ abstract class object_file_system extends \file_system_filedir {
         $output = fgets($io, 4096);
         pclose($io);
         return (int)$output;
+    }
+
+    /**
+     * Get the file MIME type from the headers sent.
+     * @param array $headers
+     * @return string
+     */
+    private function get_mimetype_from_headers(array $headers) {
+        foreach ($headers as $header) {
+            if (strpos($header, 'Content-Type:') === 0) {
+                $parts = explode(' ', $header);
+                return str_replace(';', '', $parts[1]);
+            }
+        }
+        return false;
     }
 }
