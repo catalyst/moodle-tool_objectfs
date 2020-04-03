@@ -274,6 +274,8 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     public function presignedurl_tests_content($fs, $testfiles) {
+        global $CFG;
+        $CFG->enablepresignedurls = true;
         $output = '';
 
         $output .= $this->box('');
@@ -320,8 +322,15 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    /**
+     * Generates the output string that contains the presignedurl.
+     * @param string $url
+     * @param string $filename
+     * @param string $identifier
+     * @return string
+     * @throws coding_exception
+     */
     private function get_output($url, $filename, $identifier) {
-
         if ('iframesnotsupported' === $identifier) {
             $output = '<iframe height="400" width="100%" src="' . $url . '">'.
                 get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').'</iframe>';
@@ -329,7 +338,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').': '.
                 '<a href="'. $url .'">'. $filename . '</a>';
         }
-
         return $output . '<br><small>Redirecting to: ' . pathinfo($url, PATHINFO_DIRNAME) . '/...</small>';;
     }
 
@@ -341,7 +349,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @return string
      * @throws dml_exception
      */
-    public function generate_presigned_url($fs, $file, array $headers = []) {
+    private function generate_presigned_url($fs, $file, array $headers = []) {
         $filename = $file->get_filename();
         if (!$fs->is_extension_whitelisted($filename)) {
             return \moodle_url::make_pluginfile_url(
