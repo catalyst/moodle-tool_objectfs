@@ -229,12 +229,12 @@ class manager {
         $return = [];
         foreach ($types as $type) {
             // Filter for where group matches type, only keep extension.
-            $extensions = array_keys(array_filter($mimetypes, function($element) use ($type) {
-                if (isset($element['groups'])) {
-                    return in_array($type, $element['groups']);
+            $extensions = [];
+            foreach ($mimetypes as $extension => $item) {
+                if (!empty(array_column($item, 'groups'))) {
+                    $extensions[] = $extension;
                 }
-                return false;
-            }));
+            }
             $tonormalise = !empty($extensions) ? $extensions : $type;
             $normalised = $util->normalize_file_types($tonormalise);
             // Merge into return array.
