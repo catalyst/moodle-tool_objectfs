@@ -281,10 +281,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         foreach ($testfiles as $file) {
             $headers = array('Content-Disposition: attachment');
             $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
-
-            $outputstring = get_string('presignedurl_testing:downloadfile', 'tool_objectfs').': '.
-                '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
-            $output .= $this->heading($outputstring, 5);
+            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'downloadfile'), 5);
         }
 
         $output .= $this->box('');
@@ -293,9 +290,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $headers = array('Content-Disposition: attachment; filename="'.$file->get_filename().'"');
             $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
 
-            $outputstring = get_string('presignedurl_testing:downloadfile', 'tool_objectfs').': '.
-                '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
-            $output .= $this->heading($outputstring, 5);
+            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'downloadfile'), 5);
         }
 
         $output .= $this->box('');
@@ -305,9 +300,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                 '"', 'Content-Type: '.$file->get_mimetype());
             $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
 
-            $outputstring = get_string('presignedurl_testing:openinbrowser', 'tool_objectfs').': '.
-                '<a href="'.$presignedurl.'">'.$file->get_filename().'</a>';
-            $output .= $this->heading($outputstring, 5);
+            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'openinbrowser'), 5);
         }
 
         $output .= $this->box('');
@@ -320,13 +313,24 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $outputstring = '"'.$file->get_filename().'" '.get_string('presignedurl_testing:fileiniframe', 'tool_objectfs').':';
             $output .= $this->heading($outputstring, 5);
 
-            $outputstring = '<iframe height="400" width="100%" src="'.$presignedurl.'">'.
-                get_string('presignedurl_testing:iframesnotsupported', 'tool_objectfs').'</iframe>';
-            $output .= $this->box($outputstring);
+            $output .= $this->box($this->get_output($presignedurl, $file->get_filename(), 'iframesnotsupported'));
             $output .= $this->box('');
         }
 
         return $output;
+    }
+
+    private function get_output($url, $filename, $identifier) {
+
+        if ('iframesnotsupported' === $identifier) {
+            $output = '<iframe height="400" width="100%" src="' . $url . '">'.
+                get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').'</iframe>';
+        } else {
+            $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').': '.
+                '<a href="'. $url .'">'. $filename . '</a>';
+        }
+
+        return $output . '<br><small>Redirecting to: ' . pathinfo($url, PATHINFO_DIRNAME) . '/...</small>';;
     }
 
     /**
