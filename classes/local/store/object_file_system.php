@@ -746,7 +746,7 @@ abstract class object_file_system extends \file_system_filedir {
                   GROUP BY filename';
             $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
             return ($record->filesize > $this->externalclient->presignedminfilesize &&
-                !$this->is_extension_whitelisted($record->filename));
+                $this->is_extension_whitelisted($record->filename));
         }
     }
 
