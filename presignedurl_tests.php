@@ -35,6 +35,9 @@ $output = $PAGE->get_renderer('tool_objectfs');
 
 echo $output->header();
 echo $output->heading(get_string('presignedurl_testing:page', 'tool_objectfs'));
+$delete = optional_param('delete', 0, PARAM_INT);
+$settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs'),
+    get_string('presignedurl_testing:objectfssettings', 'tool_objectfs'));
 
 $config = manager::get_objectfs_config();
 $support = false;
@@ -42,11 +45,16 @@ if (!empty($config->filesystem)) {
     $fs = new $config->filesystem();
     $support = $fs->supports_presigned_urls();
 }
-$settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs'),
-    get_string('presignedurl_testing:objectfssettings', 'tool_objectfs'));
-
 if ($support) {
-
+    if ($delete === 1) {
+        $output->delete_presignedurl_tests_files();
+        echo $output->notification('Files deteled successfully', 'success');
+        $url = new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php');
+        echo $output->heading(html_writer::link($url, 'Reload page'), 6);
+        echo $output->footer();
+    }
+    $deleteurl = new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php', ['delete' => 1]);
+    echo $output->heading(html_writer::link($deleteurl, 'Delete test files'), 6);
     $client = manager::get_client($config);
     if ($client and $client->get_availability()) {
         $connection = $client->test_connection();

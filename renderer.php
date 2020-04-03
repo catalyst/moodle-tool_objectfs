@@ -232,6 +232,31 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    /**
+     * Delete test files from files table
+     * @throws dml_exception
+     */
+    public function delete_presignedurl_tests_files() {
+        global $CFG;
+        $filestorage = get_file_storage();
+        $fixturespath = $CFG->dirroot . '/admin/tool/objectfs/tests/fixtures/';
+        $fixturesfiles = glob($fixturespath.'*');
+        foreach ($fixturesfiles as $fixturesfile) {
+            $testfilename = str_replace($fixturespath, '', $fixturesfile);
+            $testfile = $filestorage->get_file(
+                \context_system::instance()->id,
+                'tool_objectfs',
+                'settings',
+                0,
+                '/',
+                $testfilename
+            );
+            if ($testfile) {
+                $testfile->delete();
+            }
+        }
+    }
+
     public function presignedurl_tests_load_files($fs) {
         global $CFG;
         $filestorage = get_file_storage();
