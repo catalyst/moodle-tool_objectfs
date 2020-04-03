@@ -736,17 +736,17 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
-        // If file MIME type is whitelisted we do not generate a presigned_url for it.
-        $mimetype = $this->get_mimetype_from_headers(headers_list());
-        if ($mimetype && $this->is_mimetype_whitelisted($mimetype)) {
-            return false;
-        }
-
         // Redirect only files that bigger than configured value.
+        // And if file extension is not whitelisted.
         if ($this->externalclient->presignedminfilesize > 0) {
-            $sql = "SELECT MAX(filesize) FROM {files} WHERE contenthash = ? AND filesize > ?";
-            $filesize = $DB->get_field_sql($sql, [$contenthash, 0]);
-            return ($filesize > $this->externalclient->presignedminfilesize);
+            $sql = 'SELECT MAX(filesize), filename
+                      FROM {files}
+                     WHERE contenthash = :contenthash
+                       AND filesize > :filesize
+                  GROUP BY filename';
+            $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
+            return ($record->filesize > $this->externalclient->presignedminfilesize &&
+                !$this->is_extension_whitelisted($record->filename));
         }
     }
 
@@ -763,12 +763,12 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Check if file MIME type is whitelisted.
-     * @param string $mimetype
+     * Check if file extension is whitelisted.
+     * @param string $filename
      * @return bool
      * @throws \dml_exception
      */
-    public function is_mimetype_whitelisted($mimetype) {
+    public function is_extension_whitelisted($filename) {
         $config = manager::get_objectfs_config();
         if (empty($config->signingwhitelist)) {
             return false;
@@ -777,9 +777,9 @@ abstract class object_file_system extends \file_system_filedir {
         if (empty($whitelist)) {
             return false;
         }
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
         $whitelisted = false;
-        $extension = '.' . \core_filetypes::get_file_extension($mimetype);
-        if (in_array($extension, $whitelist)) {
+        if (in_array('.' . $extension, $whitelist)) {
             $whitelisted = true;
         }
         return $whitelisted;
@@ -856,20 +856,5 @@ abstract class object_file_system extends \file_system_filedir {
         $output = fgets($io, 4096);
         pclose($io);
         return (int)$output;
-    }
-
-    /**
-     * Get the file MIME type from the headers sent.
-     * @param array $headers
-     * @return string
-     */
-    private function get_mimetype_from_headers(array $headers) {
-        foreach ($headers as $header) {
-            if (strpos($header, 'Content-Type:') === 0) {
-                $parts = explode(' ', $header);
-                return str_replace(';', '', $parts[1]);
-            }
-        }
-        return false;
     }
 }
