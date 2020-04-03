@@ -343,7 +343,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      */
     public function generate_presigned_url($fs, $file, array $headers = []) {
         $filename = $file->get_filename();
-        if ($fs->is_extension_whitelisted($filename)) {
+        if (!$fs->is_extension_whitelisted($filename)) {
             return \moodle_url::make_pluginfile_url(
                 \context_system::instance()->id,
                 OBJECTFS_PLUGIN_NAME,
