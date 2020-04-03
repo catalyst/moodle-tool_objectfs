@@ -330,7 +330,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Returns a presigned_url for a file, if the file's mime type is whitelisted it returns a local url.
+     * Returns a presigned_url for a file, if the file's extension is whitelisted it returns a local url.
      * @param $fs
      * @param \stored_file $file
      * @param array $headers
@@ -338,14 +338,15 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @throws dml_exception
      */
     public function generate_presigned_url($fs, $file, array $headers = []) {
-        if ($fs->is_mimetype_whitelisted($file->get_mimetype())) {
+        $filename = $file->get_filename();
+        if ($fs->is_extension_whitelisted($filename)) {
             return \moodle_url::make_pluginfile_url(
                 \context_system::instance()->id,
                 OBJECTFS_PLUGIN_NAME,
                 'settings',
                 0,
                 '/',
-                $file->get_filename()
+                $filename
             )->out();
         }
         return $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
