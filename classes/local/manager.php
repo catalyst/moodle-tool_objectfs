@@ -215,4 +215,31 @@ class manager {
         }
         return openssl_pkey_get_private($cloudfrontprivatekey);
     }
+
+    /**
+     * Breaks apart filetype groups into an array of extensions, so they can
+     * be granularly filtered.
+     *
+     * @param array $types array of extensions or types to break apart.
+     * @return array array of all extensions in all input groups.
+     */
+    public static function file_split_types_to_exts($types) {
+        $util = new \core_form\filetypes_util();
+        $mimetypes = get_mimetypes_array();
+        $return = [];
+        foreach ($types as $type) {
+            // Filter for where group matches type, only keep extension.
+            $extensions = array_keys(array_filter($mimetypes, function($element) use ($type) {
+                if (isset($element['groups'])) {
+                    return in_array($type, $element['groups']);
+                }
+                return false;
+            }));
+            $tonormalise = !empty($extensions) ? $extensions : $type;
+            $normalised = $util->normalize_file_types($tonormalise);
+            // Merge into return array.
+            $return += $normalised;
+        }
+        return $return;
+    }
 }

@@ -773,13 +773,14 @@ abstract class object_file_system extends \file_system_filedir {
         if (empty($config->signingwhitelist)) {
             return false;
         }
-        $whitelist = explode(',',  $config->signingwhitelist);
+        $whitelist = (new \core_form\filetypes_util())->normalize_file_types($config->signingwhitelist);
         if (empty($whitelist)) {
             return false;
         }
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $whitelistedextensions = manager::file_split_types_to_exts($whitelist);
+        $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
         $whitelisted = false;
-        if (in_array('.' . $extension, $whitelist)) {
+        if (in_array($extension, $whitelistedextensions)) {
             $whitelisted = true;
         }
         return $whitelisted;
