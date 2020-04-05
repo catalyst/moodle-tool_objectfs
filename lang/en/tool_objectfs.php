@@ -155,6 +155,8 @@ $string['settings:presignedurl:enablepresigneds3urls_help'] = 'Enable Pre-Signed
 
 $string['settings:presignedurl:whitelist'] = 'Pre-Signed URL whitelist.';
 $string['settings:presignedurl:whitelist_help'] = 'Only whitelisted file extensions will be redirected to Pre-Signed URL.';
+$string['settings:presignedurl:deletedsuccess'] = 'Files deleted successfully.';
+$string['settings:presignedurl:deletefiles'] = 'Delete test files.';
 
 $string['settings:presignedcloudfronturl:header'] = 'Cloudfront Settings (Experimental)';
 $string['settings:presignedcloudfronturl:warning'] = 'Before enabling Cloudfront Pre-Signed URL, please, make sure that all tests are passed successfully: ';
