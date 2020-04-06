@@ -746,7 +746,7 @@ abstract class object_file_system extends \file_system_filedir {
                   GROUP BY filename';
             $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
             return ($record->filesize > $this->externalclient->presignedminfilesize &&
-                $this->is_extension_whitelisted($record->filename));
+                manager::is_extension_whitelisted($record->filename));
         }
     }
 
@@ -760,30 +760,6 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function generate_presigned_url_to_external_file($contenthash, $headers = array()) {
         return $this->externalclient->generate_presigned_url($contenthash, $headers);
-    }
-
-    /**
-     * Check if file extension is whitelisted.
-     * @param string $filename
-     * @return bool
-     * @throws \dml_exception
-     */
-    public function is_extension_whitelisted($filename) {
-        $config = manager::get_objectfs_config();
-        if (empty($config->signingwhitelist)) {
-            return false;
-        }
-        $whitelist = (new \core_form\filetypes_util())->normalize_file_types($config->signingwhitelist);
-        if (empty($whitelist)) {
-            return false;
-        }
-        $whitelistedextensions = manager::file_split_types_to_exts($whitelist);
-        $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
-        $whitelisted = false;
-        if (in_array($extension, $whitelistedextensions)) {
-            $whitelisted = true;
-        }
-        return $whitelisted;
     }
 
     /**

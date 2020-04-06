@@ -217,29 +217,22 @@ class manager {
     }
 
     /**
-     * Breaks apart filetype groups into an array of extensions, so they can
-     * be granularly filtered.
-     *
-     * @param array $types array of extensions or types to break apart.
-     * @return array array of all extensions in all input groups.
+     * Check if file extension is whitelisted.
+     * @param string $filename
+     * @return bool
+     * @throws \dml_exception
      */
-    public static function file_split_types_to_exts($types) {
-        $util = new \core_form\filetypes_util();
-        $mimetypes = get_mimetypes_array();
-        $return = [];
-        foreach ($types as $type) {
-            // Filter for where group matches type, only keep extension.
-            $extensions = [];
-            foreach ($mimetypes as $extension => $item) {
-                if (!empty(array_column($item, 'groups'))) {
-                    $extensions[] = $extension;
-                }
-            }
-            $tonormalise = !empty($extensions) ? $extensions : $type;
-            $normalised = $util->normalize_file_types($tonormalise);
-            // Merge into return array.
-            $return += $normalised;
+    public static function is_extension_whitelisted($filename) {
+        $config = self::get_objectfs_config();
+        if (empty($config->signingwhitelist)) {
+            return false;
         }
-        return $return;
+        $util = new \core_form\filetypes_util();
+        $whitelist = $util->normalize_file_types($config->signingwhitelist);
+        if (empty($whitelist)) {
+            return false;
+        }
+        $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
+        return $util->is_whitelisted($extension, $whitelist);
     }
 }
