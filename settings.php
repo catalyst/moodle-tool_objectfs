@@ -120,7 +120,7 @@ if ($ADMIN->fulltree) {
                 new lang_string('settings:presignedurl:whitelist', OBJECTFS_PLUGIN_NAME),
                 new lang_string('settings:presignedurl:whitelist_help', OBJECTFS_PLUGIN_NAME),
                 '',
-                ['onlytypes' => ['txt', 'image', 'document', 'web_file', 'video']]
+                ['onlytypes' => ['txt', 'document', 'gif', 'jpe',  'jpeg', 'png', 'mov', 'mp4', 'webm']]
             )
         );
 

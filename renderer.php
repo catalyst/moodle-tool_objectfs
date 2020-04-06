@@ -344,7 +344,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Generates the output string that contains the presignedurl.
+     * Generates the output string that contains the presignedurl or local url.
      * @param string $url
      * @param string $filename
      * @param string $identifier
@@ -352,27 +352,32 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @throws coding_exception
      */
     private function get_output($url, $filename, $identifier) {
+        global $CFG, $OUTPUT;
+        $redirect = $OUTPUT->pix_icon('i/grade_correct', '', 'moodle', ['class' => 'icon']) . 'Pre-Signed URL: ';
+        if (false !== strpos($url, $CFG->wwwroot)) {
+            $redirect = $OUTPUT->pix_icon('i/grade_incorrect', '', 'moodle', ['class' => 'icon']) . 'Local url: ';
+        }
+        $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').': '.
+            '<a href="'. $url .'">'. $filename . '</a>';
         if ('iframesnotsupported' === $identifier) {
             $output = '<iframe height="400" width="100%" src="' . $url . '">'.
                 get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').'</iframe>';
-        } else {
-            $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').': '.
-                '<a href="'. $url .'">'. $filename . '</a>';
         }
-        return $output . '<br><small>Redirecting to: ' . pathinfo($url, PATHINFO_DIRNAME) . '/...</small>';;
+        return $output . '<br><small>' . $redirect . pathinfo($url, PATHINFO_DIRNAME) . '/...</small>';;
     }
 
     /**
-     * Returns a presigned_url for a file, if the file's extension is whitelisted it returns a local url.
+     * Returns a presigned_url for the test page files only if their extension is whitelisted.
+     * Otherwise a local url is generated. This is for testing purposes only.
      * @param $fs
-     * @param \stored_file $file
+     * @param stored_file $file
      * @param array $headers
      * @return string
      * @throws dml_exception
      */
     private function generate_presigned_url($fs, $file, array $headers = []) {
         $filename = $file->get_filename();
-        if (!$fs->is_extension_whitelisted($filename)) {
+        if (!manager::is_extension_whitelisted($filename)) {
             return \moodle_url::make_pluginfile_url(
                 \context_system::instance()->id,
                 OBJECTFS_PLUGIN_NAME,

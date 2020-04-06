@@ -33,9 +33,9 @@ admin_externalpage_setup('tool_objectfs_presignedurl_testing');
 
 $output = $PAGE->get_renderer('tool_objectfs');
 
-$delete = optional_param('delete', 0, PARAM_INT);
+$delete = optional_param('delete', 0, PARAM_BOOL);
 $deletedsuccess = '';
-if ($delete === 1) {
+if ($delete) {
     require_sesskey();
     $output->delete_presignedurl_tests_files();
     $deletedstring = get_string('settings:presignedurl:deletedsuccess', OBJECTFS_PLUGIN_NAME);
