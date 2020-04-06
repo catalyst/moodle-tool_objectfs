@@ -118,9 +118,7 @@ if ($ADMIN->fulltree) {
             new admin_setting_filetypes(
                 'tool_objectfs/signingwhitelist',
                 new lang_string('settings:presignedurl:whitelist', OBJECTFS_PLUGIN_NAME),
-                new lang_string('settings:presignedurl:whitelist_help', OBJECTFS_PLUGIN_NAME),
-                '',
-                ['onlytypes' => ['txt', 'document', 'gif', 'jpe',  'jpeg', 'png', 'mov', 'mp4', 'webm']]
+                new lang_string('settings:presignedurl:whitelist_help', OBJECTFS_PLUGIN_NAME)
             )
         );
 
