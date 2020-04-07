@@ -310,7 +310,10 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test2', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $headers = array('Content-Disposition: attachment; filename="'.$file->get_filename().'"');
+            $headers = [
+                'Content-Disposition: attachment; filename="' . $file->get_filename() . '"',
+                'Content-Type: ' . $file->get_mimetype()
+            ];
             $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
 
             $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'downloadfile'), 5);
