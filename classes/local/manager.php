@@ -215,4 +215,24 @@ class manager {
         }
         return openssl_pkey_get_private($cloudfrontprivatekey);
     }
+
+    /**
+     * Check if file extension is whitelisted.
+     * @param string $filename
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function is_extension_whitelisted($filename) {
+        $config = self::get_objectfs_config();
+        if (empty($config->signingwhitelist)) {
+            return false;
+        }
+        $util = new \core_form\filetypes_util();
+        $whitelist = $util->normalize_file_types($config->signingwhitelist);
+        if (empty($whitelist)) {
+            return false;
+        }
+        $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
+        return $util->is_whitelisted($extension, $whitelist);
+    }
 }

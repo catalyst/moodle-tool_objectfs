@@ -115,6 +115,14 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
 
         $settings->add(
+            new admin_setting_filetypes(
+                'tool_objectfs/signingwhitelist',
+                new lang_string('settings:presignedurl:whitelist', OBJECTFS_PLUGIN_NAME),
+                new lang_string('settings:presignedurl:whitelist_help', OBJECTFS_PLUGIN_NAME)
+            )
+        );
+
+        $settings->add(
             new admin_setting_configselect(
                 'tool_objectfs/signingmethod',
                 get_string('settings:presignedurl:enablepresignedurlschoice', OBJECTFS_PLUGIN_NAME),

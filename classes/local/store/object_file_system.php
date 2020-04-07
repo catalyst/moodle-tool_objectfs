@@ -737,10 +737,16 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         // Redirect only files that bigger than configured value.
+        // And if file extension is not whitelisted.
         if ($this->externalclient->presignedminfilesize > 0) {
-            $sql = "SELECT MAX(filesize) FROM {files} WHERE contenthash = ? AND filesize > ?";
-            $filesize = $DB->get_field_sql($sql, [$contenthash, 0]);
-            return ($filesize > $this->externalclient->presignedminfilesize);
+            $sql = 'SELECT MAX(filesize), filename
+                      FROM {files}
+                     WHERE contenthash = :contenthash
+                       AND filesize > :filesize
+                  GROUP BY filename';
+            $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
+            return ($record->filesize > $this->externalclient->presignedminfilesize &&
+                manager::is_extension_whitelisted($record->filename));
         }
     }
 
