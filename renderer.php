@@ -261,6 +261,10 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $syscontext = \context_system::instance();
 
         foreach ($fixturesfiles as $fixturesfile) {
+            // Filter out possible compressed files.
+            if (false !== strpos($fixturesfile, '.br')) {
+                continue;
+            }
             $testfilename = str_replace($fixturespath, '', $fixturesfile);
 
             $contextid = $syscontext->id;
