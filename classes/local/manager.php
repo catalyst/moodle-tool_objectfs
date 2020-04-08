@@ -210,9 +210,11 @@ class manager {
      * @param string $cloudfrontprivatekey
      * @return bool|resource
      */
-    static public function parse_cloudfront_private_key($cloudfrontprivatekey) {
-        if (file_exists($cloudfrontprivatekey) && is_readable($cloudfrontprivatekey)) {
-            $cloudfrontprivatekey = file_get_contents($cloudfrontprivatekey);
+    public static function parse_cloudfront_private_key($cloudfrontprivatekey) {
+        global $CFG;
+        $pemfile = $CFG->dataroot . '/objectfs/' . $cloudfrontprivatekey;
+        if (file_exists($pemfile) && is_readable($pemfile)) {
+            $cloudfrontprivatekey = file_get_contents($pemfile);
         }
         return openssl_pkey_get_private($cloudfrontprivatekey);
     }
