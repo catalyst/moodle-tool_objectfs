@@ -26,6 +26,7 @@
 namespace tool_objectfs\local;
 
 use stdClass;
+use tool_objectfs\local\store\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -234,5 +235,18 @@ class manager {
         }
         $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
         return $util->is_whitelisted($extension, $whitelist);
+    }
+
+    /**
+     * Check if '$CFG->alternative_file_system_class' is properly set.
+     * @return bool
+     */
+    public static function check_file_storage_filesystem() {
+        $fs = get_file_storage();
+        $objectfilesystem = object_file_system::class;
+        if ($fs->get_file_system() instanceof $objectfilesystem) {
+            return true;
+        }
+        return false;
     }
 }
