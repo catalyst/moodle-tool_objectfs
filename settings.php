@@ -26,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/classes/local/manager.php');
+require_once(__DIR__ . '/lib.php');
 
 global $PAGE, $CFG;
 

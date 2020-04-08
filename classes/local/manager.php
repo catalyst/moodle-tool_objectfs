@@ -196,6 +196,9 @@ class manager {
         if ('cf' !== $config->signingmethod) {
             return '';
         }
+        if (empty($config->cloudfrontprivatekey)) {
+            return '';
+        }
         $path = $config->cloudfrontprivatekey;
         $text = 'settings:presignedcloudfronturl:cloudfront_pem_found';
         $type = 'notifysuccess';
