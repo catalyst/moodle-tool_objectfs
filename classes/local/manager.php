@@ -207,12 +207,23 @@ class manager {
     }
 
     /**
+     * Returns a private key resource needed generate a valid cloudfront signature,
+     * it can be the string content of the .pem e.g:
+     * -----BEGIN RSA PRIVATE KEY-----
+     * S3O3BrpoUCwYTF5Vn9EQhkjsu8s...
+     * -----END RSA PRIVATE KEY-----
+     * Or the name of the file that contains the private key,
+     * this file should be located in: $CFG->dataroot . '/objectfs/' e.g:
+     * $CFG->dataroot . '/objectfs/' . cloudfront.pem
+     *
      * @param string $cloudfrontprivatekey
      * @return bool|resource
      */
-    static public function parse_cloudfront_private_key($cloudfrontprivatekey) {
-        if (file_exists($cloudfrontprivatekey) && is_readable($cloudfrontprivatekey)) {
-            $cloudfrontprivatekey = file_get_contents($cloudfrontprivatekey);
+    public static function parse_cloudfront_private_key($cloudfrontprivatekey) {
+        global $CFG;
+        $pemfile = $CFG->dataroot . '/objectfs/' . $cloudfrontprivatekey;
+        if (file_exists($pemfile) && is_readable($pemfile)) {
+            $cloudfrontprivatekey = 'file://' . $pemfile;
         }
         return openssl_pkey_get_private($cloudfrontprivatekey);
     }
