@@ -26,6 +26,7 @@
 namespace tool_objectfs\local;
 
 use stdClass;
+use tool_objectfs\local\store\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -92,7 +93,6 @@ class manager {
         // Cloudfront CDN with Signed URLS - canned policy.
         $config->cloudfrontresourcedomain = '';
         $config->cloudfrontkeypairid = '';
-        $config->cloudfrontprivatekeypemfilepathname = $CFG->dataroot . '/objectfs/cloudfront.pem';
 
         // SigningMethod - determine whether S3 or Cloudfront etc should be used.
         $config->signingmethod = '';  // This will be the default if not otherwise set. Values ('s3' | 'cf').
@@ -196,20 +196,68 @@ class manager {
         if ('cf' !== $config->signingmethod) {
             return '';
         }
-        $path = $config->cloudfrontprivatekeypemfilepathname;
-        $fileformatted = true;
+        $path = $config->cloudfrontprivatekey;
         $text = 'settings:presignedcloudfronturl:cloudfront_pem_found';
         $type = 'notifysuccess';
-
-        $cert = file_get_contents($path);
-        if ((strpos($cert, '-----') !== 0) || openssl_pkey_get_private($cert) == false) {
-            $fileformatted = false;
-        }
-        $exits = file_exists($path) && is_readable($path) && $fileformatted;
-        if (false === $exits) {
+        if (false === self::parse_cloudfront_private_key($path)) {
             $text = 'settings:presignedcloudfronturl:cloudfront_pem_not_found';
             $type = 'notifyproblem';
         }
         return $OUTPUT->notification(get_string($text, OBJECTFS_PLUGIN_NAME), $type);
+    }
+
+    /**
+     * Returns a private key resource needed generate a valid cloudfront signature,
+     * it can be the string content of the .pem e.g:
+     * -----BEGIN RSA PRIVATE KEY-----
+     * S3O3BrpoUCwYTF5Vn9EQhkjsu8s...
+     * -----END RSA PRIVATE KEY-----
+     * Or the name of the file that contains the private key,
+     * this file should be located in: $CFG->dataroot . '/objectfs/' e.g:
+     * $CFG->dataroot . '/objectfs/' . cloudfront.pem
+     *
+     * @param string $cloudfrontprivatekey
+     * @return bool|resource
+     */
+    public static function parse_cloudfront_private_key($cloudfrontprivatekey) {
+        global $CFG;
+        $pemfile = $CFG->dataroot . '/objectfs/' . $cloudfrontprivatekey;
+        if (file_exists($pemfile) && is_readable($pemfile)) {
+            $cloudfrontprivatekey = 'file://' . $pemfile;
+        }
+        return openssl_pkey_get_private($cloudfrontprivatekey);
+    }
+
+    /**
+     * Check if file extension is whitelisted.
+     * @param string $filename
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function is_extension_whitelisted($filename) {
+        $config = self::get_objectfs_config();
+        if (empty($config->signingwhitelist)) {
+            return false;
+        }
+        $util = new \core_form\filetypes_util();
+        $whitelist = $util->normalize_file_types($config->signingwhitelist);
+        if (empty($whitelist)) {
+            return false;
+        }
+        $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
+        return $util->is_whitelisted($extension, $whitelist);
+    }
+
+    /**
+     * Check if '$CFG->alternative_file_system_class' is properly set.
+     * @return bool
+     */
+    public static function check_file_storage_filesystem() {
+        $fs = get_file_storage();
+        $objectfilesystem = object_file_system::class;
+        if ($fs->get_file_system() instanceof $objectfilesystem) {
+            return true;
+        }
+        return false;
     }
 }

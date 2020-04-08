@@ -153,6 +153,11 @@ $string['settings:presignedurl:presignedminfilesize_help'] = 'Minimum file size 
 $string['settings:presignedurl:enablepresigneds3urls'] = 'S3 Pre-Signed URLs';
 $string['settings:presignedurl:enablepresigneds3urls_help'] = 'Enable Pre-Signed S3 URLs to request content directly from external storage.';
 
+$string['settings:presignedurl:whitelist'] = 'Pre-Signed URL whitelist.';
+$string['settings:presignedurl:whitelist_help'] = 'Only whitelisted file extensions will be redirected to Pre-Signed URL.';
+$string['settings:presignedurl:deletedsuccess'] = 'Files deleted successfully.';
+$string['settings:presignedurl:deletefiles'] = 'Delete test files.';
+
 $string['settings:presignedcloudfronturl:header'] = 'Cloudfront Settings (Experimental)';
 $string['settings:presignedcloudfronturl:warning'] = 'Before enabling Cloudfront Pre-Signed URL, please, make sure that all tests are passed successfully: ';
 $string['settings:presignedcloudfronturl:enablepresignedcloudfronturls'] = 'Cloudfront Pre-Signed URLs';
@@ -161,12 +166,29 @@ $string['settings:presignedcloudfronturl:cloudfront_resource_domain'] = 'DOMAIN 
 $string['settings:presignedcloudfronturl:cloudfront_resource_domain_help'] = 'Enter the domain name from which resources are requested at Cloudfront (refer to AWS Cloudfront Distribution)';
 $string['settings:presignedcloudfronturl:cloudfront_key_pair_id'] = 'Key_Pair ID from AWS';
 $string['settings:presignedcloudfronturl:cloudfront_key_pair_id_help'] = 'This is generated using AWS account \'root\' user (along with the private key .pem file).';
-$string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname'] = 'PRIVATE Key .pem pathname';
-$string['settings:presignedcloudfronturl:cloudfront_private_key_pem_file_pathname_help'] = 'Full path and filename to the .pem file. Example: {$CFG->dataroot}' . '/objectfs/ (CFG->dataroot/objectfs/) should be prepended to .pem filename. The actual .pem file must be available for file_get_content().';
+$string['settings:presignedcloudfronturl:cloudfront_private_key_pem'] = 'PRIVATE Key .pem';
+$string['settings:presignedcloudfronturl:cloudfront_private_key_pem_help'] = '
+<p><b><em>Private key</em></b> can be one of the following:
+<ol>
+<li>
+<pre>
+A file name with the pem extension e.g.: <b><em>cloudfront.pem</em></b>
+The named file must contain a PEM encoded certificate/private key.
+The file should be located under the following path: <b><em>$CFG->dataroot . \'/objectfs/\'</em></b>
+</pre>
+</li>
+<li>A PEM formatted string. e.g.:<br>
+<pre>
+<b><em>-----BEGIN RSA PRIVATE KEY-----</em></b>
+<b><em>S3O3BrpoUCwYTF5Vn9EQhkjsu8s...</em></b>
+<b><em>-----END RSA PRIVATE KEY-----</em></b>
+</pre>
+</li>
+</ol></p>';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'custom policy\' JSON (optional)';
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
-$string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key .pem exists OK';
-$string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key .pem not found';
+$string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key content (.pem) is valid. OK';
+$string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key (.pem) is invalid.';
 
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
 $string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLa are not supported by chosen storage file system.';

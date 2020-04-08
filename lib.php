@@ -53,3 +53,27 @@ function tool_objectfs_cron() {
 
     return true;
 }
+
+/**
+ * Sends a plugin file to the browser.
+ * @param $course
+ * @param $cm
+ * @param \context $context
+ * @param string $filearea
+ * @param array $args
+ * @param bool $forcedownload
+ * @param array $options
+ * @return bool
+ */
+function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, array $args, bool $forcedownload,
+    array $options = []) {
+
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, OBJECTFS_PLUGIN_NAME, $filearea, $args[0], '/', $args[1]);
+    if (!$file || (is_object($file) && $file->is_directory())) {
+        send_file_not_found();
+    }
+    \core\session\manager::write_close();
+    send_stored_file($file, null, 0, $forcedownload, $options);
+    return true;
+}

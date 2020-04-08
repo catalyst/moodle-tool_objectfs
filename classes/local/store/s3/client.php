@@ -27,7 +27,6 @@ namespace tool_objectfs\local\store\s3;
 
 defined('MOODLE_INTERNAL') || die();
 
-use Aws\CloudFront\CloudFrontClient;
 use Aws\Exception\MultipartUploadException;
 use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
@@ -393,6 +392,7 @@ class client extends object_client_base {
      * @param array $headers request headers.
      *
      * @return string.
+     * @throws \Exception
      */
     public function generate_presigned_url($contenthash, $headers) {
         if ('cf' === $this->signingmethod) {
@@ -444,24 +444,14 @@ class client extends object_client_base {
     }
 
     /**
-     * @return CloudFrontClient
-     */
-    private function get_cloudfront_client() {
-        return new CloudFrontClient([
-            'profile' => 'default',
-            'version' => 'latest',
-            'region' => $this->config->s3_region,  /* The region is the source bucket region ? - 'ap-southeast-2' */
-        ]);
-    }
-
-    /**
      * @param string $contenthash
      * @param array $headers
      * @param bool $nicefilename
      * @return string
+     * @throws \Exception
      */
-    private function generate_presigned_url_cloudfront($contenthash, $headers = [], $nicefilename = true) {
-        $client = $this->get_cloudfront_client();
+
+    private function generate_presigned_url_cloudfront($contenthash, array $headers = [], $nicefilename = true) {
         $key = $this->get_filepath_from_hash($contenthash);
 
         $expires = time();
@@ -472,19 +462,38 @@ class client extends object_client_base {
         if ($nicefilename) {
             $key .= $this->get_nice_filename($headers);
         }
+        $resource = $this->config->cloudfrontresourcedomain . '/' . $key;
+        // This is the id of the Cloudfront key pair you generated.
+        $keypairid = $this->config->cloudfrontkeypairid;
 
-        $resourcekey = $this->config->cloudfrontresourcedomain . '/' . $key;
-        $signingparameters = [
-            'url' => $resourcekey,
-            'expires' => $expires,
-            'key_pair_id' => $this->config->cloudfrontkeypairid,
-            'private_key' => realpath($this->config->cloudfrontprivatekeypemfilepathname),
+        $signingpolicy = [
+            'Statement' => [[
+                'Resource' => $resource,
+                'Condition' => [
+                    'DateLessThan' => ['AWS:EpochTime' => $expires],
+                ],
+            ]],
         ];
-        $signedurlcannedpolicy = $client->getSignedUrl($signingparameters);
-        $signedurl = (string)$signedurlcannedpolicy;
+        $json = json_encode($signingpolicy, JSON_UNESCAPED_SLASHES);
 
-        /* $headers[] = 'Location:"' . $signedurl . '"'; // This may cause loss of headers (etag for example). */
-        return $signedurl;
+        // Create the private key.
+        $key = manager::parse_cloudfront_private_key($this->config->cloudfrontprivatekey);
+        if (!$key) {
+            throw new \moodle_exception(OBJECTFS_PLUGIN_NAME . ': could not load cloudfront signing key.');
+        }
+
+        // Sign the policy with the private key.
+        if (!openssl_sign($json, $signedpolicy, $key, OPENSSL_ALGO_SHA1)) {
+            throw new \moodle_exception(OBJECTFS_PLUGIN_NAME . ': signing policy failed, ' . openssl_error_string());
+        }
+
+        // Create url safe signed policy.
+        $base64signedpolicy = base64_encode($signedpolicy);
+        $signature = str_replace(['+', '=', '/'], ['-', '_', '~'], $base64signedpolicy);
+
+        // Construct the URL.
+        $params = ['Expires' => $expires, 'Signature' => $signature, 'Key-Pair-Id' => $keypairid];
+        return new \moodle_url($resource, $params);
     }
 
     /**
