@@ -49,8 +49,13 @@ $ADMIN->add('tools', new admin_externalpage('tool_objectfs_missing_files',
     new moodle_url('/admin/tool/objectfs/missing_files.php')));
 
 if ($ADMIN->fulltree) {
+    $warntext = '';
+    if (!\tool_objectfs\local\manager::check_file_storage_filesystem()) {
+        $warntext  = $OUTPUT->notification(get_string('settings:clientselection:filesystemnotdefined', OBJECTFS_PLUGIN_NAME));
+    }
+    $config = \tool_objectfs\local\manager::get_objectfs_config();
     $settings->add(new admin_setting_heading('tool_objectfs/generalsettings',
-        new lang_string('settings:generalheader', 'tool_objectfs'), ''));
+        new lang_string('settings:generalheader', 'tool_objectfs'), $warntext));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enabletasks',
         new lang_string('settings:enabletasks', 'tool_objectfs'), '', ''));
@@ -90,15 +95,16 @@ if ($ADMIN->fulltree) {
         \tool_objectfs\local\manager::get_fs_list()));
 
 
-    $config = \tool_objectfs\local\manager::get_objectfs_config();
-    $support = false;
+
+    $signingsupport = false;
     if (!empty($config->filesystem)) {
-        $support = (new $config->filesystem())->supports_presigned_urls();
+        $signingsupport = (new $config->filesystem())->supports_presigned_urls();
     }
     $warning = !method_exists('file_system', 'supports_xsendfile');
     $warningtext = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
     $warningtext .= \tool_objectfs\local\manager::cloudfront_pem_exists();
-    if ($support) {
+
+    if ($signingsupport) {
         $settings->add(new admin_setting_heading('tool_objectfs/presignedurls',
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
 
