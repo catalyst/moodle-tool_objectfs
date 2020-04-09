@@ -20,6 +20,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
 * [Moodle configuration](#moodle-configuration)
   * [General Settings](#general-settings)
   * [File Transfer settings](#file-transfer-settings)
+  * [Pre-Signed URLs Settings](#pre-signed-urls-settings)
   * [Amazon S3 settings](#amazon-s3-settings)
   * [Azure Blob Storage settings](#azure-blob-storage-settings)
   * [DigitalOcean Spaces settings](#digitalocean-spaces-settings)
@@ -241,6 +242,27 @@ These settings control the movement of files to and from object storage.
 ### File System settings
 - **Storage File System Selection**: The backend filesystem to be used. This is also used for the background transfer tasks when the main alternative_file_system_class variable is not set.
 
+### Pre-Signed URLs Settings
+- **Enable Pre-Signed URLs**: Enable redirect requesting content from external storage.
+- **Pre-Signed URL expiration time**: The time after which the **Pre-Signed URL** should expire.
+- **Minimum size for Pre-Signed URL (KB)**: Minimum file size required to redirect requests to an external storage.
+- **Pre-Signed URL whitelist**: Specify file extensions eligible to generate a **Pre-Signed URL**. If left empty requests will not be redirected to an external storage even if **Enable Pre-Signed URLs** is **ON**.  
+- **Signing method**: Define the desired client to generate **Pre-Signed URLs**.
+    * Options available:
+        - **S3**
+        - **CloudFront**
+    * S3: Inherits the settings from [Amazon S3 settings](#amazon-s3-settings)
+    * Cloudfront: It requires to create a [Cloudfront Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-creating-console.html)
+        * **DOMAIN (inc. https://)**: Domain name where the content requests will be redirected to.
+        * **Key_Pair ID from AWS**: Key to identify your trusted signers. [Creating CloudFront Key Pairs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html#private-content-creating-cloudfront-key-pairs)
+        * **PRIVATE Key .pem**:
+            * can be one of the following:
+                * A file name with the pem extension e.g.: cloudfront.pem. The file should be located under the following path: **$CFG->dataroot . '/objectfs/'**
+                * A PEM formatted string. e.g.:
+                <pre>-----BEGIN RSA PRIVATE KEY-----
+              S3O3BrpoUCwYTF5Vn9EQhkjsu8s...
+              -----END RSA PRIVATE KEY-----</pre>
+ 
 ### Amazon S3 settings
 S3 specific settings
 - **Key**: AWS credential key.
