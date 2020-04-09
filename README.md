@@ -244,10 +244,10 @@ These settings control the movement of files to and from object storage.
 
 ### Pre-Signed URLs Settings
 - **Enable Pre-Signed URLs**: Enable redirect requesting content from external storage.
-- **Pre-Signed URL expiration time**: The time after which the <b>Pre-Signed URL</b> should expire.
+- **Pre-Signed URL expiration time**: The time after which the **Pre-Signed URL** should expire.
 - **Minimum size for Pre-Signed URL (KB)**: Minimum file size required to redirect requests to an external storage.
-- **Pre-Signed URL whitelist**: Specify file extensions eligible to generate a <b>Pre-Signed URL</b>
-- **Signing method**: Define the desired client to generate <b>Pre-Signed URLs</b>.
+- **Pre-Signed URL whitelist**: Specify file extensions eligible to generate a **Pre-Signed URL**. If left empty requests will not be redirected to an external storage even if **Enable Pre-Signed URLs** is **ON**.  
+- **Signing method**: Define the desired client to generate **Pre-Signed URLs**.
     * Options available:
         - **S3**
         - **CloudFront**
@@ -257,7 +257,7 @@ These settings control the movement of files to and from object storage.
         * **Key_Pair ID from AWS**: Key to identify your trusted signers. [Creating CloudFront Key Pairs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html#private-content-creating-cloudfront-key-pairs)
         * **PRIVATE Key .pem**:
             * can be one of the following:
-                * A file name with the pem extension e.g.: cloudfront.pem
+                * A file name with the pem extension e.g.: cloudfront.pem. The file should be located under the following path: **$CFG->dataroot . '/objectfs/'**
                 * A PEM formatted string. e.g.:
                 <pre>-----BEGIN RSA PRIVATE KEY-----
               S3O3BrpoUCwYTF5Vn9EQhkjsu8s...
