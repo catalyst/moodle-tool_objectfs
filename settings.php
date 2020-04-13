@@ -95,7 +95,14 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:clientselection:title_help', 'tool_objectfs'), '',
         \tool_objectfs\local\manager::get_fs_list()));
 
+    $client = \tool_objectfs\local\manager::get_client($config);
+    if ($client && $client->get_availability()) {
+        $settings = $client->define_client_section($settings, $config);
 
+        if ($PAGE->has_set_url() && $PAGE->url->compare(new moodle_url('/admin/settings.php?section=tool_objectfs'))) {
+            $client->define_client_check($client);
+        }
+    }
 
     $signingsupport = false;
     if (!empty($config->filesystem)) {
@@ -166,15 +173,6 @@ if ($ADMIN->fulltree) {
                     PARAM_TEXT
                 )
             );
-        }
-    }
-
-    $client = \tool_objectfs\local\manager::get_client($config);
-    if ($client && $client->get_availability()) {
-        $settings = $client->define_client_section($settings, $config);
-
-        if ($PAGE->has_set_url() && $PAGE->url->compare(new moodle_url('/admin/settings.php?section=tool_objectfs'))) {
-            $client->define_client_check($client);
         }
     }
 
