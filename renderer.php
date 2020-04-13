@@ -347,7 +347,40 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $output .= $this->box('');
         }
 
+        $output .= $this->box('');
+        $output .= $this->heading(get_string('presignedurl_testing:test5', 'tool_objectfs'), 4);
+        // Expires in seconds.
+        $testexpires = [0, 10];
+        foreach ($testfiles as $key => $file) {
+            if ($key > 1) {
+                break;
+            }
+            $presignedurl = $this->generate_file_url_expires($file, $testexpires[$key]);
+
+            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'openinbrowser'), 5);
+        }
+
         return $output;
+    }
+
+    /**
+     * WIP generate a file url with adding a param to set 'Expires' header.
+     * @param stored_file $file
+     * @param int $expires
+     * @return string
+     * @throws dml_exception
+     */
+    private function generate_file_url_expires($file, $expires) {
+        $url = \moodle_url::make_pluginfile_url(
+            \context_system::instance()->id,
+            OBJECTFS_PLUGIN_NAME,
+            'settings',
+            0,
+            '/',
+            $file->get_filename()
+        );
+        $url->param('expires', $expires);
+        return $url->out();
     }
 
     /**
