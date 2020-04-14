@@ -454,13 +454,19 @@ class client extends object_client_base {
         $key = $this->get_filepath_from_hash($contenthash);
 
         $expires = $this->get_header($headers, 'Expires');
+        $now = time();
         if (is_string($expires)) {
             // Convert to a valid timestamp.
             $expires = strtotime($expires);
+            if ($expires < $now) {
+                $expires = $now;
+            }
+            // We make sure we have at least 60s before the url expires.
+            $expires += MINSECS;
         }
         if (is_null($expires) || false === $expires) {
             // Invalid date format use config->expirationtime instead.
-            $expires = time() + $this->expirationtime;
+            $expires = $now + $this->expirationtime;
         }
 
         if ($nicefilename) {

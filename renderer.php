@@ -304,18 +304,17 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $CFG->enablepresignedurls = true;
         $output = '';
 
-//        $output .= $this->box('');
-//        $output .= $this->heading(get_string('presignedurl_testing:test1', 'tool_objectfs'), 4);
-//        foreach ($testfiles as $file) {
-//            $headers = array('Content-Disposition: attachment');
-//            $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
-//            $output .= $this->heading($this->get_output($fs, $presignedurl, $file, 'downloadfile'), 5);
-//        }
+        $output .= $this->box('');
+        $output .= $this->heading(get_string('presignedurl_testing:test1', 'tool_objectfs'), 4);
+        foreach ($testfiles as $file) {
+            $presignedurl = $this->generate_file_url($file, false, true);
+            $output .= $this->heading($this->get_output($fs, $presignedurl, $file, 'downloadfile'), 5);
+        }
 
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test2', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $presignedurl = $this->generate_presigned_url($file, false, true);
+            $presignedurl = $this->generate_file_url($file, false, true);
 
             $output .= $this->heading($this->get_output($fs, $presignedurl, $file, 'downloadfile'), 5);
         }
@@ -323,7 +322,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test3', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $presignedurl = $this->generate_presigned_url($file);
+            $presignedurl = $this->generate_file_url($file);
 
             $output .= $this->heading($this->get_output($fs, $presignedurl, $file, 'openinbrowser'), 5);
         }
@@ -331,7 +330,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test4', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $presignedurl = $this->generate_presigned_url($file);
+            $presignedurl = $this->generate_file_url($file);
 
             $outputstring = '"'.$file->get_filename().'" '.get_string('presignedurl_testing:fileiniframe', 'tool_objectfs').':';
             $output .= $this->heading($outputstring, 5);
@@ -349,7 +348,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             if (!isset($testexpirefiles[$filename])) {
                 continue;
             }
-            $presignedurl = $this->generate_presigned_url($file, $testexpirefiles[$filename]);
+            $presignedurl = $this->generate_file_url($file, $testexpirefiles[$filename]);
 
             $outputstring = '"' . $filename . '" '.
                 get_string('presignedurl_testing:fileiniframe', OBJECTFS_PLUGIN_NAME) . ':';
@@ -370,7 +369,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @return string
      * @throws dml_exception
      */
-    private function generate_presigned_url($file, $expires = false, $forcedownload = false) {
+    private function generate_file_url($file, $expires = false, $forcedownload = false) {
         $url = \moodle_url::make_pluginfile_url(
             \context_system::instance()->id,
             OBJECTFS_PLUGIN_NAME,
@@ -380,6 +379,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $file->get_filename(),
             $forcedownload
         );
+        $expires = (-1 !== $expires) ? $expires : false;
         if (false !== $expires) {
             $url->param('expires', $expires);
         }
