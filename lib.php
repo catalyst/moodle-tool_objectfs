@@ -64,6 +64,7 @@ function tool_objectfs_cron() {
  * @param bool $forcedownload
  * @param array $options
  * @return bool
+ * @throws coding_exception
  */
 function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, array $args, bool $forcedownload,
     array $options = []) {
@@ -74,6 +75,10 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
         send_file_not_found();
     }
     $lifetime = optional_param('expires', null, PARAM_INT);
+    // Manually setting the expires header to: $CFG->filelifetime.
+    if (-1 === $lifetime) {
+        $lifetime = null;
+    }
     \core\session\manager::write_close();
     send_stored_file($file, $lifetime, 0, $forcedownload, $options);
     return true;

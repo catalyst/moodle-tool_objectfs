@@ -25,6 +25,7 @@
 
 use tool_objectfs\local\manager;
 use tool_objectfs\local\report\objectfs_report;
+use tool_objectfs\local\store\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -303,130 +304,109 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $CFG->enablepresignedurls = true;
         $output = '';
 
-        $output .= $this->box('');
-        $output .= $this->heading(get_string('presignedurl_testing:test1', 'tool_objectfs'), 4);
-        foreach ($testfiles as $file) {
-            $headers = array('Content-Disposition: attachment');
-            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
-            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'downloadfile'), 5);
-        }
+//        $output .= $this->box('');
+//        $output .= $this->heading(get_string('presignedurl_testing:test1', 'tool_objectfs'), 4);
+//        foreach ($testfiles as $file) {
+//            $headers = array('Content-Disposition: attachment');
+//            $presignedurl = $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
+//            $output .= $this->heading($this->get_output($fs, $presignedurl, $file, 'downloadfile'), 5);
+//        }
 
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test2', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $headers = [
-                'Content-Disposition: attachment; filename="' . $file->get_filename() . '"',
-                'Content-Type: ' . $file->get_mimetype()
-            ];
-            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
+            $presignedurl = $this->generate_presigned_url($file, false, true);
 
-            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'downloadfile'), 5);
+            $output .= $this->heading($this->get_output($fs, $presignedurl, $file, 'downloadfile'), 5);
         }
 
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test3', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
-                '"', 'Content-Type: '.$file->get_mimetype());
-            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
+            $presignedurl = $this->generate_presigned_url($file);
 
-            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'openinbrowser'), 5);
+            $output .= $this->heading($this->get_output($fs, $presignedurl, $file, 'openinbrowser'), 5);
         }
 
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test4', 'tool_objectfs'), 4);
         foreach ($testfiles as $file) {
-            $headers = array('Content-Disposition: inline; filename="'.$file->get_filename().
-                '"', 'Content-Type: '.$file->get_mimetype());
-            $presignedurl = $this->generate_presigned_url($fs, $file, $headers);
+            $presignedurl = $this->generate_presigned_url($file);
 
             $outputstring = '"'.$file->get_filename().'" '.get_string('presignedurl_testing:fileiniframe', 'tool_objectfs').':';
             $output .= $this->heading($outputstring, 5);
 
-            $output .= $this->box($this->get_output($presignedurl, $file->get_filename(), 'iframesnotsupported'));
+            $output .= $this->box($this->get_output($fs, $presignedurl, $file, 'iframesnotsupported'));
             $output .= $this->box('');
         }
 
         $output .= $this->box('');
         $output .= $this->heading(get_string('presignedurl_testing:test5', 'tool_objectfs'), 4);
         // Expires in seconds.
-        $testexpires = [0, 10];
+        $testexpirefiles = ['testimage.png' => 0, 'testlarge.pdf' => 10, 'test.txt' => -1];
         foreach ($testfiles as $key => $file) {
-            if ($key > 1) {
-                break;
+            $filename = $file->get_filename();
+            if (!isset($testexpirefiles[$filename])) {
+                continue;
             }
-            $presignedurl = $this->generate_file_url_expires($file, $testexpires[$key]);
+            $presignedurl = $this->generate_presigned_url($file, $testexpirefiles[$filename]);
 
-            $output .= $this->heading($this->get_output($presignedurl, $file->get_filename(), 'openinbrowser'), 5);
+            $outputstring = '"' . $filename . '" '.
+                get_string('presignedurl_testing:fileiniframe', OBJECTFS_PLUGIN_NAME) . ':';
+            $output .= $this->heading($outputstring, 5);
+
+            $output .= $this->box($this->get_output($fs, $presignedurl, $file, 'iframesnotsupported'));
+            $output .= $this->box('');
         }
 
         return $output;
     }
 
     /**
-     * WIP generate a file url with adding a param to set 'Expires' header.
+     * Generate a file url with adding a param to set 'Expires' header.
      * @param stored_file $file
-     * @param int $expires
+     * @param int|bool $expires
+     * @param bool $forcedownload
      * @return string
      * @throws dml_exception
      */
-    private function generate_file_url_expires($file, $expires) {
+    private function generate_presigned_url($file, $expires = false, $forcedownload = false) {
         $url = \moodle_url::make_pluginfile_url(
             \context_system::instance()->id,
             OBJECTFS_PLUGIN_NAME,
             'settings',
             0,
             '/',
-            $file->get_filename()
+            $file->get_filename(),
+            $forcedownload
         );
-        $url->param('expires', $expires);
+        if (false !== $expires) {
+            $url->param('expires', $expires);
+        }
         return $url->out();
     }
 
     /**
      * Generates the output string that contains the presignedurl or local url.
+     * @param object_file_system $fs
      * @param string $url
-     * @param string $filename
+     * @param stored_file $file
      * @param string $identifier
      * @return string
      * @throws coding_exception
      */
-    private function get_output($url, $filename, $identifier) {
-        global $CFG, $OUTPUT;
-        $redirect = $OUTPUT->pix_icon('i/grade_correct', '', 'moodle', ['class' => 'icon']) . 'Pre-Signed URL: ';
-        if (false !== strpos($url, $CFG->wwwroot)) {
-            $redirect = $OUTPUT->pix_icon('i/grade_incorrect', '', 'moodle', ['class' => 'icon']) . 'Local url: ';
+    private function get_output($fs, $url, $file, $identifier) {
+        global $OUTPUT;
+        $redirect = $OUTPUT->pix_icon('i/grade_correct', '', 'moodle', ['class' => 'icon']) . 'Redirecting to external storage: ';
+        if (!$fs->presigned_url_should_redirect($file->get_contenthash())) {
+            $redirect = $OUTPUT->pix_icon('i/grade_incorrect', '', 'moodle', ['class' => 'icon']) . 'Not redirecting: ';
         }
-        $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').': '.
-            '<a href="'. $url .'">'. $filename . '</a>';
+        $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs') . ': '.
+            '<a href="'. $url .'">'. $file->get_filename() . '</a>';
         if ('iframesnotsupported' === $identifier) {
             $output = '<iframe height="400" width="100%" src="' . $url . '">'.
                 get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').'</iframe>';
         }
-        return $output . '<br><small>' . $redirect . pathinfo($url, PATHINFO_DIRNAME) . '/...</small>';;
-    }
-
-    /**
-     * Returns a presigned_url for the test page files only if their extension is whitelisted.
-     * Otherwise a local url is generated. This is for testing purposes only.
-     * @param $fs
-     * @param stored_file $file
-     * @param array $headers
-     * @return string
-     * @throws dml_exception
-     */
-    private function generate_presigned_url($fs, $file, array $headers = []) {
-        $filename = $file->get_filename();
-        if (!manager::is_extension_whitelisted($filename)) {
-            return \moodle_url::make_pluginfile_url(
-                \context_system::instance()->id,
-                OBJECTFS_PLUGIN_NAME,
-                'settings',
-                0,
-                '/',
-                $filename
-            )->out();
-        }
-        return $fs->generate_presigned_url_to_external_file($file->get_contenthash(), $headers);
+        return $output . '<br><small>' . $redirect . $url . '</small>';;
     }
 }
