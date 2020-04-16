@@ -450,13 +450,23 @@ class client extends object_client_base {
      * @return string
      * @throws \Exception
      */
-
     private function generate_presigned_url_cloudfront($contenthash, array $headers = [], $nicefilename = true) {
         $key = $this->get_filepath_from_hash($contenthash);
 
-        $expires = time();
-        if (!empty($this->expirationtime)) {
-            $expires += $this->expirationtime; // Example: time()+300.
+        $expires = $this->get_header($headers, 'Expires');
+        $now = time();
+        if (is_string($expires)) {
+            // Convert to a valid timestamp.
+            $expires = strtotime($expires);
+            if ($expires < $now) {
+                $expires = $now;
+            }
+            // We make sure we have at least 60s before the url expires.
+            $expires += MINSECS;
+        }
+        if (is_null($expires) || false === $expires) {
+            // Invalid date format use config->expirationtime instead.
+            $expires = $now + $this->expirationtime;
         }
 
         if ($nicefilename) {
