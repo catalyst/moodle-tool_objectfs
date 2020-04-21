@@ -104,75 +104,83 @@ if ($ADMIN->fulltree) {
         }
     }
 
+    $warningtext = '';
     $signingsupport = false;
     if (!empty($config->filesystem)) {
         $signingsupport = (new $config->filesystem())->supports_presigned_urls();
     }
-    $warning = !method_exists('file_system', 'supports_xsendfile');
-    $warningtext = $warning ? $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs')) : '';
+    if (!method_exists('file_system', 'supports_xsendfile')) {
+        $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:coresupport', 'tool_objectfs'));
+    }
     $warningtext .= \tool_objectfs\local\manager::cloudfront_pem_exists();
+    $classexists = class_exists('admin_setting_filetypes');
+    if (!$classexists) {
+        $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:filetypesclass', 'tool_objectfs'));
+    }
 
     if ($signingsupport) {
         $settings->add(new admin_setting_heading('tool_objectfs/presignedurls',
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
 
-        $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
-            new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
-            new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs'), ''));
+        if ($classexists) {
+            $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
+                new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
+                new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs'), ''));
 
-        $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
-            new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
-            new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), 2 * HOURSECS, HOURSECS));
+            $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
+                new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
+                new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), 2 * HOURSECS, HOURSECS));
 
-        $settings->add(new admin_setting_configtext('tool_objectfs/presignedminfilesize',
-            new lang_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'),
-            new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
+            $settings->add(new admin_setting_configtext('tool_objectfs/presignedminfilesize',
+                new lang_string('settings:presignedurl:presignedminfilesize', 'tool_objectfs'),
+                new lang_string('settings:presignedurl:presignedminfilesize_help', 'tool_objectfs'), 0, PARAM_INT));
 
-        $settings->add(
-            new admin_setting_filetypes(
-                'tool_objectfs/signingwhitelist',
-                new lang_string('settings:presignedurl:whitelist', OBJECTFS_PLUGIN_NAME),
-                new lang_string('settings:presignedurl:whitelist_help', OBJECTFS_PLUGIN_NAME)
-            )
-        );
-
-        $settings->add(
-            new admin_setting_configselect(
-                'tool_objectfs/signingmethod',
-                get_string('settings:presignedurl:enablepresignedurlschoice', OBJECTFS_PLUGIN_NAME),
-                '',
-                's3',
-                ['s3' => 'S3', 'cf' => 'CloudFront']
-            )
-        );
-
-        if ('cf' === $config->signingmethod) {
             $settings->add(
-                new admin_setting_configtext('tool_objectfs/cloudfrontresourcedomain',
-                    get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', OBJECTFS_PLUGIN_NAME),
-                    get_string('settings:presignedcloudfronturl:cloudfront_resource_domain_help', OBJECTFS_PLUGIN_NAME),
-                    '',
-                    PARAM_TEXT
+                new admin_setting_filetypes(
+                    'tool_objectfs/signingwhitelist',
+                    new lang_string('settings:presignedurl:whitelist', OBJECTFS_PLUGIN_NAME),
+                    new lang_string('settings:presignedurl:whitelist_help', OBJECTFS_PLUGIN_NAME)
                 )
             );
 
             $settings->add(
-                new admin_setting_configtext('tool_objectfs/cloudfrontkeypairid',
-                    get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', OBJECTFS_PLUGIN_NAME),
-                    get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id_help', OBJECTFS_PLUGIN_NAME),
+                new admin_setting_configselect(
+                    'tool_objectfs/signingmethod',
+                    get_string('settings:presignedurl:enablepresignedurlschoice', OBJECTFS_PLUGIN_NAME),
                     '',
-                    PARAM_TEXT
+                    's3',
+                    ['s3' => 'S3', 'cf' => 'CloudFront']
                 )
             );
 
-            $settings->add(
-                new admin_setting_configtextarea('tool_objectfs/cloudfrontprivatekey',
-                    get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem', OBJECTFS_PLUGIN_NAME),
-                    get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_help', OBJECTFS_PLUGIN_NAME),
-                    '',
-                    PARAM_TEXT
-                )
-            );
+            if ('cf' === $config->signingmethod) {
+                $settings->add(
+                    new admin_setting_configtext('tool_objectfs/cloudfrontresourcedomain',
+                        get_string('settings:presignedcloudfronturl:cloudfront_resource_domain', OBJECTFS_PLUGIN_NAME),
+                        get_string('settings:presignedcloudfronturl:cloudfront_resource_domain_help', OBJECTFS_PLUGIN_NAME),
+                        '',
+                        PARAM_TEXT
+                    )
+                );
+
+                $settings->add(
+                    new admin_setting_configtext('tool_objectfs/cloudfrontkeypairid',
+                        get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id', OBJECTFS_PLUGIN_NAME),
+                        get_string('settings:presignedcloudfronturl:cloudfront_key_pair_id_help', OBJECTFS_PLUGIN_NAME),
+                        '',
+                        PARAM_TEXT
+                    )
+                );
+
+                $settings->add(
+                    new admin_setting_configtextarea('tool_objectfs/cloudfrontprivatekey',
+                        get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem', OBJECTFS_PLUGIN_NAME),
+                        get_string('settings:presignedcloudfronturl:cloudfront_private_key_pem_help', OBJECTFS_PLUGIN_NAME),
+                        '',
+                        PARAM_TEXT
+                    )
+                );
+            }
         }
     }
 
