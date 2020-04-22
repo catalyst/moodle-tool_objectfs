@@ -111,29 +111,14 @@ class manager {
      * @return bool
      */
     public static function get_client($config) {
-        $fsclass = $config->filesystem;
-        $client = str_replace('_file_system', '', $fsclass);
-        $client = str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $client.'\\client');
+        $clientclass = self::get_client_classname_from_fs($config->filesystem);
 
-        if (class_exists($client)) {
-            return new $client($config);
+        if (class_exists($clientclass)) {
+            return new $clientclass($config);
         }
 
         return false;
     }
-
-    /**
-     * @return mixed
-     */
-    public static function get_fs_list() {
-        $found[''] = get_string('pleaseselect', OBJECTFS_PLUGIN_NAME);
-        $found['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
-        $found['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
-        $found['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
-        $found['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
-        return $found;
-    }
-
 
     /**
      * @param $contenthash
@@ -262,5 +247,41 @@ class manager {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns the list of installed and available filesystems.
+     *
+     * @return array
+     * @throws \coding_exception
+     */
+    public static function get_available_fs_list() {
+        $result[''] = get_string('pleaseselect', OBJECTFS_PLUGIN_NAME);
+
+        $filesystems['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
+        $filesystems['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
+        $filesystems['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
+        $filesystems['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
+
+        foreach ($filesystems as $filesystem) {
+            $clientclass = self::get_client_classname_from_fs($filesystem);
+            $client = new $clientclass(null);
+
+            if ($client && $client->get_availability()) {
+                $result[$filesystem] = $filesystem;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Returns client classname for given filesystem.
+     *
+     * @param string $filesystem File system
+     * @return string
+     */
+    public static function get_client_classname_from_fs($filesystem) {
+        $clientclass = str_replace('_file_system', '', $filesystem);
+        return str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $clientclass.'\\client');
     }
 }

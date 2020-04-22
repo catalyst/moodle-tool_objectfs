@@ -93,7 +93,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('tool_objectfs/filesystem',
         new lang_string('settings:clientselection:title', 'tool_objectfs'),
         new lang_string('settings:clientselection:title_help', 'tool_objectfs'), '',
-        \tool_objectfs\local\manager::get_fs_list()));
+        \tool_objectfs\local\manager::get_available_fs_list()));
 
     $client = \tool_objectfs\local\manager::get_client($config);
     if ($client && $client->get_availability()) {
