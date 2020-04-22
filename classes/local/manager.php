@@ -126,7 +126,7 @@ class manager {
      * @return mixed
      */
     public static function get_fs_list() {
-        $found[''] = 'Please, select';
+        $found[''] = get_string('pleaseselect', OBJECTFS_PLUGIN_NAME);
         $found['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
         $found['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
         $found['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';

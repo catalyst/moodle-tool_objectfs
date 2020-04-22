@@ -179,6 +179,7 @@ $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 
 $string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key content (.pem) is valid. OK';
 $string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key (.pem) is invalid.';
 
+$string['pleaseselect'] = 'Please, select';
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
 $string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLa are not supported by chosen storage file system.';
 $string['presignedurl_testing:test1'] = '1) Test links below to download file with contenthash as its name:';
