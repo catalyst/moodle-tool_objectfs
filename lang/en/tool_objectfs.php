@@ -141,6 +141,7 @@ $string['settings:preferexternal_help'] = 'If a file is stored both locally and 
 
 $string['settings:presignedurl:header'] = 'Pre-Signed URLs Settings';
 $string['settings:presignedurl:coresupport'] = 'Feature is not supported by core, you need to cherry pick: <a href="https://github.com/catalyst/moodle-tool_objectfs#allow-support-for-xsendfile-in-alternative-file-system">xsendfile support</a>';
+$string['settings:presignedurl:filetypesclass'] = 'Pre-Signed URLs can\'t be configured, you need to backport MDL-53240';
 $string['settings:presignedurl:enablepresignedurlschoice'] = 'Signing method';
 $string['settings:presignedurl:warning'] = 'Before enabling Pre-Signed URL, please, make sure that all tests are passed successfully: ';
 $string['settings:presignedurl:enablepresignedurls'] = 'Enable Pre-Signed URLs';
