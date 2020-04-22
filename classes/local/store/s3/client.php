@@ -27,11 +27,6 @@ namespace tool_objectfs\local\store\s3;
 
 defined('MOODLE_INTERNAL') || die();
 
-use Aws\Exception\MultipartUploadException;
-use Aws\S3\MultipartUploader;
-use Aws\S3\ObjectUploader;
-use Aws\S3\S3Client;
-use Aws\S3\Exception\S3Exception;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 
@@ -80,7 +75,7 @@ class client extends object_client_base {
     }
 
     public function set_client($config) {
-        $this->client = S3Client::factory(array(
+        $this->client = \Aws\S3\S3Client::factory(array(
         'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
         'region' => $config->s3_region,
         'version' => AWS_API_VERSION
@@ -105,7 +100,7 @@ class client extends object_client_base {
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
                             'Key' => $key));
-        } catch (S3Exception $e) {
+        } catch (\Aws\S3\Exception\S3Exception $e) {
             return false;
         }
 
@@ -204,7 +199,7 @@ class client extends object_client_base {
                             'Bucket' => $this->bucket));
 
             $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
-        } catch (S3Exception $e) {
+        } catch (\Aws\S3\Exception\S3Exception $e) {
             $connection->success = false;
             $details = $this->get_exception_details($e);
             $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
@@ -229,7 +224,7 @@ class client extends object_client_base {
                             'Bucket' => $this->bucket,
                             'Key' => 'permissions_check_file',
                             'Body' => 'test content'));
-        } catch (S3Exception $e) {
+        } catch (\Aws\S3\Exception\S3Exception $e) {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
@@ -239,7 +234,7 @@ class client extends object_client_base {
             $result = $this->client->getObject(array(
                             'Bucket' => $this->bucket,
                             'Key' => 'permissions_check_file'));
-        } catch (S3Exception $e) {
+        } catch (\Aws\S3\Exception\S3Exception $e) {
             $errorcode = $e->getAwsErrorCode();
             // Write could have failed.
             if ($errorcode !== 'NoSuchKey') {
@@ -254,7 +249,7 @@ class client extends object_client_base {
                 $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => 'permissions_check_file'));
                 $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
                 $permissions->success = false;
-            } catch (S3Exception $e) {
+            } catch (\Aws\S3\Exception\S3Exception $e) {
                 $errorcode = $e->getAwsErrorCode();
                 // Something else went wrong.
                 if ($errorcode !== 'AccessDenied') {
@@ -275,7 +270,7 @@ class client extends object_client_base {
     protected function get_exception_details($exception) {
         $message = $exception->getMessage();
 
-        if (get_class($exception) !== 'S3Exception') {
+        if (get_class($exception) !== '\Aws\S3\Exception\S3Exception') {
             return "Not a S3 exception : $message";
         }
 
@@ -361,10 +356,10 @@ class client extends object_client_base {
 
         try {
             $externalpath = $this->get_filepath_from_hash($contenthash);
-            $uploader = new ObjectUploader($this->client, $this->bucket, $externalpath, $filehandle);
+            $uploader = new \Aws\S3\ObjectUploader($this->client, $this->bucket, $externalpath, $filehandle);
             $uploader->upload();
             fclose($filehandle);
-        } catch (MultipartUploadException $e) {
+        } catch (\Aws\Exception\MultipartUploadException $e) {
             $params = $e->getState()->getId();
             $this->client->abortMultipartUpload($params);
             fclose($filehandle);

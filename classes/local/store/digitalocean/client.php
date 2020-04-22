@@ -26,7 +26,6 @@ namespace tool_objectfs\local\store\digitalocean;
 
 defined('MOODLE_INTERNAL') || die();
 
-use Aws\S3\S3Client;
 use tool_objectfs\local\store\s3\client as s3_client;
 
 class client extends s3_client {
@@ -46,7 +45,7 @@ class client extends s3_client {
     }
 
     public function set_client($config) {
-        $this->client = S3Client::factory(array(
+        $this->client = \Aws\S3\S3Client::factory(array(
             'credentials' => array('key' => $config->do_key, 'secret' => $config->do_secret),
             'region' => $config->do_region,
             'endpoint' => 'https://' . $config->do_region . '.digitaloceanspaces.com',
