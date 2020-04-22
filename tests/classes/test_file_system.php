@@ -35,6 +35,7 @@ use tool_objectfs\local\store\object_file_system;
 require_once(__DIR__ . '/test_client.php');
 require_once(__DIR__ . '/test_s3_integration_client.php');
 require_once(__DIR__ . '/test_azure_integration_client.php');
+require_once(__DIR__ . '/test_swift_integration_client.php');
 
 class test_file_system extends object_file_system {
 
