@@ -28,13 +28,15 @@ namespace tool_objectfs\local\store;
 defined('MOODLE_INTERNAL') || die();
 
 abstract class object_client_base implements object_client {
-    const MAX_UPLOAD = OBJECTFS_BYTES_IN_TERABYTE * 5;
 
     protected $autoloader;
     protected $expirationtime;
     protected $testdelete = true;
     public $presignedminfilesize;
     public $enablepresignedurls;
+
+    /** @var int $maxupload Maximum allowed file size that can be uploaded. */
+    protected $maxupload;
 
     public function __construct($config) {
 
@@ -143,5 +145,14 @@ abstract class object_client_base implements object_client {
             $SESSION->notifications = [];
             call_user_func('\core\notification::' . $type, $message);
         }
+    }
+
+    /**
+     * Returns the maximum allowed file size that is to be uploaded.
+     *
+     * @return int
+     */
+    public function get_maximum_upload_size() {
+        return $this->maxupload;
     }
 }

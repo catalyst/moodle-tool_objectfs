@@ -37,11 +37,4 @@ class file_system extends object_file_system {
         $client = new client($config);
         return $client;
     }
-
-    /**
-     * @return float|int
-     */
-    static public function get_maximum_upload_size() {
-        return client::MAX_UPLOAD;
-    }
 }

@@ -34,8 +34,6 @@ class client extends object_client_base {
     /** @var string $containername The current container. */
     protected $containername;
 
-    const MAX_UPLOAD = 5368709120; // 5GiB.
-
     protected $config;
 
     /**
@@ -49,6 +47,7 @@ class client extends object_client_base {
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
+            $this->maxupload = 5368709120; // 5GiB.
             $this->containername = $config->openstack_container;
             $this->config = $config;
         } else {
@@ -86,16 +85,6 @@ class client extends object_client_base {
         return $openstack->objectStoreV1()->getContainer($this->containername);
 
     }
-
-    /**
-     * Returns the maximum allowed file size that is to be uploaded.
-     *
-     * @return int
-     */
-    public function get_maximum_upload_size() {
-        return self::MAX_UPLOAD;
-    }
-
 
     /**
      * Sets the StreamWrapper to allow accessing the remote content via a swift:// path.

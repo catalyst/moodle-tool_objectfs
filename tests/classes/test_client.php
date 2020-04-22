@@ -21,12 +21,15 @@ defined('MOODLE_INTERNAL') || die();
 use tool_objectfs\local\store\object_client_base;
 
 class test_client extends object_client_base {
-    const MAX_UPLOAD = 5000000000;
+
+    /** @var int $maxupload Maximum allowed file size that can be uploaded. */
+    protected $maxupload;
 
     private $bucketpath;
 
     public function __construct($config) {
         global $CFG;
+        $this->maxupload = 5000000000;
         $dataroot = $CFG->phpunit_dataroot;
         if (defined('PHPUNIT_INSTANCE') && PHPUNIT_INSTANCE !== null) {
             $dataroot .= '/' . PHPUNIT_INSTANCE;
@@ -103,7 +106,7 @@ class test_client extends object_client_base {
     }
 
     public function get_maximum_upload_size() {
-        return self::MAX_UPLOAD;
+        return $this->maxupload;
     }
 }
 

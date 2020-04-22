@@ -53,6 +53,9 @@ class client extends object_client_base {
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
+            // Using the multipart upload methods , you can upload objects from 5 MB to 5 TB in size.
+            // See https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-multipart-upload.html.
+            $this->maxupload = OBJECTFS_BYTES_IN_TERABYTE * 5;
             $this->bucket = $config->s3_bucket;
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
@@ -82,12 +85,6 @@ class client extends object_client_base {
         'region' => $config->s3_region,
         'version' => AWS_API_VERSION
         ));
-    }
-
-    public function get_maximum_upload_size() {
-        // Using the multipart upload methods , you can upload objects from 5 MB to 5 TB in size.
-        // See https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-multipart-upload.html.
-        return static::MAX_UPLOAD;
     }
 
     /**

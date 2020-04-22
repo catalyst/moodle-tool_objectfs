@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 
 use GuzzleHttp\Exception\ConnectException;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
-use MicrosoftAzure\Storage\Common\Internal\Resources;
 use MicrosoftAzure\Storage\Common\ServicesBuilder;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use SimpleXMLElement;
@@ -38,7 +37,6 @@ use tool_objectfs\local\store\azure\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
 class client extends object_client_base {
-    const MAX_UPLOAD = Resources::MAX_BLOCK_BLOB_SIZE;
 
     /** @var BlobRestProxy $client The Blob client. */
     protected $client;
@@ -57,20 +55,12 @@ class client extends object_client_base {
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
+            $this->maxupload = MicrosoftAzure\Storage\Common\Internal\Resources::MAX_BLOCK_BLOB_SIZE;
             $this->container = $config->azure_container;
             $this->set_client($config);
         } else {
             parent::__construct($config);
         }
-    }
-
-    /**
-     * Returns the maximum allowed file size that is to be uploaded.
-     *
-     * @return int
-     */
-    public function get_maximum_upload_size() {
-        return self::MAX_UPLOAD;
     }
 
     /**

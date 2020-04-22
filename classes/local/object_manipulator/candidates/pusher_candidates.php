@@ -55,10 +55,11 @@ class pusher_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
+        $filesystem = new $this->config->filesystem;
         return [
             'maxcreatedtimstamp' => time() - $this->config->minimumage,
             'threshold' => $this->config->sizethreshold,
-            'maximum_file_size' => call_user_func($this->config->filesystem . '::get_maximum_upload_size'),
+            'maximum_file_size' => $filesystem->get_maximum_upload_filesize(),
             'object_location' => OBJECT_LOCATION_LOCAL,
         ];
     }
