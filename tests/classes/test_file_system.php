@@ -38,7 +38,7 @@ require_once(__DIR__ . '/test_azure_integration_client.php');
 
 class test_file_system extends object_file_system {
 
-    static private $uploadsize;
+    private $maxupload;
 
     protected function initialise_external_client($config) {
         global $CFG;
@@ -71,14 +71,14 @@ class test_file_system extends object_file_system {
         } else {
             $client = new test_client($config);
         }
-        self::$uploadsize = $client->get_maximum_upload_size();
+        $this->maxupload = $client->get_maximum_upload_size();
         return $client;
     }
 
     /**
      * @return float|int
      */
-    static public function get_maximum_upload_size() {
-        return self::$uploadsize;
+    public function get_maximum_upload_size() {
+        return $this->maxupload;
     }
 }

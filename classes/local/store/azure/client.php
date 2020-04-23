@@ -27,18 +27,12 @@ namespace tool_objectfs\local\store\azure;
 
 defined('MOODLE_INTERNAL') || die();
 
-use GuzzleHttp\Exception\ConnectException;
-use MicrosoftAzure\Storage\Blob\BlobRestProxy;
-use MicrosoftAzure\Storage\Common\Internal\Resources;
-use MicrosoftAzure\Storage\Common\ServicesBuilder;
-use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use SimpleXMLElement;
 use stdClass;
 use tool_objectfs\local\store\azure\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
 class client extends object_client_base {
-    const MAX_UPLOAD = Resources::MAX_BLOCK_BLOB_SIZE;
 
     /** @var BlobRestProxy $client The Blob client. */
     protected $client;
@@ -57,20 +51,12 @@ class client extends object_client_base {
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
+            $this->maxupload = \MicrosoftAzure\Storage\Common\Internal\Resources::MAX_BLOCK_BLOB_SIZE;
             $this->container = $config->azure_container;
             $this->set_client($config);
         } else {
             parent::__construct($config);
         }
-    }
-
-    /**
-     * Returns the maximum allowed file size that is to be uploaded.
-     *
-     * @return int
-     */
-    public function get_maximum_upload_size() {
-        return self::MAX_UPLOAD;
     }
 
     /**
@@ -95,7 +81,7 @@ class client extends object_client_base {
 
         $sasconnectionstring = str_replace(' ', '', $sasconnectionstring);
 
-        $this->client = ServicesBuilder::getInstance()->createBlobService($sasconnectionstring);
+        $this->client = \MicrosoftAzure\Storage\Common\ServicesBuilder::getInstance()->createBlobService($sasconnectionstring);
     }
 
     /**
@@ -196,7 +182,7 @@ class client extends object_client_base {
 
             $result = $this->client->getBlobProperties($this->container, $key)->getProperties();
 
-        } catch (ServiceException $e) {
+        } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
             return false;
         }
 
@@ -236,11 +222,11 @@ class client extends object_client_base {
         try {
             $result = $this->client->createBlockBlob($this->container, 'connection_check_file', 'connection_check_file');
             $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
-        } catch (ServiceException $e) {
+        } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
             $connection->success = false;
             $details = $this->get_exception_details($e);
             $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
-        } catch (ConnectException $e) {
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
             $connection->success = false;
             $details = $e->getMessage();
             $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
@@ -256,7 +242,7 @@ class client extends object_client_base {
 
         try {
             $result = $this->client->createBlockBlob($this->container, 'permissions_check_file', 'permissions_check_file');
-        } catch (ServiceException $e) {
+        } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
@@ -264,7 +250,7 @@ class client extends object_client_base {
 
         try {
             $result = $this->client->getBlob($this->container, 'permissions_check_file');
-        } catch (ServiceException $e) {
+        } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
             $errorcode = $this->get_body_error_code($e);
 
             // Write could have failed.
@@ -279,7 +265,7 @@ class client extends object_client_base {
             $result = $this->client->deleteBlob($this->container, 'permissions_check_file');
             $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
             $permissions->success = false;
-        } catch (ServiceException $e) {
+        } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
             $errorcode = $this->get_body_error_code($e);
 
             // Something else went wrong.
@@ -297,7 +283,7 @@ class client extends object_client_base {
         return $permissions;
     }
 
-    protected function get_exception_details(ServiceException $exception) {
+    protected function get_exception_details(\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $exception) {
         $message = $exception->getErrorMessage();
 
         if (get_class($exception) !== 'MicrosoftAzure\Storage\Common\Exceptions\ServiceException') {
@@ -359,7 +345,7 @@ class client extends object_client_base {
      * @param ServiceException $e The exception that contains the XML body.
      * @return string The error code.
      */
-    private function get_body_error_code(ServiceException $e) {
+    private function get_body_error_code(\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
         // Casting the stream content to a string will give us the HTTP body content.
         $body = (string) $e->getResponse()->getBody();
 
