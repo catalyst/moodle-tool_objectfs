@@ -61,7 +61,7 @@ class manager {
 
         $config->filesystem = '';
         $config->enablepresignedurls = 0;
-        $config->expirationtime = 10 * MINSECS;
+        $config->expirationtime = 2 * HOURSECS;
         $config->presignedminfilesize = 0;
 
         // S3 file system.
