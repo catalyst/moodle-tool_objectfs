@@ -16,7 +16,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="toolobjeobje_con_idu_ix" UNIQUE="true" FIELDS="contenthash, location" />
+        <INDEX NAME="toolobjeobje_con_idu_ix" UNIQUE="true" FIELDS="contenthash, location"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="tool_objectfs_reports" COMMENT="Object report data for objectfs">
