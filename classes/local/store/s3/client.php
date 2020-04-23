@@ -424,12 +424,8 @@ class client extends object_client_base {
         }
 
         $command = $this->client->getCommand('GetObject', $params);
-        $expirationtime = $this->get_header($headers, 'Expires');
-
-        if (empty($expirationtime)) {
-            $expirationtime = '+' . $this->expirationtime . ' seconds';
-        }
-        $request = $this->client->createPresignedRequest($command, $expirationtime);
+        $expires = $this->get_expiration_time(time(), $this->get_header($headers, 'Expires'));
+        $request = $this->client->createPresignedRequest($command, $expires);
 
         $signedurl = (string)$request->getUri();
         return $signedurl;
@@ -445,21 +441,7 @@ class client extends object_client_base {
     private function generate_presigned_url_cloudfront($contenthash, array $headers = [], $nicefilename = true) {
         $key = $this->get_filepath_from_hash($contenthash);
 
-        $expires = $this->get_header($headers, 'Expires');
-        $now = time();
-        if (is_string($expires)) {
-            // Convert to a valid timestamp.
-            $expires = strtotime($expires);
-            if ($expires < $now) {
-                $expires = $now;
-            }
-            // We make sure we have at least 60s before the url expires.
-            $expires += MINSECS;
-        }
-        if (is_null($expires) || false === $expires) {
-            // Invalid date format use config->expirationtime instead.
-            $expires = $now + $this->expirationtime;
-        }
+        $expires = $this->get_expiration_time(time(), $this->get_header($headers, 'Expires'));
 
         if ($nicefilename) {
             $key .= $this->get_nice_filename($headers);
@@ -530,5 +512,34 @@ class client extends object_client_base {
             }
         }
         return '';
+    }
+
+    /**
+     * Returns expiration timestamp for pre-signed url.
+     *
+     * @param  int   $now     Now timestamp
+     * @param  mixed $expires 'Expires' header
+     * @return int
+     */
+    public function get_expiration_time($now, $expires) {
+        if (is_string($expires)) {
+            // Convert to a valid timestamp.
+            $expires = strtotime($expires);
+        }
+        // If it's set to 0, set it to default.
+        if ($expires == 0) {
+            $expires = $now + $this->expirationtime;
+        }
+        // If it's already expired set it to now.
+        if ($expires < $now) {
+            $expires = $now;
+        }
+        if (is_null($expires) || false === $expires) {
+            // Invalid date format use default instead.
+            $expires = $now + $this->expirationtime;
+        }
+        // We make sure we have at least 60s before the url expires.
+        $expires += MINSECS;
+        return $expires;
     }
 }
