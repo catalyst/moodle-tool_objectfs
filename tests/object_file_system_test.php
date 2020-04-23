@@ -33,6 +33,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         // Get a reflection of externalclient->$key property.
         $property = new \ReflectionProperty($externalclientref->getValue($this->filesystem), $key);
+        $property->setAccessible(true);
 
         // Set new value for externalclient->$key property.
         $property->setValue($externalclientref->getValue($this->filesystem), $value);
@@ -692,5 +693,61 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $object = $this->create_local_object();
         $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($object->contenthash));
+    }
+
+    /**
+     * Data provider for test_get_expiration_time_method_if_supported().
+     *
+     * @return array
+     */
+    public function test_get_expiration_time_method_if_supported_provider() {
+        $now = time();
+        return [
+            // Default Pre-Signed URL expiration time and int-like 'Expires' header.
+            [7200, $now, 0, $now + 7200 + MINSECS],
+            [7200, $now, $now - 100, $now + MINSECS],
+            [7200, $now, $now + 100, $now + 100 + MINSECS],
+
+            // Default Pre-Signed URL expiration time and string-like 'Expires' header.
+            [7200, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 7200 + MINSECS],
+            [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
+            [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100 + MINSECS],
+
+            // Custom Pre-Signed URL expiration time and int-like 'Expires' header.
+            [600, $now, 0, $now + 600 + MINSECS],
+            [600, $now, $now - 100, $now + MINSECS],
+            [600, $now, $now + 100, $now + 100 + MINSECS],
+
+            // Custom Pre-Signed URL expiration time and string-like 'Expires' header.
+            [600, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 600 + MINSECS],
+            [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
+            [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100 + MINSECS],
+        ];
+    }
+
+    /**
+     * Test S3 and DO clients get_expiration_time() method.
+     * Available when running integration tests.
+     *
+     * @dataProvider test_get_expiration_time_method_if_supported_provider
+     *
+     * @param int   $expirationsetting Pre-Signed URL expiration time
+     * @param int   $now               Now timestamp
+     * @param mixed $expiresheader     'Expires' header
+     * @param int   $expectedresult    Expiration timestamp for URL
+     */
+    public function test_get_expiration_time_method_if_supported($expirationsetting, $now, $expiresheader, $expectedresult) {
+        $this->filesystem = new test_file_system();
+        $externalclient = $this->filesystem->get_external_client();
+
+        if (!$externalclient->support_presigned_urls()) {
+            $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
+        }
+
+        if ($expirationsetting !== 7200) {
+            $this->set_externalclient_config('expirationtime', $expirationsetting);
+        }
+
+        $this->assertEquals($expectedresult, $externalclient->get_expiration_time($now, $expiresheader));
     }
 }
