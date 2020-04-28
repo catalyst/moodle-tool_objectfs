@@ -737,22 +737,22 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         // Redirect regardless.
-        if ($this->externalclient->presignedminfilesize == 0) {
+        if ($this->externalclient->presignedminfilesize == 0 &&
+                manager::all_extensions_whitelisted()) {
             return true;
         }
 
-        // Redirect only files that bigger than configured value.
-        // And if file extension is not whitelisted.
-        if ($this->externalclient->presignedminfilesize > 0) {
-            $sql = 'SELECT MAX(filesize) AS filesize, filename
-                      FROM {files}
-                     WHERE contenthash = :contenthash
-                       AND filesize > :filesize
-                  GROUP BY filename';
-            $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
-            return ($record->filesize > $this->externalclient->presignedminfilesize &&
-                manager::is_extension_whitelisted($record->filename));
-        }
+        // Redirect when the file size is bigger than presignedminfilesize setting
+        // and the file extension is whitelisted.
+        $sql = 'SELECT MAX(filesize) AS filesize, filename
+                  FROM {files}
+                 WHERE contenthash = :contenthash
+                   AND filesize > :filesize
+              GROUP BY filename';
+        $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
+
+        return ($record->filesize >= $this->externalclient->presignedminfilesize &&
+            manager::is_extension_whitelisted($record->filename));
     }
 
     /**

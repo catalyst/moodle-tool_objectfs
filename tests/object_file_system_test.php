@@ -651,11 +651,13 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $provider[] = array(1, '', true);
         $provider[] = array(1, null, false);
 
-        // Testing minimum file size to be greater than file size = 10 (default).
+        // Testing minimum file size to be greater than file size = 10.
+        // 10 is a default file size created in objectfs unit tests.
         $provider[] = array(1, 11, false);
         $provider[] = array(1, '11', false);
 
-        // Testing minimum file size to be less than file size = 10 (default).
+        // Testing minimum file size to be less than file size = 10.
+        // 10 is a default file size created in objectfs unit tests.
         $provider[] = array(1, 9, true);
         $provider[] = array(1, '9', true);
 
@@ -692,6 +694,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         }
 
         $object = $this->create_local_object();
+        set_config('signingwhitelist', '*', 'tool_objectfs');
         $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($object->contenthash));
     }
 
