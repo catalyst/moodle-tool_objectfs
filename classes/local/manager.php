@@ -237,6 +237,20 @@ class manager {
     }
 
     /**
+     * Check if all file extensions are whitelisted.
+     *
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function all_extensions_whitelisted() {
+        $config = self::get_objectfs_config();
+        if (!empty($config->signingwhitelist) && $config->signingwhitelist == '*') {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Check if '$CFG->alternative_file_system_class' is properly set.
      * @return bool
      */
