@@ -84,7 +84,7 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:deletelocal', 'tool_objectfs'), '', ''));
 
     $settings->add(new admin_setting_configduration('tool_objectfs/consistencydelay',
-        new lang_string('settings:consistencydelay', 'tool_objectfs'), '', '', 10 * MINSECS));
+        new lang_string('settings:consistencydelay', 'tool_objectfs'), '', 10 * MINSECS, MINSECS));
 
 
     $settings->add(new admin_setting_heading('tool_objectfs/storagefilesystemselection',
