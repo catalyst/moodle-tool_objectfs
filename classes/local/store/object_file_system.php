@@ -744,11 +744,11 @@ abstract class object_file_system extends \file_system_filedir {
 
         // Redirect when the file size is bigger than presignedminfilesize setting
         // and the file extension is whitelisted.
-        $sql = 'SELECT MAX(filesize) AS filesize, filename
+        $sql = 'SELECT filesize, filename
                   FROM {files}
                  WHERE contenthash = :contenthash
                    AND filesize > :filesize
-              GROUP BY filename';
+                 LIMIT 1';
         $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
 
         return ($record->filesize >= $this->externalclient->presignedminfilesize &&
