@@ -252,7 +252,7 @@ These settings control the movement of files to and from object storage.
         - **S3**
         - **CloudFront**
     * S3: Inherits the settings from [Amazon S3 settings](#amazon-s3-settings)
-    * Cloudfront: It requires to create a [Cloudfront Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-creating-console.html)
+    * Cloudfront: It requires to create a [Cloudfront Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-creating-console.html) with **Query String Forwarding** set to **Forward all**
         * **DOMAIN (inc. https://)**: Domain name where the content requests will be redirected to.
         * **Key_Pair ID from AWS**: Key to identify your trusted signers. [Creating CloudFront Key Pairs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html#private-content-creating-cloudfront-key-pairs)
         * **PRIVATE Key .pem**:
