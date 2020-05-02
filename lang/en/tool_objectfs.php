@@ -68,6 +68,8 @@ $string['settings:enabletasks'] = 'Enable transfer tasks';
 $string['settings:enabletasks_help'] = 'Enable or disable the object file system tasks which move files between the filedir and external object storage.';
 $string['settings:enablelogging'] = 'Enable real time logging';
 $string['settings:enablelogging_help'] = 'Enable or disable file system logging. Will output diagnostic information to the php error log. ';
+$string['settings:useproxy'] = 'Use proxy';
+$string['settings:useproxy_help'] = 'Objectfs can use configured proxy to reach external storage.';
 
 $string['settings:generalheader'] = 'General Settings';
 
