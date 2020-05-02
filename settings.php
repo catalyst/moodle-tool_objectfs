@@ -67,6 +67,11 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablelogging',
         new lang_string('settings:enablelogging', 'tool_objectfs'), '', ''));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'tool_objectfs/useproxy',
+        new lang_string('settings:useproxy', 'tool_objectfs'),
+        new lang_string('settings:useproxy_help', 'tool_objectfs'),
+        0));
 
     $settings->add(new admin_setting_heading('tool_objectfs/filetransfersettings',
         new lang_string('settings:filetransferheader', 'tool_objectfs'), ''));
