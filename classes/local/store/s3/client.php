@@ -75,11 +75,17 @@ class client extends object_client_base {
     }
 
     public function set_client($config) {
-        $this->client = \Aws\S3\S3Client::factory(array(
-        'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
-        'region' => $config->s3_region,
-        'version' => AWS_API_VERSION
-        ));
+        $options = array(
+            'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
+            'region' => $config->s3_region,
+            'version' => AWS_API_VERSION
+        );
+
+        if ($config->useproxy) {
+            $options['http'] = array('proxy' => $this->get_proxy_string());
+        }
+
+        $this->client = \Aws\S3\S3Client::factory($options);
     }
 
     /**
@@ -541,5 +547,30 @@ class client extends object_client_base {
         // We make sure we have at least 60s before the url expires.
         $expires += MINSECS;
         return $expires;
+    }
+
+    /**
+     * Returns proxy string to use as a storage client param.
+     * String format: 'username:password@127.0.0.1:123'.
+     *
+     * @return string
+     */
+    public function get_proxy_string() {
+        global $CFG;
+        $proxy = '';
+        if (empty($CFG->proxytype) || $CFG->proxytype == 'SOCKS5') {
+            // S3 doesn't support SOCKS proxy.
+            return $proxy;
+        }
+        if (!empty($CFG->proxyhost)) {
+            $proxy = $CFG->proxyhost;
+            if (!empty($CFG->proxyport)) {
+                $proxy .= ':'. $CFG->proxyport;
+            }
+            if (!empty($CFG->proxyuser) && !empty($CFG->proxypassword)) {
+                $proxy = $CFG->proxyuser . ':' . $CFG->proxypassword . '@' . $proxy;
+            }
+        }
+        return $proxy;
     }
 }
