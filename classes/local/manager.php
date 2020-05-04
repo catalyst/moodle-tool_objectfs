@@ -316,4 +316,24 @@ class manager {
         }
         return '';
     }
+
+    /**
+     * Returns file name from Content-Disposition header.
+     *
+     * @param  string $header Content-Disposition header
+     * @return string
+     */
+    public static function get_filename_from_header($header) {
+        $filename = '';
+        if (!empty($header)) {
+            $fparts = explode('; ', $header);
+            if (!empty($fparts[1])) {
+                // Get the actual filename.
+                $filename = str_replace('filename=', '', $fparts[1]);
+                // Remove the quotes.
+                $filename = str_replace('"', '', $filename);
+            }
+        }
+        return $filename;
+    }
 }
