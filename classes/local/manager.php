@@ -299,4 +299,42 @@ class manager {
         $clientclass = str_replace('_file_system', '', $filesystem);
         return str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $clientclass.'\\client');
     }
+
+    /**
+     * Returns given header from headers set.
+     *
+     * @param array $headers request headers.
+     * @param string $search
+     *
+     * @return string header.
+     */
+    public static function get_header($headers, $search) {
+        foreach ($headers as $header) {
+            $found = strpos($header, $search);
+            if ($found !== false) {
+                return substr($header, strlen($search) + 1);
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Returns file name from Content-Disposition header.
+     *
+     * @param  string $header Content-Disposition header
+     * @return string
+     */
+    public static function get_filename_from_header($header) {
+        $filename = '';
+        if (!empty($header)) {
+            $fparts = explode('; ', $header);
+            if (!empty($fparts[1])) {
+                // Get the actual filename.
+                $filename = str_replace('filename=', '', $fparts[1]);
+                // Remove the quotes.
+                $filename = str_replace('"', '', $filename);
+            }
+        }
+        return $filename;
+    }
 }

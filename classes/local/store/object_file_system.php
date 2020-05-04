@@ -697,9 +697,10 @@ abstract class object_file_system extends \file_system_filedir {
         switch ($location) {
             case OBJECT_LOCATION_EXTERNAL:
             case OBJECT_LOCATION_DUPLICATED:
-                if ($this->presigned_url_should_redirect($contenthash)) {
+                $headers = headers_list();
+                if ($this->presigned_url_should_redirect($contenthash, $headers)) {
                     try {
-                        redirect($this->generate_presigned_url_to_external_file($contenthash, headers_list()));
+                        redirect($this->generate_presigned_url_to_external_file($contenthash, $headers));
                     } catch (\Exception $e) {
                         return false;
                     }
@@ -728,8 +729,16 @@ abstract class object_file_system extends \file_system_filedir {
             && isset($this->externalclient->presignedminfilesize);
     }
 
-    public function presigned_url_should_redirect($contenthash) {
-        global $DB;
+    /**
+     * Returns true if the file system should redirect to pre-signed url.
+     *
+     * @param  string $contenthash File content hash.
+     * @param  array  $headers     Request headers.
+     * @return bool
+     * @throws \dml_exception
+     */
+    public function presigned_url_should_redirect($contenthash, $headers = array()) {
+        global $DB, $_SERVER;
 
         // Disabled.
         if (!$this->presigned_url_configured()) {
@@ -742,17 +751,31 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
-        // Redirect when the file size is bigger than presignedminfilesize setting
-        // and the file extension is whitelisted.
-        $sql = 'SELECT MAX(filesize) AS filesize, filename
+        // Do not redirect if the file extension is not whitelisted.
+        // Try to retrieve the file name from headers.
+        $disposition = manager::get_header($headers, 'Content-Disposition');
+        $filename = manager::get_filename_from_header($disposition);
+        if (!manager::is_extension_whitelisted($filename)) {
+            return false;
+        }
+
+        // Try to retrieve the file name from the request path info.
+        if (isset($_SERVER['PATH_INFO']) && !empty($_SERVER['PATH_INFO'])) {
+            $path = urldecode($_SERVER['PATH_INFO']);
+            $filename = basename($path);
+            if (!manager::is_extension_whitelisted($filename)) {
+                return false;
+            }
+        }
+
+        // Redirect when the file size is bigger than presignedminfilesize setting.
+        $sql = 'SELECT MAX(filesize)
                   FROM {files}
                  WHERE contenthash = :contenthash
-                   AND filesize > :filesize
-              GROUP BY filename';
+                   AND filesize > :filesize';
         $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
 
-        return ($record->filesize >= $this->externalclient->presignedminfilesize &&
-            manager::is_extension_whitelisted($record->filename));
+        return ($record->filesize >= $this->externalclient->presignedminfilesize);
     }
 
     /**
