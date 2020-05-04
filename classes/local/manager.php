@@ -298,4 +298,22 @@ class manager {
         $clientclass = str_replace('_file_system', '', $filesystem);
         return str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $clientclass.'\\client');
     }
+
+    /**
+     * Returns given header from headers set.
+     *
+     * @param array $headers request headers.
+     * @param string $search
+     *
+     * @return string header.
+     */
+    public static function get_header($headers, $search) {
+        foreach ($headers as $header) {
+            $found = strpos($header, $search);
+            if ($found !== false) {
+                return substr($header, strlen($search) + 1);
+            }
+        }
+        return '';
+    }
 }

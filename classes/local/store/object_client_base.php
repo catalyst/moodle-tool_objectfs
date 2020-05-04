@@ -81,24 +81,6 @@ abstract class object_client_base implements object_client {
     }
 
     /**
-     * Returns given header from headers set.
-     *
-     * @param array $headers request headers.
-     * @param string $search
-     *
-     * @return string header.
-     */
-    public function get_header($headers, $search) {
-        foreach ($headers as $header) {
-            $found = strpos($header, $search);
-            if ($found !== false) {
-                return substr($header, strlen($search) + 1);
-            }
-        }
-        return '';
-    }
-
-    /**
      * Moodle admin settings form to display connection details for the client service.
      *
      * @param $client

@@ -399,12 +399,12 @@ class client extends object_client_base {
      * @return string
      */
     private function generate_presigned_url_s3($contenthash, $headers) {
-        $contentdisposition = $this->get_header($headers, 'Content-Disposition');
+        $contentdisposition = manager::get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
             $params['ResponseContentDisposition'] = $contentdisposition;
         }
 
-        $contenttype = $this->get_header($headers, 'Content-Type');
+        $contenttype = manager::get_header($headers, 'Content-Type');
         if ($contenttype !== '') {
             $params['ResponseContentType'] = $contenttype;
         }
@@ -413,18 +413,18 @@ class client extends object_client_base {
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $key;
 
-        $contentdisposition = $this->get_header($headers, 'Content-Disposition');
+        $contentdisposition = manager::get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
             $params['ResponseContentDisposition'] = $contentdisposition;
         }
 
-        $contenttype = $this->get_header($headers, 'Content-Type');
+        $contenttype = manager::get_header($headers, 'Content-Type');
         if ($contenttype !== '') {
             $params['ResponseContentType'] = $contenttype;
         }
 
         $command = $this->client->getCommand('GetObject', $params);
-        $expires = $this->get_expiration_time(time(), $this->get_header($headers, 'Expires'));
+        $expires = $this->get_expiration_time(time(), manager::get_header($headers, 'Expires'));
         $request = $this->client->createPresignedRequest($command, $expires);
 
         $signedurl = (string)$request->getUri();
@@ -441,7 +441,7 @@ class client extends object_client_base {
     private function generate_presigned_url_cloudfront($contenthash, array $headers = [], $nicefilename = true) {
         $key = $this->get_filepath_from_hash($contenthash);
 
-        $expires = $this->get_expiration_time(time(), $this->get_header($headers, 'Expires'));
+        $expires = $this->get_expiration_time(time(), manager::get_header($headers, 'Expires'));
 
         if ($nicefilename) {
             $key .= $this->get_nice_filename($headers);
@@ -487,8 +487,8 @@ class client extends object_client_base {
     private function get_nice_filename($headers) {
         // We are trying to deliver original filename rather than hash filename to client.
         $originalfilename = '';
-        $contentdisposition = trim($this->get_header($headers, 'Content-Disposition'));
-        $originalcontenttype = trim($this->get_header($headers, 'Content-Type'));
+        $contentdisposition = trim(manager::get_header($headers, 'Content-Disposition'));
+        $originalcontenttype = trim(manager::get_header($headers, 'Content-Type'));
 
         /*
             Need to get the filename and content-type from HEADERS array
