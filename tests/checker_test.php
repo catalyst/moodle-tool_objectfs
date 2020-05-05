@@ -46,7 +46,7 @@ class checker_testcase extends tool_objectfs_testcase {
         global $DB;
         $file = $this->create_local_object();
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-        $this->assertNotFalse($location);
+        $this->assertEquals('string', gettype($location));
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
@@ -54,7 +54,7 @@ class checker_testcase extends tool_objectfs_testcase {
         global $DB;
         $file = $this->create_duplicated_object();
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-        $this->assertNotFalse($location);
+        $this->assertEquals('string', gettype($location));
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
@@ -62,7 +62,7 @@ class checker_testcase extends tool_objectfs_testcase {
         global $DB;
         $file = $this->create_remote_object();
         $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
-        $this->assertNotFalse($location);
+        $this->assertEquals('string', gettype($location));
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
@@ -92,7 +92,7 @@ class checker_testcase extends tool_objectfs_testcase {
         $this->checker->execute([$localobject]);
         $dblocation = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $localobject->contenthash]);
 
-        $this->assertNotFalse($dblocation);
+        $this->assertEquals('string', gettype($dblocation));
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
         self::assertFalse($this->objects_contain_hash($localobject->contenthash));
     }
