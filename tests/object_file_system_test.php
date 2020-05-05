@@ -675,6 +675,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      * @param $enablepresignedurls mixed enable pre-signed URLs.
      * @param $presignedminfilesize mixed minimum file size to be redirected to pre-signed URL.
      * @param $result boolean expected result.
+     * @throws \dml_exception
      */
     public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls,
             $presignedminfilesize, $result) {
