@@ -80,6 +80,7 @@ $string['settings:clientselection:title'] = 'Storage File System';
 $string['settings:clientselection:title_help'] = 'The storage file system. This is also the active file system for the background tasks.';
 $string['settings:clientselection:mismatchfilesystem'] = 'This setting should match $CFG->alternative_file_system_class';
 $string['settings:clientselection:filesystemnotdefined'] = '$CFG->alternative_file_system_class should be set in your Moodle config.php';
+$string['settings:clientselection:fsapinotbackported'] = 'File system API (MDL-46375) is not backported. Follow up <a href="https://github.com/catalyst/moodle-tool_objectfs#backporting">Backporting</a> README section.';
 
 $string['settings:aws:header'] = 'Amazon S3 Settings';
 $string['settings:aws:key'] = 'Key';
