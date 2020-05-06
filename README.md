@@ -294,6 +294,27 @@ Openstack Object Storage settings
 - **Project ID**: Openstack project ID
 - **Container**: Name of the storage container
 
+## Applying core patches
+
+This plugin requires various trackers to be backported to maintain the plugin functionality.
+
+| Moodle version   | Patches |
+|------------------|---------|
+| Moodle 3.1       | [MDL-46375](https://tracker.moodle.org/browse/MDL-46375), [MDL-58068](https://tracker.moodle.org/browse/MDL-58068) |
+
+#### Moodle 3.1:
+<pre>
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core31.diff
+</pre>
+The patch was created with following commands: 
+<pre>
+// MDL-46375
+git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
+git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
+// MDL-58068
+git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
+</pre>
+
 ## Backporting
 
 If you are on an older moodle then you can backport the necessary API's in order to support this plugin. Use with caution!
