@@ -8,97 +8,72 @@ cache:
     - $HOME/.composer/cache
     - $HOME/.npm
 
-php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-
 dist: trusty
 
 addons:
   postgresql: "9.4"
 
-env:
-  - DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-  - DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
-  - DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
-  - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
-  - DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
-  - DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
-  - DB=pgsql MOODLE_BRANCH=master
-  - DB=mysqli MOODLE_BRANCH=master
-
 matrix:
-  exclude:
+  include:
     - php: 7.2
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.2
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=pgsql MOODLE_BRANCH=master
-    - php: 7.1
       env: DB=mysqli MOODLE_BRANCH=master
-    - php: 7.1
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+    - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=master
+    - php: 5.6
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE
+    - php: 5.6
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_27_STABLE
     - php: 7.0
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE
     - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE_FSAPI MOODLE_REPO=https://github.com/kenneth-hendricks/moodle-fs-api.git
-    - php: 7.0
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 7.0
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 7.0
-      env: DB=pgsql MOODLE_BRANCH=master
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=master
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_31_STABLE
     - php: 5.6
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE
     - php: 5.6
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
-    - php: 5.6
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 5.6
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 5.6
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 5.6
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 5.6
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 5.6
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 5.6
-      env: DB=pgsql MOODLE_BRANCH=master
-    - php: 5.6
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 5.6
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_31_STABLE
+    - php: 7.2
       env: DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
-    - php: 5.6
-      env: DB=mysqli MOODLE_BRANCH=master
+    - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_35_STABLE
+    - php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
+    - php: 7.1
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_35_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
+    - php: 7.0
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_35_STABLE
+    - php: 7.2
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
+    - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_36_STABLE
+    - php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
+    - php: 7.1
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_36_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
+    - php: 7.0
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_36_STABLE
+    - php: 7.2
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 7.1
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 7.2
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 7.1
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
 
 before_install:
+  - export IGNORE_PATHS=classes/azure/StreamWrapper.php,classes/local/store/azure/stream_wrapper.php,classes/local/store/swift/stream_wrapper.php
   - export MOODLE_VERSION=$(echo "$MOODLE_BRANCH" | cut -d'_' -f 2)
   - if [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] && [ $DB == "pgsql" ] && [[ "$MOODLE_VERSION" -gt 38 || "$MOODLE_VERSION" == "master" ]] ; then
       sudo /etc/init.d/postgresql stop;
@@ -120,6 +95,7 @@ before_install:
 
 install:
   - moodle-plugin-ci install -vvv
+  - if [ ! -z "$CORE_PATCH" ]; then (cd /home/travis/build/moodle; git apply admin/tool/objectfs/patch/$CORE_PATCH); fi
 
 script:
   - php moodle/admin/tool/objectfs/tests/privacy/privacy.php
