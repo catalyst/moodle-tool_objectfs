@@ -301,18 +301,46 @@ This plugin requires various trackers to be backported to maintain the plugin fu
 | Moodle version   | Patches |
 |------------------|---------|
 | Moodle 3.1       | [MDL-46375](https://tracker.moodle.org/browse/MDL-46375), [MDL-58068](https://tracker.moodle.org/browse/MDL-58068) |
+| Moodle 2.7       | [MDL-46375](https://tracker.moodle.org/browse/MDL-46375), [MDL-58068](https://tracker.moodle.org/browse/MDL-58068), [MDL-49627](https://tracker.moodle.org/browse/MDL-49627) |
 
 #### Moodle 3.1:
+Apply the patch:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core31.diff
 </pre>
 The patch was created with following commands: 
 <pre>
-// MDL-46375
+// Cherry-pick MDL-46375
 git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
 git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
-// MDL-58068
+
+// Cherry-pick MDL-58068
 git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
+
+// Create the patch
+git format-patch MOODLE_27_STABLE --stdout > core31.diff
+</pre>
+
+#### Moodle 2.7:
+Apply the patch:
+<pre>
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core27.diff
+</pre>
+The patch was created with following commands: 
+<pre>
+// Cherry-pick MDL-49627
+git cherry-pick b7067f065e6ce8d7587039094259ace3e0804663
+git cherry-pick 2b53b13ff7b7cb98f81d5ef98214a91dedc124af
+
+// Cherry-pick MDL-46375
+git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
+git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
+
+// Cherry-pick MDL-58068
+git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
+
+// Create the patch
+git format-patch MOODLE_27_STABLE --stdout > core27.diff
 </pre>
 
 ## Backporting
