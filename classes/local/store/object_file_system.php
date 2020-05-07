@@ -769,7 +769,7 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         // Redirect when the file size is bigger than presignedminfilesize setting.
-        $sql = 'SELECT MAX(filesize)
+        $sql = 'SELECT MAX(filesize) as filesize
                   FROM {files}
                  WHERE contenthash = :contenthash
                    AND filesize > :filesize';
