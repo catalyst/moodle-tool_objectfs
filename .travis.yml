@@ -15,10 +15,6 @@ addons:
 
 matrix:
   include:
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=master
-    - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=master
     - php: 5.6
       env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE CORE_PATCH=core27.diff
     - php: 5.6
@@ -71,6 +67,10 @@ matrix:
       env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
     - php: 7.1
       env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 7.2
+      env: DB=mysqli MOODLE_BRANCH=master
+    - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=master
 
 before_install:
   - export MOODLE_VERSION=$(echo "$MOODLE_BRANCH" | cut -d'_' -f 2)
