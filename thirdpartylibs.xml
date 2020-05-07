@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>classes/local/store/azure/stream_wrapper.php</location>
+        <name>Azure Blob Storage stream wrapper</name>
+        <version>custom</version>
+        <license></license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>classes/local/store/swift/stream_wrapper.php</location>
+        <name>Swift storage stream wrapper</name>
+        <version>custom</version>
+        <license></license>
+        <licenseversion></licenseversion>
+    </library>
+</libraries>
