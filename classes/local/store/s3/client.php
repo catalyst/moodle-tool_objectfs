@@ -85,6 +85,13 @@ class client extends object_client_base {
             $options['http'] = array('proxy' => $this->get_proxy_string());
         }
 
+        // support base_url config for aws api
+        // compatible endpoints
+
+        if ($config->s3_base_url) {
+            $options['endpoint'] = $config->s3_base_url;
+        }
+
         $this->client = \Aws\S3\S3Client::factory($options);
     }
 
@@ -341,6 +348,10 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_configselect('tool_objectfs/s3_region',
             new \lang_string('settings:aws:region', 'tool_objectfs'),
             new \lang_string('settings:aws:region_help', 'tool_objectfs'), '', $regionoptions));
+
+        $settings->add(new \admin_setting_configtext('tool_objectfs/s3_base_url',
+            new \lang_string('settings:aws:base_url', 'tool_objectfs'),
+            new \lang_string('settings:aws:base_url_help', 'tool_objectfs'), ''));
 
         return $settings;
     }

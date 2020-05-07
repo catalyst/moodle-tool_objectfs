@@ -14,6 +14,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
 * [Currently supported object stores](#currently-supported-object-stores)
   * [Roadmap](#roadmap)
   * [Amazon S3](#amazon-s3)
+  * [Google gcs](#google-gcs)
   * [Azure Blob Storage](#azure-blob-storage)
   * [DigitalOcean Spaces](#digitalocean-spaces)
   * [Openstack Object Storage](#openstack-object-storage)
@@ -133,6 +134,20 @@ There is support for more object stores planed.
   ]
 }
 ```
+
+### Google GCS
+
+*Google gcs setup*
+
+- Create an gcs bucket.
+- Go to the storage page, settings, interoperability. select `create a key for a service account`
+  - choose create new account to create a service account
+  - choose your new service account and press create key
+  Use these for your secret and key options
+- Replace 'bucketname' with the name of your S3 bucket.
+- Add your service account as a member under the permissions tab for your new bucket with the `storage object admin` role
+- set the bucket to use fine-grained access control
+- You will need to set 'base_url' to https://storage.googleapis.com in your config
 
 ### Azure Blob Storage
 
@@ -269,6 +284,7 @@ S3 specific settings
 - **Secret**: AWS credential secret.
 - **Bucket**: S3 bucket name to store files in.
 - **AWS region**: AWS API endpoint region to use.
+- **Base URL**: useful for s3-compatible providers *eg* set to `https://storage.googleapis.com` for gcs
 
 ### Azure Blob Storage settings
 Azure Blob Storage specific settings
