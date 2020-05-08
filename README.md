@@ -310,83 +310,128 @@ Openstack Object Storage settings
 - **Project ID**: Openstack project ID
 - **Container**: Name of the storage container
 
-## Backporting
+## Applying core patches
 
-If you are on an older moodle then you can backport the necessary API's in order to support this plugin. Use with caution!
+This plugin requires various trackers to be backported to maintain the plugin functionality.
 
-### Backport the File System API
-#### Moodle 2.6 only
-1. Cherry pick [MDL-44510](https://tracker.moodle.org/browse/MDL-44510):
+| Moodle version   | Mandatory patches | Optimization  | Pre-signed URLs |
+|------------------|-------------------|---------------|-----------------|
+| Moodle 3.9       |                   |               |                 |
+| Moodle 3.8       | MDL-58281         | MDL-68342     |                 |
+| Moodle 3.4 - 3.7 | MDL-58281         | MDL-68342     | MDL-66304       |
+| Moodle 3.3       | MDL-58281         | MDL-68342     | MDL-53240<br>MDL-66304 |
+| Moodle 2.9 - 3.2 | MDL-58281<br>MDL-46375<br>MDL-58068<br>MDL-58684<br>MDL-58297 | MDL-68342 | MDL-53240<br>MDL-66304 |
+| Moodle 2.7 - 2.8 | MDL-58281<br>MDL-46375<br>MDL-58068<br>MDL-49627<br>MDL-58684<br>MDL-58297 | MDL-68342 | MDL-53240<br>MDL-66304 |
+
+#### Moodle 3.9:
+TBA
+
+#### Moodle 3.8:
+TBA
+
+#### Moodle 3.4 - 3.7:
+TBA
+
+#### Moodle 3.3:
+TBA
+
+#### Moodle 3.2:
+Apply the patch:
 <pre>
-git remote add upstream git@github.com:moodle/moodle.git
-git fetch upstream
-git cherry-pick 54f1423ecc1f5372ca452ab14aeab16489ce1e6f
-// Solve conflicts as needed.
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core32.diff
 </pre>
-
-2. Back port the Moodle lock API. A patch has been prepared. Note: this patch does not include installation of the lock tables - this is handled by the plugin itself to avoid hacking core update.php and version.
+The patch was created with following commands: 
 <pre>
-git remote add fsapi git@github.com:kenneth-hendricks/moodle-fs-api.git
-git fetch fsapi
-git cherry-pick b66908597636a0389154aaa86172b63a2570dd31
-// Solve conflicts as needed.
-</pre>
+// Cherry-pick MDL-46375
+git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
+git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
 
-3. Follow steps in sections below.
+// Cherry-pick MDL-58068
+git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
 
-#### Moodle 2.6 - 2.8 only
-1. Cherry pick [MDL-49627](https://tracker.moodle.org/browse/MDL-49627):
-<pre>
-git remote add upstream git@github.com:moodle/moodle.git
-git fetch upstream
-git cherry-pick 47d3338..2b53b13
-// Solve conflicts and git cherry-pick --continue as needed.
-</pre>
+// TBA
+// Revert the changes for MDL-35290 and cherry-pick them from 3.3 instead
+// git revert 100a53119a719a1a5564fedc3e2db4eb70d19857 655b4543662f1b49978c1176e68fffad6286b7b4
+// git cherry-pick 67fa4b55b95ea179f68ae8f5f2af84adf18f5546
 
-2. Follow steps in section below.
-
-#### Moodle 2.6 - 3.2
-1. Cherry pick the file system API patch: [MDL-46375](https://tracker.moodle.org/browse/MDL-46375):
-<pre>
-git remote add upstream git@github.com:moodle/moodle.git
-git fetch upstream
-git cherry-pick 846d899..0c03db6
-// Solve conflicts and git cherry-pick --continue as needed.
-</pre>
-
-2. Moodle 3.2 only: revert the changes for MDL-35290 and cherry-pick them from 3.3 instead:
-<pre>
-git revert 100a53119a719a1a5564fedc3e2db4eb70d19857 655b4543662f1b49978c1176e68fffad6286b7b4
-git cherry-pick 67fa4b55b95ea179f68ae8f5f2af84adf18f5546
-// Solve conflicts and git cherry-pick --continue as needed.
-</pre>
-
-3. If you need tests to pass see PHPUnit test compatibility below .
-
-
-### Update the backported File System API
-Since it was first created there have been a number of bug fixes to the File System API. These should also be back ported.
-
-TODO: Add watch and add steps for these trackers: MDL-58297, MDL-58281, MDL-58068, MDL-57971
-
-* [MDL-58684](https://tracker.moodle.org/browse/MDL-58684)
-<pre>
-git remote add upstream git@github.com:moodle/moodle.git
-git fetch upstream
-git cherry-pick 5529b4701aa52caf30a25052ba90aaa7b7dc0ef7
+// Cherry-pick MDL-58684
+// TBA
+// git cherry-pick 5529b4701aa52caf30a25052ba90aaa7b7dc0ef7
 // WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
-git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
+// git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
+
+// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304
+// TBA
+
+// Create the patch
+git format-patch MOODLE_32_STABLE --stdout > core32.diff
 </pre>
 
-### Allow support for xsendfile in alternative File System
+#### Moodle 2.9 - 3.1:
+Apply the patch for you Moodle version:
+<pre>
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core31.diff
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core30.diff
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core29.diff
+</pre>
+The patch was created with following commands: 
+<pre>
+// Cherry-pick MDL-46375
+git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
+git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
 
-1. Cherry pick the file system API patch: [MDL-66304](https://tracker.moodle.org/browse/MDL-66304):
-```sh
-git remote add upstream git@github.com:moodle/moodle.git
-git fetch upstream
-git cherry-pick 1a159252405e85394d241922a5244309e9ad14f4
-// Solve conflicts and git cherry-pick --continue as needed.
-```
+// Cherry-pick MDL-58068
+git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
+
+// Cherry-pick MDL-58684
+// TBA
+// git cherry-pick 5529b4701aa52caf30a25052ba90aaa7b7dc0ef7
+// WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
+// git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
+
+// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304
+// TBA
+
+// Create the patch
+git format-patch MOODLE_31_STABLE --stdout > core31.diff
+git format-patch MOODLE_30_STABLE --stdout > core30.diff
+git format-patch MOODLE_29_STABLE --stdout > core29.diff
+</pre>
+
+#### Moodle 2.7 - 2.8:
+Apply the patch for you Moodle version:
+<pre>
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core28.diff
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core27.diff
+</pre>
+The patch was created with following commands: 
+<pre>
+// Cherry-pick MDL-49627
+git cherry-pick b7067f065e6ce8d7587039094259ace3e0804663
+git cherry-pick 2b53b13ff7b7cb98f81d5ef98214a91dedc124af
+
+// Cherry-pick MDL-46375
+git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
+git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
+
+// Cherry-pick MDL-58068
+git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
+
+// Cherry-pick MDL-58684
+// TBA
+// git cherry-pick 5529b4701aa52caf30a25052ba90aaa7b7dc0ef7
+// WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
+// git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
+
+// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304
+// TBA
+
+// Create the patch
+git format-patch MOODLE_28_STABLE --stdout > core28.diff
+git format-patch MOODLE_27_STABLE --stdout > core27.diff
+</pre>
+
+TODO: Watch and add steps for these trackers when they are integrated: MDL-57971
 
 ### PHPUnit test compatibility
 The file system API patch introduces tests that use:

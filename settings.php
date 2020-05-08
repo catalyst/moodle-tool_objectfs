@@ -51,8 +51,12 @@ $ADMIN->add('tools', new admin_externalpage('tool_objectfs_missing_files',
 
 if ($ADMIN->fulltree) {
     $warntext = '';
-    if (!\tool_objectfs\local\manager::check_file_storage_filesystem()) {
-        $warntext  = $OUTPUT->notification(get_string('settings:clientselection:filesystemnotdefined', OBJECTFS_PLUGIN_NAME));
+    if (method_exists('file_storage', 'get_file_system')) {
+        if (!\tool_objectfs\local\manager::check_file_storage_filesystem()) {
+            $warntext  = $OUTPUT->notification(get_string('settings:clientselection:filesystemnotdefined', OBJECTFS_PLUGIN_NAME));
+        }
+    } else {
+        $warntext  = $OUTPUT->notification(get_string('settings:clientselection:fsapinotbackported', OBJECTFS_PLUGIN_NAME));
     }
     $config = \tool_objectfs\local\manager::get_objectfs_config();
     $settings->add(new admin_setting_heading('tool_objectfs/generalsettings',
