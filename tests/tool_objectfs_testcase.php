@@ -74,8 +74,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
             'source'    => $sourcefield,
         );
         $file = $fs->create_file_from_pathname($filerecord, $pathname);
-        // Above method does not set a file size, we do this it has a positive filesize.
-        $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
         manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
@@ -100,8 +98,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
             'source'    => $sourcefield,
         );
         $file = $fs->create_file_from_string($filerecord, $content);
-        // Above method does not set a file size, we do this it has a positive filesize.
-        $DB->set_field('files', 'filesize', 10, array('contenthash' => $file->get_contenthash()));
 
         manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
         return $file;
