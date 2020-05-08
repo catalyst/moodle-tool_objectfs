@@ -403,7 +403,7 @@ class client extends object_client_base {
      * @return string.
      * @throws \Exception
      */
-    public function generate_presigned_url($contenthash, $headers) {
+    public function generate_presigned_url($contenthash, $headers = array()) {
         if ('cf' === $this->signingmethod) {
             return  $this->generate_presigned_url_cloudfront($contenthash, $headers);
         }

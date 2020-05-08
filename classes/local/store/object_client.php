@@ -38,7 +38,7 @@ interface object_client {
     public function get_availability();
     public function get_maximum_upload_size();
     public function verify_object($contenthash, $localpath);
-    public function generate_presigned_url($contenthash, $headers);
+    public function generate_presigned_url($contenthash, $headers = array());
     public function support_presigned_urls();
     public function test_permissions($testdelete);
 }

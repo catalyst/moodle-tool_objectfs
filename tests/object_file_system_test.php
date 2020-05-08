@@ -607,7 +607,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
         try {
-            $signedurl = $this->filesystem->generate_presigned_url_to_external_file($filehash);
+            $signedurl = $this->filesystem->externalclient->generate_presigned_url($filehash);
             $this->assertTrue($this->is_externally_readable_by_url($signedurl));
         } catch (\coding_exception $e) {
             $this->assertEquals($e->a, 'Pre-signed URLs not supported');
@@ -649,7 +649,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $provider[] = array(1, 0, true);
         $provider[] = array(1, '0', true);
         $provider[] = array(1, '', true);
-        $provider[] = array(1, null, false);
 
         // Testing minimum file size to be greater than file size = 10.
         // 10 is a default file size created in objectfs unit tests.
@@ -693,9 +692,13 @@ class object_file_system_testcase extends tool_objectfs_testcase {
             $this->set_externalclient_config('presignedminfilesize', $presignedminfilesize);
         }
 
-        $object = $this->create_local_object();
-        set_config('signingwhitelist', '*', 'tool_objectfs');
-        $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($object->contenthash));
+        if ($this->filesystem->presigned_url_configured()) {
+            $object = $this->create_local_object();
+            set_config('signingwhitelist', '*', 'tool_objectfs');
+            $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($object->contenthash));
+        } else {
+            $this->assertEquals($result, false);
+        }
     }
 
     /**
