@@ -314,14 +314,14 @@ Openstack Object Storage settings
 
 This plugin requires various trackers to be backported to maintain the plugin functionality.
 
-| Moodle version   | Mandatory patches | Optimization  | Pre-signed URLs |
-|------------------|-------------------|---------------|-----------------|
-| Moodle 3.9       |                   |               |                 |
-| Moodle 3.8       | MDL-58281         | MDL-68342     |                 |
-| Moodle 3.4 - 3.7 | MDL-58281         | MDL-68342     | MDL-66304       |
-| Moodle 3.3       | MDL-58281         | MDL-68342     | MDL-53240<br>MDL-66304 |
-| Moodle 2.9 - 3.2 | MDL-58281<br>MDL-46375<br>MDL-58068<br>MDL-58684<br>MDL-58297 | MDL-68342 | MDL-53240<br>MDL-66304 |
-| Moodle 2.7 - 2.8 | MDL-58281<br>MDL-46375<br>MDL-58068<br>MDL-49627<br>MDL-58684<br>MDL-58297 | MDL-68342 | MDL-53240<br>MDL-66304 |
+| Moodle version   | Totara version     | Branch       | PHP  |Mandatory patches | Pre-signed URLs |
+|------------------|--------------------|--------------|------|------------------|-----------------|
+| Moodle 3.9       |                    | master       | 7.0+ |                  |                 |
+| Moodle 3.8       |                    | master       | 7.0+ | MDL-58281         | MDL-68342       |
+| Moodle 3.4 - 3.7 |                    | master       | 7.0+ | MDL-58281         | MDL-68342, MDL-66304 |
+| Moodle 3.3       | Totara 12          | master       | 7.0+ | MDL-58281         | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 2.9 - 3.2 | Totara 2.9, 9 - 11 | 27-32-STABLE | 5.5+ | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | 5.5+ | MDL-58281, MDL-46375,<br>MDL-58068, MDL-49627,<br>MDL-58684, MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
 
 #### Moodle 3.9:
 TBA
@@ -332,10 +332,10 @@ TBA
 #### Moodle 3.4 - 3.7:
 TBA
 
-#### Moodle 3.3:
+#### Moodle 3.3 and Totara 12:
 TBA
 
-#### Moodle 3.2:
+#### Moodle 3.2 and Totara 11:
 Apply the patch:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core32.diff
@@ -367,7 +367,7 @@ git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
 git format-patch MOODLE_32_STABLE --stdout > core32.diff
 </pre>
 
-#### Moodle 2.9 - 3.1:
+#### Moodle 2.9 - 3.1 and Totara 2.9, 9 - 11:
 Apply the patch for you Moodle version:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core31.diff
@@ -398,7 +398,7 @@ git format-patch MOODLE_30_STABLE --stdout > core30.diff
 git format-patch MOODLE_29_STABLE --stdout > core29.diff
 </pre>
 
-#### Moodle 2.7 - 2.8:
+#### Moodle 2.7 - 2.8 and Totara 2.7 - 2.8:
 Apply the patch for you Moodle version:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core28.diff
