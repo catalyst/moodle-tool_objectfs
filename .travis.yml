@@ -11,7 +11,7 @@ cache:
 dist: trusty
 
 addons:
-  postgresql: "9.4"
+  postgresql: "9.5"
 
 matrix:
   include:
@@ -49,11 +49,6 @@ matrix:
       env: DB=pgsql  MOODLE_BRANCH=master
 
 before_install:
-  - export MOODLE_VERSION=$(echo "$MOODLE_BRANCH" | cut -d'_' -f 2)
-  - if [ ${TRAVIS_PHP_VERSION:0:3} -gt "7.2" ] && [ $DB == "pgsql" ] && [[ "$MOODLE_VERSION" -gt 38 || "$MOODLE_VERSION" == "master" ]] ; then
-      sudo /etc/init.d/postgresql stop;
-      sudo /etc/init.d/postgresql start 9.5;
-    fi
   - phpenv config-rm xdebug.ini
   - cd ../..
   - git clone --mirror 'https://github.com/moodlehq/moodle-behat-extension.git' '/home/travis/.composer/cache/vcs/git-github.com-moodlehq-moodle-behat-extension.git/' || true
