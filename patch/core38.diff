@@ -1,0 +1,176 @@
+From 9752542c8668892d7fbe44f8000493478ea7f05f Mon Sep 17 00:00:00 2001
+From: Brendan Heywood <brendan@catalyst-au.net>
+Date: Mon, 30 Dec 2019 14:31:44 +1100
+Subject: [PATCH 1/2] MDL-58281 files: Correctly handle missing files in
+ readfile_accel
+
+---
+ lib/filelib.php                 | 20 +++++++++++++++++---
+ lib/filestorage/file_system.php |  4 +++-
+ lib/setuplib.php                |  4 ++++
+ 3 files changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/lib/filelib.php b/lib/filelib.php
+index 36a85d87561..c8e98f503dd 100644
+--- a/lib/filelib.php
++++ b/lib/filelib.php
+@@ -2219,16 +2219,20 @@ function readfile_accel($file, $mimetype, $accelerate) {
+             if ($ranges) {
+                 if (is_object($file)) {
+                     $handle = $file->get_content_file_handle();
++                    if ($handle === false) {
++                        throw new file_exception('storedfilecannotreadfile', $file->get_filename());
++                    }
+                 } else {
+                     $handle = fopen($file, 'rb');
++                    if ($handle === false) {
++                        throw new file_exception('cannotopenfile', $file);
++                    }
+                 }
+                 byteserving_send_file($handle, $mimetype, $ranges, $filesize);
+             }
+         }
+     }
+ 
+-    header('Content-Length: '.$filesize);
+-
+     if ($filesize > 10000000) {
+         // for large files try to flush and close all buffers to conserve memory
+         while(@ob_get_level()) {
+@@ -2238,11 +2242,21 @@ function readfile_accel($file, $mimetype, $accelerate) {
+         }
+     }
+ 
++    // Send this header after we have flushed the buffers so that if we fail
++    // later can remove this because it wasn't sent.
++    header('Content-Length: ' . $filesize);
++
++    if (!empty($_SERVER['REQUEST_METHOD']) and $_SERVER['REQUEST_METHOD'] === 'HEAD') {
++        exit;
++    }
++
+     // send the whole file content
+     if (is_object($file)) {
+         $file->readfile();
+     } else {
+-        readfile_allow_large($file, $filesize);
++        if (readfile_allow_large($file, $filesize) === false) {
++            throw new file_exception('cannotopenfile', $file);
++        }
+     }
+ }
+ 
+diff --git a/lib/filestorage/file_system.php b/lib/filestorage/file_system.php
+index 8cf9ffcdc6d..50156960d78 100644
+--- a/lib/filestorage/file_system.php
++++ b/lib/filestorage/file_system.php
+@@ -63,7 +63,9 @@ abstract class file_system {
+         } else {
+             $path = $this->get_remote_path_from_storedfile($file);
+         }
+-        readfile_allow_large($path, $file->get_filesize());
++        if (readfile_allow_large($path, $file->get_filesize()) === false) {
++            throw new file_exception('storedfilecannotreadfile', $file->get_filename());
++        }
+     }
+ 
+     /**
+diff --git a/lib/setuplib.php b/lib/setuplib.php
+index f291a6dfc1f..4aa3b9ad136 100644
+--- a/lib/setuplib.php
++++ b/lib/setuplib.php
+@@ -362,6 +362,10 @@ function default_exception_handler($ex) {
+ 
+     $info = get_exception_info($ex);
+ 
++    // If we already tried to send the header remove it, the content length
++    // should be either empty or the length of the error page.
++    @header_remove('Content-Length');
++
+     if (is_early_init($info->backtrace)) {
+         echo bootstrap_renderer::early_error($info->message, $info->moreinfourl, $info->link, $info->backtrace, $info->debuginfo, $info->errorcode);
+     } else {
+-- 
+2.17.1
+
+
+From 631f133b299e20825f084a426c44614f3d48b772 Mon Sep 17 00:00:00 2001
+From: Brendan Heywood <brendan@catalyst-au.net>
+Date: Thu, 16 Apr 2020 16:31:07 +1000
+Subject: [PATCH 2/2] MDL-68342 files: Add a faster xsendfile method to avoid
+ db lookups
+
+---
+ lib/filelib.php                  |  2 +-
+ lib/filestorage/file_storage.php | 15 +++++++++++++++
+ lib/filestorage/file_system.php  | 15 +++++++++++++++
+ 3 files changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/lib/filelib.php b/lib/filelib.php
+index c8e98f503dd..e36ab295fd5 100644
+--- a/lib/filelib.php
++++ b/lib/filelib.php
+@@ -2169,7 +2169,7 @@ function readfile_accel($file, $mimetype, $accelerate) {
+         if (is_object($file)) {
+             $fs = get_file_storage();
+             if ($fs->supports_xsendfile()) {
+-                if ($fs->xsendfile($file->get_contenthash())) {
++                if ($fs->xsendfile_file($file)) {
+                     return;
+                 }
+             }
+diff --git a/lib/filestorage/file_storage.php b/lib/filestorage/file_storage.php
+index 033449956c1..46773e714b4 100644
+--- a/lib/filestorage/file_storage.php
++++ b/lib/filestorage/file_storage.php
+@@ -1821,6 +1821,21 @@ class file_storage {
+         }
+     }
+ 
++    /**
++     * Serve file content using X-Sendfile header.
++     * Please make sure that all headers are already sent and the all
++     * access control checks passed.
++     *
++     * This alternate method to xsendfile() allows an alternate file system
++     * to use the full file metadata and avoid extra lookups.
++     *
++     * @param stored_file $file The file to send
++     * @return bool success
++     */
++    public function xsendfile_file(stored_file $file): bool {
++        return $this->filesystem->xsendfile_file($file);
++    }
++
+     /**
+      * Serve file content using X-Sendfile header.
+      * Please make sure that all headers are already sent
+diff --git a/lib/filestorage/file_system.php b/lib/filestorage/file_system.php
+index 50156960d78..e8a78fb8160 100644
+--- a/lib/filestorage/file_system.php
++++ b/lib/filestorage/file_system.php
+@@ -435,6 +435,21 @@ abstract class file_system {
+         return $image;
+     }
+ 
++    /**
++     * Serve file content using X-Sendfile header.
++     * Please make sure that all headers are already sent and the all
++     * access control checks passed.
++     *
++     * This alternate method to xsendfile() allows an alternate file system
++     * to use the full file metadata and avoid extra lookups.
++     *
++     * @param stored_file $file The file to send
++     * @return bool success
++     */
++    public function xsendfile_file(stored_file $file): bool {
++        return $this->xsendfile($file->get_contenthash());
++    }
++
+     /**
+      * Serve file content using X-Sendfile header.
+      * Please make sure that all headers are already sent and the all
+-- 
+2.17.1
+

@@ -327,7 +327,21 @@ This plugin requires various trackers to be backported to maintain the plugin fu
 TBA
 
 #### Moodle 3.8:
-TBA
+Apply the patch:
+<pre>
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core38.diff
+</pre>
+The patch was created with following commands: 
+<pre>
+// Cherry-pick MDL-58281
+git cherry-pick 1fef1de5922f7ea130e4994b3453610079874b63
+
+// Cherry-pick MDL-68342
+git cherry-pick 5bf5a7aaebabff669a674f19a4ec33cbca24f515
+
+// Create the patch
+git format-patch MOODLE_38_STABLE --stdout > core38.diff
+</pre>
 
 #### Moodle 3.4 - 3.7:
 TBA

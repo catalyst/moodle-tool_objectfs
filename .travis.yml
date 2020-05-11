@@ -39,6 +39,10 @@ matrix:
       env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
     - php: 7.3
       env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE CORE_PATCH=core38.diff
+    - php: 7.3
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE CORE_PATCH=core38.diff
     - php: 7.2
       env: DB=mysqli MOODLE_BRANCH=master
     - php: 7.2
