@@ -650,15 +650,15 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $provider[] = array(1, '0', true);
         $provider[] = array(1, '', true);
 
-        // Testing minimum file size to be greater than file size = 10.
-        // 10 is a default file size created in objectfs unit tests.
-        $provider[] = array(1, 11, false);
-        $provider[] = array(1, '11', false);
+        // Testing minimum file size to be greater than file size.
+        // 12 is a size of the file with 'test content' content.
+        $provider[] = array(1, 13, false);
+        $provider[] = array(1, '13', false);
 
-        // Testing minimum file size to be less than file size = 10.
-        // 10 is a default file size created in objectfs unit tests.
-        $provider[] = array(1, 9, true);
-        $provider[] = array(1, '9', true);
+        // Testing minimum file size to be less than file size.
+        // 12 is a size of the file with 'test content' content.
+        $provider[] = array(1, 11, true);
+        $provider[] = array(1, '11', true);
 
         // Testing nulls and empty strings.
         $provider[] = array(null, null, false);
@@ -693,9 +693,10 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         }
 
         if ($this->filesystem->presigned_url_configured()) {
-            $object = $this->create_local_object();
+            $file = $this->create_local_file('test content');
             set_config('signingwhitelist', '*', 'tool_objectfs');
-            $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($object->contenthash));
+            $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect($file->get_contenthash()));
+            $this->assertEquals($result, $this->filesystem->presigned_url_should_redirect_file($file));
         } else {
             $this->assertEquals($result, false);
         }

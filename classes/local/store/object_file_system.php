@@ -406,6 +406,29 @@ abstract class object_file_system extends \file_system_filedir {
      * Please make sure that all headers are already sent and the all
      * access control checks passed.
      *
+     * This alternate method to xsendfile() allows an alternate file system
+     * to use the full file metadata and avoid extra lookups.
+     *
+     * @param stored_file $file The file to send
+     * @return bool success
+     * @throws \dml_exception
+     */
+    public function xsendfile_file(stored_file $file): bool {
+        $contenthash = $file->get_contenthash();
+        if ($this->presigned_url_configured() &&
+                $this->presigned_url_should_redirect_file($file) &&
+                $this->is_file_readable_externally_by_hash($contenthash)) {
+
+            return $this->redirect_to_presigned_url($contenthash, headers_list());
+        }
+        return false;
+    }
+
+    /**
+     * Serve file content using X-Sendfile header.
+     * Please make sure that all headers are already sent and the all
+     * access control checks passed.
+     *
      * Use this method to redirect to pre-signed URL if the file is readable externally.
      *
      * @param string $contenthash The content hash of the file to be served
@@ -722,6 +745,22 @@ abstract class object_file_system extends \file_system_filedir {
     public function presigned_url_configured() {
         return $this->externalclient->support_presigned_urls()
             && $this->externalclient->enablepresignedurls;
+    }
+
+    /**
+     * Returns true if the file system should redirect to pre-signed url.
+     * This method takes file object as an argument to avoid extra lookups
+     * and get file name and file size directly from the object.
+     *
+     * @param  object $file        File object
+     * @return bool
+     * @throws \dml_exception
+     */
+    public function presigned_url_should_redirect_file($file) {
+        // Redirect when the file size is bigger than presignedminfilesize setting
+        // and file extension is whitelisted.
+        return ($file->get_filesize() >= $this->externalclient->presignedminfilesize &&
+            manager::is_extension_whitelisted($file->get_filename()));
     }
 
     /**
