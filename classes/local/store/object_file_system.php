@@ -47,7 +47,7 @@ require_once($CFG->libdir . '/filestorage/file_storage.php');
 
 abstract class object_file_system extends \file_system_filedir {
 
-    private $externalclient;
+    public $externalclient;
     private $preferexternal;
     private $deleteexternally;
     private $logger;
@@ -406,12 +406,21 @@ abstract class object_file_system extends \file_system_filedir {
      * Please make sure that all headers are already sent and the all
      * access control checks passed.
      *
+     * Use this method to redirect to pre-signed URL if the file is readable externally.
+     *
      * @param string $contenthash The content hash of the file to be served
      * @return bool success
+     * @throws \dml_exception
      */
     public function xsendfile($contenthash) {
-        // Use this method to redirect to pre-signed URL.
-        return $this->redirect_to_presigned_url($contenthash);
+        $headers = headers_list();
+        if ($this->presigned_url_configured() &&
+                $this->is_file_readable_externally_by_hash($contenthash) &&
+                $this->presigned_url_should_redirect($contenthash, $headers)) {
+
+            return $this->redirect_to_presigned_url($contenthash, $headers);
+        }
+        return false;
     }
 
     /**
@@ -687,31 +696,18 @@ abstract class object_file_system extends \file_system_filedir {
 
     /**
      * Redirect to pre-signed URL to download file directly from external storage.
-     * Return false if file is local or external storage doesn't support pre-signed URLs.
      *
-     * @param string $contenthash The content hash of the file to be served
+     * @param  string  $contenthash  The content hash of the file to be served
+     * @param  array   $headers      Request headers
      * @return bool
+     * @throws \dml_exception
      */
-    public function redirect_to_presigned_url($contenthash) {
-        $location = $this->get_object_location_from_hash($contenthash);
-        switch ($location) {
-            case OBJECT_LOCATION_EXTERNAL:
-            case OBJECT_LOCATION_DUPLICATED:
-                $headers = headers_list();
-                if ($this->presigned_url_should_redirect($contenthash, $headers)) {
-                    try {
-                        redirect($this->generate_presigned_url_to_external_file($contenthash, $headers));
-                    } catch (\Exception $e) {
-                        return false;
-                    }
-                }
-                break;
-            case OBJECT_LOCATION_LOCAL:
-            case OBJECT_LOCATION_ERROR:
-            default:
-                return false;
+    public function redirect_to_presigned_url($contenthash, $headers = array()) {
+        try {
+            redirect($this->externalclient->generate_presigned_url($contenthash, $headers));
+        } catch (\Exception $e) {
+            return false;
         }
-        return false;
     }
 
 
@@ -725,8 +721,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function presigned_url_configured() {
         return $this->externalclient->support_presigned_urls()
-            && $this->externalclient->enablepresignedurls
-            && isset($this->externalclient->presignedminfilesize);
+            && $this->externalclient->enablepresignedurls;
     }
 
     /**
@@ -739,11 +734,6 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function presigned_url_should_redirect($contenthash, $headers = array()) {
         global $DB, $_SERVER;
-
-        // Disabled.
-        if (!$this->presigned_url_configured()) {
-            return false;
-        }
 
         // Redirect regardless.
         if ($this->externalclient->presignedminfilesize == 0 &&
@@ -776,18 +766,6 @@ abstract class object_file_system extends \file_system_filedir {
         $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
 
         return ($record->filesize >= $this->externalclient->presignedminfilesize);
-    }
-
-    /**
-     * Generates pre-signed URL to external file.
-     *
-     * @param string $contenthash file content hash.
-     * @param array $headers request headers.
-     *
-     * @return string.
-     */
-    public function generate_presigned_url_to_external_file($contenthash, $headers = array()) {
-        return $this->externalclient->generate_presigned_url($contenthash, $headers);
     }
 
     /**
