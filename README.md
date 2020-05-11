@@ -57,6 +57,16 @@ https://github.com/catalyst/moodle-local_datacleaner
 
 This plugin is GDPR complient if you enable the deletion of remote objects.
 
+## Branches
+
+| Moodle version   | Totara version     | Branch       | PHP  |
+|------------------|--------------------|--------------|------|
+| Moodle 3.9       |                    | master       | 7.0+ |
+| Moodle 3.8       |                    | master       | 7.0+ |
+| Moodle 3.4 - 3.7 |                    | master       | 7.0+ |
+| Moodle 3.3       | Totara 12          | master       | 7.0+ |
+| Moodle 2.9 - 3.2 | Totara 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE) | 5.5+ |
+| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE) | 5.5+ |
 
 ## Installation
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
@@ -314,14 +324,14 @@ Openstack Object Storage settings
 
 This plugin requires various trackers to be backported to maintain the plugin functionality.
 
-| Moodle version   | Totara version     | Branch       | PHP  |Mandatory patches | Pre-signed URLs |
-|------------------|--------------------|--------------|------|------------------|-----------------|
-| Moodle 3.9       |                    | master       | 7.0+ |                  |                 |
-| Moodle 3.8       |                    | master       | 7.0+ | MDL-58281         | MDL-68342       |
-| Moodle 3.4 - 3.7 |                    | master       | 7.0+ | MDL-58281         | MDL-68342, MDL-66304 |
-| Moodle 3.3       | Totara 12          | master       | 7.0+ | MDL-58281         | MDL-68342, MDL-53240,<br>MDL-66304 |
-| Moodle 2.9 - 3.2 | Totara 2.9, 9 - 11 | 27-32-STABLE | 5.5+ | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
-| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | 5.5+ | MDL-58281, MDL-46375,<br>MDL-58068, MDL-49627,<br>MDL-58684, MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle version   | Totara version     | Branch       | Mandatory patches | Pre-signed URLs |
+|------------------|--------------------|--------------|-------------------|-----------------|
+| Moodle 3.9       |                    | master       |                   |                 |
+| Moodle 3.8       |                    | master       | MDL-58281         | MDL-68342       |
+| Moodle 3.4 - 3.7 |                    | master       | MDL-58281         | MDL-68342, MDL-66304 |
+| Moodle 3.3       | Totara 12          | master       | MDL-58281         | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 2.9 - 3.2 | Totara 2.9, 9 - 11 | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-49627,<br>MDL-58684, MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
 
 #### Moodle 3.9:
 TBA
