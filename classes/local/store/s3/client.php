@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
+use local_aws\admin_settings_aws_region;
 
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
@@ -200,7 +201,8 @@ class client extends object_client_base {
      * There is no check connection in the AWS API.
      * We use list buckets instead and check the bucket is in the list.
      *
-     * @return boolean true on success, false on failure.
+     * @return object
+     * @throws \coding_exception
      */
     public function test_connection() {
         $connection = new \stdClass();
@@ -208,15 +210,18 @@ class client extends object_client_base {
         $connection->message = '';
 
         try {
-            $result = $this->client->headBucket(array(
-                            'Bucket' => $this->bucket));
-
+            $this->client->headBucket(array('Bucket' => $this->bucket));
             $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $connection->success = false;
             $details = $this->get_exception_details($e);
             $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+        } catch (\GuzzleHttp\Exception\InvalidArgumentException $e) {
+            $connection->success = false;
+            $details = $this->get_exception_details($e);
+            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
         }
+
         return $connection;
     }
 
@@ -303,32 +308,24 @@ class client extends object_client_base {
     }
 
     /**
-     * @param admin_settingpage $settings
-     * @param $config
-     * @return admin_settingpage
+     * S3 settings form.
+     *
+     * @param  \admin_settingpage  $settings
+     * @param  object              $config
+     *
+     * @return \admin_settingpage
+     * @throws \coding_exception
      */
     public function define_client_section($settings, $config) {
+        global $OUTPUT;
+        $plugins = \core_component::get_all_versions();
 
-        $regionoptions = array(
-            'us-east-1'      => 'us-east-1 (N. Virginia)',
-            'us-east-2'      => 'us-east-2 (Ohio)',
-            'us-west-1'      => 'us-west-1 (N. California)',
-            'us-west-2'      => 'us-west-2 (Oregon)',
-            'ap-northeast-1' => 'ap-northeast-1 (Tokyo)',
-            'ap-northeast-2' => 'ap-northeast-2 (Seoul)',
-            'ap-northeast-3' => 'ap-northeast-3 (Osaka)',
-            'ap-south-1'     => 'ap-south-1 (Mumbai)',
-            'ap-southeast-1' => 'ap-southeast-1 (Singapore)',
-            'ap-southeast-2' => 'ap-southeast-2 (Sydney)',
-            'ca-central-1'   => 'ca-central-1 (Canda Central)',
-            'cn-north-1'     => 'cn-north-1 (Beijing)',
-            'cn-northwest-1' => 'cn-northwest-1 (Ningxia)',
-            'eu-central-1'   => 'eu-central-1 (Frankfurt)',
-            'eu-west-1'      => 'eu-west-1 (Ireland)',
-            'eu-west-2'      => 'eu-west-2 (London)',
-            'eu-west-3'      => 'eu-west-3 (Paris)',
-            'sa-east-1'      => 'sa-east-1 (Sao Paulo)'
-        );
+        if (!array_key_exists('local_aws', $plugins) || $plugins['local_aws'] < '2020051200') {
+            $text  = $OUTPUT->notification(new \lang_string('settings:aws:upgradeneeded', OBJECTFS_PLUGIN_NAME));
+            $settings->add(new \admin_setting_heading('tool_objectfs/aws',
+                new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
+            return $settings;
+        }
 
         $settings->add(new \admin_setting_heading('tool_objectfs/aws',
             new \lang_string('settings:aws:header', 'tool_objectfs'), ''));
@@ -345,9 +342,9 @@ class client extends object_client_base {
             new \lang_string('settings:aws:bucket', 'tool_objectfs'),
             new \lang_string('settings:aws:bucket_help', 'tool_objectfs'), ''));
 
-        $settings->add(new \admin_setting_configselect('tool_objectfs/s3_region',
+        $settings->add(new admin_settings_aws_region('tool_objectfs/s3_region',
             new \lang_string('settings:aws:region', 'tool_objectfs'),
-            new \lang_string('settings:aws:region_help', 'tool_objectfs'), '', $regionoptions));
+            new \lang_string('settings:aws:region_help', 'tool_objectfs'), ''));
 
         $settings->add(new \admin_setting_configtext('tool_objectfs/s3_base_url',
             new \lang_string('settings:aws:base_url', 'tool_objectfs'),
