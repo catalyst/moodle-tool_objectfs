@@ -318,9 +318,20 @@ class client extends object_client_base {
      */
     public function define_client_section($settings, $config) {
         global $OUTPUT;
-        $plugins = \core_component::get_all_versions();
+        $plugins = \core_component::get_plugin_list('local');
 
-        if (!array_key_exists('local_aws', $plugins) || $plugins['local_aws'] < '2020051200') {
+        if (!array_key_exists('aws', $plugins)) {
+            $text  = $OUTPUT->notification(new \lang_string('settings:aws:installneeded', OBJECTFS_PLUGIN_NAME));
+            $settings->add(new \admin_setting_heading('tool_objectfs/aws',
+                new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
+            return $settings;
+        }
+
+        $plugin = (object)['version' => null];
+        if (file_exists($plugins['aws'].'/version.php')) {
+            include($plugins['aws'].'/version.php');
+        }
+        if (empty($plugin->version) || $plugin->version < 2020051200) {
             $text  = $OUTPUT->notification(new \lang_string('settings:aws:upgradeneeded', OBJECTFS_PLUGIN_NAME));
             $settings->add(new \admin_setting_heading('tool_objectfs/aws',
                 new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
