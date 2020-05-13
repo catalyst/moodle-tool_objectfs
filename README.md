@@ -59,14 +59,12 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 
 ## Branches
 
-| Moodle version   | Totara version     | Branch       | PHP  |
-|------------------|--------------------|--------------|------|
-| Moodle 3.9       |                    | master       | 7.0+ |
-| Moodle 3.8       |                    | master       | 7.0+ |
-| Moodle 3.4 - 3.7 |                    | master       | 7.0+ |
-| Moodle 3.3       | Totara 12          | master       | 7.0+ |
-| Moodle 2.9 - 3.2 | Totara 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE) | 5.5+ |
-| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE) | 5.5+ |
+| Moodle version   | Totara version           | Branch       | PHP  |
+|------------------|--------------------------|--------------|------|
+| Moodle 3.4 - 3.9 |                          | master       | 7.0+ |
+| Moodle 3.3       | Totara 12                | master       | 7.0+ |
+| Moodle 2.7 - 3.2 | Totara 2.7 - 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE) | 5.5+ |
+
 
 ## Installation
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
@@ -330,8 +328,9 @@ This plugin requires various trackers to be backported to maintain the plugin fu
 | Moodle 3.8       |                    | master       | MDL-58281         | MDL-68342       |
 | Moodle 3.4 - 3.7 |                    | master       | MDL-58281         | MDL-68342, MDL-66304 |
 | Moodle 3.3       | Totara 12          | master       | MDL-58281         | MDL-68342, MDL-53240,<br>MDL-66304 |
-| Moodle 2.9 - 3.2 | Totara 2.9, 9 - 11 | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
-| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-49627,<br>MDL-58684, MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 3.2       | Totara 11          | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 2.9 - 3.1 | Totara 2.9, 9 - 10 | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297, MDL-55071 | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-49627,<br>MDL-58684, MDL-58297<br>MDL-55071 | MDL-68342, MDL-53240,<br>MDL-66304 |
 
 #### Moodle 3.9:
 TBA
@@ -391,7 +390,7 @@ git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
 git format-patch MOODLE_32_STABLE --stdout > core32.diff
 </pre>
 
-#### Moodle 2.9 - 3.1 and Totara 2.9, 9 - 11:
+#### Moodle 2.9 - 3.1 and Totara 2.9, 9 - 10:
 Apply the patch for you Moodle version:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core31.diff
@@ -413,7 +412,7 @@ git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
 // WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
 // git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
 
-// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304
+// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304, MDL-55071
 // TBA
 
 // Create the patch
@@ -447,7 +446,7 @@ git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
 // WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
 // git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
 
-// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304
+// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304, MDL-55071
 // TBA
 
 // Create the patch
