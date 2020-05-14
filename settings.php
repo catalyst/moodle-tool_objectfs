@@ -45,6 +45,10 @@ $ADMIN->add('reports', new admin_externalpage('tool_objectfs_object_status',
     get_string('object_status:page', 'tool_objectfs'),
     new moodle_url('/admin/tool/objectfs/object_status.php')));
 
+$ADMIN->add('reports', new admin_externalpage('tool_objectfs_object_status_history',
+    get_string('object_status:historypage', 'tool_objectfs'),
+    new moodle_url('/admin/tool/objectfs/object_status_history.php')));
+
 $ADMIN->add('tools', new admin_externalpage('tool_objectfs_missing_files',
     get_string('page:missingfiles', 'tool_objectfs'),
     new moodle_url('/admin/tool/objectfs/missing_files.php')));

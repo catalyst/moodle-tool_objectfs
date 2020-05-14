@@ -38,7 +38,10 @@ $string['not_enabled'] = 'The object file system background tasks are not enable
 $string['client_not_available'] = 'The configured remote client is not available. Please ensure it is installed correctly.';
 
 $string['object_status:page'] = 'Object status';
+$string['object_status:historypage'] = 'Object status history';
 $string['object_status:location'] = 'Object location';
+$string['object_status:log_size'] = 'Log size';
+$string['object_status:mime_type'] = 'Mime type';
 $string['object_status:files'] = 'Objects';
 $string['object_status:size'] = 'Total size';
 

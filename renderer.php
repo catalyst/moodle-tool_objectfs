@@ -102,7 +102,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @return string
      * @throws coding_exception
      */
-    private function get_file_location_string($filelocation) {
+    public function get_file_location_string($filelocation) {
         $locationstringmap = [
             'total' => 'object_status:location:total',
             'filedir' => 'object_status:filedir',
@@ -144,7 +144,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    private function get_size_range_from_logsize($logsize) {
+    public function get_size_range_from_logsize($logsize) {
 
         // Small logsizes have been compressed.
         if ($logsize == 'small') {
@@ -183,7 +183,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    private function augment_barchart(&$table) {
+    public function augment_barchart(&$table) {
 
         // This assumes 2 columns, the first is a number and the second
         // is a file size.
