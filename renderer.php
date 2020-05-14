@@ -148,7 +148,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         // Small logsizes have been compressed.
         if ($logsize == 'small') {
-            return '< 1MB';
+            return '< 1KB';
         }
 
         $floor = pow(2, $logsize);

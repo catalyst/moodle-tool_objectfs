@@ -59,8 +59,8 @@ class log_size_report_builder extends objectfs_report_builder {
 
         foreach ($stats as $key => $stat) {
 
-            // Logsize of <= 19 means that files are smaller than 1 MB.
-            if ($stat->datakey <= 19) {
+            // Logsize of <= 9 means that files are smaller than 1 KB.
+            if ($stat->datakey <= 9) {
                 $smallstats->objectcount += $stat->objectcount;
                 $smallstats->objectsum += $stat->objectsum;
                 unset($stats[$key]);
