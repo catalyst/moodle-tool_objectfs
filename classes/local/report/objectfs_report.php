@@ -41,7 +41,7 @@ class objectfs_report implements \renderable {
     /**
      * @param string $reporttype
      */
-    public function __construct($reporttype, $reportstarted = 0) {
+    public function __construct($reporttype, $reportstarted) {
         $this->reporttype = $reporttype;
         $this->reportstarted = $reportstarted;
     }
@@ -117,8 +117,8 @@ class objectfs_report implements \renderable {
             $report = $reportbuilder->build_report($reportstarted);
             objectfs_report_builder::save_report_to_database($report);
         }
-        // Throttle here for one second to make sure the reports have different
-        // $reportstarted if they called twice in a row.
+        // Throttle here for one second to make sure the snapshots have different
+        // $reportstarted if the report was called twice in a row and it was super fast.
         sleep(1);
     }
 

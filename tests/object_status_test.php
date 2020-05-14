@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * tool_sssfs file status tests.
+ * tool_objectfs file status tests.
  *
- * @package   local_catdeleter
+ * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,14 +35,49 @@
 
 class object_status_testcase extends tool_objectfs_testcase {
 
-    public function test_report_builders () {
-        set_config('filesystem', get_class($this->filesystem), 'tool_objectfs');
+    /**
+     * Test that generate_status_report a snapshot of report.
+     */
+    public function test_generate_status_report() {
+        global $DB;
+        $DB->delete_records('tool_objectfs_reports');
+        objectfs_report::generate_status_report();
+        $records = $DB->get_records_sql('SELECT DISTINCT timecreated FROM {tool_objectfs_reports}');
+        $this->assertEquals(1, count($records));
+    }
+
+    /**
+     * Test that tool_objectfs_reports table holds historic data.
+     */
+    public function test_generate_status_report_historic() {
+        global $DB;
+        $DB->delete_records('tool_objectfs_reports');
+        objectfs_report::generate_status_report();
+        objectfs_report::generate_status_report();
+        $records = $DB->get_records_sql('SELECT DISTINCT timecreated FROM {tool_objectfs_reports}');
+        $this->assertEquals(2, count($records));
+    }
+
+    /**
+     * Test that load_report_from_database returns report object.
+     */
+    public function test_load_report_from_database() {
+        global $DB;
+        $DB->delete_records('tool_objectfs_reports');
+        objectfs_report::generate_status_report();
         $reporttypes = objectfs_report::get_report_types();
         foreach ($reporttypes as $reporttype) {
-            $reportbuilderclass = "tool_objectfs\\local\\report\\{$reporttype}_report_builder";
-            $reportbuilder = new $reportbuilderclass();
-            $report = $reportbuilder->build_report();
-            objectfs_report_builder::save_report_to_database($report);
+            $report = objectfs_report_builder::load_report_from_database($reporttype);
+            $this->assertEquals('tool_objectfs\local\report\objectfs_report', get_class($report));
         }
+    }
+
+    /**
+     * Test that get_report_types returns an array of report types.
+     */
+    public function test_get_report_types() {
+        $reporttypes = objectfs_report::get_report_types();
+        $this->assertEquals('array', gettype($reporttypes));
+        $this->assertEquals(3, count($reporttypes));
     }
 }
