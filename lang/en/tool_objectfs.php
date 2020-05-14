@@ -93,6 +93,8 @@ $string['settings:aws:region'] = 'region';
 $string['settings:aws:region_help'] = 'Amazon S3 API gateway region.';
 $string['settings:aws:base_url'] = 'Base URL';
 $string['settings:aws:base_url_help'] = 'Alternate url for cnames or s3 compatible endpoints. Leave blank for normal S3 use.';
+$string['settings:aws:upgradeneeded'] = 'Please upgrade \'local_aws\' plugin to the latest supported version.';
+$string['settings:aws:installneeded'] = 'Please install \'local_aws\' plugin.';
 
 $string['settings:do:header'] = 'DigitalOcean Spaces Settings';
 $string['settings:do:key'] = 'Key';
