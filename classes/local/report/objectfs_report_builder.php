@@ -29,19 +29,18 @@ defined('MOODLE_INTERNAL') || die();
 
 abstract class objectfs_report_builder {
 
-    abstract public function build_report();
+    abstract public function build_report($reportstarted);
 
     public static function save_report_to_database(objectfs_report $report) {
         global $DB;
         $reporttype = $report->get_report_type();
         $reportrows = $report->get_rows();
-
-        // Remove old records.
-        $DB->delete_records('tool_objectfs_reports', array('reporttype' => $reporttype));
+        $reportstarted = $report->get_report_started();
 
         // Add report type to each row.
         foreach ($reportrows as $row) {
             $row->reporttype = $reporttype;
+            $row->timecreated = $reportstarted;
             // We dont use insert_records because of 26 compatibility.
             $DB->insert_record('tool_objectfs_reports', $row);
         }
@@ -49,8 +48,10 @@ abstract class objectfs_report_builder {
 
     public static function load_report_from_database($reporttype) {
         global $DB;
-        $rows = $DB->get_records('tool_objectfs_reports', array('reporttype' => $reporttype));
-        $report = new objectfs_report($reporttype);
+        $record = $DB->get_record_sql('SELECT MAX(timecreated) AS timecreated FROM {tool_objectfs_reports}');
+        $params = array('reporttype' => $reporttype, 'timecreated' => $record->timecreated);
+        $rows = $DB->get_records('tool_objectfs_reports', $params);
+        $report = new objectfs_report($reporttype, $record->timecreated);
         $report->add_rows($rows);
         return $report;
     }

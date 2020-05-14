@@ -89,5 +89,26 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020030900, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2020051400) {
+        global $DB;
+        // Delete all records before creating new NOTNULL column.
+        $DB->delete_records('tool_objectfs_reports');
+        $table = new xmldb_table('tool_objectfs_reports');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, '0', 'objectsum');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $index = new xmldb_index('tool_objectfs_reports_timecreated_idx', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        $index = new xmldb_index('tool_objectfs_reports_reporttype_idx', XMLDB_INDEX_NOTUNIQUE, ['reporttype']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2020051400, 'tool', 'objectfs');
+    }
+
     return true;
 }

@@ -29,10 +29,10 @@ defined('MOODLE_INTERNAL') || die();
 
 class mime_type_report_builder extends objectfs_report_builder {
 
-    public function build_report() {
+    public function build_report($reportstarted) {
         global $DB;
 
-        $report = new objectfs_report('mime_type');
+        $report = new objectfs_report('mime_type', $reportstarted);
 
         $sql = "SELECT sum(filesize) as objectsum, filetype as datakey, count(*) as objectcount
                 FROM (SELECT distinct filesize,

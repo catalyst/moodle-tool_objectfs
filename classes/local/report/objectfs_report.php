@@ -32,14 +32,18 @@ class objectfs_report implements \renderable {
     /** @var string $reporttype */
     protected $reporttype = '';
 
+    /** @var int $reportstarted */
+    protected $reportstarted = 0;
+
     /** @var array $rows */
     protected $rows = [];
 
     /**
      * @param string $reporttype
      */
-    public function __construct($reporttype) {
+    public function __construct($reporttype, $reportstarted = 0) {
         $this->reporttype = $reporttype;
+        $this->reportstarted = $reportstarted;
     }
 
     /**
@@ -79,6 +83,13 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * @return int
+     */
+    public function get_report_started() {
+        return $this->reportstarted;
+    }
+
+    /**
      * @return mixed
      * @throws \dml_exception
      */
@@ -97,14 +108,18 @@ class objectfs_report implements \renderable {
     }
 
     public static function generate_status_report() {
+        $reportstarted = time();
         $reporttypes = self::get_report_types();
 
         foreach ($reporttypes as $reporttype) {
             $reportbuilderclass = "tool_objectfs\\local\\report\\{$reporttype}_report_builder";
             $reportbuilder = new $reportbuilderclass();
-            $report = $reportbuilder->build_report();
+            $report = $reportbuilder->build_report($reportstarted);
             objectfs_report_builder::save_report_to_database($report);
         }
+        // Throttle here for one second to make sure the reports have different
+        // $reportstarted if they called twice in a row.
+        sleep(1);
     }
 
     /**

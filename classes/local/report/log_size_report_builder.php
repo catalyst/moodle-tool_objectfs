@@ -29,10 +29,10 @@ defined('MOODLE_INTERNAL') || die();
 
 class log_size_report_builder extends objectfs_report_builder {
 
-    public function build_report() {
+    public function build_report($reportstarted) {
         global $DB;
 
-        $report = new objectfs_report('log_size');
+        $report = new objectfs_report('log_size', $reportstarted);
 
         $sql = 'SELECT floor (log(2, filesize)) as datakey,
                        sum(filesize) as objectsum,
