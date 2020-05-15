@@ -27,11 +27,17 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-$pageurl = new \moodle_url('/admin/tool/objectfs/object_status_history.php');
+$date        = optional_param('date', 0, PARAM_INT); // Date to display.
+$params = array();
+if (!empty($date)) {
+    $params['date'] = $date;
+}
+
+$pageurl = new \moodle_url('/admin/tool/objectfs/object_status_history.php', $params);
 $heading = get_string('object_status:historypage', 'tool_objectfs');
 $PAGE->set_url($pageurl);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_pagelayout('admin');
+$PAGE->set_pagelayout('report');
 $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
 
@@ -42,9 +48,26 @@ echo $OUTPUT->header();
 
 echo "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
 
+$dates = $OUTPUT->get_date_options();
+if (!empty($date) && array_key_exists($date, $dates)) {
+    $reportdate = $date;
+} else {
+    $reportdate = key($dates);
+}
+
+echo html_writer::start_tag('form', array('class' => 'reportselecform', 'action' => $pageurl, 'method' => 'get'));
+//echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => 'Previous report', 'class' => 'btn btn-secondary'));
+//echo html_writer::span('          ');
+echo html_writer::select($dates, "date", $reportdate);
+echo html_writer::span('          ');
+echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => 'Get this report', 'class' => 'btn btn-secondary'));
+//echo html_writer::span('          ');
+//echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => 'Next report', 'class' => 'btn btn-secondary'));
+echo html_writer::end_tag('form');
+
 $reporttypes = tool_objectfs\local\report\objectfs_report::get_report_types();
 foreach ($reporttypes as $reporttype) {
-    $table = new tool_objectfs\local\report\object_status_history_table($reporttype);
+    $table = new tool_objectfs\local\report\object_status_history_table($reporttype, $reportdate);
     $table->baseurl = $pageurl;
     $table->out(100, false);
     echo "<br>";

@@ -40,13 +40,17 @@ class object_status_history_table extends \table_sql {
     /** @var string $reporttype */
     protected $reporttype = '';
 
+    /** @var int $reportcreated */
+    protected $reportcreated = 0;
+
     /**
      * Constructor for the file status history table.
      */
-    public function __construct($reporttype) {
+    public function __construct($reporttype, $reportcreated) {
         parent::__construct('runningtasks');
 
         $this->reporttype = $reporttype;
+        $this->reportcreated = $reportcreated;
 
         $columnheaders = [
             'reporttype'  => get_string('object_status:' . $reporttype, 'tool_objectfs'),
@@ -72,8 +76,7 @@ class object_status_history_table extends \table_sql {
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB, $OUTPUT;
         $sort = $this->get_sql_sort();
-        $record = $DB->get_record_sql('SELECT MAX(timecreated) AS timecreated FROM {tool_objectfs_reports}');
-        $params = array('reporttype' => $this->reporttype, 'timecreated' => $record->timecreated);
+        $params = array('reporttype' => $this->reporttype, 'timecreated' => $this->reportcreated);
         $fields = 'datakey AS reporttype, objectcount AS files, objectsum AS size';
         $rows = $DB->get_records('tool_objectfs_reports', $params, $sort, $fields);
 

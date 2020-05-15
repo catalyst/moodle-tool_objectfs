@@ -409,4 +409,22 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         }
         return $output . '<br><small>' . $redirect . $url . '</small>';;
     }
+
+    /**
+     * Return list of date options.
+     *
+     * @return array date options.
+     * @throws /dml_exception
+     */
+    public function get_date_options() {
+        global $DB;
+        $reports = $DB->get_records_sql('SELECT DISTINCT timecreated FROM {tool_objectfs_reports} ORDER BY timecreated DESC');
+
+        foreach ($reports as $report) {
+            $dates[$report->timecreated] = userdate($report->timecreated, get_string('strftimedaydatetime'));
+        }
+
+        // TODO: What of the list is too long?
+        return $dates;
+    }
 }
