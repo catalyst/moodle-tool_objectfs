@@ -40,6 +40,7 @@ $string['client_not_available'] = 'The configured remote client is not available
 $string['object_status:page'] = 'Object status';
 $string['object_status:historypage'] = 'Object status history';
 $string['object_status:location'] = 'Object location';
+$string['object_status:locationhistory'] = 'Object location history';
 $string['object_status:log_size'] = 'Log size';
 $string['object_status:mime_type'] = 'Mime type';
 $string['object_status:files'] = 'Objects';

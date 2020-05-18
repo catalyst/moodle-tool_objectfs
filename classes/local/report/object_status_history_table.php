@@ -47,7 +47,7 @@ class object_status_history_table extends \table_sql {
      * Constructor for the file status history table.
      */
     public function __construct($reporttype, $reportcreated) {
-        parent::__construct('runningtasks');
+        parent::__construct('statushistory');
 
         $this->reporttype = $reporttype;
         $this->reportcreated = $reportcreated;
@@ -75,10 +75,9 @@ class object_status_history_table extends \table_sql {
      */
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB, $OUTPUT;
-        $sort = $this->get_sql_sort();
         $params = array('reporttype' => $this->reporttype, 'timecreated' => $this->reportcreated);
         $fields = 'datakey AS reporttype, objectcount AS files, objectsum AS size';
-        $rows = $DB->get_records('tool_objectfs_reports', $params, $sort, $fields);
+        $rows = $DB->get_records('tool_objectfs_reports', $params, '', $fields);
 
         $table = new \stdClass();
         foreach ($rows as $row) {

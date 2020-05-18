@@ -452,7 +452,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             reset($dates);
         }
 
-
         $output .= $OUTPUT->box_start();
         $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $oldestdate), '<<', 'get', $prevdisabled);
         $output .= $OUTPUT->spacer();
