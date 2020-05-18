@@ -42,8 +42,8 @@ class object_status_testcase extends tool_objectfs_testcase {
         global $DB;
         $DB->delete_records('tool_objectfs_reports');
         objectfs_report::generate_status_report();
-        $records = $DB->get_records_sql('SELECT DISTINCT timecreated FROM {tool_objectfs_reports}');
-        $this->assertEquals(1, count($records));
+        $dates = objectfs_report::get_report_dates();
+        $this->assertEquals(1, count($dates));
     }
 
     /**
@@ -54,8 +54,8 @@ class object_status_testcase extends tool_objectfs_testcase {
         $DB->delete_records('tool_objectfs_reports');
         objectfs_report::generate_status_report();
         objectfs_report::generate_status_report();
-        $records = $DB->get_records_sql('SELECT DISTINCT timecreated FROM {tool_objectfs_reports}');
-        $this->assertEquals(2, count($records));
+        $dates = objectfs_report::get_report_dates();
+        $this->assertEquals(2, count($dates));
     }
 
     /**

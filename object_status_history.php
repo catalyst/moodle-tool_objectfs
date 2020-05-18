@@ -27,7 +27,10 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-$date        = optional_param('date', 0, PARAM_INT); // Date to display.
+use tool_objectfs\local\report\objectfs_report;
+use tool_objectfs\local\report\object_status_history_table;
+
+$date = optional_param('date', 0, PARAM_INT);
 $params = array();
 if (!empty($date)) {
     $params['date'] = $date;
@@ -44,73 +47,22 @@ $PAGE->set_heading($heading);
 
 admin_externalpage_setup('tool_objectfs_object_status_history');
 
+$dates = objectfs_report::get_report_dates();
+if (!empty($date) && array_key_exists($date, $dates)) {
+    $reportdate = $date;
+} else {
+    $reportdate = key($dates);
+}
+
 $OUTPUT = $PAGE->get_renderer('tool_objectfs');
 echo $OUTPUT->header();
+echo $OUTPUT->object_status_history_page_header($dates, $reportdate);
 
-echo "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
-
-$dates = $OUTPUT->get_date_options();
-
-$prevparam = array();
-$nextparam = array();
-$prevdisabled = true;
-$nextdisabled = true;
-
-
-
-if (!empty($date) && array_key_exists($date, $dates)) {
-    while ($date != key($dates)) {
-        next($dates);
-    }
-}
-
-$reportdate = key($dates);
-
-if (next($dates)) {
-    $prevparam = ['date' => key($dates)];
-    $prevdisabled = false;
-    prev($dates);
-} else {
-    end($dates);
-}
-
-if (prev($dates)) {
-    $nextparam = ['date' => key($dates)];
-    $nextdisabled = false;
-    next($dates);
-} else {
-    reset($dates);
-}
-
-$prevurl = new \moodle_url($baseurl, $prevparam);
-$nexturl = new \moodle_url($baseurl, $nextparam);
-
-$prevbtnparams = array();
-if ($prevdisabled) {
-    $prevbtnparams['disabled'] = true;
-}
-
-$nextbtnparams = array();
-if ($nextdisabled) {
-    $nextbtnparams['disabled'] = true;
-}
-
-
-echo $OUTPUT->box_start('generalbox', 'reportdatepicker');
-echo $OUTPUT->single_button($prevurl, '<', 'get', $prevbtnparams);
-echo $OUTPUT->spacer();
-echo $OUTPUT->single_select($pageurl, 'date', $dates, $reportdate, false);
-echo $OUTPUT->spacer();
-echo $OUTPUT->single_button($nexturl, '>', 'get', $nextbtnparams);
-echo $OUTPUT->box_end();
-//echo $OUTPUT->spacer(null, true);
-
-$reporttypes = tool_objectfs\local\report\objectfs_report::get_report_types();
+$reporttypes = objectfs_report::get_report_types();
 foreach ($reporttypes as $reporttype) {
-    $table = new tool_objectfs\local\report\object_status_history_table($reporttype, $reportdate);
-    $table->baseurl = $pageurl;
-
     echo $OUTPUT->box_start();
+    $table = new object_status_history_table($reporttype, $reportdate);
+    $table->baseurl = $pageurl;
     $table->out(100, false);
     echo $OUTPUT->box_end();
 }

@@ -227,9 +227,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         $lastruntext .= $this->get_generate_status_report_update_stats_link();
         $output .= $this->box($lastruntext);
 
-        // Adds bar chart styling for sizes and counts.
-        $output .= "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
-
         return $output;
     }
 
@@ -411,20 +408,64 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Return list of date options.
+     * Returns a header for Object status history page.
      *
-     * @return array date options.
-     * @throws /dml_exception
+     * @param  array  $dates       Report dates array
+     * @param  int    $reportdate  Requested report date
+     *
+     * @return string HTML string
+     * @throws /moodle_exception
      */
-    public function get_date_options() {
-        global $DB;
-        $reports = $DB->get_records_sql('SELECT DISTINCT timecreated FROM {tool_objectfs_reports} ORDER BY timecreated DESC');
+    public function object_status_history_page_header($dates, $reportdate) {
+        global $OUTPUT;
+        $output = '';
 
-        foreach ($reports as $report) {
-            $dates[$report->timecreated] = userdate($report->timecreated, get_string('strftimedaydatetime'));
+        $baseurl = '/admin/tool/objectfs/object_status_history.php';
+
+        $prevdate = array();
+        $nextdate = array();
+        $prevdisabled = array('disabled' => true);
+        $nextdisabled = array('disabled' => true);
+
+        end($dates);
+        $oldestdate = array('date' => key($dates));
+        reset($dates);
+        $latestdate = array('date' => key($dates));
+
+        while ($reportdate != key($dates)) {
+            next($dates);
         }
 
-        // TODO: What of the list is too long?
-        return $dates;
+        if (next($dates)) {
+            $prevdate = ['date' => key($dates)];
+            $prevdisabled = array();
+            prev($dates);
+        } else {
+            end($dates);
+        }
+
+        if (prev($dates)) {
+            $nextdate = ['date' => key($dates)];
+            $nextdisabled = array();
+            next($dates);
+        } else {
+            reset($dates);
+        }
+
+
+        $output .= $OUTPUT->box_start();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $oldestdate), '<<', 'get', $prevdisabled);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $prevdate), '<', 'get', $prevdisabled);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_select(new \moodle_url($baseurl, array('date' => $reportdate)), 'date',
+            $dates, $reportdate, false);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $nextdate), '>', 'get', $nextdisabled);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $latestdate), '>>', 'get', $nextdisabled);
+        $output .= $OUTPUT->box_end();
+
+        return $output;
     }
 }

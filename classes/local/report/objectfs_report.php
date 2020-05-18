@@ -132,4 +132,25 @@ class objectfs_report implements \renderable {
             'mime_type',
         ];
     }
+
+    /**
+     * Returns the list of report snapshots.
+     *
+     * @return array date options.
+     * @throws /dml_exception
+     */
+    public static function get_report_dates() {
+        global $DB;
+        $dates = array();
+        $sql = 'SELECT DISTINCT timecreated
+                  FROM {tool_objectfs_reports}
+              ORDER BY timecreated DESC';
+        $reports = $DB->get_records_sql($sql, null, 0, 100);
+
+        foreach ($reports as $report) {
+            $dates[$report->timecreated] = userdate($report->timecreated, get_string('strftimedaydatetime'));
+        }
+
+        return $dates;
+    }
 }

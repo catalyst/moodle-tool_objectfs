@@ -44,8 +44,6 @@ $string['object_status:log_size'] = 'Log size';
 $string['object_status:mime_type'] = 'Mime type';
 $string['object_status:files'] = 'Objects';
 $string['object_status:size'] = 'Total size';
-$string['object_status:prevreport'] = 'Previous report';
-$string['object_status:nextreport'] = 'Next report';
 
 $string['page:missingfiles'] = 'Missing from filedir and external storage files';
 
