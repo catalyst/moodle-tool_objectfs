@@ -33,7 +33,8 @@ if (!empty($date)) {
     $params['date'] = $date;
 }
 
-$pageurl = new \moodle_url('/admin/tool/objectfs/object_status_history.php', $params);
+$baseurl = '/admin/tool/objectfs/object_status_history.php';
+$pageurl = new \moodle_url($baseurl, $params);
 $heading = get_string('object_status:historypage', 'tool_objectfs');
 $PAGE->set_url($pageurl);
 $PAGE->set_context(context_system::instance());
@@ -49,28 +50,69 @@ echo $OUTPUT->header();
 echo "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
 
 $dates = $OUTPUT->get_date_options();
+
+$prevparam = array();
+$nextparam = array();
+$prevdisabled = true;
+$nextdisabled = true;
+
+
+
 if (!empty($date) && array_key_exists($date, $dates)) {
-    $reportdate = $date;
-} else {
-    $reportdate = key($dates);
+    while ($date != key($dates)) {
+        next($dates);
+    }
 }
 
-echo html_writer::start_tag('form', array('class' => 'reportselecform', 'action' => $pageurl, 'method' => 'get'));
-//echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => 'Previous report', 'class' => 'btn btn-secondary'));
-//echo html_writer::span('          ');
-echo html_writer::select($dates, "date", $reportdate);
-echo html_writer::span('          ');
-echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => 'Get this report', 'class' => 'btn btn-secondary'));
-//echo html_writer::span('          ');
-//echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => 'Next report', 'class' => 'btn btn-secondary'));
-echo html_writer::end_tag('form');
+$reportdate = key($dates);
+
+if (next($dates)) {
+    $prevparam = ['date' => key($dates)];
+    $prevdisabled = false;
+    prev($dates);
+} else {
+    end($dates);
+}
+
+if (prev($dates)) {
+    $nextparam = ['date' => key($dates)];
+    $nextdisabled = false;
+    next($dates);
+} else {
+    reset($dates);
+}
+
+$prevurl = new \moodle_url($baseurl, $prevparam);
+$nexturl = new \moodle_url($baseurl, $nextparam);
+
+$prevbtnparams = array();
+if ($prevdisabled) {
+    $prevbtnparams['disabled'] = true;
+}
+
+$nextbtnparams = array();
+if ($nextdisabled) {
+    $nextbtnparams['disabled'] = true;
+}
+
+
+echo $OUTPUT->box_start('generalbox', 'reportdatepicker');
+echo $OUTPUT->single_button($prevurl, '<', 'get', $prevbtnparams);
+echo $OUTPUT->spacer();
+echo $OUTPUT->single_select($pageurl, 'date', $dates, $reportdate, false);
+echo $OUTPUT->spacer();
+echo $OUTPUT->single_button($nexturl, '>', 'get', $nextbtnparams);
+echo $OUTPUT->box_end();
+//echo $OUTPUT->spacer(null, true);
 
 $reporttypes = tool_objectfs\local\report\objectfs_report::get_report_types();
 foreach ($reporttypes as $reporttype) {
     $table = new tool_objectfs\local\report\object_status_history_table($reporttype, $reportdate);
     $table->baseurl = $pageurl;
+
+    echo $OUTPUT->box_start();
     $table->out(100, false);
-    echo "<br>";
+    echo $OUTPUT->box_end();
 }
 
 echo $OUTPUT->footer();
