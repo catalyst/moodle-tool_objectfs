@@ -45,21 +45,21 @@ class object_location_history_table extends \table_sql {
 
         // TODO: Replace by lang strings.
         $columnheaders = [
-            'date'        => 'date',
-            'local_count' => 'Local (count)',
-            'local_size'  => 'Local (size)',
-            'duplicated_count' => 'Duplicated (count)',
-            'duplicated_size'  => 'Duplicated (size)',
-            'external_count' => 'External (count)',
-            'external_size'  => 'External (size)',
-            'missing_count' => 'Error (count)',
-            'missing_size'  => 'Error (size)',
-            'total_count' => 'Total (count)',
-            'total_size'  => 'Total (size)',
-            'filedir_count' => 'Filedir (count)',
-            'filedir_size'  => 'Filedir (size)',
-            'delta_count' => 'Delta (count)',
-            'delta_size'  => 'Delta (size)',
+            'date' => get_string('date'),
+            'local_count' => get_string('object_status:location:localcount', 'tool_objectfs'),
+            'local_size' => get_string('object_status:location:localsize', 'tool_objectfs'),
+            'duplicated_count' => get_string('object_status:location:duplicatedcount', 'tool_objectfs'),
+            'duplicated_size' => get_string('object_status:location:duplicatedsize', 'tool_objectfs'),
+            'external_count' => get_string('object_status:location:externalcount', 'tool_objectfs'),
+            'external_size' => get_string('object_status:location:externalsize', 'tool_objectfs'),
+            'missing_count' => get_string('object_status:location:missingcount', 'tool_objectfs'),
+            'missing_size' => get_string('object_status:location:missingsize', 'tool_objectfs'),
+            'total_count' => get_string('object_status:location:totalcount', 'tool_objectfs'),
+            'total_size' => get_string('object_status:location:totalsize', 'tool_objectfs'),
+            'filedir_count' => get_string('object_status:location:filedircount', 'tool_objectfs'),
+            'filedir_size' => get_string('object_status:location:filedirsize', 'tool_objectfs'),
+            'delta_count' => get_string('object_status:location:deltacount', 'tool_objectfs'),
+            'delta_size' => get_string('object_status:location:deltasize', 'tool_objectfs'),
         ];
 
         $this->is_downloadable(true);
@@ -90,33 +90,48 @@ class object_location_history_table extends \table_sql {
                  WHERE reporttype = :reporttype
               ORDER BY timecreated';
         $params = array('reporttype' => 'location');
-        $rawrecords = $DB->get_records_sql($sql, $params);
-
+        $rawrecords = $DB->get_records_sql($sql, $params, 0, 5000);
         $reportdates = objectfs_report::get_report_dates();
 
         foreach ($reportdates as $timecreated => $userdate) {
+            $deltacount = abs($rawrecords[$timecreated.'filedir']->count -
+                $rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->count -
+                $rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->count);
+            $deltasize = abs($rawrecords[$timecreated.'filedir']->size -
+                $rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->size -
+                $rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->size);
             $row['date'] = $userdate;
-            $row['local_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->count);
-            $row['local_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->size);
-            $row['duplicated_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->count);
-            $row['duplicated_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->size);
-            $row['external_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_EXTERNAL]->count);
-            $row['external_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_EXTERNAL]->size);
-            $row['missing_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_ERROR]->count);
-            $row['missing_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_ERROR]->size);
-            $row['total_count'] = number_format($rawrecords[$timecreated.'total']->count);
-            $row['total_size'] = display_size($rawrecords[$timecreated.'total']->size);
-            $row['filedir_count'] = number_format($rawrecords[$timecreated.'filedir']->count);
-            $row['filedir_size'] = display_size($rawrecords[$timecreated.'filedir']->size);
-            if (isset($rawrecords[$timecreated.'deltaa'])) {
-                $delta = $rawrecords[$timecreated.'deltaa'];
+            if ($this->is_downloading() && in_array($this->download, ['csv', 'excel', 'json', 'ods'])) {
+                $row['local_count'] = $rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->count;
+                $row['local_size'] = $rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->size;
+                $row['duplicated_count'] = $rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->count;
+                $row['duplicated_size'] = $rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->size;
+                $row['external_count'] = $rawrecords[$timecreated.OBJECT_LOCATION_EXTERNAL]->count;
+                $row['external_size'] = $rawrecords[$timecreated.OBJECT_LOCATION_EXTERNAL]->size;
+                $row['missing_count'] = $rawrecords[$timecreated.OBJECT_LOCATION_ERROR]->count;
+                $row['missing_size'] = $rawrecords[$timecreated.OBJECT_LOCATION_ERROR]->size;
+                $row['total_count'] = $rawrecords[$timecreated.'total']->count;
+                $row['total_size'] = $rawrecords[$timecreated.'total']->size;
+                $row['filedir_count'] = $rawrecords[$timecreated.'filedir']->count;
+                $row['filedir_size'] = $rawrecords[$timecreated.'filedir']->size;
+                $row['delta_count'] = $deltacount;
+                $row['delta_size'] = $deltasize;
             } else {
-                $delta = $rawrecords[$timecreated.'deltab'];
+                $row['local_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->count);
+                $row['local_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_LOCAL]->size);
+                $row['duplicated_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->count);
+                $row['duplicated_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_DUPLICATED]->size);
+                $row['external_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_EXTERNAL]->count);
+                $row['external_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_EXTERNAL]->size);
+                $row['missing_count'] = number_format($rawrecords[$timecreated.OBJECT_LOCATION_ERROR]->count);
+                $row['missing_size'] = display_size($rawrecords[$timecreated.OBJECT_LOCATION_ERROR]->size);
+                $row['total_count'] = number_format($rawrecords[$timecreated.'total']->count);
+                $row['total_size'] = display_size($rawrecords[$timecreated.'total']->size);
+                $row['filedir_count'] = number_format($rawrecords[$timecreated.'filedir']->count);
+                $row['filedir_size'] = display_size($rawrecords[$timecreated.'filedir']->size);
+                $row['delta_count'] = number_format($deltacount);
+                $row['delta_size'] = display_size($deltasize);
             }
-            $row['delta_count'] = number_format($delta->count);
-            $row['delta_size'] = display_size($delta->size);
-
-            // TODO: Add bar chart.
             $this->rawdata[] = $row;
         }
     }
