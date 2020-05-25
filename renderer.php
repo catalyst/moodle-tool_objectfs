@@ -57,11 +57,11 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                              get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($rows as $row) {
-            $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
+            $filelocation = objectfs_report::get_file_location_string($row->datakey); // Turn int location into string.
             $table->data[] = array($filelocation, $row->objectcount, $row->objectsum);
         }
 
-        $this->augment_barchart($table);
+        objectfs_report::augment_barchart($table);
 
         $output = html_writer::table($table);
 
@@ -97,28 +97,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return '';
     }
 
-    /**
-     * @param int|string $filelocation
-     * @return string
-     * @throws coding_exception
-     */
-    public function get_file_location_string($filelocation) {
-        $locationstringmap = [
-            'total' => 'object_status:location:total',
-            'filedir' => 'object_status:filedir',
-            'deltaa' => 'object_status:delta:a',
-            'deltab' => 'object_status:delta:b',
-            OBJECT_LOCATION_ERROR => 'object_status:location:error',
-            OBJECT_LOCATION_LOCAL => 'object_status:location:local',
-            OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
-            OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
-        ];
-        if (isset($locationstringmap[$filelocation])) {
-            return get_string($locationstringmap[$filelocation], 'tool_objectfs');
-        }
-        return get_string('object_status:location:unknown', 'tool_objectfs');
-    }
-
     private function render_log_size_report($report) {
         $rows = $report->get_rows();
 
@@ -133,30 +111,15 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                              get_string('object_status:size', 'tool_objectfs'));
 
         foreach ($rows as $row) {
-            $sizerange = $this->get_size_range_from_logsize($row->datakey); // Turn logsize into a byte range.
+            $sizerange = objectfs_report::get_size_range_from_logsize($row->datakey); // Turn logsize into a byte range.
             $table->data[] = array($sizerange, $row->objectcount, $row->objectsum);
         }
 
-        $this->augment_barchart($table);
+        objectfs_report::augment_barchart($table);
 
         $output = html_writer::table($table);
 
         return $output;
-    }
-
-    public function get_size_range_from_logsize($logsize) {
-
-        // Small logsizes have been compressed.
-        if ($logsize == 'small') {
-            return '< 1KB';
-        }
-
-        $floor = pow(2, $logsize);
-        $roof = ($floor * 2);
-        $floor = display_size($floor);
-        $roof = display_size($roof);
-        $sizerange = "$floor - $roof";
-        return $sizerange;
     }
 
     private function render_mime_type_report($report) {
@@ -176,34 +139,11 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $table->data[] = array($row->datakey, $row->objectcount, $row->objectsum);
         }
 
-        $this->augment_barchart($table);
+        objectfs_report::augment_barchart($table);
 
         $output = html_writer::table($table);
 
         return $output;
-    }
-
-    public function augment_barchart(&$table) {
-
-        // This assumes 2 columns, the first is a number and the second
-        // is a file size.
-
-        foreach (array(1, 2) as $col) {
-
-            $max = 0;
-            foreach ($table->data as $row) {
-                if ($row[$col] > $max) {
-                    $max = $row[$col];
-                }
-            }
-
-            foreach ($table->data as $i => $row) {
-                $table->data[$i][$col] = sprintf('<div class="ofs-bar" style="width:%.1f%%">%s</div>',
-                    100 * $row[$col] / $max,
-                    $col == 1 ? number_format($row[$col]) : display_size($row[$col])
-                );
-            }
-        }
     }
 
     public function object_status_page_intro() {

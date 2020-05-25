@@ -27,6 +27,8 @@ namespace tool_objectfs\local\report;
 
 defined('MOODLE_INTERNAL') || die();
 
+use tool_objectfs\local\report\objectfs_report;
+
 require_once($CFG->libdir . '/tablelib.php');
 
 /**
@@ -74,7 +76,7 @@ class object_status_history_table extends \table_sql {
      * @throws \dml_exception
      */
     public function query_db($pagesize, $useinitialsbar = true) {
-        global $DB, $OUTPUT;
+        global $DB;
         $params = array('reporttype' => $this->reporttype, 'timecreated' => $this->reportcreated);
         $fields = 'datakey AS reporttype, objectcount AS files, objectsum AS size';
         $rows = $DB->get_records('tool_objectfs_reports', $params, '', $fields);
@@ -82,16 +84,16 @@ class object_status_history_table extends \table_sql {
         $table = new \stdClass();
         foreach ($rows as $row) {
             if ($this->reporttype == 'location') {
-                $reporttype = $OUTPUT->get_file_location_string($row->reporttype);
+                $reporttype = objectfs_report::get_file_location_string($row->reporttype);
             } else if ($this->reporttype == 'log_size') {
-                $reporttype = $OUTPUT->get_size_range_from_logsize($row->reporttype);
+                $reporttype = objectfs_report::get_size_range_from_logsize($row->reporttype);
             } else {
                 $reporttype = $row->reporttype;
             }
 
             $table->data[] = array($reporttype, $row->files, $row->size);
         }
-        $OUTPUT->augment_barchart($table);
+        objectfs_report::augment_barchart($table);
         foreach ($table->data as $item) {
             $this->rawdata[] = array('reporttype' => $item[0], 'files' => $item[1], 'size' => $item[2]);
         }
