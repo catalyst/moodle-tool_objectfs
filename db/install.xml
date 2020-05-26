@@ -19,21 +19,33 @@
         <INDEX NAME="toolobjeobje_con_idu_ix" UNIQUE="true" FIELDS="contenthash, location"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="tool_objectfs_reports" COMMENT="Object report data for objectfs">
+    <TABLE NAME="tool_objectfs_reports" COMMENT="List of Object reports for objectfs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="reporttype" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="datakey" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="objectcount" TYPE="int" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="objectsum" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="reportdate" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="tool_objectfs_reports_timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
-        <INDEX NAME="tool_objectfs_reports_reporttype_idx" UNIQUE="false" FIELDS="reporttype"/>
+        <INDEX NAME="reportdate_idx" UNIQUE="false" FIELDS="reportdate"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="tool_objectfs_report_data" COMMENT="Object report data for objectfs">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="reportid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="reporttype" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="datakey" TYPE="char" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="objectcount" TYPE="int" LENGTH="15" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="objectsum" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="reportid_idx" UNIQUE="false" FIELDS="reportid"/>
+        <INDEX NAME="reporttype_idx" UNIQUE="false" FIELDS="reporttype"/>
       </INDEXES>
     </TABLE>
   </TABLES>
