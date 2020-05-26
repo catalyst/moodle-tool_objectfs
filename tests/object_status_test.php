@@ -93,7 +93,6 @@ class object_status_testcase extends tool_objectfs_testcase {
         global $CFG;
         objectfs_report::generate_status_report();
         $reportdate = key(objectfs_report::get_report_dates());
-
         $table = new object_status_history_table('location', $reportdate);
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
@@ -106,39 +105,46 @@ class object_status_testcase extends tool_objectfs_testcase {
      * Test that object_status_history_table has correct log_size section.
      */
     public function test_object_status_history_table_log_size() {
-        global $CFG;
+        global $DB, $CFG;
+        $DB->delete_records('files');
+        $this->create_local_file('local file');
         objectfs_report::generate_status_report();
         $reportdate = key(objectfs_report::get_report_dates());
-
         $table = new object_status_history_table('log_size', $reportdate);
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
         $table->query_db(100, false);
-        // By default, Moodle has 2 files less than 1KB and 2 files 1KB - 2KB.
-        $this->assertEquals(2, count($table->rawdata));
+        $this->assertEquals(1, count($table->rawdata));
+        $this->assertEquals('< 1KB', $table->rawdata[0]['reporttype']);
+        $this->assertEquals('1', strip_tags($table->rawdata[0]['files']));
+        $this->assertEquals('10 bytes', strip_tags($table->rawdata[0]['size']));
     }
 
     /**
      * Test that object_status_history_table has correct mime_type section.
      */
     public function test_object_status_history_table_mime_type() {
-        global $CFG;
+        global $DB, $CFG;
+        $DB->delete_records('files');
+        $this->create_local_file('local file');
         objectfs_report::generate_status_report();
         $reportdate = key(objectfs_report::get_report_dates());
-
         $table = new object_status_history_table('mime_type', $reportdate);
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
         $table->query_db(100, false);
-        // By default, Moodle has 4 files of image mime.
         $this->assertEquals(1, count($table->rawdata));
+        $this->assertEquals('', $table->rawdata[0]['reporttype']);
+        $this->assertEquals('1', strip_tags($table->rawdata[0]['files']));
+        $this->assertEquals('10 bytes', strip_tags($table->rawdata[0]['size']));
     }
 
     /**
      * Test that object_location_history_table has records.
      */
     public function test_object_location_history_table() {
-        global $CFG;
+        global $DB, $CFG;
+        $DB->delete_records('files');
         $this->create_local_file('local file');
         $this->create_duplicated_file('duplicated file');
         $this->create_remote_file('external file');
@@ -147,14 +153,11 @@ class object_status_testcase extends tool_objectfs_testcase {
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
         $table->query_db(100, false);
-        // Confirm, that report snapshot exists.
         $this->assertEquals(1, count($table->rawdata));
         $row = reset($table->rawdata);
-        // There should be 4 default Moodle files + one local file.
-        $this->assertEquals(5, $row['local_count']);
+        $this->assertEquals(1, $row['local_count']);
         $this->assertEquals(1, $row['duplicated_count']);
         $this->assertEquals(1, $row['external_count']);
-        // There should be 4 default Moodle files + 3 test files.
-        $this->assertEquals(7, $row['total_count']);
+        $this->assertEquals(3, $row['total_count']);
     }
 }

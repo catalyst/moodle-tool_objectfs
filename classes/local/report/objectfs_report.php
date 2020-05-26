@@ -198,10 +198,12 @@ class objectfs_report implements \renderable {
             }
 
             foreach ($table->data as $i => $row) {
-                $table->data[$i][$col] = sprintf('<div class="ofs-bar" style="width:%.1f%%">%s</div>',
-                    100 * $row[$col] / $max,
-                    $col == 1 ? number_format($row[$col]) : display_size($row[$col])
-                );
+                if ($max != 0) {
+                    $table->data[$i][$col] = sprintf('<div class="ofs-bar" style="width:%.1f%%">%s</div>',
+                        100 * $row[$col] / $max,
+                        $col == 1 ? number_format($row[$col]) : display_size($row[$col])
+                    );
+                }
             }
         }
     }

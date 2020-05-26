@@ -65,7 +65,6 @@ class object_location_history_table extends \table_sql {
         $this->is_downloadable(true);
         $this->define_columns(array_keys($columnheaders));
         $this->define_headers(array_values($columnheaders));
-        $this->define_header_column('date');
         $this->collapsible(false);
         $this->sortable(false);
         $this->pageable(false);
