@@ -61,7 +61,7 @@ foreach ($reporttypes as $reporttype) {
     echo $OUTPUT->box_start();
     $table = new object_status_history_table($reporttype, $reportid);
     $table->baseurl = $pageurl;
-    $table->out(100, false);
+    $table->out(0, false);
     echo $OUTPUT->box_end();
 }
 

@@ -23,9 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('NO_OUTPUT_BUFFERING', true);
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
+
+admin_externalpage_setup('tool_objectfs_object_location_history');
 
 $logformat   = optional_param('download', '', PARAM_ALPHA);
 $params = array();
@@ -41,8 +44,6 @@ $PAGE->set_pagelayout('report');
 $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
 
-admin_externalpage_setup('tool_objectfs_object_location_history');
-
 $OUTPUT = $PAGE->get_renderer('tool_objectfs');
 
 $table = new tool_objectfs\local\report\object_location_history_table();
@@ -50,10 +51,10 @@ $table->baseurl = $pageurl;
 
 if (empty($logformat)) {
     echo $OUTPUT->header();
-    $table->out(100, false);
+    $table->out(0, false);
     echo $OUTPUT->footer();
 } else {
     $filename = 'object_location_history_' . userdate(time(), get_string('backupnameformat', 'langconfig'), 99, false);
     $table->is_downloading($logformat, $filename);
-    $table->out(100, false);
+    $table->out(0, false);
 }
