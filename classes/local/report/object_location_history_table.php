@@ -43,7 +43,6 @@ class object_location_history_table extends \table_sql {
     public function __construct() {
         parent::__construct('locationhistory');
 
-        // TODO: Replace by lang strings.
         $columnheaders = [
             'date' => get_string('date'),
             'local_count' => get_string('object_status:location:localcount', 'tool_objectfs'),

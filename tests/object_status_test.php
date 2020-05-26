@@ -47,7 +47,7 @@ class object_status_testcase extends tool_objectfs_testcase {
     }
 
     /**
-     * Test that generate_status_report a snapshot of report.
+     * Test that generate_status_report creates a snapshot of report.
      */
     public function test_generate_status_report() {
         objectfs_report::generate_status_report();
@@ -147,5 +147,22 @@ class object_status_testcase extends tool_objectfs_testcase {
         $this->assertEquals(1, $row['duplicated_count']);
         $this->assertEquals(1, $row['external_count']);
         $this->assertEquals(3, $row['total_count']);
+    }
+
+    /**
+     * Test that cleanup_reports deletes old data.
+     */
+    public function test_cleanup_reports() {
+        global $DB;
+        objectfs_report::generate_status_report();
+        $reports = objectfs_report::get_report_ids();
+        $this->assertEquals(1, count($reports));
+        $record = new \stdClass();
+        $record->id = key($reports);
+        $record->reportdate = time() - YEARSECS - 1;
+        $DB->update_record('tool_objectfs_reports', $record);
+        objectfs_report::cleanup_reports();
+        $reports = objectfs_report::get_report_ids();
+        $this->assertEquals(0, count($reports));
     }
 }

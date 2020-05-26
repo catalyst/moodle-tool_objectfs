@@ -103,6 +103,22 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * Deletes report snapshots older than 1 year.
+     *
+     * @return void
+     * @throws /dml_exception
+     */
+    public static function cleanup_reports() {
+        global $DB;
+        $reportdate = time() - YEARSECS;
+        $params = array('reportdate' => $reportdate);
+        $reports = $DB->get_records_select('tool_objectfs_reports', 'reportdate < :reportdate', $params, 'id', 'id');
+        $reportids = array_keys($reports);
+        $DB->delete_records_list('tool_objectfs_reports', 'id', $reportids);
+        $DB->delete_records_list('tool_objectfs_report_data', 'reportid', $reportids);
+    }
+
+    /**
      * @return array
      */
     public static function get_report_types() {
