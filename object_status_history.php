@@ -27,13 +27,15 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
+admin_externalpage_setup('tool_objectfs_object_status_history');
+
 use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\report\object_status_history_table;
 
-$date = optional_param('date', 0, PARAM_INT);
+$reportid = optional_param('reportid', 0, PARAM_INT);
 $params = array();
-if (!empty($date)) {
-    $params['date'] = $date;
+if (!empty($reportid)) {
+    $params['reportid'] = $reportid;
 }
 
 $baseurl = '/admin/tool/objectfs/object_status_history.php';
@@ -45,23 +47,19 @@ $PAGE->set_pagelayout('report');
 $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
 
-admin_externalpage_setup('tool_objectfs_object_status_history');
-
-$dates = objectfs_report::get_report_dates();
-if (!empty($date) && array_key_exists($date, $dates)) {
-    $reportdate = $date;
-} else {
-    $reportdate = key($dates);
+$reports = objectfs_report::get_report_ids();
+if (empty($reportid) || !array_key_exists($reportid, $reports)) {
+    $reportid = key($reports);
 }
 
 $OUTPUT = $PAGE->get_renderer('tool_objectfs');
 echo $OUTPUT->header();
-echo $OUTPUT->object_status_history_page_header($dates, $reportdate);
+echo $OUTPUT->object_status_history_page_header($reports, $reportid);
 
 $reporttypes = objectfs_report::get_report_types();
 foreach ($reporttypes as $reporttype) {
     echo $OUTPUT->box_start();
-    $table = new object_status_history_table($reporttype, $reportdate);
+    $table = new object_status_history_table($reporttype, $reportid);
     $table->baseurl = $pageurl;
     $table->out(100, false);
     echo $OUTPUT->box_end();

@@ -350,59 +350,61 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     /**
      * Returns a header for Object status history page.
      *
-     * @param  array  $dates       Report dates array
-     * @param  int    $reportdate  Requested report date
+     * @param  array  $reports     Report ids and dates array
+     * @param  int    $reportid    Requested report id
      *
      * @return string HTML string
      * @throws /moodle_exception
      */
-    public function object_status_history_page_header($dates, $reportdate) {
+    public function object_status_history_page_header($reports, $reportid) {
         global $OUTPUT;
         $output = '';
 
         $baseurl = '/admin/tool/objectfs/object_status_history.php';
 
-        $prevdate = array();
-        $nextdate = array();
+        $previd = array();
+        $nextid = array();
         $prevdisabled = array('disabled' => true);
         $nextdisabled = array('disabled' => true);
 
-        end($dates);
-        $oldestdate = array('date' => key($dates));
-        reset($dates);
-        $latestdate = array('date' => key($dates));
+        end($reports);
+        $oldestid = array('reportid' => key($reports));
+        reset($reports);
+        $latestid = array('reportid' => key($reports));
 
-        while ($reportdate != key($dates)) {
-            next($dates);
+        while ($reportid != key($reports)) {
+            next($reports);
         }
 
-        if (next($dates)) {
-            $prevdate = ['date' => key($dates)];
+        if (next($reports)) {
+            $previd = ['reportid' => key($reports)];
             $prevdisabled = array();
-            prev($dates);
+            prev($reports);
         } else {
-            end($dates);
+            end($reports);
         }
 
-        if (prev($dates)) {
-            $nextdate = ['date' => key($dates)];
+        if (prev($reports)) {
+            $nextid = ['reportid' => key($reports)];
             $nextdisabled = array();
-            next($dates);
+            next($reports);
         } else {
-            reset($dates);
+            reset($reports);
         }
 
+        foreach ($reports as $id => $timestamp) {
+            $userdates[$id] = userdate($timestamp, get_string('strftimedaydatetime'));
+        }
         $output .= $OUTPUT->box_start();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $oldestdate), '<<', 'get', $prevdisabled);
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $oldestid), '<<', 'get', $prevdisabled);
         $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $prevdate), '<', 'get', $prevdisabled);
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $previd), '<', 'get', $prevdisabled);
         $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_select(new \moodle_url($baseurl, array('date' => $reportdate)), 'date',
-            $dates, $reportdate, false);
+        $output .= $OUTPUT->single_select(new \moodle_url($baseurl), 'reportid', $userdates, $reportid, false);
         $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $nextdate), '>', 'get', $nextdisabled);
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $nextid), '>', 'get', $nextdisabled);
         $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $latestdate), '>>', 'get', $nextdisabled);
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $latestid), '>>', 'get', $nextdisabled);
         $output .= $OUTPUT->box_end();
 
         return $output;

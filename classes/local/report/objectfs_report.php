@@ -32,8 +32,8 @@ class objectfs_report implements \renderable {
     /** @var string $reporttype */
     protected $reporttype = '';
 
-    /** @var int $reportstarted */
-    protected $reportstarted = 0;
+    /** @var int $reportid */
+    protected $reportid = 0;
 
     /** @var array $rows */
     protected $rows = [];
@@ -41,9 +41,9 @@ class objectfs_report implements \renderable {
     /**
      * @param string $reporttype
      */
-    public function __construct($reporttype, $reportstarted) {
+    public function __construct($reporttype, $reportid) {
         $this->reporttype = $reporttype;
-        $this->reportstarted = $reportstarted;
+        $this->reportid = $reportid;
     }
 
     /**
@@ -85,8 +85,8 @@ class objectfs_report implements \renderable {
     /**
      * @return int
      */
-    public function get_report_started() {
-        return $this->reportstarted;
+    public function get_report_id() {
+        return $this->reportid;
     }
 
     /**
@@ -108,18 +108,16 @@ class objectfs_report implements \renderable {
     }
 
     public static function generate_status_report() {
-        $reportstarted = time();
+        global $DB;
+        $reportid = $DB->insert_record('tool_objectfs_reports', (object)['reportdate' => time()]);
         $reporttypes = self::get_report_types();
 
         foreach ($reporttypes as $reporttype) {
             $reportbuilderclass = "tool_objectfs\\local\\report\\{$reporttype}_report_builder";
             $reportbuilder = new $reportbuilderclass();
-            $report = $reportbuilder->build_report($reportstarted);
+            $report = $reportbuilder->build_report($reportid);
             objectfs_report_builder::save_report_to_database($report);
         }
-        // Throttle here for one second to make sure the snapshots have different
-        // $reportstarted if the report was called twice in a row and it was super fast.
-        sleep(1);
     }
 
     /**
@@ -139,19 +137,14 @@ class objectfs_report implements \renderable {
      * @return array date options.
      * @throws /dml_exception
      */
-    public static function get_report_dates() {
+    public static function get_report_ids() {
         global $DB;
-        $dates = array();
-        $sql = 'SELECT DISTINCT timecreated
-                  FROM {tool_objectfs_reports}
-              ORDER BY timecreated DESC';
-        $reports = $DB->get_records_sql($sql, null, 0, 100);
-
-        foreach ($reports as $report) {
-            $dates[$report->timecreated] = userdate($report->timecreated, get_string('strftimedaydatetime'));
+        $reports = array();
+        $records = $DB->get_records('tool_objectfs_reports', null, 'id DESC', 'id, reportdate');
+        foreach ($records as $record) {
+            $reports[$record->id] = $record->reportdate;
         }
-
-        return $dates;
+        return $reports;
     }
 
     /**

@@ -42,17 +42,17 @@ class object_status_history_table extends \table_sql {
     /** @var string $reporttype */
     protected $reporttype = '';
 
-    /** @var int $reportcreated */
-    protected $reportcreated = 0;
+    /** @var int $reportid */
+    protected $reportid = 0;
 
     /**
      * Constructor for the file status history table.
      */
-    public function __construct($reporttype, $reportcreated) {
+    public function __construct($reporttype, $reportid) {
         parent::__construct('statushistory');
 
         $this->reporttype = $reporttype;
-        $this->reportcreated = $reportcreated;
+        $this->reportid = $reportid;
 
         $columnheaders = [
             'reporttype'  => get_string('object_status:' . $reporttype, 'tool_objectfs'),
@@ -77,9 +77,9 @@ class object_status_history_table extends \table_sql {
      */
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
-        $params = array('reporttype' => $this->reporttype, 'timecreated' => $this->reportcreated);
+        $params = array('reporttype' => $this->reporttype, 'reportid' => $this->reportid);
         $fields = 'datakey AS reporttype, objectcount AS files, objectsum AS size';
-        $rows = $DB->get_records('tool_objectfs_reports', $params, '', $fields);
+        $rows = $DB->get_records('tool_objectfs_report_data', $params, '', $fields);
 
         $table = new \stdClass();
         foreach ($rows as $row) {

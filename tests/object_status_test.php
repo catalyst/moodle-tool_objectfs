@@ -51,8 +51,8 @@ class object_status_testcase extends tool_objectfs_testcase {
      */
     public function test_generate_status_report() {
         objectfs_report::generate_status_report();
-        $dates = objectfs_report::get_report_dates();
-        $this->assertEquals(1, count($dates));
+        $reports = objectfs_report::get_report_ids();
+        $this->assertEquals(1, count($reports));
     }
 
     /**
@@ -61,8 +61,8 @@ class object_status_testcase extends tool_objectfs_testcase {
     public function test_generate_status_report_historic() {
         objectfs_report::generate_status_report();
         objectfs_report::generate_status_report();
-        $dates = objectfs_report::get_report_dates();
-        $this->assertEquals(2, count($dates));
+        $reports = objectfs_report::get_report_ids();
+        $this->assertEquals(2, count($reports));
     }
 
     /**
@@ -92,8 +92,8 @@ class object_status_testcase extends tool_objectfs_testcase {
     public function test_object_status_history_table_location() {
         global $CFG;
         objectfs_report::generate_status_report();
-        $reportdate = key(objectfs_report::get_report_dates());
-        $table = new object_status_history_table('location', $reportdate);
+        $reports = objectfs_report::get_report_ids();
+        $table = new object_status_history_table('location', key($reports));
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
         $table->query_db(100, false);
@@ -109,8 +109,8 @@ class object_status_testcase extends tool_objectfs_testcase {
         $DB->delete_records('files');
         $this->create_local_file('local file');
         objectfs_report::generate_status_report();
-        $reportdate = key(objectfs_report::get_report_dates());
-        $table = new object_status_history_table('log_size', $reportdate);
+        $reports = objectfs_report::get_report_ids();
+        $table = new object_status_history_table('log_size', key($reports));
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
         $table->query_db(100, false);
@@ -128,8 +128,8 @@ class object_status_testcase extends tool_objectfs_testcase {
         $DB->delete_records('files');
         $this->create_local_file('local file');
         objectfs_report::generate_status_report();
-        $reportdate = key(objectfs_report::get_report_dates());
-        $table = new object_status_history_table('mime_type', $reportdate);
+        $reports = objectfs_report::get_report_ids();
+        $table = new object_status_history_table('mime_type', key($reports));
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
         $table->query_db(100, false);
