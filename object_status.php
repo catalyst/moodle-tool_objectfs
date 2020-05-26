@@ -15,37 +15,54 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File status page - stats on where files are b/w local file system and s3
+ * File status history page.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Mikhail Golenkov <golenkovm@gmail.com>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../../config.php');
-require_once(__DIR__ . '/lib.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
+require_once($CFG->libdir.'/tablelib.php');
 
 admin_externalpage_setup('tool_objectfs_object_status');
 
 use tool_objectfs\local\report\objectfs_report;
-use tool_objectfs\local\report\objectfs_report_builder;
+use tool_objectfs\local\report\object_status_history_table;
 
-$output = $PAGE->get_renderer('tool_objectfs');
-
-echo $output->header();
-
-echo $output->heading(get_string('object_status:page', 'tool_objectfs'));
-
-echo $output->object_status_page_intro();
-
-$reporttypes = objectfs_report::get_report_types();
-
-foreach ($reporttypes as $reporttype) {
-    $report = objectfs_report_builder::load_report_from_database($reporttype);
-    // We call this render method directly cause 26 cant handle namespace classes.
-    echo $output->render_objectfs_report($report);
+$reportid = optional_param('reportid', 0, PARAM_INT);
+$params = array();
+if (!empty($reportid)) {
+    $params['reportid'] = $reportid;
 }
 
-echo $output->footer();
+$baseurl = '/admin/tool/objectfs/object_status.php';
+$pageurl = new \moodle_url($baseurl, $params);
+$heading = get_string('object_status:page', 'tool_objectfs');
+$PAGE->set_url($pageurl);
+$PAGE->set_context(context_system::instance());
+$PAGE->set_pagelayout('report');
+$PAGE->set_title($heading);
+$PAGE->set_heading($heading);
+
+$reports = objectfs_report::get_report_ids();
+if (empty($reportid) || !array_key_exists($reportid, $reports)) {
+    $reportid = key($reports);
+}
+
+$OUTPUT = $PAGE->get_renderer('tool_objectfs');
+echo $OUTPUT->header();
+echo $OUTPUT->object_status_history_page_header($reports, $reportid);
+
+$reporttypes = objectfs_report::get_report_types();
+foreach ($reporttypes as $reporttype) {
+    echo $OUTPUT->box_start();
+    $table = new object_status_history_table($reporttype, $reportid);
+    $table->baseurl = $pageurl;
+    $table->out(100, false);
+    echo $OUTPUT->box_end();
+}
+
+echo $OUTPUT->footer();

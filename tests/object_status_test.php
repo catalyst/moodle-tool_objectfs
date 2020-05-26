@@ -66,18 +66,6 @@ class object_status_testcase extends tool_objectfs_testcase {
     }
 
     /**
-     * Test that load_report_from_database returns report object.
-     */
-    public function test_load_report_from_database() {
-        objectfs_report::generate_status_report();
-        $reporttypes = objectfs_report::get_report_types();
-        foreach ($reporttypes as $reporttype) {
-            $report = objectfs_report_builder::load_report_from_database($reporttype);
-            $this->assertEquals('tool_objectfs\local\report\objectfs_report', get_class($report));
-        }
-    }
-
-    /**
      * Test that get_report_types returns an array of report types.
      */
     public function test_get_report_types() {

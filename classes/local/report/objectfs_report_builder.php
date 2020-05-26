@@ -45,15 +45,4 @@ abstract class objectfs_report_builder {
             $DB->insert_record('tool_objectfs_report_data', $row);
         }
     }
-
-    public static function load_report_from_database($reporttype) {
-        global $DB;
-        $record = $DB->get_record_sql('SELECT MAX(id) AS reportid FROM {tool_objectfs_reports}');
-        $params = array('reporttype' => $reporttype, 'reportid' => $record->reportid);
-        $rows = $DB->get_records('tool_objectfs_report_data', $params);
-        $report = new objectfs_report($reporttype, $record->reportid);
-        $report->add_rows($rows);
-        return $report;
-    }
-
 }

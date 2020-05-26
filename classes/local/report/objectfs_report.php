@@ -89,24 +89,6 @@ class objectfs_report implements \renderable {
         return $this->reportid;
     }
 
-    /**
-     * @return mixed
-     * @throws \dml_exception
-     */
-    public static function get_last_generate_status_report_runtime() {
-        global $DB, $CFG;
-
-        if ($CFG->branch <= 26) {
-            $lastruntime = $DB->get_field('config_plugins', 'value',
-                array('name' => 'lastcron', 'plugin' => 'tool_objectfs'));
-        } else {
-            $lastruntime = $DB->get_field('task_scheduled', 'lastruntime',
-                array('classname' => '\tool_objectfs\task\generate_status_report'));
-        }
-
-        return $lastruntime;
-    }
-
     public static function generate_status_report() {
         global $DB;
         $reportid = $DB->insert_record('tool_objectfs_reports', (object)['reportdate' => time()]);
