@@ -30,19 +30,4 @@ defined('MOODLE_INTERNAL') || die();
 abstract class objectfs_report_builder {
 
     abstract public function build_report($reportid);
-
-    public static function save_report_to_database(objectfs_report $report) {
-        global $DB;
-        $reporttype = $report->get_report_type();
-        $reportrows = $report->get_rows();
-        $reportid = $report->get_report_id();
-
-        // Add report type to each row.
-        foreach ($reportrows as $row) {
-            $row->reporttype = $reporttype;
-            $row->reportid = $reportid;
-            // We dont use insert_records because of 26 compatibility.
-            $DB->insert_record('tool_objectfs_report_data', $row);
-        }
-    }
 }

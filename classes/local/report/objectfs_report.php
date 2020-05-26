@@ -89,6 +89,24 @@ class objectfs_report implements \renderable {
         return $this->reportid;
     }
 
+    /**
+     * Saves report snapshot to database.
+     *
+     * @return void
+     * @throws /dml_exception
+     */
+    public function save_report_to_database() {
+        global $DB;
+
+        // Add report type to each row.
+        foreach ($this->rows as $row) {
+            $row->reporttype = $this->reporttype;
+            $row->reportid = $this->reportid;
+            // We dont use insert_records because of 26 compatibility.
+            $DB->insert_record('tool_objectfs_report_data', $row);
+        }
+    }
+
     public static function generate_status_report() {
         global $DB;
         $reportid = $DB->insert_record('tool_objectfs_reports', (object)['reportdate' => time()]);
@@ -98,7 +116,7 @@ class objectfs_report implements \renderable {
             $reportbuilderclass = "tool_objectfs\\local\\report\\{$reporttype}_report_builder";
             $reportbuilder = new $reportbuilderclass();
             $report = $reportbuilder->build_report($reportid);
-            objectfs_report_builder::save_report_to_database($report);
+            $report->save_report_to_database();
         }
     }
 
