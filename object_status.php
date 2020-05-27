@@ -47,22 +47,26 @@ $PAGE->set_pagelayout('report');
 $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
 
-$reports = objectfs_report::get_report_ids();
-if (empty($reportid) || !array_key_exists($reportid, $reports)) {
-    $reportid = key($reports);
-}
-
 $OUTPUT = $PAGE->get_renderer('tool_objectfs');
 echo $OUTPUT->header();
-echo $OUTPUT->object_status_history_page_header($reports, $reportid);
 
-$reporttypes = objectfs_report::get_report_types();
-foreach ($reporttypes as $reporttype) {
-    echo $OUTPUT->box_start();
-    $table = new object_status_history_table($reporttype, $reportid);
-    $table->baseurl = $pageurl;
-    $table->out(0, false);
-    echo $OUTPUT->box_end();
+if ($reports = objectfs_report::get_report_ids()) {
+    echo $OUTPUT->object_status_history_page_header($reports, $reportid);
+
+    if (empty($reportid) || !array_key_exists($reportid, $reports)) {
+        $reportid = key($reports);
+    }
+
+    $reporttypes = objectfs_report::get_report_types();
+    foreach ($reporttypes as $reporttype) {
+        echo $OUTPUT->box_start();
+        $table = new object_status_history_table($reporttype, $reportid);
+        $table->baseurl = $pageurl;
+        $table->out(0, false);
+        echo $OUTPUT->box_end();
+    }
+} else {
+    echo $OUTPUT->heading(get_string('nothingtodisplay'));
 }
 
 echo $OUTPUT->footer();
