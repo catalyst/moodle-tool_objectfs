@@ -36,9 +36,9 @@ class location_report_builder extends objectfs_report_builder {
      * @return objectfs_report
      * @throws \dml_exception
      */
-    public function build_report() {
+    public function build_report($reportid) {
         global $DB;
-        $report = new objectfs_report('location');
+        $report = new objectfs_report('location', $reportid);
         $locations = [
             OBJECT_LOCATION_LOCAL,
             OBJECT_LOCATION_DUPLICATED,

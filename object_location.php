@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File status history page.
+ * Object location history page.
  *
  * @package   tool_objectfs
  * @author    Mikhail Golenkov <golenkovm@gmail.com>
@@ -23,24 +23,21 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('NO_OUTPUT_BUFFERING', true);
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-admin_externalpage_setup('tool_objectfs_object_status');
+admin_externalpage_setup('tool_objectfs_object_location_history');
 
-use tool_objectfs\local\report\objectfs_report;
-use tool_objectfs\local\report\object_status_history_table;
-
-$reportid = optional_param('reportid', 0, PARAM_INT);
+$logformat   = optional_param('download', '', PARAM_ALPHA);
 $params = array();
-if (!empty($reportid)) {
-    $params['reportid'] = $reportid;
+if ($logformat) {
+    $params['download'] = $logformat;
 }
 
-$baseurl = '/admin/tool/objectfs/object_status.php';
-$pageurl = new \moodle_url($baseurl, $params);
-$heading = get_string('object_status:page', 'tool_objectfs');
+$pageurl = new \moodle_url('/admin/tool/objectfs/object_location.php', $params);
+$heading = get_string('object_status:locationhistory', 'tool_objectfs');
 $PAGE->set_url($pageurl);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('report');
@@ -48,25 +45,16 @@ $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
 
 $OUTPUT = $PAGE->get_renderer('tool_objectfs');
-echo $OUTPUT->header();
 
-if ($reports = objectfs_report::get_report_ids()) {
-    echo $OUTPUT->object_status_history_page_header($reports, $reportid);
+$table = new tool_objectfs\local\report\object_location_history_table();
+$table->baseurl = $pageurl;
 
-    if (empty($reportid) || !array_key_exists($reportid, $reports)) {
-        $reportid = key($reports);
-    }
-
-    $reporttypes = objectfs_report::get_report_types();
-    foreach ($reporttypes as $reporttype) {
-        echo $OUTPUT->box_start();
-        $table = new object_status_history_table($reporttype, $reportid);
-        $table->baseurl = $pageurl;
-        $table->out(0, false);
-        echo $OUTPUT->box_end();
-    }
+if (empty($logformat)) {
+    echo $OUTPUT->header();
+    $table->out(0, false);
+    echo $OUTPUT->footer();
 } else {
-    echo $OUTPUT->heading(get_string('nothingtodisplay'));
+    $filename = 'object_location_history_' . userdate(time(), get_string('backupnameformat', 'langconfig'), 99, false);
+    $table->is_downloading($logformat, $filename);
+    $table->out(0, false);
 }
-
-echo $OUTPUT->footer();

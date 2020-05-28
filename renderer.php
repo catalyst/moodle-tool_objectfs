@@ -31,208 +31,6 @@ defined('MOODLE_INTERNAL') || die();
 
 class tool_objectfs_renderer extends plugin_renderer_base {
 
-    public function render_objectfs_report(objectfs_report $report) {
-        $reporttype = $report->get_report_type();
-
-        $renderfunction = "render_{$reporttype}_report";
-
-        $output = '';
-
-        $output .= $this->$renderfunction($report);
-
-        return $output;
-    }
-
-    private function render_location_report($report) {
-        $rows = $report->get_rows();
-
-        if (empty($rows)) {
-            return '';
-        }
-
-        $table = new html_table();
-
-        $table->head = array(get_string('object_status:location', 'tool_objectfs'),
-                             get_string('object_status:files', 'tool_objectfs'),
-                             get_string('object_status:size', 'tool_objectfs'));
-
-        foreach ($rows as $row) {
-            $filelocation = $this->get_file_location_string($row->datakey); // Turn int location into string.
-            $table->data[] = array($filelocation, $row->objectcount, $row->objectsum);
-        }
-
-        $this->augment_barchart($table);
-
-        $output = html_writer::table($table);
-
-        return $output;
-    }
-
-    /**
-     * @return string
-     * @throws coding_exception
-     * @throws dml_exception
-     * @throws moodle_exception
-     */
-    private function get_generate_status_report_update_stats_link() {
-        $classname = '\tool_objectfs\task\generate_status_report';
-        if (class_exists('tool_task\run_from_cli')) {
-            $runnabletasks = tool_task\run_from_cli::is_runnable();
-        } else {
-            $runnabletasks = false;
-        }
-
-        $task = \core\task\manager::get_scheduled_task($classname);
-        if (!$task->get_disabled() && get_config('tool_task', 'enablerunnow') && $runnabletasks) {
-
-            $link = html_writer::link(
-                new moodle_url(
-                    '/admin/tool/task/schedule_task.php',
-                    ['task' => '\tool_objectfs\task\generate_status_report']
-                ),
-                '<small>' . get_string('object_status:filedir:update', 'tool_objectfs') . '</small>'
-            );
-            return " ($link)";
-        }
-        return '';
-    }
-
-    /**
-     * @param int|string $filelocation
-     * @return string
-     * @throws coding_exception
-     */
-    private function get_file_location_string($filelocation) {
-        $locationstringmap = [
-            'total' => 'object_status:location:total',
-            'filedir' => 'object_status:filedir',
-            'deltaa' => 'object_status:delta:a',
-            'deltab' => 'object_status:delta:b',
-            OBJECT_LOCATION_ERROR => 'object_status:location:error',
-            OBJECT_LOCATION_LOCAL => 'object_status:location:local',
-            OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
-            OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
-        ];
-        if (isset($locationstringmap[$filelocation])) {
-            return get_string($locationstringmap[$filelocation], 'tool_objectfs');
-        }
-        return get_string('object_status:location:unknown', 'tool_objectfs');
-    }
-
-    private function render_log_size_report($report) {
-        $rows = $report->get_rows();
-
-        if (empty($rows)) {
-            return '';
-        }
-
-        $table = new html_table();
-
-        $table->head = array('logsize',
-                             get_string('object_status:files', 'tool_objectfs'),
-                             get_string('object_status:size', 'tool_objectfs'));
-
-        foreach ($rows as $row) {
-            $sizerange = $this->get_size_range_from_logsize($row->datakey); // Turn logsize into a byte range.
-            $table->data[] = array($sizerange, $row->objectcount, $row->objectsum);
-        }
-
-        $this->augment_barchart($table);
-
-        $output = html_writer::table($table);
-
-        return $output;
-    }
-
-    private function get_size_range_from_logsize($logsize) {
-
-        // Small logsizes have been compressed.
-        if ($logsize == 'small') {
-            return '< 1KB';
-        }
-
-        $floor = pow(2, $logsize);
-        $roof = ($floor * 2);
-        $floor = display_size($floor);
-        $roof = display_size($roof);
-        $sizerange = "$floor - $roof";
-        return $sizerange;
-    }
-
-    private function render_mime_type_report($report) {
-        $rows = $report->get_rows();
-
-        if (empty($rows)) {
-            return '';
-        }
-
-        $table = new html_table();
-
-        $table->head = array('mimetype',
-                             get_string('object_status:files', 'tool_objectfs'),
-                             get_string('object_status:size', 'tool_objectfs'));
-
-        foreach ($rows as $row) {
-            $table->data[] = array($row->datakey, $row->objectcount, $row->objectsum);
-        }
-
-        $this->augment_barchart($table);
-
-        $output = html_writer::table($table);
-
-        return $output;
-    }
-
-    private function augment_barchart(&$table) {
-
-        // This assumes 2 columns, the first is a number and the second
-        // is a file size.
-
-        foreach (array(1, 2) as $col) {
-
-            $max = 0;
-            foreach ($table->data as $row) {
-                if ($row[$col] > $max) {
-                    $max = $row[$col];
-                }
-            }
-
-            foreach ($table->data as $i => $row) {
-                $table->data[$i][$col] = sprintf('<div class="ofs-bar" style="width:%.1f%%">%s</div>',
-                    100 * $row[$col] / $max,
-                    $col == 1 ? number_format($row[$col]) : display_size($row[$col])
-                );
-            }
-        }
-    }
-
-    public function object_status_page_intro() {
-        $output = '';
-
-        $url = new \moodle_url('/admin/settings.php?section=tool_objectfs');
-        $urltext = get_string('settings', 'tool_objectfs');
-        $output .= html_writer::tag('div', html_writer::link($url , $urltext));
-
-        $config = manager::get_objectfs_config();
-        if (!isset($config->enabletasks) || !$config->enabletasks) {
-            $output .= $this->box(get_string('not_enabled', 'tool_objectfs'));
-        }
-
-        $lastrun = objectfs_report::get_last_generate_status_report_runtime();
-        if ($lastrun) {
-            $lastruntext = get_string('object_status:last_run', 'tool_objectfs', userdate($lastrun));
-        } else {
-            $lastruntext = get_string('object_status:never_run', 'tool_objectfs');
-        }
-        $lastruntext .= $this->get_generate_status_report_update_stats_link();
-        $output .= $this->box($lastruntext);
-
-        // Adds bar chart styling for sizes and counts.
-        $output .= "<style>.ofs-bar { background: #17a5eb; white-space: nowrap; }</style>";
-
-        return $output;
-    }
-
     /**
      * Delete test files from files table
      * @throws coding_exception
@@ -408,5 +206,68 @@ class tool_objectfs_renderer extends plugin_renderer_base {
                 get_string('presignedurl_testing:' . $identifier, 'tool_objectfs').'</iframe>';
         }
         return $output . '<br><small>' . $redirect . $url . '</small>';;
+    }
+
+    /**
+     * Returns a header for Object status history page.
+     *
+     * @param  array  $reports     Report ids and dates array
+     * @param  int    $reportid    Requested report id
+     *
+     * @return string HTML string
+     * @throws /moodle_exception
+     */
+    public function object_status_history_page_header($reports, $reportid) {
+        global $OUTPUT;
+        $output = '';
+
+        $baseurl = '/admin/tool/objectfs/object_status.php';
+
+        $previd = array();
+        $nextid = array();
+        $prevdisabled = array('disabled' => true);
+        $nextdisabled = array('disabled' => true);
+
+        end($reports);
+        $oldestid = array('reportid' => key($reports));
+        reset($reports);
+        $latestid = array('reportid' => key($reports));
+
+        while ($reportid != key($reports)) {
+            next($reports);
+        }
+
+        if (next($reports)) {
+            $previd = ['reportid' => key($reports)];
+            $prevdisabled = array();
+            prev($reports);
+        } else {
+            end($reports);
+        }
+
+        if (prev($reports)) {
+            $nextid = ['reportid' => key($reports)];
+            $nextdisabled = array();
+            next($reports);
+        } else {
+            reset($reports);
+        }
+
+        foreach ($reports as $id => $timestamp) {
+            $userdates[$id] = userdate($timestamp, get_string('strftimedaydatetime'));
+        }
+        $output .= $OUTPUT->box_start();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $oldestid), '<<', 'get', $prevdisabled);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $previd), '<', 'get', $prevdisabled);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_select(new \moodle_url($baseurl), 'reportid', $userdates, $reportid, false);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $nextid), '>', 'get', $nextdisabled);
+        $output .= $OUTPUT->spacer();
+        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $latestid), '>>', 'get', $nextdisabled);
+        $output .= $OUTPUT->box_end();
+
+        return $output;
     }
 }

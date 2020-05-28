@@ -48,6 +48,7 @@ function tool_objectfs_cron() {
         // when tasks/manipulators run. Every cron we just run all the manipulators.
         (new manipulator_builder())->execute_all();
 
+        \tool_objectfs\local\report\objectfs_report::cleanup_reports();
         \tool_objectfs\local\report\objectfs_report::generate_status_report();
     }
 

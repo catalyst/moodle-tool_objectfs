@@ -39,6 +39,9 @@ $string['client_not_available'] = 'The configured remote client is not available
 
 $string['object_status:page'] = 'Object status';
 $string['object_status:location'] = 'Object location';
+$string['object_status:locationhistory'] = 'Object location history';
+$string['object_status:log_size'] = 'Log size';
+$string['object_status:mime_type'] = 'Mime type';
 $string['object_status:files'] = 'Objects';
 $string['object_status:size'] = 'Total size';
 
@@ -52,6 +55,20 @@ $string['object_status:location:local'] = 'Marked as only in filedir';
 $string['object_status:location:external'] = 'Only in external storage';
 $string['object_status:location:unknown'] = 'Unknown object location';
 $string['object_status:location:total'] = 'Total';
+$string['object_status:location:localcount'] = 'Local (count)';
+$string['object_status:location:localsize'] = 'Local (size)';
+$string['object_status:location:duplicatedcount'] = 'Duplicated (count)';
+$string['object_status:location:duplicatedsize'] = 'Duplicated (size)';
+$string['object_status:location:externalcount'] = 'External (count)';
+$string['object_status:location:externalsize'] = 'External (size)';
+$string['object_status:location:missingcount'] = 'Error (count)';
+$string['object_status:location:missingsize'] = 'Error (size)';
+$string['object_status:location:totalcount'] = 'Total (count)';
+$string['object_status:location:totalsize'] = 'Total (size)';
+$string['object_status:location:filedircount'] = 'Filedir (count)';
+$string['object_status:location:filedirsize'] = 'Filedir (size)';
+$string['object_status:location:deltacount'] = 'Delta (count)';
+$string['object_status:location:deltasize'] = 'Delta (size)';
 
 $string['object_status:filedir'] = 'Filedir';
 $string['object_status:delta:a'] = 'Delta (filedir - objectfs)';

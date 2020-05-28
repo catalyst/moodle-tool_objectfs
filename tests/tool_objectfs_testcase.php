@@ -56,7 +56,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     }
 
     protected function create_local_file_from_path($pathname) {
-        global $DB;
         $fs = get_file_storage();
         $syscontext = \context_system::instance();
         $component = 'core';
@@ -72,6 +71,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
             'filepath'  => $filepath,
             'filename'  => $pathname,
             'source'    => $sourcefield,
+            'mimetype'  => 'text',
         );
         $file = $fs->create_file_from_pathname($filerecord, $pathname);
 
@@ -80,7 +80,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     }
 
     protected function create_local_file($content = 'test content') {
-        global $DB;
         $fs = get_file_storage();
         $syscontext = \context_system::instance();
         $component = 'core';
@@ -96,6 +95,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
             'filepath'  => $filepath,
             'filename'  => md5($content), // Unqiue content should guarentee unique path.
             'source'    => $sourcefield,
+            'mimetype'  => 'text',
         );
         $file = $fs->create_file_from_string($filerecord, $content);
 
