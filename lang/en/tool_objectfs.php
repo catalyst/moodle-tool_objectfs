@@ -148,7 +148,7 @@ $string['settings:openstack:container'] = 'Container name';
 $string['settings:openstack:container_help'] = 'The name of the container that will store the objects.';
 
 $string['settings:filetransferheader'] = 'File Transfer Settings';
-$string['settings:sizethreshold'] = 'Minimum size threshold (KB)';
+$string['settings:sizethreshold'] = 'Minimum size threshold';
 $string['settings:sizethreshold_help'] = 'Minimum size threshold for transfering objects to external object storage. If objects are over this size they will be transfered.';
 $string['settings:batchsize'] = 'Number files in one batch';
 $string['settings:batchsize_help'] = 'Number of files to be transferred in one cron run';
@@ -172,7 +172,7 @@ $string['settings:presignedurl:enablepresignedurls'] = 'Enable Pre-Signed URLs';
 $string['settings:presignedurl:enablepresignedurls_help'] = 'Enable Pre-Signed URLs to request content directly from external storage.';
 $string['settings:presignedurl:expirationtime'] = 'Pre-Signed URL expiration time';
 $string['settings:presignedurl:expirationtime_help'] = 'The time after which the Pre-Signed URL should expire.';
-$string['settings:presignedurl:presignedminfilesize'] = 'Minimum size for Pre-Signed URL (KB)';
+$string['settings:presignedurl:presignedminfilesize'] = 'Minimum size for Pre-Signed URL';
 $string['settings:presignedurl:presignedminfilesize_help'] = 'Minimum file size to be redirected to Pre-Signed URL.';
 
 $string['settings:presignedurl:enablepresigneds3urls'] = 'S3 Pre-Signed URLs';
