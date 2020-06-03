@@ -103,9 +103,10 @@ class object_status_testcase extends tool_objectfs_testcase {
         $table->setup();
         $table->query_db(100, false);
         $this->assertEquals(1, count($table->rawdata));
-        $this->assertEquals('< 1KB', $table->rawdata[0]['reporttype']);
-        $this->assertEquals('1', strip_tags($table->rawdata[0]['files']));
-        $this->assertEquals('10 bytes', strip_tags($table->rawdata[0]['size']));
+        $record = reset($table->rawdata);
+        $this->assertEquals('small', $record->heading);
+        $this->assertEquals('1', $record->count);
+        $this->assertEquals('10', $record->size);
     }
 
     /**
@@ -122,9 +123,10 @@ class object_status_testcase extends tool_objectfs_testcase {
         $table->setup();
         $table->query_db(100, false);
         $this->assertEquals(1, count($table->rawdata));
-        $this->assertEquals('', $table->rawdata[0]['reporttype']);
-        $this->assertEquals('1', strip_tags($table->rawdata[0]['files']));
-        $this->assertEquals('10 bytes', strip_tags($table->rawdata[0]['size']));
+        $record = reset($table->rawdata);
+        $this->assertEquals('', $record->heading);
+        $this->assertEquals('1', $record->count);
+        $this->assertEquals('10', $record->size);
     }
 
     /**
