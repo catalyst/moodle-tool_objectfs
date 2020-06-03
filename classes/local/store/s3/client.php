@@ -207,19 +207,16 @@ class client extends object_client_base {
     public function test_connection() {
         $connection = new \stdClass();
         $connection->success = true;
-        $connection->message = '';
+        $connection->details = '';
 
         try {
             $this->client->headBucket(array('Bucket' => $this->bucket));
-            $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $connection->success = false;
-            $details = $this->get_exception_details($e);
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+            $connection->details = $this->get_exception_details($e);
         } catch (\GuzzleHttp\Exception\InvalidArgumentException $e) {
             $connection->success = false;
-            $details = $this->get_exception_details($e);
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+            $connection->details = $this->get_exception_details($e);
         }
 
         return $connection;
@@ -339,7 +336,7 @@ class client extends object_client_base {
         }
 
         $settings->add(new \admin_setting_heading('tool_objectfs/aws',
-            new \lang_string('settings:aws:header', 'tool_objectfs'), ''));
+            new \lang_string('settings:aws:header', 'tool_objectfs'), $this->define_client_check()));
 
         $settings->add(new \admin_setting_configtext('tool_objectfs/s3_key',
             new \lang_string('settings:aws:key', 'tool_objectfs'),

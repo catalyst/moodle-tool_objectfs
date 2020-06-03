@@ -169,26 +169,23 @@ class client extends object_client_base {
 
         $connection = new \stdClass();
         $connection->success = true;
-        $connection->message = '';
+        $connection->details = '';
 
         try {
             $container = $this->get_container();
         } catch (\Exception $e) {
             $connection->success = false;
-            $connection->message = $e->getMessage();
+            $connection->details = $e->getMessage();
             return $connection;
         }
 
         try {
-            $result = $container->createObject(['name' => 'connection_check_file', 'content' => 'connection_check_file']);
-            $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
+            $container->createObject(['name' => 'connection_check_file', 'content' => 'connection_check_file']);
         } catch (BadResponseError $e) {
             $connection->success = false;
-            $details = $this->get_exception_details($e);
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+            $connection->details = $this->get_exception_details($e);
         } catch (Exception $e) {
             $connection->success = false;
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs');
         }
 
         return $connection;
@@ -262,7 +259,7 @@ class client extends object_client_base {
     public function define_client_section($settings, $config) {
 
         $settings->add(new \admin_setting_heading('tool_objectfs/openstack',
-            new \lang_string('settings:openstack:header', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:header', 'tool_objectfs'), $this->define_client_check()));
 
         $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_authurl',
             new \lang_string('settings:openstack:authurl', 'tool_objectfs'),
