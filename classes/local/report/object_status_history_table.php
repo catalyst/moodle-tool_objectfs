@@ -49,6 +49,9 @@ class object_status_history_table extends \table_sql {
     /** @var int $maxsize */
     protected $maxsize = 0;
 
+    /** @var int $totalsize */
+    protected $totalsize = 0;
+
     /**
      * Constructor for the file status history table.
      */
@@ -63,6 +66,11 @@ class object_status_history_table extends \table_sql {
             'count'       => get_string('object_status:count', 'tool_objectfs'),
             'size'        => get_string('object_status:size', 'tool_objectfs'),
         ];
+
+        if ($this->reporttype == 'log_size') {
+            $columnheaders['runningsize'] = get_string('object_status:runningsize', 'tool_objectfs');
+            $columnheaders['runningpsentage'] = get_string('object_status:runningpsentage', 'tool_objectfs');
+        }
 
         $this->define_columns(array_keys($columnheaders));
         $this->define_headers(array_values($columnheaders));
@@ -87,6 +95,7 @@ class object_status_history_table extends \table_sql {
         $this->rawdata = $rows;
 
         foreach ($rows as $row) {
+            $this->totalsize += $row->size;
             if ($row->count > $this->maxcount) {
                 $this->maxcount = $row->count;
             }
@@ -131,8 +140,7 @@ class object_status_history_table extends \table_sql {
             $share = round(100 * $row->count / $this->maxcount);
         }
         $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
-        $output = \html_writer::tag('div', number_format($row->count), $htmlparams);
-        return $output;
+        return \html_writer::tag('div', number_format($row->count), $htmlparams);
     }
 
     /**
@@ -147,8 +155,51 @@ class object_status_history_table extends \table_sql {
             $share = round(100 * $row->size / $this->maxsize);
         }
         $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
-        $output = \html_writer::tag('div', display_size($row->size), $htmlparams);
-        return $output;
+        return \html_writer::tag('div', display_size($row->size), $htmlparams);
+    }
+
+    /**
+     * Format the column with running total (size) for log size report.
+     *
+     * @param  \stdClass $row
+     * @return string
+     */
+    public function col_runningsize(\stdClass $row) {
+        $runningsize = 0;
+        foreach ($this->rawdata as $rawdatum) {
+            $runningsize += $rawdatum->size;
+            if ($rawdatum->heading == $row->heading) {
+                break;
+            }
+        }
+        $share = 0;
+        if ($this->totalsize > 0) {
+            $share = round(100 * $runningsize / $this->totalsize);
+        }
+        $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
+        return \html_writer::tag('div', display_size($runningsize), $htmlparams);
+    }
+
+    /**
+     * Format the column with a running total (percentage) for log size report.
+     *
+     * @param  \stdClass $row
+     * @return string
+     */
+    public function col_runningpsentage(\stdClass $row) {
+        $runningsize = 0;
+        foreach ($this->rawdata as $rawdatum) {
+            $runningsize += $rawdatum->size;
+            if ($rawdatum->heading == $row->heading) {
+                break;
+            }
+        }
+        $share = 0;
+        if ($this->totalsize > 0) {
+            $share = round(100 * $runningsize / $this->totalsize, 2);
+        }
+        $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
+        return \html_writer::tag('div', number_format($share, 2) . '%', $htmlparams);
     }
 
     /**
