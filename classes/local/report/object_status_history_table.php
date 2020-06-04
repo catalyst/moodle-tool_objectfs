@@ -69,7 +69,6 @@ class object_status_history_table extends \table_sql {
 
         if ($this->reporttype == 'log_size') {
             $columnheaders['runningsize'] = get_string('object_status:runningsize', 'tool_objectfs');
-            //$columnheaders['runningpsentage'] = get_string('object_status:runningpsentage', 'tool_objectfs');
         }
 
         $this->define_columns(array_keys($columnheaders));
@@ -135,12 +134,7 @@ class object_status_history_table extends \table_sql {
      * @return string
      */
     public function col_count(\stdClass $row) {
-        $share = 0;
-        if ($this->maxcount > 0) {
-            $share = round(100 * $row->count / $this->maxcount);
-        }
-        $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
-        return \html_writer::tag('div', number_format($row->count), $htmlparams);
+        return $this->add_barchart($row->count, $this->maxcount, 'count');
     }
 
     /**
@@ -150,12 +144,7 @@ class object_status_history_table extends \table_sql {
      * @return string
      */
     public function col_size(\stdClass $row) {
-        $share = 0;
-        if ($this->maxsize > 0) {
-            $share = round(100 * $row->size / $this->maxsize);
-        }
-        $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
-        return \html_writer::tag('div', display_size($row->size), $htmlparams);
+        return $this->add_barchart($row->size, $this->maxsize, 'size');
     }
 
     /**
@@ -172,13 +161,43 @@ class object_status_history_table extends \table_sql {
                 break;
             }
         }
+        return $this->add_barchart($runningsize, $this->totalsize, 'runningsize', 2);
+    }
+
+    /**
+     * Wrap the column value into HTML tag with bar chart.
+     *
+     * @param  int    $value     Table cell value
+     * @param  int    $max       Maximum value for a given column
+     * @param  string $type      Column type (count, size or runningsize)
+     * @param  int    $precision The optional number of decimal digits to round to
+     * @return string
+     */
+    public function add_barchart($value, $max, $type, $precision = 0) {
         $share = 0;
-        if ($this->totalsize > 0) {
-            $share = round(100 * $runningsize / $this->totalsize, 2);
+        if ($max > 0) {
+            $share = round(100 * $value / $max, $precision);
         }
         $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
-        $text = number_format($share, 2). '% (' . display_size($runningsize) . ')';
-        return \html_writer::tag('div', $text, $htmlparams);
+
+        switch ($type) {
+            case 'count':
+                $output = \html_writer::tag('div', number_format($value), $htmlparams);
+                break;
+
+            case 'size':
+                $output = \html_writer::tag('div', display_size($value), $htmlparams);
+                break;
+
+            case 'runningsize':
+                $text = number_format($share, $precision). '% (' . display_size($value) . ')';
+                $output = \html_writer::tag('div', $text, $htmlparams);
+                break;
+
+            default:
+                $output = $value;
+        }
+        return $output;
     }
 
     /**
@@ -188,7 +207,7 @@ class object_status_history_table extends \table_sql {
      * @return string
      * @throws \coding_exception
      */
-    private function get_file_location_string($filelocation) {
+    public function get_file_location_string($filelocation) {
         $locationstringmap = [
             'total' => 'object_status:location:total',
             'filedir' => 'object_status:filedir',
@@ -211,7 +230,7 @@ class object_status_history_table extends \table_sql {
      * @param  string $logsize
      * @return string
      */
-    private function get_size_range_from_logsize($logsize) {
+    public function get_size_range_from_logsize($logsize) {
         // Small logsizes have been compressed.
         if ($logsize == 'small') {
             return '< 1KB';
