@@ -217,19 +217,16 @@ class client extends object_client_base {
     public function test_connection() {
         $connection = new \stdClass();
         $connection->success = true;
-        $connection->message = '';
+        $connection->details = '';
 
         try {
-            $result = $this->client->createBlockBlob($this->container, 'connection_check_file', 'connection_check_file');
-            $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
+            $this->client->createBlockBlob($this->container, 'connection_check_file', 'connection_check_file');
         } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
             $connection->success = false;
-            $details = $this->get_exception_details($e);
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+            $connection->details = $this->get_exception_details($e);
         } catch (\GuzzleHttp\Exception\ConnectException $e) {
             $connection->success = false;
-            $details = $e->getMessage();
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+            $connection->details = $e->getMessage();
         }
 
         return $connection;
@@ -319,7 +316,7 @@ class client extends object_client_base {
     public function define_client_section($settings, $config) {
 
         $settings->add(new \admin_setting_heading('tool_objectfs/azure',
-            new \lang_string('settings:azure:header', 'tool_objectfs'), ''));
+            new \lang_string('settings:azure:header', 'tool_objectfs'), $this->define_client_check()));
 
         $settings->add(new \admin_setting_configtext('tool_objectfs/azure_accountname',
             new \lang_string('settings:azure:accountname', 'tool_objectfs'),

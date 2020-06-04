@@ -66,6 +66,7 @@ class manager {
         $config->presignedminfilesize = 0;
 
         // S3 file system.
+        $config->s3_usesdkcreds = 0;
         $config->s3_key = '';
         $config->s3_secret = '';
         $config->s3_bucket = '';

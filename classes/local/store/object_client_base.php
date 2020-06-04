@@ -83,50 +83,29 @@ abstract class object_client_base implements object_client {
     /**
      * Moodle admin settings form to display connection details for the client service.
      *
-     * @param $client
+     * @return string
+     * @throws /coding_exception
      */
-    public function define_client_check($client) {
-        if (CLI_SCRIPT) {
-            // Running from CLI and there is no session.
-            return;
-        }
-        $connection = $client->test_connection();
+    public function define_client_check() {
+        global $OUTPUT;
+        $output = '';
+        $connection = $this->test_connection();
         if ($connection->success) {
-            $this->notification($connection->message);
+            $output .= $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_objectfs'), 'notifysuccess');
             // Check permissions if we can connect.
-            $permissions = $client->test_permissions($this->testdelete);
+            $permissions = $this->test_permissions($this->testdelete);
             if ($permissions->success) {
-                $message = key($permissions->messages) . ' ' . current($permissions->messages);
-                $this->notification($message);
+                $output .= $OUTPUT->notification(key($permissions->messages), 'notifysuccess');
             } else {
                 foreach ($permissions->messages as $message => $type) {
-                    $this->notification($message . ' - ' . $type, 'warning');
+                    $output .= $OUTPUT->notification($message, $type);
                 }
             }
         } else {
-            $this->notification($connection->message, 'error');
+            $output .= $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_objectfs').
+                $connection->details, 'notifyproblem');
         }
-    }
-
-    /**
-     * Class \core\notification is only available for moodle versions > 3.1
-     * @param $message
-     * @param string $type
-     */
-    public function notification($message, $type = 'success') {
-        global $CFG, $OUTPUT, $SESSION;;
-        $methodsmap = [
-            'success' => 'notifysuccess',
-            'warning' => 'notifyproblem',
-            'error' => 'notifyproblem',
-        ];
-        if (!empty($CFG->branch) && $CFG->branch < '31' && isset($methodsmap[$type])) {
-            $type = $methodsmap[$type];
-            echo $OUTPUT->notification($message, $type);
-        } else {
-            $SESSION->notifications = [];
-            call_user_func('\core\notification::' . $type, $message);
-        }
+        return $output;
     }
 
     /**

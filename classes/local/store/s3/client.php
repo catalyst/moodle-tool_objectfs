@@ -77,10 +77,13 @@ class client extends object_client_base {
 
     public function set_client($config) {
         $options = array(
-            'credentials' => array('key' => $config->s3_key, 'secret' => $config->s3_secret),
             'region' => $config->s3_region,
             'version' => AWS_API_VERSION
         );
+
+        if (empty($config->s3_usesdkcreds)) {
+            $options['credentials'] = array('key' => $config->s3_key, 'secret' => $config->s3_secret);
+        }
 
         if ($config->useproxy) {
             $options['http'] = array('proxy' => $this->get_proxy_string());
@@ -207,19 +210,19 @@ class client extends object_client_base {
     public function test_connection() {
         $connection = new \stdClass();
         $connection->success = true;
-        $connection->message = '';
+        $connection->details = '';
 
         try {
             $this->client->headBucket(array('Bucket' => $this->bucket));
-            $connection->message = get_string('settings:connectionsuccess', 'tool_objectfs');
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $connection->success = false;
-            $details = $this->get_exception_details($e);
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+            $connection->details = $this->get_exception_details($e);
         } catch (\GuzzleHttp\Exception\InvalidArgumentException $e) {
             $connection->success = false;
-            $details = $this->get_exception_details($e);
-            $connection->message = get_string('settings:connectionfailure', 'tool_objectfs') . $details;
+            $connection->details = $this->get_exception_details($e);
+        } catch (\Aws\Exception\CredentialsException $e) {
+            $connection->success = false;
+            $connection->details = $this->get_exception_details($e);
         }
 
         return $connection;
@@ -230,7 +233,8 @@ class client extends object_client_base {
      * There is no check connection in the AWS API.
      * We use list buckets instead and check the bucket is in the list.
      *
-     * @return boolean true on success, false on failure.
+     * @return object
+     * @throws \coding_exception
      */
     public function test_permissions($testdelete) {
         $permissions = new \stdClass();
@@ -339,15 +343,21 @@ class client extends object_client_base {
         }
 
         $settings->add(new \admin_setting_heading('tool_objectfs/aws',
-            new \lang_string('settings:aws:header', 'tool_objectfs'), ''));
+            new \lang_string('settings:aws:header', 'tool_objectfs'), $this->define_client_check()));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/s3_key',
-            new \lang_string('settings:aws:key', 'tool_objectfs'),
-            new \lang_string('settings:aws:key_help', 'tool_objectfs'), ''));
+        $settings->add(new \admin_setting_configcheckbox('tool_objectfs/s3_usesdkcreds',
+            new \lang_string('settings:aws:usesdkcreds', 'tool_objectfs'),
+            $this->define_client_check_sdk($config), ''));
 
-        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/s3_secret',
-            new \lang_string('settings:aws:secret', 'tool_objectfs'),
-            new \lang_string('settings:aws:secret_help', 'tool_objectfs'), ''));
+        if (empty($config->s3_usesdkcreds)) {
+            $settings->add(new \admin_setting_configtext('tool_objectfs/s3_key',
+                new \lang_string('settings:aws:key', 'tool_objectfs'),
+                new \lang_string('settings:aws:key_help', 'tool_objectfs'), ''));
+
+            $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/s3_secret',
+                new \lang_string('settings:aws:secret', 'tool_objectfs'),
+                new \lang_string('settings:aws:secret_help', 'tool_objectfs'), ''));
+        }
 
         $settings->add(new \admin_setting_configtext('tool_objectfs/s3_bucket',
             new \lang_string('settings:aws:bucket', 'tool_objectfs'),
@@ -591,5 +601,40 @@ class client extends object_client_base {
             }
         }
         return $proxy;
+    }
+
+    /**
+     * Perform test connection and permission check using
+     * the default credential provider chain to find AWS credentials.
+     *
+     * @param  object $config
+     * @return string HTML string holding notification messages
+     * @throws /coding_exception
+     */
+    public function define_client_check_sdk($config) {
+        global $OUTPUT;
+        $output = '';
+        if (empty($config->s3_usesdkcreds)) {
+            $config->s3_usesdkcreds = 1;
+            $this->set_client($config);
+            $connection = $this->test_connection();
+            if ($connection->success) {
+                $output .= $OUTPUT->notification(get_string('settings:aws:sdkcredsok', 'tool_objectfs'), 'notifysuccess');
+                // Check permissions if we can connect.
+                $permissions = $this->test_permissions($this->testdelete);
+                if ($permissions->success) {
+                    $output .= $OUTPUT->notification(key($permissions->messages), 'notifysuccess');
+                } else {
+                    foreach ($permissions->messages as $message => $type) {
+                        $output .= $OUTPUT->notification($message, $type);
+                    }
+                }
+            } else {
+                $output .= $OUTPUT->notification(get_string('settings:aws:sdkcredserror', 'tool_objectfs'), 'warning');
+            }
+            $config->s3_usesdkcreds = 0;
+            $this->set_client($config);
+        }
+        return $output;
     }
 }
