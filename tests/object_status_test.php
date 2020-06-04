@@ -167,4 +167,75 @@ class object_status_testcase extends tool_objectfs_testcase {
         $reports = objectfs_report::get_report_ids();
         $this->assertEquals(0, count($reports));
     }
+
+    /**
+     * Data provider for test_object_status_add_barchart_method().
+     *
+     * @return array
+     */
+    public function test_object_status_add_barchart_method_provider() {
+        return [
+            [0, 0, '', 0, '0'],
+            [0, 100, 'count', 0, '<div class="ofs-bar" style="width:0%">0</div>'],
+            [0, 100, 'size', 0, '<div class="ofs-bar" style="width:0%">0 bytes</div>'],
+            [0, 100, 'runningsize', 0, '<div class="ofs-bar" style="width:0%">0% (0 bytes)</div>'],
+            [0, 100, 'count', 2, '<div class="ofs-bar" style="width:0%">0</div>'],
+            [0, 100, 'size', 2, '<div class="ofs-bar" style="width:0%">0 bytes</div>'],
+            [0, 100, 'runningsize', 2, '<div class="ofs-bar" style="width:0%">0.00% (0 bytes)</div>'],
+            [10, 100, 'count', 2, '<div class="ofs-bar" style="width:10%">10</div>'],
+            [10, 100, 'size', 2, '<div class="ofs-bar" style="width:10%">10 bytes</div>'],
+            [10, 100, 'runningsize', 2, '<div class="ofs-bar" style="width:10%">10.00% (10 bytes)</div>'],
+            [12345678, 123456789, 'count', 0, '<div class="ofs-bar" style="width:10%">12,345,678</div>'],
+            [12345678, 123456789, 'size', 0, '<div class="ofs-bar" style="width:10%">11.8MB</div>'],
+            [12345678, 123456789, 'runningsize', 2, '<div class="ofs-bar" style="width:10%">10.00% (11.8MB)</div>'],
+        ];
+    }
+
+    /**
+     * Test add_barchart() returns correct HTML string.
+     *
+     * @dataProvider test_object_status_add_barchart_method_provider
+     *
+     * @param  int    $value     Table cell value
+     * @param  int    $max       Maximum value for a given column
+     * @param  string $type      Column type (count, size or runningsize)
+     * @param  int    $precision The optional number of decimal digits to round to
+     * @param  string $expected  Expected result
+     */
+    public function test_object_status_add_barchart_method($value, $max, $type, $precision, $expected) {
+        $table = new object_status_history_table('location', 0);
+        $actual = $table->add_barchart($value, $max, $type, $precision);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Data provider for test_object_status_get_size_range_from_logsize().
+     *
+     * @return array
+     */
+    public function test_object_status_get_size_range_from_logsize_provider() {
+        return [
+            ['small', '< 1KB'],
+            ['10', '1KB - 2KB'],
+            ['11', '2KB - 4KB'],
+            ['20', '1MB - 2MB'],
+            ['21', '2MB - 4MB'],
+            ['30', '1GB - 2GB'],
+            ['31', '2GB - 4GB'],
+        ];
+    }
+
+    /**
+     * Test get_size_range_from_logsize() returns correct HTML string.
+     *
+     * @dataProvider test_object_status_get_size_range_from_logsize_provider
+     *
+     * @param  string $logsize   Log size to be ranged
+     * @param  string $expected  Expected result
+     */
+    public function test_object_status_get_size_range_from_logsize($logsize, $expected) {
+        $table = new object_status_history_table('location', 0);
+        $actual = $table->get_size_range_from_logsize($logsize);
+        $this->assertEquals($expected, $actual);
+    }
 }
