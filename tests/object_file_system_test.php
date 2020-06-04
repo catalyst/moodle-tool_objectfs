@@ -676,7 +676,8 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      * @param $presignedminfilesize mixed minimum file size to be redirected to pre-signed URL.
      * @param $result boolean expected result.
      */
-    public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls, $presignedminfilesize, $result) {
+    public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls,
+            $presignedminfilesize, $result) {
         $this->filesystem = new test_file_system();
         $externalclient = $this->filesystem->get_external_client();
 

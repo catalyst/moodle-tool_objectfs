@@ -89,9 +89,7 @@ class client extends object_client_base {
             $options['http'] = array('proxy' => $this->get_proxy_string());
         }
 
-        // support base_url config for aws api
-        // compatible endpoints
-
+        // Support base_url config for aws api compatible endpoints.
         if ($config->s3_base_url) {
             $options['endpoint'] = $config->s3_base_url;
         }

@@ -27,8 +27,6 @@ namespace tool_objectfs\local\report;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\report\objectfs_report;
-
 require_once($CFG->libdir . '/tablelib.php');
 
 /**
@@ -45,6 +43,15 @@ class object_status_history_table extends \table_sql {
     /** @var int $reportid */
     protected $reportid = 0;
 
+    /** @var int $maxcount */
+    protected $maxcount = 0;
+
+    /** @var int $maxsize */
+    protected $maxsize = 0;
+
+    /** @var int $totalsize */
+    protected $totalsize = 0;
+
     /**
      * Constructor for the file status history table.
      */
@@ -55,10 +62,14 @@ class object_status_history_table extends \table_sql {
         $this->reportid = $reportid;
 
         $columnheaders = [
-            'reporttype'  => get_string('object_status:' . $reporttype, 'tool_objectfs'),
-            'files'       => get_string('object_status:files', 'tool_objectfs'),
+            'heading'     => get_string('object_status:' . $reporttype, 'tool_objectfs'),
+            'count'       => get_string('object_status:count', 'tool_objectfs'),
             'size'        => get_string('object_status:size', 'tool_objectfs'),
         ];
+
+        if ($this->reporttype == 'log_size') {
+            $columnheaders['runningsize'] = get_string('object_status:runningsize', 'tool_objectfs');
+        }
 
         $this->define_columns(array_keys($columnheaders));
         $this->define_headers(array_values($columnheaders));
@@ -78,24 +89,157 @@ class object_status_history_table extends \table_sql {
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
         $params = array('reporttype' => $this->reporttype, 'reportid' => $this->reportid);
-        $fields = 'datakey AS reporttype, objectcount AS files, objectsum AS size';
+        $fields = 'datakey AS heading, objectcount AS count, objectsum AS size';
         $rows = $DB->get_records('tool_objectfs_report_data', $params, '', $fields);
+        $this->rawdata = $rows;
 
-        $table = new \stdClass();
         foreach ($rows as $row) {
-            if ($this->reporttype == 'location') {
-                $reporttype = objectfs_report::get_file_location_string($row->reporttype);
-            } else if ($this->reporttype == 'log_size') {
-                $reporttype = objectfs_report::get_size_range_from_logsize($row->reporttype);
-            } else {
-                $reporttype = $row->reporttype;
+            $this->totalsize += $row->size;
+            if ($row->count > $this->maxcount) {
+                $this->maxcount = $row->count;
             }
+            if ($row->size > $this->maxsize) {
+                $this->maxsize = $row->size;
+            }
+        }
+    }
 
-            $table->data[] = array($reporttype, $row->files, $row->size);
+    /**
+     * Format the heading column.
+     *
+     * @param  \stdClass $row
+     * @return string
+     * @throws \coding_exception
+     */
+    public function col_heading(\stdClass $row) {
+        switch ($this->reporttype) {
+            case 'location':
+                $heading = $this->get_file_location_string($row->heading);
+                break;
+
+            case 'log_size':
+                $heading = $this->get_size_range_from_logsize($row->heading);
+                break;
+
+            default:
+                $heading = $row->heading;
         }
-        objectfs_report::augment_barchart($table);
-        foreach ($table->data as $item) {
-            $this->rawdata[] = array('reporttype' => $item[0], 'files' => $item[1], 'size' => $item[2]);
+        return $heading;
+    }
+
+    /**
+     * Format the count column.
+     *
+     * @param  \stdClass $row
+     * @return string
+     */
+    public function col_count(\stdClass $row) {
+        return $this->add_barchart($row->count, $this->maxcount, 'count');
+    }
+
+    /**
+     * Format the size column.
+     *
+     * @param  \stdClass $row
+     * @return string
+     */
+    public function col_size(\stdClass $row) {
+        return $this->add_barchart($row->size, $this->maxsize, 'size');
+    }
+
+    /**
+     * Format the column with running total (size) for log size report.
+     *
+     * @param  \stdClass $row
+     * @return string
+     */
+    public function col_runningsize(\stdClass $row) {
+        $runningsize = 0;
+        foreach ($this->rawdata as $rawdatum) {
+            $runningsize += $rawdatum->size;
+            if ($rawdatum->heading == $row->heading) {
+                break;
+            }
         }
+        return $this->add_barchart($runningsize, $this->totalsize, 'runningsize', 2);
+    }
+
+    /**
+     * Wrap the column value into HTML tag with bar chart.
+     *
+     * @param  int    $value     Table cell value
+     * @param  int    $max       Maximum value for a given column
+     * @param  string $type      Column type (count, size or runningsize)
+     * @param  int    $precision The optional number of decimal digits to round to
+     * @return string
+     */
+    public function add_barchart($value, $max, $type, $precision = 0) {
+        $share = 0;
+        if ($max > 0) {
+            $share = round(100 * $value / $max, $precision);
+        }
+        $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
+
+        switch ($type) {
+            case 'count':
+                $output = \html_writer::tag('div', number_format($value), $htmlparams);
+                break;
+
+            case 'size':
+                $output = \html_writer::tag('div', display_size($value), $htmlparams);
+                break;
+
+            case 'runningsize':
+                $text = number_format($share, $precision). '% (' . display_size($value) . ')';
+                $output = \html_writer::tag('div', $text, $htmlparams);
+                break;
+
+            default:
+                $output = $value;
+        }
+        return $output;
+    }
+
+    /**
+     * Formats location string.
+     *
+     * @param  int|string $filelocation
+     * @return string
+     * @throws \coding_exception
+     */
+    public function get_file_location_string($filelocation) {
+        $locationstringmap = [
+            'total' => 'object_status:location:total',
+            'filedir' => 'object_status:filedir',
+            'deltaa' => 'object_status:delta:a',
+            'deltab' => 'object_status:delta:b',
+            OBJECT_LOCATION_ERROR => 'object_status:location:error',
+            OBJECT_LOCATION_LOCAL => 'object_status:location:local',
+            OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
+            OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
+        ];
+        if (isset($locationstringmap[$filelocation])) {
+            return get_string($locationstringmap[$filelocation], 'tool_objectfs');
+        }
+        return get_string('object_status:location:unknown', 'tool_objectfs');
+    }
+
+    /**
+     * Formats size range from log size.
+     *
+     * @param  string $logsize
+     * @return string
+     */
+    public function get_size_range_from_logsize($logsize) {
+        // Small logsizes have been compressed.
+        if ($logsize == 'small') {
+            return '< 1KB';
+        }
+        $floor = pow(2, $logsize);
+        $roof = ($floor * 2);
+        $floor = display_size($floor);
+        $roof = display_size($roof);
+        $sizerange = "$floor - $roof";
+        return $sizerange;
     }
 }
