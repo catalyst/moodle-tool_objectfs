@@ -257,7 +257,7 @@ Go to Site Administration -> Plugins -> Admin tools -> Object storage file syste
 ### File Transfer settings
 These settings control the movement of files to and from object storage.
 
-- **Minimum size threshold (KB)**: Minimum size threshold for transferring objects to remote object storage. If objects are over this size they will be transferred.
+- **Minimum size threshold (bytes)**: Minimum size threshold in bytes for transferring objects to remote object storage. If objects are over this size they will be transferred.
 - **Minimum age**: Minimum age that a object must exist on the local filedir before it will be considered for transfer.
 - **Delete local objects**: Delete local objects once they are in remote object storage after the consistency delay.
 - **Consistency delay**: How long an object must have existed after being transferred to remote object storage before they are a candidate for deletion locally.
@@ -268,7 +268,7 @@ These settings control the movement of files to and from object storage.
 ### Pre-Signed URLs Settings
 - **Enable Pre-Signed URLs**: Enable redirect requesting content from external storage.
 - **Pre-Signed URL expiration time**: The time after which the **Pre-Signed URL** should expire.
-- **Minimum size for Pre-Signed URL (KB)**: Minimum file size required to redirect requests to an external storage.
+- **Minimum size for Pre-Signed URL (bytes)**: Minimum file size in bytes required to redirect requests to an external storage.
 - **Pre-Signed URL whitelist**: Specify file extensions eligible to generate a **Pre-Signed URL**. If left empty requests will not be redirected to an external storage even if **Enable Pre-Signed URLs** is **ON**.  
 - **Signing method**: Define the desired client to generate **Pre-Signed URLs**.
     * Options available:
