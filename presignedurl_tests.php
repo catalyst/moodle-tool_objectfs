@@ -44,7 +44,7 @@ if ($delete) {
 
 echo $output->header();
 echo $output->heading(get_string('presignedurl_testing:page', 'tool_objectfs'));
-$settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs'),
+$settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs_settings'),
     get_string('presignedurl_testing:objectfssettings', 'tool_objectfs'));
 
 $config = manager::get_objectfs_config();
