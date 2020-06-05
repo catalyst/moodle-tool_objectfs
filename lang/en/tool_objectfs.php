@@ -211,7 +211,7 @@ $string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfron
 
 $string['pleaseselect'] = 'Please, select';
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
-$string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLa are not supported by chosen storage file system.';
+$string['presignedurl_testing:presignedurlsnotsupported'] = 'Pre-Signed URLs are not supported by chosen storage file system.';
 $string['presignedurl_testing:test1'] = '1) Test links below to download file with contenthash as its name:';
 $string['presignedurl_testing:test2'] = '2) Test links below to download file with original file name:';
 $string['presignedurl_testing:test3'] = '3) Test links below to open content inline:';
