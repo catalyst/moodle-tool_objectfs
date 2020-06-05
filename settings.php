@@ -34,10 +34,12 @@ if (!$hassiteconfig) {
     return;
 }
 
-$settings = new admin_settingpage('tool_objectfs', get_string('pluginname', 'tool_objectfs'));
-$ADMIN->add('tools', $settings);
+$ADMIN->add('tools', new admin_category('tool_objectfs', get_string('pluginname', 'tool_objectfs')));
 
-$ADMIN->add('tools', new admin_externalpage('tool_objectfs_presignedurl_testing',
+$settings = new admin_settingpage('tool_objectfs_settings', get_string('pluginsettings', 'tool_objectfs'));
+$ADMIN->add('tool_objectfs', $settings);
+
+$ADMIN->add('tool_objectfs', new admin_externalpage('tool_objectfs_presignedurl_testing',
     get_string('presignedurl_testing:page', 'tool_objectfs'),
     new moodle_url('/admin/tool/objectfs/presignedurl_tests.php')));
 
@@ -49,7 +51,7 @@ $ADMIN->add('reports', new admin_externalpage('tool_objectfs_object_location_his
     get_string('object_status:locationhistory', 'tool_objectfs'),
     new moodle_url('/admin/tool/objectfs/object_location.php')));
 
-$ADMIN->add('tools', new admin_externalpage('tool_objectfs_missing_files',
+$ADMIN->add('tool_objectfs', new admin_externalpage('tool_objectfs_missing_files',
     get_string('page:missingfiles', 'tool_objectfs'),
     new moodle_url('/admin/tool/objectfs/missing_files.php')));
 

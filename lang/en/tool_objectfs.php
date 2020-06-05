@@ -25,6 +25,7 @@
  */
 
 $string['pluginname'] = 'Object storage file system';
+$string['pluginsettings'] = 'Plugin Settings';
 $string['privacy:metadata'] = 'The tool objectfs plugin does not store any personal data.';
 $string['push_objects_to_storage_task'] = 'Object file system upload task';
 $string['delete_local_objects_task'] = 'Object file system delete local objects task';
