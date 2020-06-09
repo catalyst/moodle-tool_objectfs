@@ -85,12 +85,10 @@ class object_location_history_table extends \table_sql {
         $reports = objectfs_report::get_report_ids();
 
         foreach ($reports as $id => $timecreated) {
-            $deltacount = abs($rawrecords[$id.'filedir']->count -
-                $rawrecords[$id.OBJECT_LOCATION_LOCAL]->count -
-                $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count);
-            $deltasize = abs($rawrecords[$id.'filedir']->size -
-                $rawrecords[$id.OBJECT_LOCATION_LOCAL]->size -
-                $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size);
+            $localcount = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->count + $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count;
+            $deltacount = abs($rawrecords[$id.'filedir']->count - $localcount);
+            $localsize = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->size + $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size;
+            $deltasize = abs($rawrecords[$id.'filedir']->size - $localsize);
             $row['date'] = userdate($timecreated, get_string('strftimedaydatetime'));
             if ($this->is_downloading() && in_array($this->download, ['csv', 'excel', 'json', 'ods'])) {
                 $row['local_count'] = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->count;
