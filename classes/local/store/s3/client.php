@@ -340,7 +340,7 @@ class client extends object_client_base {
         if (file_exists($plugins['aws'].'/version.php')) {
             include($plugins['aws'].'/version.php');
         }
-        if (empty($plugin->version) || $plugin->version < 2020051200) {
+        if (empty($plugin->version) || $plugin->version < 2020060900) {
             $text  = $OUTPUT->notification(new \lang_string('settings:aws:upgradeneeded', OBJECTFS_PLUGIN_NAME));
             $settings->add(new \admin_setting_heading('tool_objectfs/aws',
                 new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
