@@ -758,4 +758,19 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $this->assertEquals($expectedresult, $externalclient->get_expiration_time($now, $expiresheader));
     }
+
+    /**
+     * Test copy_content_from_storedfile() method does direct copying.
+     */
+    public function test_copy_content_from_storedfile() {
+        $file = $this->create_remote_file();
+        // Confirm, that the file is not readable locally.
+        $this->assertFalse($this->filesystem->is_file_readable_locally_by_storedfile($file));
+        // Get the current remote path.
+        $currentpath = $this->filesystem->get_remote_path_from_storedfile($file);
+        // Copy the file to new external path.
+        $this->filesystem->copy_content_from_storedfile($file, $currentpath . '_new');
+        // Confirm, that the file wasn't downloaded locally and was copied directly to new path.
+        $this->assertFalse($this->filesystem->is_file_readable_locally_by_storedfile($file));
+    }
 }
