@@ -776,4 +776,18 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         // Confirm, that the file wasn't downloaded locally and was copied directly to new path.
         $this->assertFalse($this->filesystem->is_file_readable_locally_by_storedfile($file));
     }
+
+    /**
+     * Test get_filesize_by_contenthash() returns file size by its contenthash.
+     */
+    public function test_get_filesize_by_contenthash() {
+        // Test existing file.
+        $file = $this->create_local_file();
+        $actual = $this->filesystem->get_filesize_by_contenthash($file->get_contenthash());
+        $this->assertEquals($file->get_filesize(), $actual);
+        // Test missing file.
+        $fakehash = 'this is a fake hash';
+        $actual = $this->filesystem->get_filesize_by_contenthash($fakehash);
+        $this->assertFalse($actual);
+    }
 }

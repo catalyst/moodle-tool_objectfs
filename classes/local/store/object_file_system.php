@@ -773,7 +773,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function presigned_url_should_redirect($contenthash, $headers = array()) {
-        global $DB, $_SERVER;
+        global $_SERVER;
 
         // Redirect regardless.
         if ($this->externalclient->presignedminfilesize == 0 &&
@@ -799,13 +799,8 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         // Redirect when the file size is bigger than presignedminfilesize setting.
-        $sql = 'SELECT MAX(filesize) as filesize
-                  FROM {files}
-                 WHERE contenthash = :contenthash
-                   AND filesize > :filesize';
-        $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
-
-        return ($record->filesize >= $this->externalclient->presignedminfilesize);
+        $filesize = $this->get_filesize_by_contenthash($contenthash);
+        return ($filesize >= $this->externalclient->presignedminfilesize);
     }
 
     /**
@@ -890,5 +885,17 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function copy_content_from_storedfile(stored_file $file, $target) {
         return $this->copy_file_from_hash_to_path($file->get_contenthash(), $target);
+    }
+
+    /**
+     * Returns the size of the file by its contenthash.
+     *
+     * @param  string $contenthash Contenthash of the file
+     * @return mixed String or false if the file not found
+     * @throws \dml_exception
+     */
+    public function get_filesize_by_contenthash($contenthash) {
+        global $DB;
+        return $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
     }
 }
