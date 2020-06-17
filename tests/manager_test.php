@@ -97,4 +97,34 @@ class manager_testcase extends tool_objectfs_testcase {
         }
         $this->assertEquals($result, manager::is_extension_whitelisted($filename));
     }
+
+    /**
+     * Data provider for test_get_header().
+     *
+     * @return array
+     */
+    public function get_header_provider() {
+        return [
+            [[], '', ''],
+            [[], 'Missing header', ''],
+            [['Content-Type: text'], 'Content-Type', 'text'],
+            [['Content-Disposition: inline; filename="file.mp4"'], 'Content-Disposition', 'inline; filename="file.mp4"'],
+            [['Content-Ranges: bytes 50823168-69632911/69632912'], 'Content-Ranges', 'bytes 50823168-69632911/69632912'],
+            [['Content-Type: text', 'Range: bytes=0-499, -500'], 'Range', 'bytes=0-499, -500'],
+        ];
+    }
+
+    /**
+     * Test get_header() method.
+     *
+     * @dataProvider get_header_provider
+     *
+     * @param  array   $headers     Headers
+     * @param  string  $search      What we are searching for
+     * @param  bool    $expected    Expected result
+     */
+    public function test_get_header($headers, $search, $expected) {
+        $actual = manager::get_header($headers, $search);
+        $this->assertEquals($expected, $actual);
+    }
 }

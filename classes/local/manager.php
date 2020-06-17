@@ -312,9 +312,9 @@ class manager {
      */
     public static function get_header($headers, $search) {
         foreach ($headers as $header) {
-            $found = strpos($header, $search);
+            $found = strpos($header, $search.':', 0);
             if ($found !== false) {
-                return substr($header, strlen($search) + 1);
+                return substr($header, strlen($search) + 2);
             }
         }
         return '';
