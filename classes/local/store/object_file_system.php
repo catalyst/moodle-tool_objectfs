@@ -879,4 +879,15 @@ abstract class object_file_system extends \file_system_filedir {
         pclose($io);
         return (int)$output;
     }
+
+    /**
+     * Copy content of file to given pathname.
+     *
+     * @param stored_file $file The file to be copied
+     * @param string $target real path to the new file
+     * @return bool success
+     */
+    public function copy_content_from_storedfile(stored_file $file, $target) {
+        return $this->copy_file_from_hash_to_path($file->get_contenthash(), $target);
+    }
 }

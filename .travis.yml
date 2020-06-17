@@ -44,6 +44,10 @@ matrix:
     - php: 7.3
       env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE CORE_PATCH=core38.diff
     - php: 7.2
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_39_STABLE
+    - php: 7.3
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_39_STABLE
+    - php: 7.2
       env: DB=mysqli MOODLE_BRANCH=master
     - php: 7.2
       env: DB=pgsql  MOODLE_BRANCH=master
@@ -68,7 +72,6 @@ install:
   - if [ ! -z "$CORE_PATCH" ]; then (cd /home/travis/build/moodle; git apply admin/tool/objectfs/patch/$CORE_PATCH); fi
 
 script:
-  - php moodle/admin/tool/objectfs/tests/privacy/privacy.php
   - moodle-plugin-ci validate
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpcpd
