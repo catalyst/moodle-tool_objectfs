@@ -68,7 +68,6 @@ install:
   - if [ ! -z "$CORE_PATCH" ]; then (cd /home/travis/build/moodle; git apply admin/tool/objectfs/patch/$CORE_PATCH); fi
 
 script:
-  - php moodle/admin/tool/objectfs/tests/privacy/privacy.php
   - moodle-plugin-ci validate
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpcpd
