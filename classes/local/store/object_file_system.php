@@ -569,10 +569,11 @@ abstract class object_file_system extends \file_system_filedir {
      *
      * @param string $contenthash file to be copied
      * @param string $destinationpath destination directory
+     * @return bool success
      */
     public function copy_file_from_hash_to_path($contenthash, $destinationpath) {
         $path = $this->get_remote_path_from_hash($contenthash);
-        copy($path, $destinationpath);
+        return copy($path, $destinationpath);
     }
 
     /**

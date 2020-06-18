@@ -769,7 +769,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         // Get the current remote path.
         $currentpath = $this->filesystem->get_remote_path_from_storedfile($file);
         // Copy the file to new external path.
-        $this->filesystem->copy_content_from_storedfile($file, $currentpath . '_new');
+        $result = $this->filesystem->copy_content_from_storedfile($file, $currentpath . '_new');
+        // Confirm the file copied successfully and method returns true.
+        $this->assertTrue($result);
         // Confirm, that the file wasn't downloaded locally and was copied directly to new path.
         $this->assertFalse($this->filesystem->is_file_readable_locally_by_storedfile($file));
     }
