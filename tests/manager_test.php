@@ -107,10 +107,16 @@ class manager_testcase extends tool_objectfs_testcase {
         return [
             [[], '', ''],
             [[], 'Missing header', ''],
+            // Test indexed array.
             [['Content-Type: text'], 'Content-Type', 'text'],
             [['Content-Disposition: inline; filename="file.mp4"'], 'Content-Disposition', 'inline; filename="file.mp4"'],
             [['Content-Ranges: bytes 50823168-69632911/69632912'], 'Content-Ranges', 'bytes 50823168-69632911/69632912'],
             [['Content-Type: text', 'Range: bytes=0-499, -500'], 'Range', 'bytes=0-499, -500'],
+            [['Content-Type: text', 'Range: bytes=0-499, -500'], 'range', 'bytes=0-499, -500'],
+            // Test associative array.
+            [['REQUEST_METHOD' => 'GET'], 'REQUEST_METHOD', 'GET'],
+            [['REQUEST_METHOD' => 'GET'], 'request_method', 'GET'],
+            [['REQUEST_METHOD' => 'GET', 'HTTP_RANGE' => 'bytes=132579328-132619239'], 'HTTP_RANGE', 'bytes=132579328-132619239'],
         ];
     }
 
