@@ -37,6 +37,14 @@ define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
 class client extends object_client_base {
+
+    /**
+     * @var int A predefined limit of data stored.
+     * When hit, php://temp will use a temporary file.
+     * Reference: https://github.com/catalyst/moodle-local_aws/blob/master/sdk/Aws/S3/StreamWrapper.php#L19-L25
+     */
+    const MAX_TEMP_LIMIT = 2097152;
+
     protected $client;
     protected $bucket;
     private $signingmethod;
@@ -634,5 +642,64 @@ class client extends object_client_base {
             $this->set_client($config);
         }
         return $output;
+    }
+
+    /**
+     * Proxy range request.
+     *
+     * @param  \stored_file $file    The file to send
+     * @param  object       $ranges  Object with rangefrom, rangeto and length properties.
+     * @return false If couldn't get data.
+     * @throws \coding_exception
+     */
+    public function proxy_range_request(\stored_file $file, $ranges) {
+        // Do not serve files with size less than 2MB or if the feature is disabled.
+        if ($file->get_filesize() < self::MAX_TEMP_LIMIT || empty($this->config->proxyrangerequests)) {
+            return false;
+        }
+
+        $response = $this->curl_range_request_to_presigned_url($file->get_contenthash(), $ranges, headers_list());
+        $httpcode = manager::get_header($response['responseheaders'], 'HTTP/1.1');
+
+        if ($response['content'] != '' && $httpcode == '206 Partial Content') {
+            header('HTTP/1.1 206 Partial Content');
+            header('Accept-Ranges: bytes');
+            header('Content-Range: ' . manager::get_header($response['responseheaders'], 'Content-Range'));
+            $contentlength = manager::get_header($response['responseheaders'], 'Content-Length');
+            if ($contentlength !== '') {
+                header('Content-Length: ' . $contentlength);
+            }
+            echo $response['content'];
+            die;
+        } else {
+            throw new \file_exception('Range request to URL ' . $response['url'] .
+                ' failed with HTTP code: ' . $httpcode . '. Details: ' . $response['content']);
+        }
+    }
+
+    /**
+     * Does the range request to Pre-Signed URL via cURL.
+     *
+     * @param  string $contenthash File content hash.
+     * @param  object $ranges      Object with rangefrom, rangeto and length properties.
+     * @param  array  $headers     Request headers.
+     * @return array               Requested data.
+     * @throws \coding_exception
+     */
+    public function curl_range_request_to_presigned_url($contenthash, $ranges, $headers) {
+        $url = $this->generate_presigned_url_s3($contenthash, $headers);
+        $headers = array(
+            'HTTP/1.1 206 Partial Content',
+            'Content-Length: '. $ranges->length,
+            'Range: bytes=' . $ranges->rangefrom . '-' . $ranges->rangeto,
+        );
+        $curl = new \curl();
+        $curl->setopt(array('CURLOPT_RETURNTRANSFER' => true));
+        $curl->setopt(array('CURLOPT_SSL_VERIFYPEER' => false));
+        $curl->setopt(array('CURLOPT_CONNECTTIMEOUT' => 15));
+        $curl->setopt(array('CURLOPT_TIMEOUT' => 15));
+        $curl->setHeader($headers);
+        $content = $curl->get($url);
+        return array('responseheaders' => $curl->getResponse(), 'content' => $content, 'url' => $url);
     }
 }

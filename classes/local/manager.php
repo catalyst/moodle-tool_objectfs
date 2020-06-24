@@ -64,6 +64,7 @@ class manager {
         $config->enablepresignedurls = 0;
         $config->expirationtime = 2 * HOURSECS;
         $config->presignedminfilesize = 0;
+        $config->proxyrangerequests = 0;
 
         // S3 file system.
         $config->s3_usesdkcreds = 0;

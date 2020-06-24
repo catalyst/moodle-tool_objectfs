@@ -412,6 +412,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @param stored_file $file The file to send
      * @return bool success
      * @throws \dml_exception
+     * @throws \coding_exception
      */
     public function xsendfile_file(stored_file $file): bool {
         $contenthash = $file->get_contenthash();
@@ -421,6 +422,13 @@ abstract class object_file_system extends \file_system_filedir {
 
             return $this->redirect_to_presigned_url($contenthash, headers_list());
         }
+
+        if ($this->externalclient->support_presigned_urls() &&
+                $ranges = $this->get_valid_http_ranges($file->get_filesize())) {
+
+            return $this->externalclient->proxy_range_request($file, $ranges);
+        }
+
         return false;
     }
 
@@ -897,5 +905,32 @@ abstract class object_file_system extends \file_system_filedir {
     public function get_filesize_by_contenthash($contenthash) {
         global $DB;
         return $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
+    }
+
+    /**
+     * Gets valid HTTP ranges for range request.
+     * Throttles request length down to 5MB size if it's greater.
+     *
+     * @param  int          $filesize Size of the file to be served.
+     * @return object|false           Array of range
+     */
+    public function get_valid_http_ranges($filesize) {
+        $range = manager::get_header($_SERVER, 'HTTP_RANGE');
+        if (!empty($range)) {
+            preg_match('{bytes=(\d+)?-(\d+)?(,)?}i', $range, $matches);
+            if (empty($matches[3])) {
+                $ranges = new \stdClass();
+                $ranges->rangefrom = (isset($matches[1])) ? intval($matches[1]) : 0;
+                $ranges->rangeto = (isset($matches[2])) ? intval($matches[2]) : ($filesize - 1);
+                $ranges->length = $ranges->rangeto - $ranges->rangefrom + 1;
+                if ($ranges->length > 5242880) {
+                    // Stream files in 5MB-chunks.
+                    $ranges->rangeto = $ranges->rangefrom + 5242880 - 1;
+                    $ranges->length = 5242880;
+                }
+                return $ranges;
+            }
+        }
+        return false;
     }
 }
