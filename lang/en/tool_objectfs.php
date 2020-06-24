@@ -179,6 +179,11 @@ $string['settings:presignedurl:expirationtime'] = 'Pre-Signed URL expiration tim
 $string['settings:presignedurl:expirationtime_help'] = 'The time after which the Pre-Signed URL should expire.';
 $string['settings:presignedurl:presignedminfilesize'] = 'Minimum size for Pre-Signed URL (bytes)';
 $string['settings:presignedurl:presignedminfilesize_help'] = 'Minimum file size to be redirected to Pre-Signed URL.';
+$string['settings:presignedurl:proxyrangerequests'] = 'Proxy range requests';
+$string['settings:presignedurl:proxyrangerequests_help'] = 'Pre-Signed URLs do not need to be enabled. S3 signing method will be used for this feature.';
+$string['settings:presignedurl:xsendfilefile'] = 'Backport MDL-68342 to get benefits of this setting.';
+$string['settings:presignedurl:testrangeok'] = 'Successfully tested range request.';
+$string['settings:presignedurl:testrangeerror'] = 'Test range request failed.';
 
 $string['settings:presignedurl:enablepresigneds3urls'] = 'S3 Pre-Signed URLs';
 $string['settings:presignedurl:enablepresigneds3urls_help'] = 'Enable Pre-Signed S3 URLs to request content directly from external storage.';

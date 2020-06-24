@@ -412,6 +412,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @param stored_file $file The file to send
      * @return bool success
      * @throws \dml_exception
+     * @throws \coding_exception
      */
     public function xsendfile_file(stored_file $file): bool {
         $contenthash = $file->get_contenthash();
@@ -421,6 +422,13 @@ abstract class object_file_system extends \file_system_filedir {
 
             return $this->redirect_to_presigned_url($contenthash, headers_list());
         }
+
+        if ($this->externalclient->support_presigned_urls() &&
+                $ranges = $this->get_valid_http_ranges($file->get_filesize())) {
+
+            return $this->externalclient->proxy_range_request($file, $ranges);
+        }
+
         return false;
     }
 
@@ -773,8 +781,6 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function presigned_url_should_redirect($contenthash, $headers = array()) {
-        global $DB, $_SERVER;
-
         // Redirect regardless.
         if ($this->externalclient->presignedminfilesize == 0 &&
                 manager::all_extensions_whitelisted()) {
@@ -799,13 +805,8 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         // Redirect when the file size is bigger than presignedminfilesize setting.
-        $sql = 'SELECT MAX(filesize) as filesize
-                  FROM {files}
-                 WHERE contenthash = :contenthash
-                   AND filesize > :filesize';
-        $record = $DB->get_record_sql($sql, ['contenthash' => $contenthash, 'filesize' => 0]);
-
-        return ($record->filesize >= $this->externalclient->presignedminfilesize);
+        $filesize = $this->get_filesize_by_contenthash($contenthash);
+        return ($filesize >= $this->externalclient->presignedminfilesize);
     }
 
     /**
@@ -890,5 +891,44 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function copy_content_from_storedfile(stored_file $file, $target) {
         return $this->copy_file_from_hash_to_path($file->get_contenthash(), $target);
+    }
+
+    /**
+     * Returns the size of the file by its contenthash.
+     *
+     * @param  string $contenthash Contenthash of the file
+     * @return mixed String or false if the file not found
+     * @throws \dml_exception
+     */
+    public function get_filesize_by_contenthash($contenthash) {
+        global $DB;
+        return $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
+    }
+
+    /**
+     * Gets valid HTTP ranges for range request.
+     * Throttles request length down to 5MB size if it's greater.
+     *
+     * @param  int          $filesize Size of the file to be served.
+     * @return object|false           Array of range
+     */
+    public function get_valid_http_ranges($filesize) {
+        $range = manager::get_header($_SERVER, 'HTTP_RANGE');
+        if (!empty($range)) {
+            preg_match('{bytes=(\d+)?-(\d+)?(,)?}i', $range, $matches);
+            if (empty($matches[3])) {
+                $ranges = new \stdClass();
+                $ranges->rangefrom = (isset($matches[1])) ? intval($matches[1]) : 0;
+                $ranges->rangeto = (isset($matches[2])) ? intval($matches[2]) : ($filesize - 1);
+                $ranges->length = $ranges->rangeto - $ranges->rangefrom + 1;
+                if ($ranges->length > 5242880) {
+                    // Stream files in 5MB-chunks.
+                    $ranges->rangeto = $ranges->rangefrom + 5242880 - 1;
+                    $ranges->length = 5242880;
+                }
+                return $ranges;
+            }
+        }
+        return false;
     }
 }

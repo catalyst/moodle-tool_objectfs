@@ -64,6 +64,7 @@ class manager {
         $config->enablepresignedurls = 0;
         $config->expirationtime = 2 * HOURSECS;
         $config->presignedminfilesize = 0;
+        $config->proxyrangerequests = 0;
 
         // S3 file system.
         $config->s3_usesdkcreds = 0;
@@ -305,16 +306,24 @@ class manager {
     /**
      * Returns given header from headers set.
      *
-     * @param array $headers request headers.
+     * @param array $headers An indexed or associative array with the headers.
      * @param string $search
      *
      * @return string header.
      */
     public static function get_header($headers, $search) {
-        foreach ($headers as $header) {
-            $found = strpos($header, $search);
-            if ($found !== false) {
-                return substr($header, strlen($search) + 1);
+        foreach ($headers as $key => $value) {
+            if (is_int($key)) {
+                // Indexed array where element value looks like "Header name: Header value".
+                $found = strpos(strtolower($value), strtolower($search).':', 0);
+                if ($found !== false) {
+                    return substr($value, strlen($search) + 2);
+                }
+            } else {
+                // Associative array where element key is a Header name and element value is Header value.
+                if (strtolower($key) === strtolower($search)) {
+                    return $value;
+                }
             }
         }
         return '';

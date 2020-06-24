@@ -19,6 +19,7 @@ namespace tool_objectfs\tests;
 defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\local\manager;
 
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
@@ -775,5 +776,98 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue($result);
         // Confirm, that the file wasn't downloaded locally and was copied directly to new path.
         $this->assertFalse($this->filesystem->is_file_readable_locally_by_storedfile($file));
+    }
+
+    /**
+     * Test get_filesize_by_contenthash() returns file size by its contenthash.
+     */
+    public function test_get_filesize_by_contenthash() {
+        // Test existing file.
+        $file = $this->create_local_file();
+        $actual = $this->filesystem->get_filesize_by_contenthash($file->get_contenthash());
+        $this->assertEquals($file->get_filesize(), $actual);
+        // Test missing file.
+        $fakehash = 'this is a fake hash';
+        $actual = $this->filesystem->get_filesize_by_contenthash($fakehash);
+        $this->assertFalse($actual);
+    }
+
+    /**
+     * Data provider for test_get_valid_http_ranges().
+     *
+     * @return array
+     */
+    public function test_get_valid_http_ranges_provider() {
+        return [
+            ['', 0, false],
+            ['bytes=0-', 100, (object)['rangefrom' => 0, 'rangeto' => 99, 'length' => 100]],
+            ['bytes=0-49/100', 100, (object)['rangefrom' => 0, 'rangeto' => 49, 'length' => 50]],
+            ['bytes=50-', 100, (object)['rangefrom' => 50, 'rangeto' => 99, 'length' => 50]],
+            ['bytes=50-80/100', 100, (object)['rangefrom' => 50, 'rangeto' => 80, 'length' => 31]],
+        ];
+    }
+
+    /**
+     * Test get_valid_http_ranges() returns range object depending on $_SERVER['HTTP_RANGE'] and file size.
+     *
+     * @dataProvider test_get_valid_http_ranges_provider
+     *
+     * @param string $httprangeheader HTTP_RANGE header.
+     * @param int    $filesize        File size.
+     * @param mixed  $expectedresult  Expected result.
+     */
+    public function test_get_valid_http_ranges($httprangeheader, $filesize, $expectedresult) {
+        $_SERVER['HTTP_RANGE'] = $httprangeheader;
+        $actual = $this->filesystem->get_valid_http_ranges($filesize);
+        $this->assertEquals($expectedresult, $actual);
+    }
+
+    /**
+     * Data provider for test_curl_range_request_to_presigned_url().
+     *
+     * @return array
+     */
+    public function test_curl_range_request_to_presigned_url_provider() {
+        return [
+            ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 14, 'length' => 15], '15-bytes string'],
+            ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 9, 'length' => 10], '15-bytes s'],
+            ['15-bytes string', (object)['rangefrom' => 5, 'rangeto' => 14, 'length' => 10], 'tes string'],
+        ];
+    }
+
+    /**
+     * Test external client curl_range_request_to_presigned_url() returns expected result.
+     *
+     * @dataProvider test_curl_range_request_to_presigned_url_provider
+     *
+     * @param string $content        File content.
+     * @param mixed  $ranges         Request ranges object.
+     * @param string $expectedresult Expected result.
+     */
+    public function test_curl_range_request_to_presigned_url($content, $ranges, $expectedresult) {
+        if (!$this->filesystem->get_external_client()->support_presigned_urls()) {
+            $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
+        }
+        $file = $this->create_remote_file($content);
+        $externalclient = $this->filesystem->get_external_client();
+        // Test good response.
+        $actual = $externalclient->curl_range_request_to_presigned_url($file->get_contenthash(), $ranges, []);
+        $this->assertEquals($expectedresult, $actual['content']);
+        $this->assertEquals('206 Partial Content', manager::get_header($actual['responseheaders'], 'HTTP/1.1'));
+        // Test bad response.
+        $actual = $externalclient->curl_range_request_to_presigned_url($file->get_contenthash() . '_fake', $ranges, []);
+        $this->assertEquals('404 Not Found', manager::get_header($actual['responseheaders'], 'HTTP/1.1'));
+    }
+
+    /**
+     * Test external client test_range_request() method.
+     */
+    public function test_test_range_request() {
+        $externalclient = $this->filesystem->get_external_client();
+        if ($externalclient->support_presigned_urls()) {
+            $this->assertTrue($externalclient->test_range_request($this->filesystem));
+        } else {
+            $this->assertFalse($externalclient->test_range_request($this->filesystem));
+        }
     }
 }

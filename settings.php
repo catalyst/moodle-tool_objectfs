@@ -134,6 +134,21 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
 
         if ($classexists) {
+            $warningtext = '';
+            $methodexists = method_exists('file_system', 'xsendfile_file');
+            if (!$methodexists) {
+                $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:xsendfilefile', 'tool_objectfs'));
+            } else {
+                if ($client->test_range_request(new $config->filesystem())) {
+                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeok', 'tool_objectfs'), 'notifysuccess');
+                } else {
+                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeerror', 'tool_objectfs'));
+                }
+            }
+            $settings->add(new admin_setting_configcheckbox('tool_objectfs/proxyrangerequests',
+                new lang_string('settings:presignedurl:proxyrangerequests', 'tool_objectfs'),
+                new lang_string('settings:presignedurl:proxyrangerequests_help', 'tool_objectfs') . $warningtext, '1'));
+
             $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
                 new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs'), ''));
