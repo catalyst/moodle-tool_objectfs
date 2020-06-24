@@ -356,7 +356,30 @@ git format-patch MOODLE_38_STABLE --stdout > core38.diff
 TBA
 
 #### Moodle 3.3 and Totara 12:
-TBA
+Apply the patch:
+<pre>
+git am --whitespace=nowarn < admin/tool/objectfs/patch/core33.diff
+</pre>
+The patch was created with following commands:
+<pre>
+// Cherry-pick MDL-53240
+git cherry-pick 6c4a5fdf88ac8ad88c4e86cf9b54d2b55bf2fd58
+git cherry-pick e3ad9db6b67aa378b1787497991a4422f57a6a3d
+git cherry-pick 8cf36e9c81a704c8dee90d0fef9402aec0eaf80e
+git cherry-pick 97bb4f755e5f5c8e488ecc7ad7cc932c4e294226
+
+// Cherry-pick MDL-66304
+git cherry-pick 1a159252405e85394d241922a5244309e9ad14f4
+
+// Cherry-pick MDL-68342
+git cherry-pick 5bf5a7aaebabff669a674f19a4ec33cbca24f515
+
+// Cherry-pick MDL-58281
+git cherry-pick 1fef1de5922f7ea130e4994b3453610079874b63
+
+// Create the patch
+git format-patch MOODLE_33_STABLE --stdout > core33.diff
+</pre>
 
 #### Moodle 3.2 and Totara 11:
 Apply the patch:

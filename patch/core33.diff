@@ -1,0 +1,1789 @@
+From a70ece748995866393424bee82b7d2c3e30d9f35 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?David=20Mudr=C3=A1k?= <david@moodle.com>
+Date: Fri, 24 Mar 2017 22:16:33 +0100
+Subject: [PATCH 1/7] MDL-53240 filetypes: Introduce the filetypes_util helper
+ class
+
+---
+ lang/en/mimetypes.php                  |   1 +
+ lib/form/classes/filetypes_util.php    | 252 +++++++++++++++++++++++++
+ lib/form/tests/filetypes_util_test.php | 168 +++++++++++++++++
+ 3 files changed, 421 insertions(+)
+ create mode 100644 lib/form/classes/filetypes_util.php
+ create mode 100644 lib/form/tests/filetypes_util_test.php
+
+diff --git a/lang/en/mimetypes.php b/lang/en/mimetypes.php
+index 38892265c60..6033d063a4d 100644
+--- a/lang/en/mimetypes.php
++++ b/lang/en/mimetypes.php
+@@ -35,6 +35,7 @@
+  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+  */
+ 
++$string['any'] = 'All file types';
+ $string['application/epub_zip'] = 'EPUB ebook';
+ $string['application/msword'] = 'Word document';
+ $string['application/pdf'] = 'PDF document';
+diff --git a/lib/form/classes/filetypes_util.php b/lib/form/classes/filetypes_util.php
+new file mode 100644
+index 00000000000..c8660809925
+--- /dev/null
++++ b/lib/form/classes/filetypes_util.php
+@@ -0,0 +1,252 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Provides the {@link core_form\filetypes_util} class.
++ *
++ * @package     core_form
++ * @copyright   2017 David Mudrák <david@moodle.com>
++ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++namespace core_form;
++
++use core_collator;
++use core_filetypes;
++
++defined('MOODLE_INTERNAL') || die();
++
++/**
++ * Utility class for handling with file types in the forms.
++ *
++ * This class is supposed to serve as a helper class for {@link MoodleQuickForm_filetypes}
++ * and {@link admin_setting_filetypes} classes.
++ *
++ * The file types can be specified in a syntax compatible with what filepicker
++ * and filemanager support via the "accepted_types" option: a list of extensions
++ * (e.g. ".doc"), mimetypes ("image/png") or groups ("audio").
++ *
++ * @copyright 2017 David Mudrak <david@moodle.com>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class filetypes_util {
++
++    /** @var array Cache of all file type groups for the {@link self::get_groups_info()}. */
++    protected $cachegroups = null;
++
++    /**
++     * Converts the argument into an array (list) of file types.
++     *
++     * The list can be separated by whitespace, end of lines, commas, colons and semicolons.
++     * Empty values are not returned. Values are converted to lowercase.
++     * Duplicates are removed. Glob evaluation is not supported.
++     *
++     * The return value can be used as the accepted_types option for the filepicker.
++     *
++     * @param string|array $extensions list of file extensions, groups or mimetypes
++     * @return array of strings
++     */
++    public function normalize_file_types($types) {
++
++        if ($types === '') {
++            return [];
++        }
++
++        // Turn string into a list.
++        if (!is_array($types)) {
++            $types = preg_split('/[\s,;:"\']+/', $types, null, PREG_SPLIT_NO_EMPTY);
++        }
++
++        // Fix whitespace and normalize the syntax a bit.
++        foreach ($types as $i => $type) {
++            $type = str_replace('*.', '.', $type);
++            $type = strtolower($type);
++            $type = trim($type);
++
++            if ($type === '*') {
++                return ['*'];
++            }
++
++            $types[$i] = $type;
++        }
++
++        // Do not make the user think that globs (like ".doc?") would work.
++        foreach ($types as $i => $type) {
++            if (strpos($type, '*') !== false or strpos($type, '?') !== false) {
++                unset($types[$i]);
++            }
++        }
++
++        foreach ($types as $i => $type) {
++            if (substr($type, 0, 1) === '.') {
++                // It looks like an extension.
++                $type = '.'.ltrim($type, '.');
++                $types[$i] = clean_param($type, PARAM_FILE);
++            } else if ($this->looks_like_mimetype($type)) {
++                // All good, it looks like a mimetype.
++            } else if ($this->is_filetype_group($type)) {
++                // All good, it is a known type group.
++            } else {
++                // We assume the user typed something like "png" so we consider
++                // it an extension.
++                $types[$i] = '.'.$type;
++            }
++        }
++
++        $types = array_filter($types, 'strlen');
++        $types = array_keys(array_flip($types));
++
++        return $types;
++    }
++
++    /**
++     * Does the given file type looks like a valid MIME type?
++     *
++     * This does not check of the MIME type is actually registered here/known.
++     *
++     * @param string $type
++     * @return bool
++     */
++    public function looks_like_mimetype($type) {
++        return (bool)preg_match('~^[-\.a-z0-9]+/[a-z0-9]+([-\.\+][a-z0-9]+)*$~', $type);
++    }
++
++    /**
++     * Is the given string a known filetype group?
++     *
++     * @param string $type
++     * @return bool|object false or the group info
++     */
++    public function is_filetype_group($type) {
++
++        $info = $this->get_groups_info();
++
++        if (isset($info[$type])) {
++            return $info[$type];
++
++        } else {
++            return false;
++        }
++    }
++
++    /**
++     * Provides a list of all known file type groups and their properties.
++     *
++     * @return array
++     */
++    public function get_groups_info() {
++
++        if ($this->cachegroups !== null) {
++            return $this->cachegroups;
++        }
++
++        $groups = [];
++
++        foreach (core_filetypes::get_types() as $ext => $info) {
++            if (isset($info['groups']) && is_array($info['groups'])) {
++                foreach ($info['groups'] as $group) {
++                    if (!isset($groups[$group])) {
++                        $groups[$group] = (object) [
++                            'extensions' => [],
++                            'mimetypes' => [],
++                        ];
++                    }
++                    $groups[$group]->extensions['.'.$ext] = true;
++                    if (isset($info['type'])) {
++                        $groups[$group]->mimetypes[$info['type']] = true;
++                    }
++                }
++            }
++        }
++
++        foreach ($groups as $group => $info) {
++            $info->extensions = array_keys($info->extensions);
++            $info->mimetypes = array_keys($info->mimetypes);
++        }
++
++        $this->cachegroups = $groups;
++        return $this->cachegroups;
++    }
++
++    /**
++     * Return a human readable name of the filetype group.
++     *
++     * @param string $group
++     * @return string
++     */
++    public function get_group_description($group) {
++
++		if (get_string_manager()->string_exists('group:'.$group, 'core_mimetypes')) {
++			return get_string('group:'.$group, 'core_mimetypes');
++        } else {
++            return s($group);
++        }
++    }
++
++    /**
++     * Describe the list of file types for human user.
++     *
++     * Given the list of file types, return a list of human readable
++     * descriptive names of relevant groups, types or file formats.
++     *
++     * @param string|array $types
++     * @return object
++     */
++    public function describe_file_types($types) {
++
++        $descriptions = [];
++        $types = $this->normalize_file_types($types);
++
++        foreach ($types as $type) {
++            if ($type === '*') {
++                $desc = get_string('any', 'core_mimetypes');
++                $descriptions[$desc] = [];
++            } else if ($group = $this->is_filetype_group($type)) {
++                $desc = $this->get_group_description($type);
++                $descriptions[$desc] = $group->extensions;
++
++            } else if ($this->looks_like_mimetype($type)) {
++                $desc = get_mimetype_description($type);
++                $descriptions[$desc] = file_get_typegroup('extension', [$type]);
++
++            } else {
++                $desc = get_mimetype_description(['filename' => 'fakefile'.$type]);
++                if (isset($descriptions[$desc])) {
++                    $descriptions[$desc][] = $type;
++                } else {
++                    $descriptions[$desc] = [$type];
++                }
++            }
++        }
++
++        $data = [];
++
++        foreach ($descriptions as $desc => $exts) {
++            sort($exts);
++            $data[] = (object)[
++                'description' => $desc,
++                'extensions' => join(' ', $exts),
++            ];
++        }
++
++        core_collator::asort_objects_by_property($data, 'description', core_collator::SORT_NATURAL);
++
++        return (object)[
++            'hasdescriptions' => !empty($data),
++            'descriptions' => array_values($data),
++        ];
++    }
++}
+diff --git a/lib/form/tests/filetypes_util_test.php b/lib/form/tests/filetypes_util_test.php
+new file mode 100644
+index 00000000000..323e8381a93
+--- /dev/null
++++ b/lib/form/tests/filetypes_util_test.php
+@@ -0,0 +1,168 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Provides the {@link core_form\filetypes_util_testcase} class.
++ *
++ * @package     core_form
++ * @category    test
++ * @copyright   2017 David Mudrák <david@moodle.com>
++ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++namespace core_form;
++
++use advanced_testcase;
++
++defined('MOODLE_INTERNAL') || die();
++
++global $CFG;
++
++/**
++ * Test cases for the {@link core_form\filetypes_util} class.
++ *
++ * @copyright 2017 David Mudrak <david@moodle.com>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class filetypes_util_testcase extends advanced_testcase {
++
++    /**
++     * Test normalizing list of extensions.
++     */
++    public function test_normalize_file_types() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertSame(['.odt'], $util->normalize_file_types('.odt'));
++        $this->assertSame(['.odt'], $util->normalize_file_types('odt'));
++        $this->assertSame(['.odt'], $util->normalize_file_types('.ODT'));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types('doc, jpg, mp3'));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types(['.doc', '.jpg', '.mp3']));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types('doc, *.jpg, mp3'));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types(['doc ', ' JPG ', '.mp3']));
++        $this->assertSame(['.rtf', '.pdf', '.docx'],
++            $util->normalize_file_types("RTF,.pdf\n...DocX,,,;\rPDF\trtf ...Rtf"));
++        $this->assertSame(['.tgz', '.tar.gz'], $util->normalize_file_types('tgz,TAR.GZ tar.gz .tar.gz tgz TGZ'));
++        $this->assertSame(['.notebook'], $util->normalize_file_types('"Notebook":notebook;NOTEBOOK;,\'NoTeBook\''));
++        $this->assertSame([], $util->normalize_file_types(''));
++        $this->assertSame([], $util->normalize_file_types([]));
++        $this->assertSame(['.0'], $util->normalize_file_types(0));
++        $this->assertSame(['.0'], $util->normalize_file_types('0'));
++        $this->assertSame(['.odt'], $util->normalize_file_types('*.odt'));
++        $this->assertSame([], $util->normalize_file_types('.'));
++        $this->assertSame(['.foo'], $util->normalize_file_types('. foo'));
++        $this->assertSame(['*'], $util->normalize_file_types('*'));
++        $this->assertSame([], $util->normalize_file_types('*~'));
++        $this->assertSame(['.pdf', '.ps'], $util->normalize_file_types('pdf *.ps foo* *bar .r??'));
++        $this->assertSame(['*'], $util->normalize_file_types('pdf *.ps foo* * *bar .r??'));
++    }
++
++    /**
++     * Test MIME type formal recognition.
++     */
++    public function test_looks_like_mimetype() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertTrue($util->looks_like_mimetype('type/subtype'));
++        $this->assertTrue($util->looks_like_mimetype('type/x-subtype'));
++        $this->assertTrue($util->looks_like_mimetype('type/x-subtype+xml'));
++        $this->assertTrue($util->looks_like_mimetype('type/vnd.subtype.xml'));
++        $this->assertTrue($util->looks_like_mimetype('type/vnd.subtype+xml'));
++
++        $this->assertFalse($util->looks_like_mimetype('.gif'));
++        $this->assertFalse($util->looks_like_mimetype('audio'));
++        $this->assertFalse($util->looks_like_mimetype('foo/bar/baz'));
++    }
++
++    /**
++     * Test getting/checking group.
++     */
++    public function test_is_filetype_group() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $audio = $util->is_filetype_group('audio');
++        $this->assertNotFalse($audio);
++        $this->assertInternalType('array', $audio->extensions);
++        $this->assertInternalType('array', $audio->mimetypes);
++
++        $this->assertFalse($util->is_filetype_group('.gif'));
++        $this->assertFalse($util->is_filetype_group('somethingveryunlikelytoeverexist'));
++    }
++
++
++    /**
++     * Test describing list of extensions.
++     */
++    public function test_describe_file_types() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        force_current_language('en');
++
++        // Check that it is able to describe individual file extensions.
++        $desc = $util->describe_file_types('jpg .jpeg *.jpe PNG;.gif,  mudrd8mz');
++        $this->assertTrue($desc->hasdescriptions);
++
++        $desc = $desc->descriptions;
++        $this->assertEquals(4, count($desc));
++
++        $this->assertEquals('File', $desc[0]->description);
++        $this->assertEquals('.mudrd8mz', $desc[0]->extensions);
++
++        $this->assertEquals('Image (JPEG)', $desc[2]->description);
++        $this->assertContains('.jpg', $desc[2]->extensions);
++        $this->assertContains('.jpeg', $desc[2]->extensions);
++        $this->assertContains('.jpe', $desc[2]->extensions);
++
++        // Check that it can describe groups and mimetypes too.
++        $desc = $util->describe_file_types('audio text/plain');
++        $this->assertTrue($desc->hasdescriptions);
++
++        $desc = $desc->descriptions;
++        $this->assertEquals(2, count($desc));
++
++        $this->assertEquals('Audio files', $desc[0]->description);
++        $this->assertContains('.mp3', $desc[0]->extensions);
++        $this->assertContains('.wav', $desc[0]->extensions);
++        $this->assertContains('.ogg', $desc[0]->extensions);
++
++        $this->assertEquals('Text file', $desc[1]->description);
++        $this->assertContains('.txt', $desc[1]->extensions);
++
++        // Empty.
++        $desc = $util->describe_file_types('');
++        $this->assertFalse($desc->hasdescriptions);
++        $this->assertEmpty($desc->descriptions);
++
++        // Any.
++        $desc = $util->describe_file_types('*');
++        $this->assertTrue($desc->hasdescriptions);
++        $this->assertNotEmpty($desc->descriptions[0]->description);
++        $this->assertEmpty($desc->descriptions[0]->extensions);
++
++        // Unknown mimetype.
++        $desc = $util->describe_file_types('application/x-something-really-unlikely-ever-exist');
++        $this->assertTrue($desc->hasdescriptions);
++        $this->assertEquals('application/x-something-really-unlikely-ever-exist', $desc->descriptions[0]->description);
++        $this->assertEmpty($desc->descriptions[0]->extensions);
++    }
++}
+-- 
+2.17.1
+
+
+From 3942e3c10183543f42d33a33b0ff7972fa8e8d9d Mon Sep 17 00:00:00 2001
+From: Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
+Date: Wed, 25 Sep 2019 11:07:13 +1000
+Subject: [PATCH 2/7] MDL-66304 files: Allow xsendfile support in alternative
+ file system.
+
+---
+ lib/filelib.php                  | 31 +++++++++++++++----------------
+ lib/filestorage/file_storage.php |  9 +++++++++
+ lib/filestorage/file_system.php  | 10 ++++++++++
+ 3 files changed, 34 insertions(+), 16 deletions(-)
+
+diff --git a/lib/filelib.php b/lib/filelib.php
+index 743f0779b54..97baf6bd005 100644
+--- a/lib/filelib.php
++++ b/lib/filelib.php
+@@ -1914,23 +1914,26 @@ function readfile_accel($file, $mimetype, $accelerate) {
+         }
+     }
+ 
+-    if ($accelerate and !empty($CFG->xsendfile)) {
+-        if (empty($CFG->disablebyteserving) and $mimetype !== 'text/plain') {
+-            header('Accept-Ranges: bytes');
+-        } else {
+-            header('Accept-Ranges: none');
+-        }
++    if ($accelerate and empty($CFG->disablebyteserving) and $mimetype !== 'text/plain') {
++        header('Accept-Ranges: bytes');
++    } else {
++        header('Accept-Ranges: none');
++    }
+ 
++    if ($accelerate) {
+         if (is_object($file)) {
+             $fs = get_file_storage();
+-            if ($fs->xsendfile($file->get_contenthash())) {
+-                return;
++            if ($fs->supports_xsendfile()) {
++                if ($fs->xsendfile($file->get_contenthash())) {
++                    return;
++                }
+             }
+-
+         } else {
+-            require_once("$CFG->libdir/xsendfilelib.php");
+-            if (xsendfile($file)) {
+-                return;
++            if (!empty($CFG->xsendfile)) {
++                require_once("$CFG->libdir/xsendfilelib.php");
++                if (xsendfile($file)) {
++                    return;
++                }
+             }
+         }
+     }
+@@ -1940,7 +1943,6 @@ function readfile_accel($file, $mimetype, $accelerate) {
+     header('Last-Modified: '. gmdate('D, d M Y H:i:s', $lastmodified) .' GMT');
+ 
+     if ($accelerate and empty($CFG->disablebyteserving) and $mimetype !== 'text/plain') {
+-        header('Accept-Ranges: bytes');
+ 
+         if (!empty($_SERVER['HTTP_RANGE']) and strpos($_SERVER['HTTP_RANGE'],'bytes=') !== FALSE) {
+             // byteserving stuff - for acrobat reader and download accelerators
+@@ -1978,9 +1980,6 @@ function readfile_accel($file, $mimetype, $accelerate) {
+                 byteserving_send_file($handle, $mimetype, $ranges, $filesize);
+             }
+         }
+-    } else {
+-        // Do not byteserve
+-        header('Accept-Ranges: none');
+     }
+ 
+     header('Content-Length: '.$filesize);
+diff --git a/lib/filestorage/file_storage.php b/lib/filestorage/file_storage.php
+index e518a8f8c77..5be35b8a8ce 100644
+--- a/lib/filestorage/file_storage.php
++++ b/lib/filestorage/file_storage.php
+@@ -1788,6 +1788,15 @@ class file_storage {
+         return $this->filesystem->xsendfile($contenthash);
+     }
+ 
++    /**
++     * Returns true if filesystem is configured to support xsendfile.
++     *
++     * @return bool
++     */
++    public function supports_xsendfile() {
++        return $this->filesystem->supports_xsendfile();
++    }
++
+     /**
+      * Content exists
+      *
+diff --git a/lib/filestorage/file_system.php b/lib/filestorage/file_system.php
+index 8134a8002f4..1a4fb092815 100644
+--- a/lib/filestorage/file_system.php
++++ b/lib/filestorage/file_system.php
+@@ -443,6 +443,16 @@ abstract class file_system {
+         return xsendfile($this->get_remote_path_from_hash($contenthash));
+     }
+ 
++    /**
++     * Returns true if filesystem is configured to support xsendfile.
++     *
++     * @return bool
++     */
++    public function supports_xsendfile() {
++        global $CFG;
++        return !empty($CFG->xsendfile);
++    }
++
+     /**
+      * Add the supplied file to the file system.
+      *
+-- 
+2.17.1
+
+
+From 51a74d83a3ca7ef929c3f9f985b8c88e99709b4c Mon Sep 17 00:00:00 2001
+From: Brendan Heywood <brendan@catalyst-au.net>
+Date: Thu, 16 Apr 2020 16:31:07 +1000
+Subject: [PATCH 3/7] MDL-68342 files: Add a faster xsendfile method to avoid
+ db lookups
+
+---
+ lib/filelib.php                  |  2 +-
+ lib/filestorage/file_storage.php | 15 +++++++++++++++
+ lib/filestorage/file_system.php  | 15 +++++++++++++++
+ 3 files changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/lib/filelib.php b/lib/filelib.php
+index 97baf6bd005..cbf287d7981 100644
+--- a/lib/filelib.php
++++ b/lib/filelib.php
+@@ -1924,7 +1924,7 @@ function readfile_accel($file, $mimetype, $accelerate) {
+         if (is_object($file)) {
+             $fs = get_file_storage();
+             if ($fs->supports_xsendfile()) {
+-                if ($fs->xsendfile($file->get_contenthash())) {
++                if ($fs->xsendfile_file($file)) {
+                     return;
+                 }
+             }
+diff --git a/lib/filestorage/file_storage.php b/lib/filestorage/file_storage.php
+index 5be35b8a8ce..1c68d1e24d8 100644
+--- a/lib/filestorage/file_storage.php
++++ b/lib/filestorage/file_storage.php
+@@ -1776,6 +1776,21 @@ class file_storage {
+         return $this->filesystem->add_file_from_string($content);
+     }
+ 
++    /**
++     * Serve file content using X-Sendfile header.
++     * Please make sure that all headers are already sent and the all
++     * access control checks passed.
++     *
++     * This alternate method to xsendfile() allows an alternate file system
++     * to use the full file metadata and avoid extra lookups.
++     *
++     * @param stored_file $file The file to send
++     * @return bool success
++     */
++    public function xsendfile_file(stored_file $file): bool {
++        return $this->filesystem->xsendfile_file($file);
++    }
++
+     /**
+      * Serve file content using X-Sendfile header.
+      * Please make sure that all headers are already sent
+diff --git a/lib/filestorage/file_system.php b/lib/filestorage/file_system.php
+index 1a4fb092815..12afb3de7a4 100644
+--- a/lib/filestorage/file_system.php
++++ b/lib/filestorage/file_system.php
+@@ -428,6 +428,21 @@ abstract class file_system {
+         return $image;
+     }
+ 
++    /**
++     * Serve file content using X-Sendfile header.
++     * Please make sure that all headers are already sent and the all
++     * access control checks passed.
++     *
++     * This alternate method to xsendfile() allows an alternate file system
++     * to use the full file metadata and avoid extra lookups.
++     *
++     * @param stored_file $file The file to send
++     * @return bool success
++     */
++    public function xsendfile_file(stored_file $file): bool {
++        return $this->xsendfile($file->get_contenthash());
++    }
++
+     /**
+      * Serve file content using X-Sendfile header.
+      * Please make sure that all headers are already sent and the all
+-- 
+2.17.1
+
+
+From b8372f34495368848c9f36c73e6a840d4f24383c Mon Sep 17 00:00:00 2001
+From: Brendan Heywood <brendan@catalyst-au.net>
+Date: Mon, 30 Dec 2019 14:31:44 +1100
+Subject: [PATCH 4/7] MDL-58281 files: Correctly handle missing files in
+ readfile_accel
+
+---
+ lib/filelib.php                 | 20 +++++++++++++++++---
+ lib/filestorage/file_system.php |  4 +++-
+ lib/setuplib.php                |  7 +++----
+ 3 files changed, 23 insertions(+), 8 deletions(-)
+
+diff --git a/lib/filelib.php b/lib/filelib.php
+index cbf287d7981..9f3e0a28b89 100644
+--- a/lib/filelib.php
++++ b/lib/filelib.php
+@@ -1974,16 +1974,20 @@ function readfile_accel($file, $mimetype, $accelerate) {
+             if ($ranges) {
+                 if (is_object($file)) {
+                     $handle = $file->get_content_file_handle();
++                    if ($handle === false) {
++                        throw new file_exception('storedfilecannotreadfile', $file->get_filename());
++                    }
+                 } else {
+                     $handle = fopen($file, 'rb');
++                    if ($handle === false) {
++                        throw new file_exception('cannotopenfile', $file);
++                    }
+                 }
+                 byteserving_send_file($handle, $mimetype, $ranges, $filesize);
+             }
+         }
+     }
+ 
+-    header('Content-Length: '.$filesize);
+-
+     if ($filesize > 10000000) {
+         // for large files try to flush and close all buffers to conserve memory
+         while(@ob_get_level()) {
+@@ -1993,11 +1997,21 @@ function readfile_accel($file, $mimetype, $accelerate) {
+         }
+     }
+ 
++    // Send this header after we have flushed the buffers so that if we fail
++    // later can remove this because it wasn't sent.
++    header('Content-Length: ' . $filesize);
++
++    if (!empty($_SERVER['REQUEST_METHOD']) and $_SERVER['REQUEST_METHOD'] === 'HEAD') {
++        exit;
++    }
++
+     // send the whole file content
+     if (is_object($file)) {
+         $file->readfile();
+     } else {
+-        readfile_allow_large($file, $filesize);
++        if (readfile_allow_large($file, $filesize) === false) {
++            throw new file_exception('cannotopenfile', $file);
++        }
+     }
+ }
+ 
+diff --git a/lib/filestorage/file_system.php b/lib/filestorage/file_system.php
+index 12afb3de7a4..f9c7b5ff36a 100644
+--- a/lib/filestorage/file_system.php
++++ b/lib/filestorage/file_system.php
+@@ -63,7 +63,9 @@ abstract class file_system {
+         } else {
+             $path = $this->get_remote_path_from_storedfile($file);
+         }
+-        readfile_allow_large($path, $file->get_filesize());
++        if (readfile_allow_large($path, $file->get_filesize()) === false) {
++            throw new file_exception('storedfilecannotreadfile', $file->get_filename());
++        }
+     }
+ 
+     /**
+diff --git a/lib/setuplib.php b/lib/setuplib.php
+index ed7775ba680..1ffc12c33e9 100644
+--- a/lib/setuplib.php
++++ b/lib/setuplib.php
+@@ -371,10 +371,9 @@ function default_exception_handler($ex) {
+ 
+     $info = get_exception_info($ex);
+ 
+-    if (debugging('', DEBUG_MINIMAL)) {
+-        $logerrmsg = "Default exception handler: ".$info->message.' Debug: '.$info->debuginfo."\n".format_backtrace($info->backtrace, true);
+-        error_log($logerrmsg);
+-    }
++    // If we already tried to send the header remove it, the content length
++    // should be either empty or the length of the error page.
++    @header_remove('Content-Length');
+ 
+     if (is_early_init($info->backtrace)) {
+         echo bootstrap_renderer::early_error($info->message, $info->moreinfourl, $info->link, $info->backtrace, $info->debuginfo, $info->errorcode);
+-- 
+2.17.1
+
+
+From 7c853e8dc26c25ef321aa39325ddc754562287cf Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?David=20Mudr=C3=A1k?= <david@moodle.com>
+Date: Wed, 29 Mar 2017 18:45:53 +0200
+Subject: [PATCH 5/7] MDL-53240 filetypes: Add methods for generating the
+ browser tree content
+
+These new methods will be used to render the tree of file types groups
+and extensions in the browser widget.
+
+Co-Authored-By: John Okely <john@moodle.com>
+---
+ lang/en/form.php                       |   2 +
+ lang/en/mimetypes.php                  |   1 -
+ lib/form/classes/filetypes_util.php    | 185 ++++++++++++++++++++++++-
+ lib/form/tests/filetypes_util_test.php | 141 +++++++++++++++++++
+ 4 files changed, 327 insertions(+), 2 deletions(-)
+
+diff --git a/lang/en/form.php b/lang/en/form.php
+index fceac46711d..153c2d40f08 100644
+--- a/lang/en/form.php
++++ b/lang/en/form.php
+@@ -41,6 +41,8 @@ $string['err_nopunctuation'] = 'You must enter no punctuation characters here.';
+ $string['err_numeric'] = 'You must enter a number here.';
+ $string['err_rangelength'] = 'You must enter between {$a->format[0]} and {$a->format[1]} characters here.';
+ $string['err_required'] = 'You must supply a value here.';
++$string['filetypesany'] = 'All file types';
++$string['filetypesothers'] = 'Other files';
+ $string['general'] = 'General';
+ $string['hideadvanced'] = 'Hide advanced';
+ $string['hour'] = 'Hour';
+diff --git a/lang/en/mimetypes.php b/lang/en/mimetypes.php
+index 6033d063a4d..38892265c60 100644
+--- a/lang/en/mimetypes.php
++++ b/lang/en/mimetypes.php
+@@ -35,7 +35,6 @@
+  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+  */
+ 
+-$string['any'] = 'All file types';
+ $string['application/epub_zip'] = 'EPUB ebook';
+ $string['application/msword'] = 'Word document';
+ $string['application/pdf'] = 'PDF document';
+diff --git a/lib/form/classes/filetypes_util.php b/lib/form/classes/filetypes_util.php
+index c8660809925..7d6f1369837 100644
+--- a/lib/form/classes/filetypes_util.php
++++ b/lib/form/classes/filetypes_util.php
+@@ -212,7 +212,7 @@ class filetypes_util {
+ 
+         foreach ($types as $type) {
+             if ($type === '*') {
+-                $desc = get_string('any', 'core_mimetypes');
++                $desc = get_string('filetypesany', 'core_form');
+                 $descriptions[$desc] = [];
+             } else if ($group = $this->is_filetype_group($type)) {
+                 $desc = $this->get_group_description($type);
+@@ -249,4 +249,187 @@ class filetypes_util {
+             'descriptions' => array_values($data),
+         ];
+     }
++
++    /**
++     * Prepares data for the filetypes-browser.mustache
++     *
++     * @param string|array $onlytypes Allow selection from these file types only; for example 'web_image'.
++     * @param bool allowall Allow to select 'All file types'. Does not apply with onlytypes are set.
++     * @param $current string|array Current values that should be selected.
++     * @return object
++     */
++    public function data_for_browser($onlytypes=null, $allowall=true, $current=null) {
++
++        $groups = [];
++        $current = $this->normalize_file_types($current);
++
++        // Firstly populate the tree of extensions categorized into groups.
++
++        foreach ($this->get_groups_info() as $groupkey => $groupinfo) {
++            if (empty($groupinfo->extensions)) {
++                continue;
++            }
++
++            $group = (object) [
++                'key' => $groupkey,
++                'name' => $this->get_group_description($groupkey),
++                'selectable' => true,
++                'selected' => in_array($groupkey, $current),
++                'ext' => implode(' ', $groupinfo->extensions),
++                'expanded' => false,
++            ];
++
++            $types = [];
++
++            foreach ($groupinfo->extensions as $extension) {
++                if ($onlytypes && !$this->is_whitelisted($extension, $onlytypes)) {
++                    $group->selectable = false;
++                    $group->expanded = true;
++                    $group->ext = '';
++                    continue;
++                }
++
++                $desc = get_mimetype_description(['filename' => 'fakefile'.$extension]);
++
++                if ($selected = in_array($extension, $current)) {
++                    $group->expanded = true;
++                }
++
++                $types[] = (object) [
++                    'key' => $extension,
++                    'name' => get_mimetype_description(['filename' => 'fakefile'.$extension]),
++                    'selected' => $selected,
++                    'ext' => $extension,
++                ];
++            }
++
++            if (empty($types)) {
++                continue;
++            }
++
++            core_collator::asort_objects_by_property($types, 'name', core_collator::SORT_NATURAL);
++
++            $group->types = array_values($types);
++            $groups[] = $group;
++        }
++
++        core_collator::asort_objects_by_property($groups, 'name', core_collator::SORT_NATURAL);
++
++        // Append all other uncategorized extensions.
++
++        $others = [];
++
++        foreach (core_filetypes::get_types() as $extension => $info) {
++            $extension = '.'.$extension;
++            if ($onlytypes && !$this->is_whitelisted($extension, $onlytypes)) {
++                continue;
++            }
++            if (!isset($info['groups']) || empty($info['groups'])) {
++                $others[] = (object) [
++                    'key' => $extension,
++                    'name' => get_mimetype_description(['filename' => 'fakefile'.$extension]),
++                    'selected' => in_array($extension, $current),
++                    'ext' => $extension,
++                ];
++            }
++        }
++
++        core_collator::asort_objects_by_property($others, 'name', core_collator::SORT_NATURAL);
++
++        if (!empty($others)) {
++            $groups[] = (object) [
++                'key' => '',
++                'name' => get_string('filetypesothers', 'core_form'),
++                'selectable' => false,
++                'selected' => false,
++                'ext' => '',
++                'types' => array_values($others),
++                'expanded' => true,
++            ];
++        }
++
++        if (empty($onlytypes) and $allowall) {
++            array_unshift($groups, (object) [
++                'key' => '*',
++                'name' => get_string('filetypesany', 'core_form'),
++                'selectable' => true,
++                'selected' => in_array('*', $current),
++                'ext' => null,
++                'types' => [],
++                'expanded' => false,
++            ]);
++        }
++
++        $groups = array_values($groups);
++
++        return $groups;
++    }
++
++    /**
++     * Expands the file types into the list of file extensions.
++     *
++     * The groups and mimetypes are expanded into the list of their associated file
++     * extensions. Depending on the $keepgroups and $keepmimetypes, the groups
++     * and mimetypes themselves are either kept in the list or removed.
++     *
++     * @param string|array $types
++     * @param bool $keepgroups Keep the group item in the list after expansion
++     * @param bool $keepmimetypes Keep the mimetype item in the list after expansion
++     * @return array list of extensions and eventually groups and types
++     */
++    public function expand($types, $keepgroups=false, $keepmimetypes=false) {
++
++        $expanded = [];
++
++        foreach ($this->normalize_file_types($types) as $type) {
++            if ($group = $this->is_filetype_group($type)) {
++                foreach ($group->extensions as $ext) {
++                    $expanded[$ext] = true;
++                }
++                if ($keepgroups) {
++                    $expanded[$type] = true;
++                }
++
++            } else if ($this->looks_like_mimetype($type)) {
++                // A mime type expands to the associated extensions.
++                foreach (file_get_typegroup('extension', [$type]) as $ext) {
++                    $expanded[$ext] = true;
++                }
++                if ($keepmimetypes) {
++                    $expanded[$type] = true;
++                }
++
++            } else {
++                // Single extension expands to itself.
++                $expanded[$type] = true;
++            }
++        }
++
++        return array_keys($expanded);
++    }
++
++    /**
++     * Should the given file type be considered as a part of the given whitelist.
++     *
++     * If multiple types are provided, all of them must be part of the
++     * whitelist.
++     *
++     * @param string $types One or more types in a string (space , or ; separated)
++     * @param string|array $whitelist an array or string of whitelisted types
++     * @return boolean
++     */
++    public function is_whitelisted($types, $whitelist) {
++
++        $whitelistedtypes = $this->expand($whitelist, true, true);
++
++        if (empty($whitelistedtypes) || $whitelistedtypes == ['*']) {
++            return true;
++        }
++
++        $giventypes = $this->normalize_file_types($types);
++
++        $intersection = array_intersect($giventypes, $whitelistedtypes);
++
++        return !empty($intersection);
++    }
+ }
+diff --git a/lib/form/tests/filetypes_util_test.php b/lib/form/tests/filetypes_util_test.php
+index 323e8381a93..91e17cf9aeb 100644
+--- a/lib/form/tests/filetypes_util_test.php
++++ b/lib/form/tests/filetypes_util_test.php
+@@ -165,4 +165,145 @@ class filetypes_util_testcase extends advanced_testcase {
+         $this->assertEquals('application/x-something-really-unlikely-ever-exist', $desc->descriptions[0]->description);
+         $this->assertEmpty($desc->descriptions[0]->extensions);
+     }
++
++    /**
++     * Test expanding mime types into extensions.
++     */
++    public function test_expand() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertSame([], $util->expand(''));
++
++        $expanded = $util->expand('document .cdr text/plain');
++        $this->assertNotContains('document', $expanded);
++        $this->assertNotContains('text/plain', $expanded);
++        $this->assertContains('.doc', $expanded);
++        $this->assertContains('.odt', $expanded);
++        $this->assertContains('.txt', $expanded);
++        $this->assertContains('.cdr', $expanded);
++
++        $expanded = $util->expand('document .cdr text/plain', true, false);
++        $this->assertContains('document', $expanded);
++        $this->assertNotContains('text/plain', $expanded);
++        $this->assertContains('.doc', $expanded);
++        $this->assertContains('.odt', $expanded);
++        $this->assertContains('.txt', $expanded);
++        $this->assertContains('.cdr', $expanded);
++
++        $expanded = $util->expand('document .cdr text/plain', false, true);
++        $this->assertNotContains('document', $expanded);
++        $this->assertContains('text/plain', $expanded);
++        $this->assertContains('.doc', $expanded);
++        $this->assertContains('.odt', $expanded);
++        $this->assertContains('.txt', $expanded);
++        $this->assertContains('.cdr', $expanded);
++
++        $this->assertSame([], $util->expand('foo/bar', true, false));
++        $this->assertSame(['foo/bar'], $util->expand('foo/bar', true, true));
++    }
++
++    /**
++     * Test checking that a type is among others.
++     */
++    public function test_is_whitelisted() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        // These should be intuitively true.
++        $this->assertTrue($util->is_whitelisted('txt', 'text/plain'));
++        $this->assertTrue($util->is_whitelisted('txt', 'doc txt rtf'));
++        $this->assertTrue($util->is_whitelisted('.txt', '.doc;.txt;.rtf'));
++        $this->assertTrue($util->is_whitelisted('audio', 'text/plain audio video'));
++        $this->assertTrue($util->is_whitelisted('text/plain', 'text/plain audio video'));
++        $this->assertTrue($util->is_whitelisted('jpg jpe jpeg', 'image/jpeg'));
++
++        // These should be intuitively false.
++        $this->assertFalse($util->is_whitelisted('.gif', 'text/plain'));
++
++        // Not all text/plain formats are in the document group.
++        $this->assertFalse($util->is_whitelisted('text/plain', 'document'));
++
++        // Not all documents (and also the group itself) is not a plain text.
++        $this->assertFalse($util->is_whitelisted('document', 'text/plain'));
++
++        // Any type is included if the filter is empty.
++        $this->assertTrue($util->is_whitelisted('txt', ''));
++        $this->assertTrue($util->is_whitelisted('txt', '*'));
++    }
++
++    /**
++     * Test populating the tree for the browser.
++     */
++    public function test_data_for_browser() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $data = $util->data_for_browser();
++        $this->assertContainsOnly('object', $data);
++        foreach ($data as $group) {
++            $this->assertObjectHasAttribute('key', $group);
++            $this->assertObjectHasAttribute('types', $group);
++            if ($group->key !== '') {
++                $this->assertTrue($group->selectable);
++            }
++        }
++
++        // All these three files are in both "image" and also "web_image"
++        // groups. We display both groups.
++        $data = $util->data_for_browser('jpg png gif', true, '.gif');
++        $this->assertEquals(2, count($data));
++        $this->assertTrue($data[0]->key !== $data[1]->key);
++        foreach ($data as $group) {
++            $this->assertTrue(($group->key === 'image' || $group->key === 'web_image'));
++            $this->assertEquals(3, count($group->types));
++            $this->assertFalse($group->selectable);
++            foreach ($group->types as $ext) {
++                if ($ext->key === '.gif') {
++                    $this->assertTrue($ext->selected);
++                } else {
++                    $this->assertFalse($ext->selected);
++                }
++            }
++        }
++
++        // There is a group web_image which is a subset of the group image. The
++        // file extensions that fall into both groups will be displayed twice.
++        $data = $util->data_for_browser('web_image');
++        foreach ($data as $group) {
++            $this->assertTrue(($group->key === 'image' || $group->key === 'web_image'));
++        }
++
++        // Check that "All file types" are displayed first.
++        $data = $util->data_for_browser();
++        $group = array_shift($data);
++        $this->assertEquals('*', $group->key);
++
++        // Check that "All file types" is not displayed if should not.
++        $data = $util->data_for_browser(null, false);
++        $group = array_shift($data);
++        $this->assertNotEquals('*', $group->key);
++
++        // Groups with an extension selected start expanded. The "Other files"
++        // starts expanded. The rest start collapsed.
++        $data = $util->data_for_browser(null, false, '.png');
++        foreach ($data as $group) {
++            if ($group->key === 'document') {
++                $this->assertfalse($group->expanded);
++            } else if ($group->key === '') {
++                $this->assertTrue($group->expanded);
++            }
++            foreach ($group->types as $ext) {
++                foreach ($group->types as $ext) {
++                    if ($ext->key === '.png') {
++                        $this->assertTrue($ext->selected);
++                        $this->assertTrue($group->expanded);
++                    }
++                }
++            }
++        }
++    }
+ }
+-- 
+2.17.1
+
+
+From 607c48fad831719994e509cee8597772a12b562a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?David=20Mudr=C3=A1k?= <david@moodle.com>
+Date: Wed, 5 Apr 2017 01:21:48 +0200
+Subject: [PATCH 6/7] MDL-53240 filetypes: Introduce admin_setting_filetypes
+ class
+
+This new type of admin settings makes use of the filetypes browser but
+for the admin settings.
+---
+ admin/templates/setting_filetypes.mustache |  52 +++++++++
+ lang/en/form.php                           |   1 +
+ lib/adminlib.php                           | 117 +++++++++++++++++++++
+ lib/form/classes/filetypes_util.php        |  29 +++--
+ lib/form/tests/filetypes_util_test.php     |  36 +++++++
+ 5 files changed, 229 insertions(+), 6 deletions(-)
+ create mode 100644 admin/templates/setting_filetypes.mustache
+
+diff --git a/admin/templates/setting_filetypes.mustache b/admin/templates/setting_filetypes.mustache
+new file mode 100644
+index 00000000000..7075ea25a4b
+--- /dev/null
++++ b/admin/templates/setting_filetypes.mustache
+@@ -0,0 +1,52 @@
++{{!
++    This file is part of Moodle - http://moodle.org/
++
++    Moodle is free software: you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    Moodle is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++}}
++{{!
++    @template core_admin/setting_filetypes
++
++    Renders the admin_setting_filetypes setting element.
++
++    Context variables required for this template:
++    * id - element id
++    * name - form element name
++    * value - element value
++    * descriptions - data for the core_form/filetypes-descriptions template
++
++    Example context (json):
++    {
++        "id": "test0",
++        "name": "test",
++        "value": ".jpg,.gif",
++        "descriptions": {
++            "hasdescriptions": true,
++            "descriptions": [
++                {
++                    "description": "Image (JPEG)",
++                    "extensions": ".jpeg .jpe .jpg"
++                },
++                {
++                    "description": "Image (GIF)",
++                    "extensions": ".gif"
++                }
++            ]
++        }
++    }
++}}
++<div class="form-text defaultsnext">
++    <input type="text" name="{{name}}" value="{{value}}" size="30" id="{{id}}" class="text-ltr">
++    <span data-filetypesbrowser="{{id}}"></span>
++    <div data-filetypesdescriptions="{{id}}">{{#descriptions}}{{>core_form/filetypes-descriptions}}{{/descriptions}}</div>
++</div>
+diff --git a/lang/en/form.php b/lang/en/form.php
+index 153c2d40f08..68c2c788627 100644
+--- a/lang/en/form.php
++++ b/lang/en/form.php
+@@ -42,6 +42,7 @@ $string['err_numeric'] = 'You must enter a number here.';
+ $string['err_rangelength'] = 'You must enter between {$a->format[0]} and {$a->format[1]} characters here.';
+ $string['err_required'] = 'You must supply a value here.';
+ $string['filetypesany'] = 'All file types';
++$string['filetypesnotwhitelisted'] = 'These file types are not allowed here: {$a}';
+ $string['filetypesothers'] = 'Other files';
+ $string['general'] = 'General';
+ $string['hideadvanced'] = 'Hide advanced';
+diff --git a/lib/adminlib.php b/lib/adminlib.php
+index 18488d007de..bd8712a5d34 100644
+--- a/lib/adminlib.php
++++ b/lib/adminlib.php
+@@ -10604,3 +10604,120 @@ class admin_settings_sitepolicy_handler_select extends admin_setting_configselec
+         return true;
+     }
+ }
++
++/**
++ * Administration setting to define a list of file types.
++ *
++ * @copyright 2016 Jonathon Fowler <fowlerj@usq.edu.au>
++ * @copyright 2017 David Mudrák <david@moodle.com>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class admin_setting_filetypes extends admin_setting_configtext {
++
++    /** @var array Allow selection from these file types only. */
++    protected $onlytypes = [];
++
++    /** @var bool Allow selection of 'All file types' (will be stored as '*'). */
++    protected $allowall = true;
++
++    /** @var core_form\filetypes_util instance to use as a helper. */
++    protected $util = null;
++
++    /**
++     * Constructor.
++     *
++     * @param string $name Unique ascii name like 'mycoresetting' or 'myplugin/mysetting'
++     * @param string $visiblename Localised label of the setting
++     * @param string $description Localised description of the setting
++     * @param string $defaultsetting Default setting value.
++     * @param array $options Setting widget options, an array with optional keys:
++     *   'onlytypes' => array Allow selection from these file types only; for example ['onlytypes' => ['web_image']].
++     *   'allowall' => bool Allow to select 'All file types', defaults to true. Does not apply if onlytypes are set.
++     */
++    public function __construct($name, $visiblename, $description, $defaultsetting = '', array $options = []) {
++
++        parent::__construct($name, $visiblename, $description, $defaultsetting, PARAM_RAW);
++
++        if (array_key_exists('onlytypes', $options) && is_array($options['onlytypes'])) {
++            $this->onlytypes = $options['onlytypes'];
++        }
++
++        if (!$this->onlytypes && array_key_exists('allowall', $options)) {
++            $this->allowall = (bool)$options['allowall'];
++        }
++
++        $this->util = new \core_form\filetypes_util();
++    }
++
++    /**
++     * Normalize the user's input and write it to the database as comma separated list.
++     *
++     * Comma separated list as a text representation of the array was chosen to
++     * make this compatible with how the $CFG->courseoverviewfilesext values are stored.
++     *
++     * @param string $data Value submitted by the admin.
++     * @return string Epty string if all good, error message otherwise.
++     */
++    public function write_setting($data) {
++        return parent::write_setting(implode(',', $this->util->normalize_file_types($data)));
++    }
++
++    /**
++     * Validate data before storage
++     *
++     * @param string $data The setting values provided by the admin
++     * @return bool|string True if ok, the string if error found
++     */
++    public function validate($data) {
++
++        // No need to call parent's validation here as we are PARAM_RAW.
++
++        if ($this->util->is_whitelisted($data, $this->onlytypes)) {
++            return true;
++
++        } else {
++            $troublemakers = $this->util->get_not_whitelisted($data, $this->onlytypes);
++            return get_string('filetypesnotwhitelisted', 'core_form', implode(' ', $troublemakers));
++        }
++    }
++
++    /**
++     * Return an HTML string for the setting element.
++     *
++     * @param string $data The current setting value
++     * @param string $query Admin search query to be highlighted
++     * @return string HTML to be displayed
++     */
++    public function output_html($data, $query='') {
++        global $OUTPUT, $PAGE;
++
++        $default = $this->get_defaultsetting();
++        $context = (object) [
++            'id' => $this->get_id(),
++            'name' => $this->get_full_name(),
++            'value' => $data,
++            'descriptions' => $this->util->describe_file_types($data),
++        ];
++        $element = $OUTPUT->render_from_template('core_admin/setting_filetypes', $context);
++
++        $PAGE->requires->js_call_amd('core_form/filetypes', 'init', [
++            $this->get_id(),
++            $this->visiblename,
++            $this->onlytypes,
++            $this->allowall,
++        ]);
++
++        return format_admin_setting($this, $this->visiblename, $element, $this->description, true, '', $default, $query);
++    }
++
++    /**
++     * Should the values be always displayed in LTR mode?
++     *
++     * We always return true here because these values are not RTL compatible.
++     *
++     * @return bool True because these values are not RTL compatible.
++     */
++    public function get_force_ltr() {
++        return true;
++    }
++}
+diff --git a/lib/form/classes/filetypes_util.php b/lib/form/classes/filetypes_util.php
+index 7d6f1369837..6fa1861f4f8 100644
+--- a/lib/form/classes/filetypes_util.php
++++ b/lib/form/classes/filetypes_util.php
+@@ -412,24 +412,41 @@ class filetypes_util {
+      * Should the given file type be considered as a part of the given whitelist.
+      *
+      * If multiple types are provided, all of them must be part of the
+-     * whitelist.
++     * whitelist. Empty type is part of any whitelist. Any type is part of an
++     * empty whitelist.
+      *
+-     * @param string $types One or more types in a string (space , or ; separated)
+-     * @param string|array $whitelist an array or string of whitelisted types
++     * @param string|array $types File types to be checked
++     * @param string|array $whitelist An array or string of whitelisted types
+      * @return boolean
+      */
+     public function is_whitelisted($types, $whitelist) {
++        return empty($this->get_not_whitelisted($types, $whitelist));
++    }
++
++    /**
++     * Returns all types that are not part of the give whitelist.
++     *
++     * This is similar check to the {@link self::is_whitelisted()} but this one
++     * actually returns the extra types.
++     *
++     * @param string|array $types File types to be checked
++     * @param string|array $whitelist An array or string of whitelisted types
++     * @return array Types not present in the whitelist
++     */
++    public function get_not_whitelisted($types, $whitelist) {
+ 
+         $whitelistedtypes = $this->expand($whitelist, true, true);
+ 
+         if (empty($whitelistedtypes) || $whitelistedtypes == ['*']) {
+-            return true;
++            return [];
+         }
+ 
+         $giventypes = $this->normalize_file_types($types);
+ 
+-        $intersection = array_intersect($giventypes, $whitelistedtypes);
++        if (empty($giventypes)) {
++            return [];
++        }
+ 
+-        return !empty($intersection);
++        return array_diff($giventypes, $whitelistedtypes);
+     }
+ }
+diff --git a/lib/form/tests/filetypes_util_test.php b/lib/form/tests/filetypes_util_test.php
+index 91e17cf9aeb..8530ab6b594 100644
+--- a/lib/form/tests/filetypes_util_test.php
++++ b/lib/form/tests/filetypes_util_test.php
+@@ -219,6 +219,7 @@ class filetypes_util_testcase extends advanced_testcase {
+         $this->assertTrue($util->is_whitelisted('audio', 'text/plain audio video'));
+         $this->assertTrue($util->is_whitelisted('text/plain', 'text/plain audio video'));
+         $this->assertTrue($util->is_whitelisted('jpg jpe jpeg', 'image/jpeg'));
++        $this->assertTrue($util->is_whitelisted(['jpg', 'jpe', '.png'], 'image'));
+ 
+         // These should be intuitively false.
+         $this->assertFalse($util->is_whitelisted('.gif', 'text/plain'));
+@@ -229,9 +230,44 @@ class filetypes_util_testcase extends advanced_testcase {
+         // Not all documents (and also the group itself) is not a plain text.
+         $this->assertFalse($util->is_whitelisted('document', 'text/plain'));
+ 
++        // This may look wrong at the first sight as you might expect that the
++        // mimetype should simply map to an extension ...
++        $this->assertFalse($util->is_whitelisted('image/jpeg', '.jpg'));
++
++        // But it is principally same situation as this (there is no 1:1 mapping).
++        $this->assertFalse($util->is_whitelisted('.c', '.txt'));
++        $this->assertTrue($util->is_whitelisted('.txt .c', 'text/plain'));
++        $this->assertFalse($util->is_whitelisted('text/plain', '.c'));
++
+         // Any type is included if the filter is empty.
+         $this->assertTrue($util->is_whitelisted('txt', ''));
+         $this->assertTrue($util->is_whitelisted('txt', '*'));
++
++        // Empty value is part of any whitelist.
++        $this->assertTrue($util->is_whitelisted('', '.txt'));
++    }
++
++    /**
++     * Test getting types not present in a whitelist.
++     */
++    public function test_get_not_whitelisted() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertEmpty($util->get_not_whitelisted('txt', 'text/plain'));
++        $this->assertEmpty($util->get_not_whitelisted('txt', '.doc .txt .rtf'));
++        $this->assertEmpty($util->get_not_whitelisted('txt', 'text/plain'));
++        $this->assertEmpty($util->get_not_whitelisted(['jpg', 'jpe', 'jpeg'], 'image/jpeg'));
++        $this->assertEmpty($util->get_not_whitelisted('', 'foo/bar'));
++        $this->assertEmpty($util->get_not_whitelisted('.foobar', ''));
++        $this->assertEmpty($util->get_not_whitelisted('.foobar', '*'));
++
++        // Returned list is normalized so extensions have the dot added.
++        $this->assertContains('.exe', $util->get_not_whitelisted('exe', '.c .h'));
++
++        // If this looks wrong to you, see {@link test_is_whitelisted()} for more details on this behaviour.
++        $this->assertContains('image/jpeg', $util->get_not_whitelisted('image/jpeg', '.jpg .jpeg'));
+     }
+ 
+     /**
+-- 
+2.17.1
+
+
+From baec0fee4efad07193a93cb2038dfd55e3f572f3 Mon Sep 17 00:00:00 2001
+From: Jonathon Fowler <fowlerj@usq.edu.au>
+Date: Fri, 24 Mar 2017 21:03:04 +0100
+Subject: [PATCH 7/7] MDL-53240 filetypes: Introduce the form element to
+ specify plugin types
+
+This is a stripped down version of the original Jonathon's element
+without the actual JS selector. The options "allowall" and "onlytypes"
+are not fully supported right now yet.
+---
+ lib/form/filetypes.php                        | 194 ++++++++++++++++++
+ .../templates/filetypes-descriptions.mustache |  60 ++++++
+ lib/formslib.php                              |   1 +
+ .../core_form/element-filetypes.mustache      |   1 +
+ 4 files changed, 256 insertions(+)
+ create mode 100644 lib/form/filetypes.php
+ create mode 100644 lib/form/templates/filetypes-descriptions.mustache
+ create mode 100644 theme/boost/templates/core_form/element-filetypes.mustache
+
+diff --git a/lib/form/filetypes.php b/lib/form/filetypes.php
+new file mode 100644
+index 00000000000..cb0794ee21a
+--- /dev/null
++++ b/lib/form/filetypes.php
+@@ -0,0 +1,194 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Provides the {@link MoodleQuickForm_filetypes} class.
++ *
++ * @package   core_form
++ * @copyright 2016 Jonathon Fowler <fowlerj@usq.edu.au>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++use core_form\filetypes_util;
++
++defined('MOODLE_INTERNAL') || die;
++
++global $CFG;
++require_once($CFG->dirroot.'/lib/form/group.php');
++
++/**
++ * File types and type groups selection form element.
++ *
++ * @package   core_form
++ * @category  form
++ * @copyright 2016 Jonathon Fowler <fowlerj@usq.edu.au>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class MoodleQuickForm_filetypes extends MoodleQuickForm_group {
++
++    /** @var array Allow selection from these file types only. */
++    protected $onlytypes = [];
++
++    /** @var bool Allow selection of 'All file types' (will be stored as '*'). */
++    protected $allowall = true;
++
++    /** @var core_form\filetypes_util instance to use as a helper. */
++    protected $util = null;
++
++    /**
++     * Constructor
++     *
++     * @param string $elementName Element's name
++     * @param string $elementLabel Label(s) for an element
++     * @param array $options element options:
++     *   'onlytypes': Allow selection from these file types only; for example ['onlytypes' => ['web_image']].
++     *   'allowall': Allow to select 'All file types', defaults to true. Does not apply with onlytypes are set.
++     * @param array|string $attributes Either a typical HTML attribute string or an associative array
++     */
++    public function __construct($elementName = null, $elementLabel = null, $options = null, $attributes = null) {
++
++        parent::__construct($elementName, $elementLabel);
++        $this->_type = 'filetypes';
++
++        // Hard-frozen elements do not get the name populated automatically,
++        // which leads to PHP notice. Add it explicitly here.
++        $this->setAttributes(array('name' => $elementName));
++        $this->updateAttributes($attributes);
++
++        if (is_array($options) && $options) {
++            if (array_key_exists('onlytypes', $options) && is_array($options['onlytypes'])) {
++                $this->onlytypes = $options['onlytypes'];
++            }
++            if (!$this->onlytypes && array_key_exists('allowall', $options)) {
++                $this->allowall = (bool)$options['allowall'];
++            }
++        }
++
++        $this->util = new filetypes_util();
++    }
++
++    /**
++     * Assemble the elements of the form control.
++     */
++    public function _createElements() {
++
++        $this->_generateId();
++
++        $this->setElements([
++            $this->createFormElement('text', 'filetypes', '', [
++                'id' => $this->getAttribute('id'),
++            ]),
++
++            $this->createFormElement('static', 'browser', null,
++                '<span data-filetypesbrowser="'.$this->getAttribute('id').'"></span>'),
++
++            $this->createFormElement('static', 'descriptions'),
++        ]);
++    }
++
++    /**
++     * Return the selected file types.
++     *
++     * @param array $submitValues submitted values
++     * @param bool $assoc if true the retured value is associated array
++     * @return array
++     */
++    public function exportValue(&$submitValues, $assoc = false) {
++
++        $value = '';
++        $filetypeselement = null;
++
++        foreach ($this->_elements as $key => $element) {
++            if ($element->_attributes['name'] === 'filetypes') {
++                $filetypeselement = $this->_elements[$key];
++            }
++        }
++
++        if ($filetypeselement) {
++            $formval = $filetypeselement->exportValue($submitValues[$this->getName()], false);
++            if ($formval) {
++                $value = $this->util->normalize_file_types($formval);
++                if ($value === ['*'] && !$this->allowall) {
++                    $value = [];
++                }
++                $value = implode(',', $value);
++            }
++        }
++
++        return $this->_prepareValue($value, $assoc);
++    }
++
++    /**
++     * Accepts a renderer (called shortly before the renderer's toHtml() method).
++     *
++     * @param HTML_QuickForm_Renderer $renderer An HTML_QuickForm_Renderer object
++     * @param bool $required Whether a group is required
++     * @param string $error An error message associated with a group
++     */
++    public function accept(&$renderer, $required = false, $error = null) {
++        global $PAGE;
++
++        if ($this->isFrozen()) {
++            // Don't render the choose button if the control is frozen.
++            foreach ($this->_elements as $key => $element) {
++                if ($element->_attributes['name'] === 'browser') {
++                    unset($this->_elements[$key]);
++                }
++            }
++        }
++
++        parent::accept($renderer, $required, $error);
++    }
++
++    /**
++     * Called by HTML_QuickForm whenever form event is made on this element
++     *
++     * @param string $event Name of event
++     * @param mixed $arg event arguments
++     * @param object $caller calling object
++     * @return bool
++     */
++    public function onQuickFormEvent($event, $arg, &$caller) {
++        global $OUTPUT;
++
++        switch ($event) {
++            case 'updateValue':
++                $value = $this->_findValue($caller->_constantValues);
++                if (null === $value) {
++                    if ($caller->isSubmitted()) {
++                        $value = $this->_findValue($caller->_submitValues);
++                    } else {
++                        $value = (string)$this->_findValue($caller->_defaultValues);
++                    }
++                }
++                if (!is_array($value)) {
++                    $value = array('filetypes' => $value);
++                }
++                if ($value['filetypes'] !== null) {
++                    $filetypes = $this->util->normalize_file_types($value['filetypes']);
++					if ($filetypes === ['*'] && !$this->allowall) {
++						$filetypes = [];
++					}
++                    $value['descriptions'] = $OUTPUT->render_from_template('core_form/filetypes-descriptions',
++                        $this->util->describe_file_types($filetypes));
++                }
++                $this->setValue($value);
++                return true;
++        }
++
++        return parent::onQuickFormEvent($event, $arg, $caller);
++    }
++}
+diff --git a/lib/form/templates/filetypes-descriptions.mustache b/lib/form/templates/filetypes-descriptions.mustache
+new file mode 100644
+index 00000000000..affe8e6a046
+--- /dev/null
++++ b/lib/form/templates/filetypes-descriptions.mustache
+@@ -0,0 +1,60 @@
++{{!
++    This file is part of Moodle - http://moodle.org/
++
++    Moodle is free software: you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    Moodle is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++}}
++{{!
++    @template core_form/filetypes-descriptions
++
++    Template to describe chosen file types.
++
++    Classes required for JS:
++    * none
++
++    Data attributes required for JS:
++    * none
++
++    Context variables required for this template:
++    * hasdescriptions (bool)
++    * descriptions (array)
++        * description (string)
++        * extensions (string)
++
++    Example context (json):
++    {
++        "hasdescriptions": true,
++        "descriptions": [
++            {
++                "description": "Image (JPEG)",
++                "extensions": ".jpeg .jpe .jpg"
++            },
++            {
++                "description": "Image (GIF)",
++                "extensions": ".gif"
++            }
++        ]
++    }
++}}
++<div class="form-filetypes-descriptions">
++{{#hasdescriptions}}
++    <ul class="list-unstyled unstyled">
++        {{#descriptions}}
++        <li>{{description}} <small class="text-muted muted">{{extensions}}</small></li>
++        {{/descriptions}}
++    </ul>
++{{/hasdescriptions}}
++{{^hasdescriptions}}
++    <p>{{#str}}noselection, form{{/str}}</p>
++{{/hasdescriptions}}
++</div>
+diff --git a/lib/formslib.php b/lib/formslib.php
+index 95f6e84c73e..e208af0140e 100644
+--- a/lib/formslib.php
++++ b/lib/formslib.php
+@@ -3105,6 +3105,7 @@ MoodleQuickForm::registerElementType('duration', "$CFG->libdir/form/duration.php
+ MoodleQuickForm::registerElementType('editor', "$CFG->libdir/form/editor.php", 'MoodleQuickForm_editor');
+ MoodleQuickForm::registerElementType('filemanager', "$CFG->libdir/form/filemanager.php", 'MoodleQuickForm_filemanager');
+ MoodleQuickForm::registerElementType('filepicker', "$CFG->libdir/form/filepicker.php", 'MoodleQuickForm_filepicker');
++MoodleQuickForm::registerElementType('filetypes', "$CFG->libdir/form/filetypes.php", 'MoodleQuickForm_filetypes');
+ MoodleQuickForm::registerElementType('grading', "$CFG->libdir/form/grading.php", 'MoodleQuickForm_grading');
+ MoodleQuickForm::registerElementType('group', "$CFG->libdir/form/group.php", 'MoodleQuickForm_group');
+ MoodleQuickForm::registerElementType('header', "$CFG->libdir/form/header.php", 'MoodleQuickForm_header');
+diff --git a/theme/boost/templates/core_form/element-filetypes.mustache b/theme/boost/templates/core_form/element-filetypes.mustache
+new file mode 100644
+index 00000000000..9a4e5cbe565
+--- /dev/null
++++ b/theme/boost/templates/core_form/element-filetypes.mustache
+@@ -0,0 +1 @@
++{{> core_form/element-group }}
+-- 
+2.17.1
+
