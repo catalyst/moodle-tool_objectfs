@@ -781,8 +781,6 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function presigned_url_should_redirect($contenthash, $headers = array()) {
-        global $_SERVER;
-
         // Redirect regardless.
         if ($this->externalclient->presignedminfilesize == 0 &&
                 manager::all_extensions_whitelisted()) {

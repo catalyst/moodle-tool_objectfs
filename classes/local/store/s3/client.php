@@ -654,8 +654,8 @@ class client extends object_client_base {
      * @throws \file_exception
      */
     public function proxy_range_request(\stored_file $file, $ranges) {
-        // Do not serve files with size less than 2MB or if the feature is disabled.
-        if ($file->get_filesize() < self::MAX_TEMP_LIMIT || empty($this->config->proxyrangerequests)) {
+        // Do not serve files if the feature is disabled or if the file size is less than 2MB.
+        if (empty($this->config->proxyrangerequests) || $file->get_filesize() < self::MAX_TEMP_LIMIT) {
             return false;
         }
 
