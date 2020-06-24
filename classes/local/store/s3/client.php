@@ -651,6 +651,7 @@ class client extends object_client_base {
      * @param  object       $ranges  Object with rangefrom, rangeto and length properties.
      * @return false If couldn't get data.
      * @throws \coding_exception
+     * @throws \file_exception
      */
     public function proxy_range_request(\stored_file $file, $ranges) {
         // Do not serve files with size less than 2MB or if the feature is disabled.
@@ -701,5 +702,34 @@ class client extends object_client_base {
         $curl->setHeader($headers);
         $content = $curl->get($url);
         return array('responseheaders' => $curl->getResponse(), 'content' => $content, 'url' => $url);
+    }
+
+    /**
+     * Test proxy range request.
+     *
+     * @param  object  $filesystem  Filesystem to be tested.
+     * @return bool
+     * @throws \coding_exception
+     */
+    public function test_range_request($filesystem) {
+        global $PAGE;
+        $output = $PAGE->get_renderer('tool_objectfs');
+        $testfiles = $output->presignedurl_tests_load_files($filesystem);
+        foreach ($testfiles as $file) {
+            if ($file->get_filename() == 'testvideo.mp4') {
+                $ranges = (object)['rangefrom' => 0, 'rangeto' => 999, 'length' => 1000];
+                $response = $this->curl_range_request_to_presigned_url($file->get_contenthash(), $ranges, []);
+                $httpcode = manager::get_header($response['responseheaders'], 'HTTP/1.1');
+                if ($response['content'] != '' && $httpcode == '206 Partial Content') {
+                    return true;
+                } else {
+                    debugging('Test range request to URL ' . $response['url'] .
+                        ' failed with HTTP code: ' . $httpcode . '. Details: ' . $response['content']);
+                    return false;
+                }
+                break;
+            }
+        }
+        return false;
     }
 }

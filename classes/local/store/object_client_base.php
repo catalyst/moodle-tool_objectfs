@@ -127,4 +127,14 @@ abstract class object_client_base implements object_client {
     public function proxy_range_request(\stored_file $file, $ranges) {
         return false;
     }
+
+    /**
+     * Test proxy range request.
+     *
+     * @param  object  $filesystem  Filesystem to be tested.
+     * @return bool
+     */
+    public function test_range_request($filesystem) {
+        return false;
+    }
 }

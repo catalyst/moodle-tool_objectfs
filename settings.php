@@ -138,6 +138,12 @@ if ($ADMIN->fulltree) {
             $methodexists = method_exists('file_system', 'xsendfile_file');
             if (!$methodexists) {
                 $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:xsendfilefile', 'tool_objectfs'));
+            } else {
+                if ($client->test_range_request(new $config->filesystem())) {
+                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeok', 'tool_objectfs'), 'notifysuccess');
+                } else {
+                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeerror', 'tool_objectfs'));
+                }
             }
             $settings->add(new admin_setting_configcheckbox('tool_objectfs/proxyrangerequests',
                 new lang_string('settings:presignedurl:proxyrangerequests', 'tool_objectfs'),
