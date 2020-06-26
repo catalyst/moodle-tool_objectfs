@@ -225,11 +225,16 @@ class manager {
      * @param string $filename
      * @return bool
      * @throws \dml_exception
+     * @throws \coding_exception
      */
     public static function is_extension_whitelisted($filename) {
         $config = self::get_objectfs_config();
         if (empty($config->signingwhitelist)) {
             return false;
+        }
+        $classexists = class_exists('\core_form\filetypes_util');
+        if (!$classexists) {
+            throw new \coding_exception(get_string('backportfiletypesclass', 'tool_objectfs'));
         }
         $util = new \core_form\filetypes_util();
         $whitelist = $util->normalize_file_types($config->signingwhitelist);
