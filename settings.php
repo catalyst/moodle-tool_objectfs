@@ -134,11 +134,29 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
 
         if ($classexists) {
+            // Check if we are actually on the objectFS settings page, or in correct category.
+            $caturl = new moodle_url('/admin/category.php');
+            $pageurl = new moodle_url('/admin/settings.php');
+            $thisurl = $PAGE->url;
+            $connstatus = false;
+            if ($caturl->compare($thisurl, URL_MATCH_BASE)) {
+                if ($thisurl->get_param('category') == 'tool_objectfs') {
+                    $testconn = $client->test_connection();
+                    $connstatus = $testconn->success;
+                }
+            } else if ($pageurl->compare($thisurl,  URL_MATCH_BASE)) {
+                if ($thisurl->get_param('section') == 'tool_objectfs_settings') {
+                    $testconn = $client->test_connection();
+                    $connstatus = $testconn->success;
+                }
+            }
+
             $warningtext = '';
             $methodexists = method_exists('file_system', 'xsendfile_file');
             if (!$methodexists) {
                 $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:xsendfilefile', 'tool_objectfs'));
-            } else {
+            } else if ($connstatus) {
+                // Range request tests can only work if there is a valid connection.
                 if ($client->test_range_request(new $config->filesystem())) {
                     $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeok', 'tool_objectfs'), 'notifysuccess');
                 } else {
