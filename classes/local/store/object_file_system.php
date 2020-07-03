@@ -738,6 +738,7 @@ abstract class object_file_system extends \file_system_filedir {
         try {
             redirect($this->externalclient->generate_presigned_url($contenthash, $headers));
         } catch (\Exception $e) {
+            debugging('Failed to redirect to pre-signed url: ' . $e->getMessage());
             return false;
         }
     }
