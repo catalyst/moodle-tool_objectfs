@@ -34,8 +34,6 @@ class client extends object_client_base {
     /** @var string $containername The current container. */
     protected $containername;
 
-    protected $config;
-
     /**
      * The swift client constructor.
      *

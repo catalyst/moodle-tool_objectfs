@@ -30,6 +30,7 @@ class test_client extends object_client_base {
     public function __construct($config) {
         global $CFG;
         $this->maxupload = 5000000000;
+        $this->config = $config;
         $dataroot = $CFG->phpunit_dataroot;
         if (defined('PHPUNIT_INSTANCE') && PHPUNIT_INSTANCE !== null) {
             $dataroot .= '/' . PHPUNIT_INSTANCE;
@@ -94,11 +95,11 @@ class test_client extends object_client_base {
     }
 
     public function test_connection() {
-        return true;
+        return (object)['success' => true, 'details' => ''];
     }
 
     public function test_permissions($testdelete) {
-        return true;
+        return (object)['success' => true, 'details' => ''];
     }
 
     public function get_availability() {
