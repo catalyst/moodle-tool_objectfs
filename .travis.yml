@@ -11,72 +11,37 @@ cache:
 dist: trusty
 
 addons:
-  postgresql: "9.5"
+  postgresql: "9.4"
 
 matrix:
   include:
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE CORE_PATCH=core33.diff
-    - php: 7.1
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_33_STABLE CORE_PATCH=core33.diff
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
-    - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_35_STABLE
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE CORE_PATCH=core38.diff
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE CORE_PATCH=core38.diff
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_39_STABLE
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_39_STABLE
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=master
-    - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=master
-    - php: 7.3
-      env: DB=mysqli MOODLE_BRANCH=master
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=master
+    - php: 5.5
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE CORE_PATCH=core27.diff
+    - php: 5.6
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_27_STABLE CORE_PATCH=core27.diff
+    - php: 5.5
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE CORE_PATCH=core31.diff
+    - php: 5.6
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_31_STABLE CORE_PATCH=core31.diff
 
 before_install:
   - export MOODLE_VERSION=$(echo "$MOODLE_BRANCH" | cut -d'_' -f 2)
   - phpenv config-rm xdebug.ini
   - cd ../..
   - git clone --mirror 'https://github.com/moodlehq/moodle-behat-extension.git' '/home/travis/.composer/cache/vcs/git-github.com-moodlehq-moodle-behat-extension.git/' || true
-  - if [ "$MOODLE_VERSION" = 36 ] || [ "$MOODLE_VERSION" -le 34 ]; then NVMVERSION=8.9; else NVMVERSION=14.0.0; fi
-  - nvm install $NVMVERSION;
-  - nvm use $NVMVERSION;
-  - composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^2;
+  - composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^1;
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
   - moodle-plugin-ci install -vvv
-  - if [ ! -z "$CORE_PATCH" ]; then (cd /home/travis/build/moodle; git am --whitespace=nowarn < admin/tool/objectfs/patch/$CORE_PATCH); fi
+  - if [ ! -z "$CORE_PATCH" ]; then (cd /home/travis/build/moodle; git am --whitespace=nowarn < admin/tool/objectfs/patch/$CORE_PATCH; php admin/tool/phpunit/cli/init.php); fi
 
 script:
   - moodle-plugin-ci validate
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci codechecker
-  - moodle-plugin-ci savepoints
-  - moodle-plugin-ci mustache
-  - moodle-plugin-ci grunt
+  - moodle-plugin-ci csslint
+  - moodle-plugin-ci jshint
+  - moodle-plugin-ci shifter
   - moodle-plugin-ci phpunit
