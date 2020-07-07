@@ -357,16 +357,20 @@ abstract class object_file_system extends \file_system_filedir {
      * @return void
      */
     public function readfile(\stored_file $file) {
-        $path = $this->get_remote_path_from_storedfile($file);
+        if (!$this->is_configured()) {
+            parent::readfile($file);
+        } else {
+            $path = $this->get_remote_path_from_storedfile($file);
 
-        $this->logger->start_timing();
-        $success = readfile_allow_large($path, $file->get_filesize());
-        $this->logger->end_timing();
+            $this->logger->start_timing();
+            $success = readfile_allow_large($path, $file->get_filesize());
+            $this->logger->end_timing();
 
-        $this->logger->log_object_read('readfile', $path, $file->get_filesize());
+            $this->logger->log_object_read('readfile', $path, $file->get_filesize());
 
-        if (!$success) {
-            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            if (!$success) {
+                manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            }
         }
     }
 
@@ -415,6 +419,10 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \coding_exception
      */
     public function xsendfile_file(stored_file $file): bool {
+        if (!$this->is_configured()) {
+            return parent::xsendfile_file($file);
+        }
+
         $contenthash = $file->get_contenthash();
         if ($this->presigned_url_configured() &&
                 $this->presigned_url_should_redirect_file($file) &&
@@ -444,6 +452,9 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function xsendfile($contenthash) {
+        if (!$this->is_configured()) {
+            return parent::xsendfile($contenthash);
+        }
         $headers = headers_list();
         if ($this->presigned_url_configured() &&
                 $this->is_file_readable_externally_by_hash($contenthash) &&
@@ -816,6 +827,9 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      */
     public function supports_xsendfile() {
+        if (!$this->is_configured()) {
+            return parent::supports_xsendfile();
+        }
         return true;
     }
 
@@ -931,5 +945,32 @@ abstract class object_file_system extends \file_system_filedir {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns true if object file system is configured.
+     *
+     * @return bool
+     */
+    public function is_configured() {
+        global $CFG;
+
+        // Return false if alternative_file_system_class is not set in config.php.
+        if (empty($CFG->alternative_file_system_class)) {
+            return false;
+        }
+
+        // Return false if there is a disparity between filesystem set in config.php and admin settings.
+        if ($CFG->alternative_file_system_class != '\\' . get_class($this)) {
+            return false;
+        }
+
+        // Return false if the client SDK does not exist or has not been loaded.
+        if (!$this->get_client_availability()) {
+            return false;
+        }
+
+        // Looks like all checks have been passed.
+        return true;
     }
 }
