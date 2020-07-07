@@ -330,7 +330,7 @@ This plugin requires various trackers to be backported to maintain the plugin fu
 | Moodle 3.3       | Totara 12          | master       | MDL-58281         | MDL-68342, MDL-53240,<br>MDL-66304 |
 | Moodle 3.2       | Totara 11          | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297 | MDL-68342, MDL-53240,<br>MDL-66304 |
 | Moodle 2.9 - 3.1 | Totara 2.9, 9 - 10 | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-58684,<br>MDL-58297, MDL-55071 | MDL-68342, MDL-53240,<br>MDL-66304 |
-| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-49627,<br>MDL-58684, MDL-58297<br>MDL-55071 | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | MDL-58281, MDL-46375,<br>MDL-58068, MDL-49627,<br>MDL-58684, MDL-58297<br>MDL-55071, MDL-42616 | MDL-68342, MDL-53240,<br>MDL-66304 |
 
 #### Moodle 3.9:
 TBA
@@ -463,13 +463,24 @@ git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
 // Cherry-pick MDL-58068
 git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
 
+// Cherry-pick MDL-53240
+git cherry-pick 6c4a5fdf88ac8ad88c4e86cf9b54d2b55bf2fd58
+git cherry-pick e3ad9db6b67aa378b1787497991a4422f57a6a3d
+git cherry-pick 8cf36e9c81a704c8dee90d0fef9402aec0eaf80e
+git cherry-pick 97bb4f755e5f5c8e488ecc7ad7cc932c4e294226
+
+// Cherry-pick MDL-42616
+git cherry-pick 91fed57a4e4005589425d701c6a888130763ca8a
+git cherry-pick d3fd2be7aab748b8b13c1c47b89a37bfd0e03256
+git cherry-pick ae46ca5fcc8823c446fba6b275daa02f5c8a7973
+
 // Cherry-pick MDL-58684
 // TBA
 // git cherry-pick 5529b4701aa52caf30a25052ba90aaa7b7dc0ef7
 // WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
 // git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
 
-// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304, MDL-55071
+// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-66304, MDL-55071
 // TBA
 
 // Create the patch
