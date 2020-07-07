@@ -429,13 +429,19 @@ git cherry-pick 0c03db6a32fb217756e091b691f1e885b608781b
 // Cherry-pick MDL-58068
 git cherry-pick db4b59fa03049992842b47c99ef8e80b41c8093d
 
+// Cherry-pick MDL-53240
+git cherry-pick 6c4a5fdf88ac8ad88c4e86cf9b54d2b55bf2fd58
+git cherry-pick e3ad9db6b67aa378b1787497991a4422f57a6a3d
+git cherry-pick 8cf36e9c81a704c8dee90d0fef9402aec0eaf80e
+git cherry-pick 97bb4f755e5f5c8e488ecc7ad7cc932c4e294226
+
 // Cherry-pick MDL-58684
 // TBA
 // git cherry-pick 5529b4701aa52caf30a25052ba90aaa7b7dc0ef7
 // WARNING: This commit has a DB upgrade. Change the version numbers to appropriately match your version of moodle.
 // git cherry-pick e927581a50dbbf39b22ab9a49e0e316fe0cc83f1
 
-// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-53240, MDL-66304, MDL-55071
+// Cherry-pick MDL-58297, MDL-58281, MDL-68342, MDL-66304, MDL-55071
 // TBA
 
 // Create the patch
