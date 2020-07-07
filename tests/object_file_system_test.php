@@ -870,4 +870,45 @@ class object_file_system_testcase extends tool_objectfs_testcase {
             $this->assertFalse($externalclient->test_range_request($this->filesystem));
         }
     }
+
+    /**
+     * Test that is_configured() returns true by default.
+     */
+    public function test_is_configured_default() {
+        $this->assertTrue($this->filesystem->is_configured());
+    }
+
+    /**
+     * Test that is_configured() returns false when the client SDK does not exist.
+     */
+    public function test_is_configured_fake_autoloader() {
+        $this->assertTrue($this->filesystem->is_configured());
+        $clientref = new \ReflectionClass($this->filesystem->externalclient);
+        $autoloaderref = $clientref->getParentClass()->getProperty('autoloader');
+        $autoloaderref->setAccessible(true);
+        $autoloader = $autoloaderref->getValue($this->filesystem->externalclient);
+        $this->set_externalclient_config('autoloader', $autoloader . '_fake');
+        $this->assertFalse($this->filesystem->is_configured());
+    }
+
+    /**
+     * Test that is_configured() returns false when filesystem set in config.php
+     * and filesystem set via admin settings do not match.
+     */
+    public function test_is_configured_settings_do_not_match() {
+        global $CFG;
+        $this->assertTrue($this->filesystem->is_configured());
+        $CFG->alternative_file_system_class = 'fake_file_system';
+        $this->assertFalse($this->filesystem->is_configured());
+    }
+
+    /**
+     * Test that is_configured() returns false when alternative_file_system_class is not set in config.php.
+     */
+    public function test_is_configured_alternative_file_system_class_is_not_set() {
+        global $CFG;
+        $this->assertTrue($this->filesystem->is_configured());
+        unset($CFG->alternative_file_system_class);
+        $this->assertFalse($this->filesystem->is_configured());
+    }
 }

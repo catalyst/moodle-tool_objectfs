@@ -56,6 +56,18 @@ $ADMIN->add('tool_objectfs', new admin_externalpage('tool_objectfs_missing_files
     new moodle_url('/admin/tool/objectfs/missing_files.php')));
 
 if ($ADMIN->fulltree) {
+    // Check if we are actually on the Objectfs settings page, or in correct category.
+    $caturl = new moodle_url('/admin/category.php');
+    $pageurl = new moodle_url('/admin/settings.php');
+    $objectfspage = false;
+    if ($PAGE->has_set_url()) {
+        $thisurl = $PAGE->url;
+        if (($caturl->compare($thisurl, URL_MATCH_BASE) && $thisurl->get_param('category') == 'tool_objectfs') ||
+            ($pageurl->compare($thisurl,  URL_MATCH_BASE) && $thisurl->get_param('section') == 'tool_objectfs_settings')) {
+            $objectfspage = true;
+        }
+    }
+
     $warntext = '';
     if (method_exists('file_storage', 'get_file_system')) {
         if (!\tool_objectfs\local\manager::check_file_storage_filesystem()) {
@@ -111,7 +123,7 @@ if ($ADMIN->fulltree) {
         \tool_objectfs\local\manager::get_available_fs_list()));
 
     $client = \tool_objectfs\local\manager::get_client($config);
-    if ($client && $client->get_availability()) {
+    if ($client && $client->get_availability() && $objectfspage) {
         $settings = $client->define_client_section($settings, $config);
     }
 
@@ -134,21 +146,10 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
 
         if ($classexists) {
-            // Check if we are actually on the objectFS settings page, or in correct category.
-            $caturl = new moodle_url('/admin/category.php');
-            $pageurl = new moodle_url('/admin/settings.php');
-            $thisurl = $PAGE->url;
             $connstatus = false;
-            if ($caturl->compare($thisurl, URL_MATCH_BASE)) {
-                if ($thisurl->get_param('category') == 'tool_objectfs') {
-                    $testconn = $client->test_connection();
-                    $connstatus = $testconn->success;
-                }
-            } else if ($pageurl->compare($thisurl,  URL_MATCH_BASE)) {
-                if ($thisurl->get_param('section') == 'tool_objectfs_settings') {
-                    $testconn = $client->test_connection();
-                    $connstatus = $testconn->success;
-                }
+            if ($objectfspage) {
+                $testconn = $client->test_connection();
+                $connstatus = $testconn->success;
             }
 
             $warningtext = '';

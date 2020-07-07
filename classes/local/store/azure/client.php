@@ -53,6 +53,7 @@ class client extends object_client_base {
             require_once($this->autoloader);
             $this->maxupload = \MicrosoftAzure\Storage\Common\Internal\Resources::MAX_BLOCK_BLOB_SIZE;
             $this->container = $config->azure_container;
+            $this->config = $config;
             $this->set_client($config);
         } else {
             parent::__construct($config);

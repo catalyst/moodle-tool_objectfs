@@ -30,6 +30,9 @@ class test_client extends object_client_base {
     public function __construct($config) {
         global $CFG;
         $this->maxupload = 5000000000;
+        $this->config = $config;
+        // Point autoloader to this file to make sure get_client_availability() returns true.
+        $this->autoloader = $CFG->dirroot . '/admin/tool/objectfs/tests/classes/test_client.php';
         $dataroot = $CFG->phpunit_dataroot;
         if (defined('PHPUNIT_INSTANCE') && PHPUNIT_INSTANCE !== null) {
             $dataroot .= '/' . PHPUNIT_INSTANCE;
@@ -94,15 +97,11 @@ class test_client extends object_client_base {
     }
 
     public function test_connection() {
-        return true;
+        return (object)['success' => true, 'details' => ''];
     }
 
     public function test_permissions($testdelete) {
-        return true;
-    }
-
-    public function get_availability() {
-        return true;
+        return (object)['success' => true, 'details' => ''];
     }
 
     public function get_maximum_upload_size() {

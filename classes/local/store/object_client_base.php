@@ -38,6 +38,9 @@ abstract class object_client_base implements object_client {
     /** @var int $maxupload Maximum allowed file size that can be uploaded. */
     protected $maxupload;
 
+    /** @var object $config Client config. */
+    protected $config;
+
     public function __construct($config) {
 
     }
@@ -136,5 +139,26 @@ abstract class object_client_base implements object_client {
      */
     public function test_range_request($filesystem) {
         return false;
+    }
+
+    /**
+     * Tests connection to external storage.
+     * Override this method in client class.
+     *
+     * @return object
+     */
+    public function test_connection() {
+        return (object)['success' => false, 'details' => ''];
+    }
+
+    /**
+     * Tests permissions to external storage.
+     * Override this method in client class.
+     *
+     * @param bool $testdelete Test delete permission and fail the test if could delete object from the storage.
+     * @return object
+     */
+    public function test_permissions($testdelete) {
+        return (object)['success' => false, 'details' => ''];
     }
 }
