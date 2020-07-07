@@ -326,11 +326,11 @@ This plugin requires various trackers to be backported to maintain the plugin fu
 |------------------|--------------------|--------------|-------------------|-----------------|
 | Moodle 3.9       |                    | master       |                   |                 |
 | Moodle 3.8       |                    | master       | MDL-58281         | MDL-68342       |
-| Moodle 3.4 - 3.7 |                    | master       | MDL-58281         | MDL-68342, MDL-66304 |
-| Moodle 3.3       | Totara 12          | master       | MDL-58281         | MDL-68342, MDL-53240,<br>MDL-66304 |
+| Moodle 3.4 - 3.7 |                    | master       | MDL-58281         | MDL-68342,<br>MDL-66304 |
+| Moodle 3.3       | Totara 12          | master       | MDL-58281         | MDL-68342,<br>MDL-53240,<br>MDL-66304 |
 | Moodle 3.2       | Totara 11          | 27-32-STABLE | MDL-58281,<br>MDL-46375,<br>MDL-58068,<br>MDL-58684,<br>MDL-58297 | MDL-68342,<br>MDL-53240,<br>MDL-66304 |
 | Moodle 2.9 - 3.1 | Totara 2.9, 9 - 10 | 27-32-STABLE | MDL-58281,<br>MDL-46375,<br>MDL-58068,<br>MDL-58684,<br>MDL-58297,<br>MDL-55071 | MDL-68342,<br>MDL-53240,<br>MDL-66304 |
-| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | MDL-58281,<br>MDL-46375,<br>MDL-58068,<br>MDL-49627,<br>MDL-58684,<br>MDL-58297<br>MDL-55071, MDL-42616 | MDL-68342,<br>MDL-53240,<br>MDL-66304 |
+| Moodle 2.7 - 2.8 | Totara 2.7 - 2.8   | 27-32-STABLE | MDL-58281,<br>MDL-46375,<br>MDL-58068,<br>MDL-49627,<br>MDL-58684,<br>MDL-58297<br>MDL-55071,<br>MDL-42616 | MDL-68342,<br>MDL-53240,<br>MDL-66304 |
 
 #### Moodle 3.9:
 TBA
