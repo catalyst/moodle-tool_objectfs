@@ -1480,9 +1480,9 @@ index 91e17cf9aeb..8530ab6b594 100644
 2.17.1
 
 
-From baec0fee4efad07193a93cb2038dfd55e3f572f3 Mon Sep 17 00:00:00 2001
-From: Jonathon Fowler <fowlerj@usq.edu.au>
-Date: Fri, 24 Mar 2017 21:03:04 +0100
+From 1145d95a3432671ad115d066ce7abafe5191cdf1 Mon Sep 17 00:00:00 2001
+From: Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
+Date: Tue, 7 Jul 2020 12:44:42 +1000
 Subject: [PATCH 7/7] MDL-53240 filetypes: Introduce the form element to
  specify plugin types
 
@@ -1493,11 +1493,9 @@ are not fully supported right now yet.
  lib/form/filetypes.php                        | 194 ++++++++++++++++++
  .../templates/filetypes-descriptions.mustache |  60 ++++++
  lib/formslib.php                              |   1 +
- .../core_form/element-filetypes.mustache      |   1 +
- 4 files changed, 256 insertions(+)
+ 3 files changed, 255 insertions(+)
  create mode 100644 lib/form/filetypes.php
  create mode 100644 lib/form/templates/filetypes-descriptions.mustache
- create mode 100644 theme/boost/templates/core_form/element-filetypes.mustache
 
 diff --git a/lib/form/filetypes.php b/lib/form/filetypes.php
 new file mode 100644
@@ -1777,13 +1775,6 @@ index 95f6e84c73e..e208af0140e 100644
  MoodleQuickForm::registerElementType('grading', "$CFG->libdir/form/grading.php", 'MoodleQuickForm_grading');
  MoodleQuickForm::registerElementType('group', "$CFG->libdir/form/group.php", 'MoodleQuickForm_group');
  MoodleQuickForm::registerElementType('header', "$CFG->libdir/form/header.php", 'MoodleQuickForm_header');
-diff --git a/theme/boost/templates/core_form/element-filetypes.mustache b/theme/boost/templates/core_form/element-filetypes.mustache
-new file mode 100644
-index 00000000000..9a4e5cbe565
---- /dev/null
-+++ b/theme/boost/templates/core_form/element-filetypes.mustache
-@@ -0,0 +1 @@
-+{{> core_form/element-group }}
 -- 
 2.17.1
 
