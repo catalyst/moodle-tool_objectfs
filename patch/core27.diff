@@ -1,7 +1,7 @@
-From d7d6a17c711c83a97a6ed24dba39fb72580fb355 Mon Sep 17 00:00:00 2001
+From fd1916d74de03d811388c9abec25665ec2e6dcd6 Mon Sep 17 00:00:00 2001
 From: Andrew Nicols <andrew@nicols.co.uk>
 Date: Mon, 23 Mar 2015 09:12:28 +0800
-Subject: [PATCH 1/5] MDL-49627 core: Improve thumbnail generation
+Subject: [PATCH 01/15] MDL-49627 core: Improve thumbnail generation
 
 We now abstract the actual file generation to a new function.
 We are then able to call this function from the other image generation
@@ -328,10 +328,10 @@ index 00000000000..befc9101b9d
 2.17.1
 
 
-From dc0e311a9863c20c214be7d31e3324bfa07a848b Mon Sep 17 00:00:00 2001
+From a972c3b025bd4afd50107d9699cb20d2f7ade13f Mon Sep 17 00:00:00 2001
 From: Andrew Nicols <andrew@nicols.co.uk>
 Date: Mon, 23 Mar 2015 09:13:26 +0800
-Subject: [PATCH 2/5] MDL-49627 core: Update uses of generate_image_thumbnail
+Subject: [PATCH 02/15] MDL-49627 core: Update uses of generate_image_thumbnail
 
 This removes the need to write tempfiles in these locations.
 ---
@@ -415,10 +415,10 @@ index 578f36fabba..1585d883ac5 100644
 2.17.1
 
 
-From dec252c3910358dce50aae9cd9b54acc964f4d36 Mon Sep 17 00:00:00 2001
+From 0ab1a2e101c87bf6f1bbc6cc3d3fdb87c50c1523 Mon Sep 17 00:00:00 2001
 From: Andrew Nicols <andrew@nicols.co.uk>
 Date: Tue, 5 Jan 2016 18:14:16 +0800
-Subject: [PATCH 3/5] MDL-46375 core_files: Split parts of file_storage into
+Subject: [PATCH 03/15] MDL-46375 core_files: Split parts of file_storage into
  new file system
 
 This change moves all operations which deal with the fetching/updating, or
@@ -4738,10 +4738,10 @@ index 52993289dc0..9a7c87b75fb 100644
 2.17.1
 
 
-From d7c5cccf7777ab26870738cb0884b0df6c03d427 Mon Sep 17 00:00:00 2001
+From 83269b055d6c476d5c87eda19218e2f36abc3b05 Mon Sep 17 00:00:00 2001
 From: Andrew Nicols <andrew@nicols.co.uk>
 Date: Wed, 8 Feb 2017 13:14:51 +0800
-Subject: [PATCH 4/5] MDL-46375 core_files: Correct filename in mbz test
+Subject: [PATCH 04/15] MDL-46375 core_files: Correct filename in mbz test
 
 I noticed during the file system abstraction that this test was
 incorrect.
@@ -4780,10 +4780,10 @@ index 682ec47bd7a..df6917b1a7e 100644
 2.17.1
 
 
-From 641f5d2adc08a56bb4fbc2511caa2b5d9dc0b6e7 Mon Sep 17 00:00:00 2001
+From 83a1729feae6542b6f8ba74b11e8de8f8be043c1 Mon Sep 17 00:00:00 2001
 From: Rajesh Taneja <rajesh@moodle.com>
 Date: Tue, 28 Feb 2017 14:58:49 +0800
-Subject: [PATCH 5/5] MDL-58068 testing: Whitelist
+Subject: [PATCH 05/15] MDL-58068 testing: Whitelist
  alternative_file_system_class in testing
 
 Unit test and behat should be allowed to
@@ -4818,6 +4818,4137 @@ index ed4bf3935ae..8ca082f1165 100644
                  );
  $productioncfg = (array)$CFG;
  $CFG = new stdClass();
+-- 
+2.17.1
+
+
+From 3bfa32a243c5630a921b5807fe69e23e979ad46d Mon Sep 17 00:00:00 2001
+From: Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+Date: Mon, 27 Feb 2017 13:14:22 +1100
+Subject: [PATCH 06/15] Convert setExpectedExceptionRegExp calls to
+ setExpectedException
+
+Also known as patch A
+---
+ lib/filestorage/tests/file_system_filedir_test.php | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/lib/filestorage/tests/file_system_filedir_test.php b/lib/filestorage/tests/file_system_filedir_test.php
+index 1f65099cb9d..0c12808ef9b 100644
+--- a/lib/filestorage/tests/file_system_filedir_test.php
++++ b/lib/filestorage/tests/file_system_filedir_test.php
+@@ -149,8 +149,8 @@ class core_files_file_system_filedir_testcase extends advanced_testcase {
+             ->chown(\org\bovigo\vfs\vfsStream::OWNER_USER_2);
+ 
+         // This should generate an exception.
+-        $this->setExpectedExceptionRegexp('file_exception',
+-            '/Can not create local file pool directories, please verify permissions in dataroot./');
++        $this->setExpectedException('file_exception',
++            'Can not create local file pool directories, please verify permissions in dataroot.');
+ 
+         new file_system_filedir();
+     }
+@@ -170,8 +170,8 @@ class core_files_file_system_filedir_testcase extends advanced_testcase {
+             ->chown(\org\bovigo\vfs\vfsStream::OWNER_USER_2);
+ 
+         // This should generate an exception.
+-        $this->setExpectedExceptionRegexp('file_exception',
+-            '/Can not create local file pool directories, please verify permissions in dataroot./');
++        $this->setExpectedException('file_exception',
++            'Can not create local file pool directories, please verify permissions in dataroot.');
+ 
+         new file_system_filedir();
+     }
+@@ -693,8 +693,8 @@ class core_files_file_system_filedir_testcase extends advanced_testcase {
+         // Setup the filedir.
+         $vfileroot = $this->setup_vfile_root();
+ 
+-        $this->setExpectedExceptionRegexp('file_exception',
+-            '/Cannot read file\. Either the file does not exist or there is a permission problem\./');
++        $this->setExpectedException('file_exception',
++            'Cannot read file. Either the file does not exist or there is a permission problem.');
+ 
+         $fs = new file_system_filedir();
+         $fs->add_file_from_path(\org\bovigo\vfs\vfsStream::url('filedir/file'));
+-- 
+2.17.1
+
+
+From 1ad6d48548d9b5e5eb1cf8a1d0a4e9012a207645 Mon Sep 17 00:00:00 2001
+From: Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+Date: Fri, 24 Feb 2017 13:17:13 +1100
+Subject: [PATCH 07/15] Convert expectException calls to setExpectedException
+
+Also known as patch B
+---
+ lib/filestorage/tests/file_system_test.php | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/filestorage/tests/file_system_test.php b/lib/filestorage/tests/file_system_test.php
+index 2aeff76edab..9bd0700e272 100644
+--- a/lib/filestorage/tests/file_system_test.php
++++ b/lib/filestorage/tests/file_system_test.php
+@@ -925,7 +925,7 @@ class core_files_file_system_testcase extends advanced_testcase {
+         $fs->method('get_remote_path_from_storedfile')
+             ->willReturn(__FILE__);
+ 
+-        $this->expectException('coding_exception', 'Unexpected file handle type');
++        $this->setExpectedException('coding_exception', 'Unexpected file handle type');
+         $fs->get_content_file_handle($file, -1);
+     }
+ 
+-- 
+2.17.1
+
+
+From 5ab054b415e64916378032f43c2e93cfecb4e544 Mon Sep 17 00:00:00 2001
+From: Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+Date: Wed, 1 Mar 2017 12:38:43 +1100
+Subject: [PATCH 08/15] Modify expected exception message
+
+Also known as patch C
+---
+ lib/filestorage/tests/file_system_filedir_test.php | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/filestorage/tests/file_system_filedir_test.php b/lib/filestorage/tests/file_system_filedir_test.php
+index 0c12808ef9b..7549c3fca50 100644
+--- a/lib/filestorage/tests/file_system_filedir_test.php
++++ b/lib/filestorage/tests/file_system_filedir_test.php
+@@ -694,7 +694,7 @@ class core_files_file_system_filedir_testcase extends advanced_testcase {
+         $vfileroot = $this->setup_vfile_root();
+ 
+         $this->setExpectedException('file_exception',
+-            'Cannot read file. Either the file does not exist or there is a permission problem.');
++            'Can not read file, either file does not exist or there are permission problems');
+ 
+         $fs = new file_system_filedir();
+         $fs->add_file_from_path(\org\bovigo\vfs\vfsStream::url('filedir/file'));
+-- 
+2.17.1
+
+
+From dad1f2c09f194ec3e1f55314145a4526346eb855 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?David=20Mudr=C3=A1k?= <david@moodle.com>
+Date: Fri, 24 Mar 2017 22:16:33 +0100
+Subject: [PATCH 09/15] MDL-53240 filetypes: Introduce the filetypes_util
+ helper class
+
+---
+ lang/en/mimetypes.php                  |   1 +
+ lib/form/classes/filetypes_util.php    | 252 +++++++++++++++++++++++++
+ lib/form/tests/filetypes_util_test.php | 168 +++++++++++++++++
+ 3 files changed, 421 insertions(+)
+ create mode 100644 lib/form/classes/filetypes_util.php
+ create mode 100644 lib/form/tests/filetypes_util_test.php
+
+diff --git a/lang/en/mimetypes.php b/lang/en/mimetypes.php
+index 64624fb6ea2..14c776355d3 100644
+--- a/lang/en/mimetypes.php
++++ b/lang/en/mimetypes.php
+@@ -36,6 +36,7 @@
+  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+  */
+ 
++$string['any'] = 'All file types';
+ $string['application/msword'] = 'Word document';
+ $string['application/pdf'] = 'PDF document';
+ $string['application/vnd.moodle.backup'] = 'Moodle backup';
+diff --git a/lib/form/classes/filetypes_util.php b/lib/form/classes/filetypes_util.php
+new file mode 100644
+index 00000000000..c8660809925
+--- /dev/null
++++ b/lib/form/classes/filetypes_util.php
+@@ -0,0 +1,252 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Provides the {@link core_form\filetypes_util} class.
++ *
++ * @package     core_form
++ * @copyright   2017 David Mudrák <david@moodle.com>
++ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++namespace core_form;
++
++use core_collator;
++use core_filetypes;
++
++defined('MOODLE_INTERNAL') || die();
++
++/**
++ * Utility class for handling with file types in the forms.
++ *
++ * This class is supposed to serve as a helper class for {@link MoodleQuickForm_filetypes}
++ * and {@link admin_setting_filetypes} classes.
++ *
++ * The file types can be specified in a syntax compatible with what filepicker
++ * and filemanager support via the "accepted_types" option: a list of extensions
++ * (e.g. ".doc"), mimetypes ("image/png") or groups ("audio").
++ *
++ * @copyright 2017 David Mudrak <david@moodle.com>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class filetypes_util {
++
++    /** @var array Cache of all file type groups for the {@link self::get_groups_info()}. */
++    protected $cachegroups = null;
++
++    /**
++     * Converts the argument into an array (list) of file types.
++     *
++     * The list can be separated by whitespace, end of lines, commas, colons and semicolons.
++     * Empty values are not returned. Values are converted to lowercase.
++     * Duplicates are removed. Glob evaluation is not supported.
++     *
++     * The return value can be used as the accepted_types option for the filepicker.
++     *
++     * @param string|array $extensions list of file extensions, groups or mimetypes
++     * @return array of strings
++     */
++    public function normalize_file_types($types) {
++
++        if ($types === '') {
++            return [];
++        }
++
++        // Turn string into a list.
++        if (!is_array($types)) {
++            $types = preg_split('/[\s,;:"\']+/', $types, null, PREG_SPLIT_NO_EMPTY);
++        }
++
++        // Fix whitespace and normalize the syntax a bit.
++        foreach ($types as $i => $type) {
++            $type = str_replace('*.', '.', $type);
++            $type = strtolower($type);
++            $type = trim($type);
++
++            if ($type === '*') {
++                return ['*'];
++            }
++
++            $types[$i] = $type;
++        }
++
++        // Do not make the user think that globs (like ".doc?") would work.
++        foreach ($types as $i => $type) {
++            if (strpos($type, '*') !== false or strpos($type, '?') !== false) {
++                unset($types[$i]);
++            }
++        }
++
++        foreach ($types as $i => $type) {
++            if (substr($type, 0, 1) === '.') {
++                // It looks like an extension.
++                $type = '.'.ltrim($type, '.');
++                $types[$i] = clean_param($type, PARAM_FILE);
++            } else if ($this->looks_like_mimetype($type)) {
++                // All good, it looks like a mimetype.
++            } else if ($this->is_filetype_group($type)) {
++                // All good, it is a known type group.
++            } else {
++                // We assume the user typed something like "png" so we consider
++                // it an extension.
++                $types[$i] = '.'.$type;
++            }
++        }
++
++        $types = array_filter($types, 'strlen');
++        $types = array_keys(array_flip($types));
++
++        return $types;
++    }
++
++    /**
++     * Does the given file type looks like a valid MIME type?
++     *
++     * This does not check of the MIME type is actually registered here/known.
++     *
++     * @param string $type
++     * @return bool
++     */
++    public function looks_like_mimetype($type) {
++        return (bool)preg_match('~^[-\.a-z0-9]+/[a-z0-9]+([-\.\+][a-z0-9]+)*$~', $type);
++    }
++
++    /**
++     * Is the given string a known filetype group?
++     *
++     * @param string $type
++     * @return bool|object false or the group info
++     */
++    public function is_filetype_group($type) {
++
++        $info = $this->get_groups_info();
++
++        if (isset($info[$type])) {
++            return $info[$type];
++
++        } else {
++            return false;
++        }
++    }
++
++    /**
++     * Provides a list of all known file type groups and their properties.
++     *
++     * @return array
++     */
++    public function get_groups_info() {
++
++        if ($this->cachegroups !== null) {
++            return $this->cachegroups;
++        }
++
++        $groups = [];
++
++        foreach (core_filetypes::get_types() as $ext => $info) {
++            if (isset($info['groups']) && is_array($info['groups'])) {
++                foreach ($info['groups'] as $group) {
++                    if (!isset($groups[$group])) {
++                        $groups[$group] = (object) [
++                            'extensions' => [],
++                            'mimetypes' => [],
++                        ];
++                    }
++                    $groups[$group]->extensions['.'.$ext] = true;
++                    if (isset($info['type'])) {
++                        $groups[$group]->mimetypes[$info['type']] = true;
++                    }
++                }
++            }
++        }
++
++        foreach ($groups as $group => $info) {
++            $info->extensions = array_keys($info->extensions);
++            $info->mimetypes = array_keys($info->mimetypes);
++        }
++
++        $this->cachegroups = $groups;
++        return $this->cachegroups;
++    }
++
++    /**
++     * Return a human readable name of the filetype group.
++     *
++     * @param string $group
++     * @return string
++     */
++    public function get_group_description($group) {
++
++		if (get_string_manager()->string_exists('group:'.$group, 'core_mimetypes')) {
++			return get_string('group:'.$group, 'core_mimetypes');
++        } else {
++            return s($group);
++        }
++    }
++
++    /**
++     * Describe the list of file types for human user.
++     *
++     * Given the list of file types, return a list of human readable
++     * descriptive names of relevant groups, types or file formats.
++     *
++     * @param string|array $types
++     * @return object
++     */
++    public function describe_file_types($types) {
++
++        $descriptions = [];
++        $types = $this->normalize_file_types($types);
++
++        foreach ($types as $type) {
++            if ($type === '*') {
++                $desc = get_string('any', 'core_mimetypes');
++                $descriptions[$desc] = [];
++            } else if ($group = $this->is_filetype_group($type)) {
++                $desc = $this->get_group_description($type);
++                $descriptions[$desc] = $group->extensions;
++
++            } else if ($this->looks_like_mimetype($type)) {
++                $desc = get_mimetype_description($type);
++                $descriptions[$desc] = file_get_typegroup('extension', [$type]);
++
++            } else {
++                $desc = get_mimetype_description(['filename' => 'fakefile'.$type]);
++                if (isset($descriptions[$desc])) {
++                    $descriptions[$desc][] = $type;
++                } else {
++                    $descriptions[$desc] = [$type];
++                }
++            }
++        }
++
++        $data = [];
++
++        foreach ($descriptions as $desc => $exts) {
++            sort($exts);
++            $data[] = (object)[
++                'description' => $desc,
++                'extensions' => join(' ', $exts),
++            ];
++        }
++
++        core_collator::asort_objects_by_property($data, 'description', core_collator::SORT_NATURAL);
++
++        return (object)[
++            'hasdescriptions' => !empty($data),
++            'descriptions' => array_values($data),
++        ];
++    }
++}
+diff --git a/lib/form/tests/filetypes_util_test.php b/lib/form/tests/filetypes_util_test.php
+new file mode 100644
+index 00000000000..323e8381a93
+--- /dev/null
++++ b/lib/form/tests/filetypes_util_test.php
+@@ -0,0 +1,168 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Provides the {@link core_form\filetypes_util_testcase} class.
++ *
++ * @package     core_form
++ * @category    test
++ * @copyright   2017 David Mudrák <david@moodle.com>
++ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++namespace core_form;
++
++use advanced_testcase;
++
++defined('MOODLE_INTERNAL') || die();
++
++global $CFG;
++
++/**
++ * Test cases for the {@link core_form\filetypes_util} class.
++ *
++ * @copyright 2017 David Mudrak <david@moodle.com>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class filetypes_util_testcase extends advanced_testcase {
++
++    /**
++     * Test normalizing list of extensions.
++     */
++    public function test_normalize_file_types() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertSame(['.odt'], $util->normalize_file_types('.odt'));
++        $this->assertSame(['.odt'], $util->normalize_file_types('odt'));
++        $this->assertSame(['.odt'], $util->normalize_file_types('.ODT'));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types('doc, jpg, mp3'));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types(['.doc', '.jpg', '.mp3']));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types('doc, *.jpg, mp3'));
++        $this->assertSame(['.doc', '.jpg', '.mp3'], $util->normalize_file_types(['doc ', ' JPG ', '.mp3']));
++        $this->assertSame(['.rtf', '.pdf', '.docx'],
++            $util->normalize_file_types("RTF,.pdf\n...DocX,,,;\rPDF\trtf ...Rtf"));
++        $this->assertSame(['.tgz', '.tar.gz'], $util->normalize_file_types('tgz,TAR.GZ tar.gz .tar.gz tgz TGZ'));
++        $this->assertSame(['.notebook'], $util->normalize_file_types('"Notebook":notebook;NOTEBOOK;,\'NoTeBook\''));
++        $this->assertSame([], $util->normalize_file_types(''));
++        $this->assertSame([], $util->normalize_file_types([]));
++        $this->assertSame(['.0'], $util->normalize_file_types(0));
++        $this->assertSame(['.0'], $util->normalize_file_types('0'));
++        $this->assertSame(['.odt'], $util->normalize_file_types('*.odt'));
++        $this->assertSame([], $util->normalize_file_types('.'));
++        $this->assertSame(['.foo'], $util->normalize_file_types('. foo'));
++        $this->assertSame(['*'], $util->normalize_file_types('*'));
++        $this->assertSame([], $util->normalize_file_types('*~'));
++        $this->assertSame(['.pdf', '.ps'], $util->normalize_file_types('pdf *.ps foo* *bar .r??'));
++        $this->assertSame(['*'], $util->normalize_file_types('pdf *.ps foo* * *bar .r??'));
++    }
++
++    /**
++     * Test MIME type formal recognition.
++     */
++    public function test_looks_like_mimetype() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertTrue($util->looks_like_mimetype('type/subtype'));
++        $this->assertTrue($util->looks_like_mimetype('type/x-subtype'));
++        $this->assertTrue($util->looks_like_mimetype('type/x-subtype+xml'));
++        $this->assertTrue($util->looks_like_mimetype('type/vnd.subtype.xml'));
++        $this->assertTrue($util->looks_like_mimetype('type/vnd.subtype+xml'));
++
++        $this->assertFalse($util->looks_like_mimetype('.gif'));
++        $this->assertFalse($util->looks_like_mimetype('audio'));
++        $this->assertFalse($util->looks_like_mimetype('foo/bar/baz'));
++    }
++
++    /**
++     * Test getting/checking group.
++     */
++    public function test_is_filetype_group() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $audio = $util->is_filetype_group('audio');
++        $this->assertNotFalse($audio);
++        $this->assertInternalType('array', $audio->extensions);
++        $this->assertInternalType('array', $audio->mimetypes);
++
++        $this->assertFalse($util->is_filetype_group('.gif'));
++        $this->assertFalse($util->is_filetype_group('somethingveryunlikelytoeverexist'));
++    }
++
++
++    /**
++     * Test describing list of extensions.
++     */
++    public function test_describe_file_types() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        force_current_language('en');
++
++        // Check that it is able to describe individual file extensions.
++        $desc = $util->describe_file_types('jpg .jpeg *.jpe PNG;.gif,  mudrd8mz');
++        $this->assertTrue($desc->hasdescriptions);
++
++        $desc = $desc->descriptions;
++        $this->assertEquals(4, count($desc));
++
++        $this->assertEquals('File', $desc[0]->description);
++        $this->assertEquals('.mudrd8mz', $desc[0]->extensions);
++
++        $this->assertEquals('Image (JPEG)', $desc[2]->description);
++        $this->assertContains('.jpg', $desc[2]->extensions);
++        $this->assertContains('.jpeg', $desc[2]->extensions);
++        $this->assertContains('.jpe', $desc[2]->extensions);
++
++        // Check that it can describe groups and mimetypes too.
++        $desc = $util->describe_file_types('audio text/plain');
++        $this->assertTrue($desc->hasdescriptions);
++
++        $desc = $desc->descriptions;
++        $this->assertEquals(2, count($desc));
++
++        $this->assertEquals('Audio files', $desc[0]->description);
++        $this->assertContains('.mp3', $desc[0]->extensions);
++        $this->assertContains('.wav', $desc[0]->extensions);
++        $this->assertContains('.ogg', $desc[0]->extensions);
++
++        $this->assertEquals('Text file', $desc[1]->description);
++        $this->assertContains('.txt', $desc[1]->extensions);
++
++        // Empty.
++        $desc = $util->describe_file_types('');
++        $this->assertFalse($desc->hasdescriptions);
++        $this->assertEmpty($desc->descriptions);
++
++        // Any.
++        $desc = $util->describe_file_types('*');
++        $this->assertTrue($desc->hasdescriptions);
++        $this->assertNotEmpty($desc->descriptions[0]->description);
++        $this->assertEmpty($desc->descriptions[0]->extensions);
++
++        // Unknown mimetype.
++        $desc = $util->describe_file_types('application/x-something-really-unlikely-ever-exist');
++        $this->assertTrue($desc->hasdescriptions);
++        $this->assertEquals('application/x-something-really-unlikely-ever-exist', $desc->descriptions[0]->description);
++        $this->assertEmpty($desc->descriptions[0]->extensions);
++    }
++}
+-- 
+2.17.1
+
+
+From b883e2164d3f0c63ad8034032893e89af2810370 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?David=20Mudr=C3=A1k?= <david@moodle.com>
+Date: Wed, 29 Mar 2017 18:45:53 +0200
+Subject: [PATCH 10/15] MDL-53240 filetypes: Add methods for generating the
+ browser tree content
+
+These new methods will be used to render the tree of file types groups
+and extensions in the browser widget.
+
+Co-Authored-By: John Okely <john@moodle.com>
+---
+ lang/en/form.php                       |   2 +
+ lang/en/mimetypes.php                  |   1 -
+ lib/form/classes/filetypes_util.php    | 185 ++++++++++++++++++++++++-
+ lib/form/tests/filetypes_util_test.php | 141 +++++++++++++++++++
+ 4 files changed, 327 insertions(+), 2 deletions(-)
+
+diff --git a/lang/en/form.php b/lang/en/form.php
+index 153a6bf3333..46400ebff0e 100644
+--- a/lang/en/form.php
++++ b/lang/en/form.php
+@@ -39,6 +39,8 @@ $string['err_nopunctuation'] = 'You must enter no punctuation characters here.';
+ $string['err_numeric'] = 'You must enter a number here.';
+ $string['err_rangelength'] = 'You must enter between {$a->format[0]} and {$a->format[1]} characters here.';
+ $string['err_required'] = 'You must supply a value here.';
++$string['filetypesany'] = 'All file types';
++$string['filetypesothers'] = 'Other files';
+ $string['general'] = 'General';
+ $string['hideadvanced'] = 'Hide advanced';
+ $string['hour'] = 'Hour';
+diff --git a/lang/en/mimetypes.php b/lang/en/mimetypes.php
+index 14c776355d3..64624fb6ea2 100644
+--- a/lang/en/mimetypes.php
++++ b/lang/en/mimetypes.php
+@@ -36,7 +36,6 @@
+  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+  */
+ 
+-$string['any'] = 'All file types';
+ $string['application/msword'] = 'Word document';
+ $string['application/pdf'] = 'PDF document';
+ $string['application/vnd.moodle.backup'] = 'Moodle backup';
+diff --git a/lib/form/classes/filetypes_util.php b/lib/form/classes/filetypes_util.php
+index c8660809925..7d6f1369837 100644
+--- a/lib/form/classes/filetypes_util.php
++++ b/lib/form/classes/filetypes_util.php
+@@ -212,7 +212,7 @@ class filetypes_util {
+ 
+         foreach ($types as $type) {
+             if ($type === '*') {
+-                $desc = get_string('any', 'core_mimetypes');
++                $desc = get_string('filetypesany', 'core_form');
+                 $descriptions[$desc] = [];
+             } else if ($group = $this->is_filetype_group($type)) {
+                 $desc = $this->get_group_description($type);
+@@ -249,4 +249,187 @@ class filetypes_util {
+             'descriptions' => array_values($data),
+         ];
+     }
++
++    /**
++     * Prepares data for the filetypes-browser.mustache
++     *
++     * @param string|array $onlytypes Allow selection from these file types only; for example 'web_image'.
++     * @param bool allowall Allow to select 'All file types'. Does not apply with onlytypes are set.
++     * @param $current string|array Current values that should be selected.
++     * @return object
++     */
++    public function data_for_browser($onlytypes=null, $allowall=true, $current=null) {
++
++        $groups = [];
++        $current = $this->normalize_file_types($current);
++
++        // Firstly populate the tree of extensions categorized into groups.
++
++        foreach ($this->get_groups_info() as $groupkey => $groupinfo) {
++            if (empty($groupinfo->extensions)) {
++                continue;
++            }
++
++            $group = (object) [
++                'key' => $groupkey,
++                'name' => $this->get_group_description($groupkey),
++                'selectable' => true,
++                'selected' => in_array($groupkey, $current),
++                'ext' => implode(' ', $groupinfo->extensions),
++                'expanded' => false,
++            ];
++
++            $types = [];
++
++            foreach ($groupinfo->extensions as $extension) {
++                if ($onlytypes && !$this->is_whitelisted($extension, $onlytypes)) {
++                    $group->selectable = false;
++                    $group->expanded = true;
++                    $group->ext = '';
++                    continue;
++                }
++
++                $desc = get_mimetype_description(['filename' => 'fakefile'.$extension]);
++
++                if ($selected = in_array($extension, $current)) {
++                    $group->expanded = true;
++                }
++
++                $types[] = (object) [
++                    'key' => $extension,
++                    'name' => get_mimetype_description(['filename' => 'fakefile'.$extension]),
++                    'selected' => $selected,
++                    'ext' => $extension,
++                ];
++            }
++
++            if (empty($types)) {
++                continue;
++            }
++
++            core_collator::asort_objects_by_property($types, 'name', core_collator::SORT_NATURAL);
++
++            $group->types = array_values($types);
++            $groups[] = $group;
++        }
++
++        core_collator::asort_objects_by_property($groups, 'name', core_collator::SORT_NATURAL);
++
++        // Append all other uncategorized extensions.
++
++        $others = [];
++
++        foreach (core_filetypes::get_types() as $extension => $info) {
++            $extension = '.'.$extension;
++            if ($onlytypes && !$this->is_whitelisted($extension, $onlytypes)) {
++                continue;
++            }
++            if (!isset($info['groups']) || empty($info['groups'])) {
++                $others[] = (object) [
++                    'key' => $extension,
++                    'name' => get_mimetype_description(['filename' => 'fakefile'.$extension]),
++                    'selected' => in_array($extension, $current),
++                    'ext' => $extension,
++                ];
++            }
++        }
++
++        core_collator::asort_objects_by_property($others, 'name', core_collator::SORT_NATURAL);
++
++        if (!empty($others)) {
++            $groups[] = (object) [
++                'key' => '',
++                'name' => get_string('filetypesothers', 'core_form'),
++                'selectable' => false,
++                'selected' => false,
++                'ext' => '',
++                'types' => array_values($others),
++                'expanded' => true,
++            ];
++        }
++
++        if (empty($onlytypes) and $allowall) {
++            array_unshift($groups, (object) [
++                'key' => '*',
++                'name' => get_string('filetypesany', 'core_form'),
++                'selectable' => true,
++                'selected' => in_array('*', $current),
++                'ext' => null,
++                'types' => [],
++                'expanded' => false,
++            ]);
++        }
++
++        $groups = array_values($groups);
++
++        return $groups;
++    }
++
++    /**
++     * Expands the file types into the list of file extensions.
++     *
++     * The groups and mimetypes are expanded into the list of their associated file
++     * extensions. Depending on the $keepgroups and $keepmimetypes, the groups
++     * and mimetypes themselves are either kept in the list or removed.
++     *
++     * @param string|array $types
++     * @param bool $keepgroups Keep the group item in the list after expansion
++     * @param bool $keepmimetypes Keep the mimetype item in the list after expansion
++     * @return array list of extensions and eventually groups and types
++     */
++    public function expand($types, $keepgroups=false, $keepmimetypes=false) {
++
++        $expanded = [];
++
++        foreach ($this->normalize_file_types($types) as $type) {
++            if ($group = $this->is_filetype_group($type)) {
++                foreach ($group->extensions as $ext) {
++                    $expanded[$ext] = true;
++                }
++                if ($keepgroups) {
++                    $expanded[$type] = true;
++                }
++
++            } else if ($this->looks_like_mimetype($type)) {
++                // A mime type expands to the associated extensions.
++                foreach (file_get_typegroup('extension', [$type]) as $ext) {
++                    $expanded[$ext] = true;
++                }
++                if ($keepmimetypes) {
++                    $expanded[$type] = true;
++                }
++
++            } else {
++                // Single extension expands to itself.
++                $expanded[$type] = true;
++            }
++        }
++
++        return array_keys($expanded);
++    }
++
++    /**
++     * Should the given file type be considered as a part of the given whitelist.
++     *
++     * If multiple types are provided, all of them must be part of the
++     * whitelist.
++     *
++     * @param string $types One or more types in a string (space , or ; separated)
++     * @param string|array $whitelist an array or string of whitelisted types
++     * @return boolean
++     */
++    public function is_whitelisted($types, $whitelist) {
++
++        $whitelistedtypes = $this->expand($whitelist, true, true);
++
++        if (empty($whitelistedtypes) || $whitelistedtypes == ['*']) {
++            return true;
++        }
++
++        $giventypes = $this->normalize_file_types($types);
++
++        $intersection = array_intersect($giventypes, $whitelistedtypes);
++
++        return !empty($intersection);
++    }
+ }
+diff --git a/lib/form/tests/filetypes_util_test.php b/lib/form/tests/filetypes_util_test.php
+index 323e8381a93..91e17cf9aeb 100644
+--- a/lib/form/tests/filetypes_util_test.php
++++ b/lib/form/tests/filetypes_util_test.php
+@@ -165,4 +165,145 @@ class filetypes_util_testcase extends advanced_testcase {
+         $this->assertEquals('application/x-something-really-unlikely-ever-exist', $desc->descriptions[0]->description);
+         $this->assertEmpty($desc->descriptions[0]->extensions);
+     }
++
++    /**
++     * Test expanding mime types into extensions.
++     */
++    public function test_expand() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertSame([], $util->expand(''));
++
++        $expanded = $util->expand('document .cdr text/plain');
++        $this->assertNotContains('document', $expanded);
++        $this->assertNotContains('text/plain', $expanded);
++        $this->assertContains('.doc', $expanded);
++        $this->assertContains('.odt', $expanded);
++        $this->assertContains('.txt', $expanded);
++        $this->assertContains('.cdr', $expanded);
++
++        $expanded = $util->expand('document .cdr text/plain', true, false);
++        $this->assertContains('document', $expanded);
++        $this->assertNotContains('text/plain', $expanded);
++        $this->assertContains('.doc', $expanded);
++        $this->assertContains('.odt', $expanded);
++        $this->assertContains('.txt', $expanded);
++        $this->assertContains('.cdr', $expanded);
++
++        $expanded = $util->expand('document .cdr text/plain', false, true);
++        $this->assertNotContains('document', $expanded);
++        $this->assertContains('text/plain', $expanded);
++        $this->assertContains('.doc', $expanded);
++        $this->assertContains('.odt', $expanded);
++        $this->assertContains('.txt', $expanded);
++        $this->assertContains('.cdr', $expanded);
++
++        $this->assertSame([], $util->expand('foo/bar', true, false));
++        $this->assertSame(['foo/bar'], $util->expand('foo/bar', true, true));
++    }
++
++    /**
++     * Test checking that a type is among others.
++     */
++    public function test_is_whitelisted() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        // These should be intuitively true.
++        $this->assertTrue($util->is_whitelisted('txt', 'text/plain'));
++        $this->assertTrue($util->is_whitelisted('txt', 'doc txt rtf'));
++        $this->assertTrue($util->is_whitelisted('.txt', '.doc;.txt;.rtf'));
++        $this->assertTrue($util->is_whitelisted('audio', 'text/plain audio video'));
++        $this->assertTrue($util->is_whitelisted('text/plain', 'text/plain audio video'));
++        $this->assertTrue($util->is_whitelisted('jpg jpe jpeg', 'image/jpeg'));
++
++        // These should be intuitively false.
++        $this->assertFalse($util->is_whitelisted('.gif', 'text/plain'));
++
++        // Not all text/plain formats are in the document group.
++        $this->assertFalse($util->is_whitelisted('text/plain', 'document'));
++
++        // Not all documents (and also the group itself) is not a plain text.
++        $this->assertFalse($util->is_whitelisted('document', 'text/plain'));
++
++        // Any type is included if the filter is empty.
++        $this->assertTrue($util->is_whitelisted('txt', ''));
++        $this->assertTrue($util->is_whitelisted('txt', '*'));
++    }
++
++    /**
++     * Test populating the tree for the browser.
++     */
++    public function test_data_for_browser() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $data = $util->data_for_browser();
++        $this->assertContainsOnly('object', $data);
++        foreach ($data as $group) {
++            $this->assertObjectHasAttribute('key', $group);
++            $this->assertObjectHasAttribute('types', $group);
++            if ($group->key !== '') {
++                $this->assertTrue($group->selectable);
++            }
++        }
++
++        // All these three files are in both "image" and also "web_image"
++        // groups. We display both groups.
++        $data = $util->data_for_browser('jpg png gif', true, '.gif');
++        $this->assertEquals(2, count($data));
++        $this->assertTrue($data[0]->key !== $data[1]->key);
++        foreach ($data as $group) {
++            $this->assertTrue(($group->key === 'image' || $group->key === 'web_image'));
++            $this->assertEquals(3, count($group->types));
++            $this->assertFalse($group->selectable);
++            foreach ($group->types as $ext) {
++                if ($ext->key === '.gif') {
++                    $this->assertTrue($ext->selected);
++                } else {
++                    $this->assertFalse($ext->selected);
++                }
++            }
++        }
++
++        // There is a group web_image which is a subset of the group image. The
++        // file extensions that fall into both groups will be displayed twice.
++        $data = $util->data_for_browser('web_image');
++        foreach ($data as $group) {
++            $this->assertTrue(($group->key === 'image' || $group->key === 'web_image'));
++        }
++
++        // Check that "All file types" are displayed first.
++        $data = $util->data_for_browser();
++        $group = array_shift($data);
++        $this->assertEquals('*', $group->key);
++
++        // Check that "All file types" is not displayed if should not.
++        $data = $util->data_for_browser(null, false);
++        $group = array_shift($data);
++        $this->assertNotEquals('*', $group->key);
++
++        // Groups with an extension selected start expanded. The "Other files"
++        // starts expanded. The rest start collapsed.
++        $data = $util->data_for_browser(null, false, '.png');
++        foreach ($data as $group) {
++            if ($group->key === 'document') {
++                $this->assertfalse($group->expanded);
++            } else if ($group->key === '') {
++                $this->assertTrue($group->expanded);
++            }
++            foreach ($group->types as $ext) {
++                foreach ($group->types as $ext) {
++                    if ($ext->key === '.png') {
++                        $this->assertTrue($ext->selected);
++                        $this->assertTrue($group->expanded);
++                    }
++                }
++            }
++        }
++    }
+ }
+-- 
+2.17.1
+
+
+From eae67295cb29fd3dbe446f3b9d25c5af5cda2957 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?David=20Mudr=C3=A1k?= <david@moodle.com>
+Date: Wed, 5 Apr 2017 01:21:48 +0200
+Subject: [PATCH 11/15] MDL-53240 filetypes: Introduce admin_setting_filetypes
+ class
+
+This new type of admin settings makes use of the filetypes browser but
+for the admin settings.
+---
+ admin/templates/setting_filetypes.mustache |  52 +++++++++
+ lang/en/form.php                           |   1 +
+ lib/adminlib.php                           | 117 +++++++++++++++++++++
+ lib/form/classes/filetypes_util.php        |  29 +++--
+ lib/form/tests/filetypes_util_test.php     |  36 +++++++
+ 5 files changed, 229 insertions(+), 6 deletions(-)
+ create mode 100644 admin/templates/setting_filetypes.mustache
+
+diff --git a/admin/templates/setting_filetypes.mustache b/admin/templates/setting_filetypes.mustache
+new file mode 100644
+index 00000000000..7075ea25a4b
+--- /dev/null
++++ b/admin/templates/setting_filetypes.mustache
+@@ -0,0 +1,52 @@
++{{!
++    This file is part of Moodle - http://moodle.org/
++
++    Moodle is free software: you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    Moodle is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++}}
++{{!
++    @template core_admin/setting_filetypes
++
++    Renders the admin_setting_filetypes setting element.
++
++    Context variables required for this template:
++    * id - element id
++    * name - form element name
++    * value - element value
++    * descriptions - data for the core_form/filetypes-descriptions template
++
++    Example context (json):
++    {
++        "id": "test0",
++        "name": "test",
++        "value": ".jpg,.gif",
++        "descriptions": {
++            "hasdescriptions": true,
++            "descriptions": [
++                {
++                    "description": "Image (JPEG)",
++                    "extensions": ".jpeg .jpe .jpg"
++                },
++                {
++                    "description": "Image (GIF)",
++                    "extensions": ".gif"
++                }
++            ]
++        }
++    }
++}}
++<div class="form-text defaultsnext">
++    <input type="text" name="{{name}}" value="{{value}}" size="30" id="{{id}}" class="text-ltr">
++    <span data-filetypesbrowser="{{id}}"></span>
++    <div data-filetypesdescriptions="{{id}}">{{#descriptions}}{{>core_form/filetypes-descriptions}}{{/descriptions}}</div>
++</div>
+diff --git a/lang/en/form.php b/lang/en/form.php
+index 46400ebff0e..dff9286314b 100644
+--- a/lang/en/form.php
++++ b/lang/en/form.php
+@@ -40,6 +40,7 @@ $string['err_numeric'] = 'You must enter a number here.';
+ $string['err_rangelength'] = 'You must enter between {$a->format[0]} and {$a->format[1]} characters here.';
+ $string['err_required'] = 'You must supply a value here.';
+ $string['filetypesany'] = 'All file types';
++$string['filetypesnotwhitelisted'] = 'These file types are not allowed here: {$a}';
+ $string['filetypesothers'] = 'Other files';
+ $string['general'] = 'General';
+ $string['hideadvanced'] = 'Hide advanced';
+diff --git a/lib/adminlib.php b/lib/adminlib.php
+index 532f64c3970..e8576de2d0b 100644
+--- a/lib/adminlib.php
++++ b/lib/adminlib.php
+@@ -8918,3 +8918,120 @@ class admin_setting_php_extension_enabled extends admin_setting {
+         return $o;
+     }
+ }
++
++/**
++ * Administration setting to define a list of file types.
++ *
++ * @copyright 2016 Jonathon Fowler <fowlerj@usq.edu.au>
++ * @copyright 2017 David Mudrák <david@moodle.com>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class admin_setting_filetypes extends admin_setting_configtext {
++
++    /** @var array Allow selection from these file types only. */
++    protected $onlytypes = [];
++
++    /** @var bool Allow selection of 'All file types' (will be stored as '*'). */
++    protected $allowall = true;
++
++    /** @var core_form\filetypes_util instance to use as a helper. */
++    protected $util = null;
++
++    /**
++     * Constructor.
++     *
++     * @param string $name Unique ascii name like 'mycoresetting' or 'myplugin/mysetting'
++     * @param string $visiblename Localised label of the setting
++     * @param string $description Localised description of the setting
++     * @param string $defaultsetting Default setting value.
++     * @param array $options Setting widget options, an array with optional keys:
++     *   'onlytypes' => array Allow selection from these file types only; for example ['onlytypes' => ['web_image']].
++     *   'allowall' => bool Allow to select 'All file types', defaults to true. Does not apply if onlytypes are set.
++     */
++    public function __construct($name, $visiblename, $description, $defaultsetting = '', array $options = []) {
++
++        parent::__construct($name, $visiblename, $description, $defaultsetting, PARAM_RAW);
++
++        if (array_key_exists('onlytypes', $options) && is_array($options['onlytypes'])) {
++            $this->onlytypes = $options['onlytypes'];
++        }
++
++        if (!$this->onlytypes && array_key_exists('allowall', $options)) {
++            $this->allowall = (bool)$options['allowall'];
++        }
++
++        $this->util = new \core_form\filetypes_util();
++    }
++
++    /**
++     * Normalize the user's input and write it to the database as comma separated list.
++     *
++     * Comma separated list as a text representation of the array was chosen to
++     * make this compatible with how the $CFG->courseoverviewfilesext values are stored.
++     *
++     * @param string $data Value submitted by the admin.
++     * @return string Epty string if all good, error message otherwise.
++     */
++    public function write_setting($data) {
++        return parent::write_setting(implode(',', $this->util->normalize_file_types($data)));
++    }
++
++    /**
++     * Validate data before storage
++     *
++     * @param string $data The setting values provided by the admin
++     * @return bool|string True if ok, the string if error found
++     */
++    public function validate($data) {
++
++        // No need to call parent's validation here as we are PARAM_RAW.
++
++        if ($this->util->is_whitelisted($data, $this->onlytypes)) {
++            return true;
++
++        } else {
++            $troublemakers = $this->util->get_not_whitelisted($data, $this->onlytypes);
++            return get_string('filetypesnotwhitelisted', 'core_form', implode(' ', $troublemakers));
++        }
++    }
++
++    /**
++     * Return an HTML string for the setting element.
++     *
++     * @param string $data The current setting value
++     * @param string $query Admin search query to be highlighted
++     * @return string HTML to be displayed
++     */
++    public function output_html($data, $query='') {
++        global $OUTPUT, $PAGE;
++
++        $default = $this->get_defaultsetting();
++        $context = (object) [
++            'id' => $this->get_id(),
++            'name' => $this->get_full_name(),
++            'value' => $data,
++            'descriptions' => $this->util->describe_file_types($data),
++        ];
++        $element = $OUTPUT->render_from_template('core_admin/setting_filetypes', $context);
++
++        $PAGE->requires->js_call_amd('core_form/filetypes', 'init', [
++            $this->get_id(),
++            $this->visiblename,
++            $this->onlytypes,
++            $this->allowall,
++        ]);
++
++        return format_admin_setting($this, $this->visiblename, $element, $this->description, true, '', $default, $query);
++    }
++
++    /**
++     * Should the values be always displayed in LTR mode?
++     *
++     * We always return true here because these values are not RTL compatible.
++     *
++     * @return bool True because these values are not RTL compatible.
++     */
++    public function get_force_ltr() {
++        return true;
++    }
++}
+diff --git a/lib/form/classes/filetypes_util.php b/lib/form/classes/filetypes_util.php
+index 7d6f1369837..6fa1861f4f8 100644
+--- a/lib/form/classes/filetypes_util.php
++++ b/lib/form/classes/filetypes_util.php
+@@ -412,24 +412,41 @@ class filetypes_util {
+      * Should the given file type be considered as a part of the given whitelist.
+      *
+      * If multiple types are provided, all of them must be part of the
+-     * whitelist.
++     * whitelist. Empty type is part of any whitelist. Any type is part of an
++     * empty whitelist.
+      *
+-     * @param string $types One or more types in a string (space , or ; separated)
+-     * @param string|array $whitelist an array or string of whitelisted types
++     * @param string|array $types File types to be checked
++     * @param string|array $whitelist An array or string of whitelisted types
+      * @return boolean
+      */
+     public function is_whitelisted($types, $whitelist) {
++        return empty($this->get_not_whitelisted($types, $whitelist));
++    }
++
++    /**
++     * Returns all types that are not part of the give whitelist.
++     *
++     * This is similar check to the {@link self::is_whitelisted()} but this one
++     * actually returns the extra types.
++     *
++     * @param string|array $types File types to be checked
++     * @param string|array $whitelist An array or string of whitelisted types
++     * @return array Types not present in the whitelist
++     */
++    public function get_not_whitelisted($types, $whitelist) {
+ 
+         $whitelistedtypes = $this->expand($whitelist, true, true);
+ 
+         if (empty($whitelistedtypes) || $whitelistedtypes == ['*']) {
+-            return true;
++            return [];
+         }
+ 
+         $giventypes = $this->normalize_file_types($types);
+ 
+-        $intersection = array_intersect($giventypes, $whitelistedtypes);
++        if (empty($giventypes)) {
++            return [];
++        }
+ 
+-        return !empty($intersection);
++        return array_diff($giventypes, $whitelistedtypes);
+     }
+ }
+diff --git a/lib/form/tests/filetypes_util_test.php b/lib/form/tests/filetypes_util_test.php
+index 91e17cf9aeb..8530ab6b594 100644
+--- a/lib/form/tests/filetypes_util_test.php
++++ b/lib/form/tests/filetypes_util_test.php
+@@ -219,6 +219,7 @@ class filetypes_util_testcase extends advanced_testcase {
+         $this->assertTrue($util->is_whitelisted('audio', 'text/plain audio video'));
+         $this->assertTrue($util->is_whitelisted('text/plain', 'text/plain audio video'));
+         $this->assertTrue($util->is_whitelisted('jpg jpe jpeg', 'image/jpeg'));
++        $this->assertTrue($util->is_whitelisted(['jpg', 'jpe', '.png'], 'image'));
+ 
+         // These should be intuitively false.
+         $this->assertFalse($util->is_whitelisted('.gif', 'text/plain'));
+@@ -229,9 +230,44 @@ class filetypes_util_testcase extends advanced_testcase {
+         // Not all documents (and also the group itself) is not a plain text.
+         $this->assertFalse($util->is_whitelisted('document', 'text/plain'));
+ 
++        // This may look wrong at the first sight as you might expect that the
++        // mimetype should simply map to an extension ...
++        $this->assertFalse($util->is_whitelisted('image/jpeg', '.jpg'));
++
++        // But it is principally same situation as this (there is no 1:1 mapping).
++        $this->assertFalse($util->is_whitelisted('.c', '.txt'));
++        $this->assertTrue($util->is_whitelisted('.txt .c', 'text/plain'));
++        $this->assertFalse($util->is_whitelisted('text/plain', '.c'));
++
+         // Any type is included if the filter is empty.
+         $this->assertTrue($util->is_whitelisted('txt', ''));
+         $this->assertTrue($util->is_whitelisted('txt', '*'));
++
++        // Empty value is part of any whitelist.
++        $this->assertTrue($util->is_whitelisted('', '.txt'));
++    }
++
++    /**
++     * Test getting types not present in a whitelist.
++     */
++    public function test_get_not_whitelisted() {
++
++        $this->resetAfterTest(true);
++        $util = new filetypes_util();
++
++        $this->assertEmpty($util->get_not_whitelisted('txt', 'text/plain'));
++        $this->assertEmpty($util->get_not_whitelisted('txt', '.doc .txt .rtf'));
++        $this->assertEmpty($util->get_not_whitelisted('txt', 'text/plain'));
++        $this->assertEmpty($util->get_not_whitelisted(['jpg', 'jpe', 'jpeg'], 'image/jpeg'));
++        $this->assertEmpty($util->get_not_whitelisted('', 'foo/bar'));
++        $this->assertEmpty($util->get_not_whitelisted('.foobar', ''));
++        $this->assertEmpty($util->get_not_whitelisted('.foobar', '*'));
++
++        // Returned list is normalized so extensions have the dot added.
++        $this->assertContains('.exe', $util->get_not_whitelisted('exe', '.c .h'));
++
++        // If this looks wrong to you, see {@link test_is_whitelisted()} for more details on this behaviour.
++        $this->assertContains('image/jpeg', $util->get_not_whitelisted('image/jpeg', '.jpg .jpeg'));
+     }
+ 
+     /**
+-- 
+2.17.1
+
+
+From fbf0111b3e6c60a5bedb2a831cfc03c5967e29ca Mon Sep 17 00:00:00 2001
+From: Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
+Date: Fri, 3 Jul 2020 13:27:37 +1000
+Subject: [PATCH 12/15] MDL-53240 filetypes: Introduce the form element to
+ specify plugin types
+
+This is a stripped down version of the original Jonathon's element without the actual JS selector. The options allowall and onlytypes are not fully supported right now yet.
+---
+ lib/form/filetypes.php                        | 194 ++++++++++++++++++
+ .../templates/filetypes-descriptions.mustache |  60 ++++++
+ lib/formslib.php                              |   1 +
+ 3 files changed, 255 insertions(+)
+ create mode 100644 lib/form/filetypes.php
+ create mode 100644 lib/form/templates/filetypes-descriptions.mustache
+
+diff --git a/lib/form/filetypes.php b/lib/form/filetypes.php
+new file mode 100644
+index 00000000000..cb0794ee21a
+--- /dev/null
++++ b/lib/form/filetypes.php
+@@ -0,0 +1,194 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Provides the {@link MoodleQuickForm_filetypes} class.
++ *
++ * @package   core_form
++ * @copyright 2016 Jonathon Fowler <fowlerj@usq.edu.au>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++use core_form\filetypes_util;
++
++defined('MOODLE_INTERNAL') || die;
++
++global $CFG;
++require_once($CFG->dirroot.'/lib/form/group.php');
++
++/**
++ * File types and type groups selection form element.
++ *
++ * @package   core_form
++ * @category  form
++ * @copyright 2016 Jonathon Fowler <fowlerj@usq.edu.au>
++ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class MoodleQuickForm_filetypes extends MoodleQuickForm_group {
++
++    /** @var array Allow selection from these file types only. */
++    protected $onlytypes = [];
++
++    /** @var bool Allow selection of 'All file types' (will be stored as '*'). */
++    protected $allowall = true;
++
++    /** @var core_form\filetypes_util instance to use as a helper. */
++    protected $util = null;
++
++    /**
++     * Constructor
++     *
++     * @param string $elementName Element's name
++     * @param string $elementLabel Label(s) for an element
++     * @param array $options element options:
++     *   'onlytypes': Allow selection from these file types only; for example ['onlytypes' => ['web_image']].
++     *   'allowall': Allow to select 'All file types', defaults to true. Does not apply with onlytypes are set.
++     * @param array|string $attributes Either a typical HTML attribute string or an associative array
++     */
++    public function __construct($elementName = null, $elementLabel = null, $options = null, $attributes = null) {
++
++        parent::__construct($elementName, $elementLabel);
++        $this->_type = 'filetypes';
++
++        // Hard-frozen elements do not get the name populated automatically,
++        // which leads to PHP notice. Add it explicitly here.
++        $this->setAttributes(array('name' => $elementName));
++        $this->updateAttributes($attributes);
++
++        if (is_array($options) && $options) {
++            if (array_key_exists('onlytypes', $options) && is_array($options['onlytypes'])) {
++                $this->onlytypes = $options['onlytypes'];
++            }
++            if (!$this->onlytypes && array_key_exists('allowall', $options)) {
++                $this->allowall = (bool)$options['allowall'];
++            }
++        }
++
++        $this->util = new filetypes_util();
++    }
++
++    /**
++     * Assemble the elements of the form control.
++     */
++    public function _createElements() {
++
++        $this->_generateId();
++
++        $this->setElements([
++            $this->createFormElement('text', 'filetypes', '', [
++                'id' => $this->getAttribute('id'),
++            ]),
++
++            $this->createFormElement('static', 'browser', null,
++                '<span data-filetypesbrowser="'.$this->getAttribute('id').'"></span>'),
++
++            $this->createFormElement('static', 'descriptions'),
++        ]);
++    }
++
++    /**
++     * Return the selected file types.
++     *
++     * @param array $submitValues submitted values
++     * @param bool $assoc if true the retured value is associated array
++     * @return array
++     */
++    public function exportValue(&$submitValues, $assoc = false) {
++
++        $value = '';
++        $filetypeselement = null;
++
++        foreach ($this->_elements as $key => $element) {
++            if ($element->_attributes['name'] === 'filetypes') {
++                $filetypeselement = $this->_elements[$key];
++            }
++        }
++
++        if ($filetypeselement) {
++            $formval = $filetypeselement->exportValue($submitValues[$this->getName()], false);
++            if ($formval) {
++                $value = $this->util->normalize_file_types($formval);
++                if ($value === ['*'] && !$this->allowall) {
++                    $value = [];
++                }
++                $value = implode(',', $value);
++            }
++        }
++
++        return $this->_prepareValue($value, $assoc);
++    }
++
++    /**
++     * Accepts a renderer (called shortly before the renderer's toHtml() method).
++     *
++     * @param HTML_QuickForm_Renderer $renderer An HTML_QuickForm_Renderer object
++     * @param bool $required Whether a group is required
++     * @param string $error An error message associated with a group
++     */
++    public function accept(&$renderer, $required = false, $error = null) {
++        global $PAGE;
++
++        if ($this->isFrozen()) {
++            // Don't render the choose button if the control is frozen.
++            foreach ($this->_elements as $key => $element) {
++                if ($element->_attributes['name'] === 'browser') {
++                    unset($this->_elements[$key]);
++                }
++            }
++        }
++
++        parent::accept($renderer, $required, $error);
++    }
++
++    /**
++     * Called by HTML_QuickForm whenever form event is made on this element
++     *
++     * @param string $event Name of event
++     * @param mixed $arg event arguments
++     * @param object $caller calling object
++     * @return bool
++     */
++    public function onQuickFormEvent($event, $arg, &$caller) {
++        global $OUTPUT;
++
++        switch ($event) {
++            case 'updateValue':
++                $value = $this->_findValue($caller->_constantValues);
++                if (null === $value) {
++                    if ($caller->isSubmitted()) {
++                        $value = $this->_findValue($caller->_submitValues);
++                    } else {
++                        $value = (string)$this->_findValue($caller->_defaultValues);
++                    }
++                }
++                if (!is_array($value)) {
++                    $value = array('filetypes' => $value);
++                }
++                if ($value['filetypes'] !== null) {
++                    $filetypes = $this->util->normalize_file_types($value['filetypes']);
++					if ($filetypes === ['*'] && !$this->allowall) {
++						$filetypes = [];
++					}
++                    $value['descriptions'] = $OUTPUT->render_from_template('core_form/filetypes-descriptions',
++                        $this->util->describe_file_types($filetypes));
++                }
++                $this->setValue($value);
++                return true;
++        }
++
++        return parent::onQuickFormEvent($event, $arg, $caller);
++    }
++}
+diff --git a/lib/form/templates/filetypes-descriptions.mustache b/lib/form/templates/filetypes-descriptions.mustache
+new file mode 100644
+index 00000000000..affe8e6a046
+--- /dev/null
++++ b/lib/form/templates/filetypes-descriptions.mustache
+@@ -0,0 +1,60 @@
++{{!
++    This file is part of Moodle - http://moodle.org/
++
++    Moodle is free software: you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    Moodle is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++}}
++{{!
++    @template core_form/filetypes-descriptions
++
++    Template to describe chosen file types.
++
++    Classes required for JS:
++    * none
++
++    Data attributes required for JS:
++    * none
++
++    Context variables required for this template:
++    * hasdescriptions (bool)
++    * descriptions (array)
++        * description (string)
++        * extensions (string)
++
++    Example context (json):
++    {
++        "hasdescriptions": true,
++        "descriptions": [
++            {
++                "description": "Image (JPEG)",
++                "extensions": ".jpeg .jpe .jpg"
++            },
++            {
++                "description": "Image (GIF)",
++                "extensions": ".gif"
++            }
++        ]
++    }
++}}
++<div class="form-filetypes-descriptions">
++{{#hasdescriptions}}
++    <ul class="list-unstyled unstyled">
++        {{#descriptions}}
++        <li>{{description}} <small class="text-muted muted">{{extensions}}</small></li>
++        {{/descriptions}}
++    </ul>
++{{/hasdescriptions}}
++{{^hasdescriptions}}
++    <p>{{#str}}noselection, form{{/str}}</p>
++{{/hasdescriptions}}
++</div>
+diff --git a/lib/formslib.php b/lib/formslib.php
+index 38c1073e697..079151ba50c 100644
+--- a/lib/formslib.php
++++ b/lib/formslib.php
+@@ -2941,6 +2941,7 @@ MoodleQuickForm::registerElementType('duration', "$CFG->libdir/form/duration.php
+ MoodleQuickForm::registerElementType('editor', "$CFG->libdir/form/editor.php", 'MoodleQuickForm_editor');
+ MoodleQuickForm::registerElementType('filemanager', "$CFG->libdir/form/filemanager.php", 'MoodleQuickForm_filemanager');
+ MoodleQuickForm::registerElementType('filepicker', "$CFG->libdir/form/filepicker.php", 'MoodleQuickForm_filepicker');
++MoodleQuickForm::registerElementType('filetypes', "$CFG->libdir/form/filetypes.php", 'MoodleQuickForm_filetypes');
+ MoodleQuickForm::registerElementType('grading', "$CFG->libdir/form/grading.php", 'MoodleQuickForm_grading');
+ MoodleQuickForm::registerElementType('group', "$CFG->libdir/form/group.php", 'MoodleQuickForm_group');
+ MoodleQuickForm::registerElementType('header', "$CFG->libdir/form/header.php", 'MoodleQuickForm_header');
+-- 
+2.17.1
+
+
+From 628e98f52c07bd316cddaeda342f6e0f650bf756 Mon Sep 17 00:00:00 2001
+From: sam marshall <s.marshall@open.ac.uk>
+Date: Mon, 15 Dec 2014 10:41:47 +0000
+Subject: [PATCH 13/15] MDL-42616 filelib: Use config value for custom MIME
+ types (1/2)
+
+Uses a new optional config variable to define custom MIME types
+in JSON format. Includes new API for accessing and modifying
+this data.
+---
+ config-dist.php              |  17 +
+ lib/classes/filetypes.php    | 682 +++++++++++++++++++++++++++++++++++
+ lib/filelib.php              | 209 +----------
+ lib/phpunit/classes/util.php |   2 +
+ lib/tests/filelib_test.php   |  54 +++
+ lib/tests/filetypes_test.php | 253 +++++++++++++
+ 6 files changed, 1016 insertions(+), 201 deletions(-)
+ create mode 100644 lib/classes/filetypes.php
+ create mode 100644 lib/tests/filetypes_test.php
+
+diff --git a/config-dist.php b/config-dist.php
+index 0a8fc37a55f..fd66830894c 100644
+--- a/config-dist.php
++++ b/config-dist.php
+@@ -508,6 +508,23 @@ $CFG->admin = 'admin';
+ // on a shared file system that supports locking.
+ //      $CFG->lock_file_root = $CFG->dataroot . '/lock';
+ //
++// Moodle 2.9 allows administrators to customise the list of supported file types.
++// To add a new filetype or override the definition of an existing one, set the
++// customfiletypes variable like this:
++//
++// $CFG->customfiletypes = array(
++//     (object)array(
++//         'extension' => 'frog',
++//         'icon' => 'archive',
++//         'type' => 'application/frog',
++//         'customdescription' => 'Amphibian-related file archive'
++//     )
++// );
++//
++// The extension, icon, and type fields are required. The icon field can refer to
++// any icon inside the pix/f folder. You can also set the customdescription field
++// (shown above) and (for advanced use) the groups, string, and defaulticon fields.
++//
+ //=========================================================================
+ // 7. SETTINGS FOR DEVELOPMENT SERVERS - not intended for production use!!!
+ //=========================================================================
+diff --git a/lib/classes/filetypes.php b/lib/classes/filetypes.php
+new file mode 100644
+index 00000000000..13ee04ba739
+--- /dev/null
++++ b/lib/classes/filetypes.php
+@@ -0,0 +1,682 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Class to manage the custom filetypes list that is stored in a config variable.
++ *
++ * @package core
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++defined('MOODLE_INTERNAL') || die();
++
++require_once($CFG->libdir . '/filelib.php');
++
++/**
++ * Class to manage the custom filetypes list that is stored in a config variable.
++ *
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++abstract class core_filetypes {
++    /** @var array Cached MIME types for current request */
++    protected static $cachedtypes;
++
++    /**
++     * Gets default MIME types that are included as standard.
++     *
++     * Note: Use the function get_mimetypes_array to access this data including
++     * any customisations the user might have made.
++     *
++     * @return array Default (pre-installed) MIME type information
++     */
++    protected static function get_default_types() {
++        return array(
++            'xxx' => array('type' => 'document/unknown', 'icon' => 'unknown'),
++            '3gp' => array('type' => 'video/quicktime', 'icon' => 'quicktime', 'groups' => array('video'), 'string' => 'video'),
++            '7z' => array('type' => 'application/x-7z-compressed', 'icon' => 'archive',
++                    'groups' => array('archive'), 'string' => 'archive'),
++            'aac' => array('type' => 'audio/aac', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++            'accdb' => array('type' => 'application/msaccess', 'icon' => 'base'),
++            'ai' => array('type' => 'application/postscript', 'icon' => 'eps', 'groups' => array('image'), 'string' => 'image'),
++            'aif' => array('type' => 'audio/x-aiff', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++            'aiff' => array('type' => 'audio/x-aiff', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++            'aifc' => array('type' => 'audio/x-aiff', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++            'applescript' => array('type' => 'text/plain', 'icon' => 'text'),
++            'asc' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'asm' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'au' => array('type' => 'audio/au', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++            'avi' => array('type' => 'video/x-ms-wm', 'icon' => 'avi',
++                    'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'bmp' => array('type' => 'image/bmp', 'icon' => 'bmp', 'groups' => array('image'), 'string' => 'image'),
++            'c' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'cct' => array('type' => 'shockwave/director', 'icon' => 'flash'),
++            'cpp' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'cs' => array('type' => 'application/x-csh', 'icon' => 'sourcecode'),
++            'css' => array('type' => 'text/css', 'icon' => 'text', 'groups' => array('web_file')),
++            'csv' => array('type' => 'text/csv', 'icon' => 'spreadsheet', 'groups' => array('spreadsheet')),
++            'dv' => array('type' => 'video/x-dv', 'icon' => 'quicktime', 'groups' => array('video'), 'string' => 'video'),
++            'dmg' => array('type' => 'application/octet-stream', 'icon' => 'unknown'),
++
++            'doc' => array('type' => 'application/msword', 'icon' => 'document', 'groups' => array('document')),
++            'bdoc' => array('type' => 'application/x-digidoc', 'icon' => 'document', 'groups' => array('archive')),
++            'cdoc' => array('type' => 'application/x-digidoc', 'icon' => 'document', 'groups' => array('archive')),
++            'ddoc' => array('type' => 'application/x-digidoc', 'icon' => 'document', 'groups' => array('archive')),
++            'docx' => array('type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
++                    'icon' => 'document', 'groups' => array('document')),
++            'docm' => array('type' => 'application/vnd.ms-word.document.macroEnabled.12', 'icon' => 'document'),
++            'dotx' => array('type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
++                    'icon' => 'document'),
++            'dotm' => array('type' => 'application/vnd.ms-word.template.macroEnabled.12', 'icon' => 'document'),
++
++            'dcr' => array('type' => 'application/x-director', 'icon' => 'flash'),
++            'dif' => array('type' => 'video/x-dv', 'icon' => 'quicktime', 'groups' => array('video'), 'string' => 'video'),
++            'dir' => array('type' => 'application/x-director', 'icon' => 'flash'),
++            'dxr' => array('type' => 'application/x-director', 'icon' => 'flash'),
++            'eps' => array('type' => 'application/postscript', 'icon' => 'eps'),
++            'epub' => array('type' => 'application/epub+zip', 'icon' => 'epub', 'groups' => array('document')),
++            'fdf' => array('type' => 'application/pdf', 'icon' => 'pdf'),
++            'flv' => array('type' => 'video/x-flv', 'icon' => 'flash',
++                    'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'f4v' => array('type' => 'video/mp4', 'icon' => 'flash', 'groups' => array('video', 'web_video'), 'string' => 'video'),
++
++            'gallery' => array('type' => 'application/x-smarttech-notebook', 'icon' => 'archive'),
++            'galleryitem' => array('type' => 'application/x-smarttech-notebook', 'icon' => 'archive'),
++            'gallerycollection' => array('type' => 'application/x-smarttech-notebook', 'icon' => 'archive'),
++            'gif' => array('type' => 'image/gif', 'icon' => 'gif', 'groups' => array('image', 'web_image'), 'string' => 'image'),
++            'gtar' => array('type' => 'application/x-gtar', 'icon' => 'archive',
++                    'groups' => array('archive'), 'string' => 'archive'),
++            'tgz' => array('type' => 'application/g-zip', 'icon' => 'archive', 'groups' => array('archive'), 'string' => 'archive'),
++            'gz' => array('type' => 'application/g-zip', 'icon' => 'archive', 'groups' => array('archive'), 'string' => 'archive'),
++            'gzip' => array('type' => 'application/g-zip', 'icon' => 'archive',
++                    'groups' => array('archive'), 'string' => 'archive'),
++            'h' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'hpp' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'hqx' => array('type' => 'application/mac-binhex40', 'icon' => 'archive',
++                    'groups' => array('archive'), 'string' => 'archive'),
++            'htc' => array('type' => 'text/x-component', 'icon' => 'markup'),
++            'html' => array('type' => 'text/html', 'icon' => 'html', 'groups' => array('web_file')),
++            'xhtml' => array('type' => 'application/xhtml+xml', 'icon' => 'html', 'groups' => array('web_file')),
++            'htm' => array('type' => 'text/html', 'icon' => 'html', 'groups' => array('web_file')),
++            'ico' => array('type' => 'image/vnd.microsoft.icon', 'icon' => 'image',
++                    'groups' => array('image'), 'string' => 'image'),
++            'ics' => array('type' => 'text/calendar', 'icon' => 'text'),
++            'isf' => array('type' => 'application/inspiration', 'icon' => 'isf'),
++            'ist' => array('type' => 'application/inspiration.template', 'icon' => 'isf'),
++            'java' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'jar' => array('type' => 'application/java-archive', 'icon' => 'archive'),
++            'jcb' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'jcl' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'jcw' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'jmt' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'jmx' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'jnlp' => array('type' => 'application/x-java-jnlp-file', 'icon' => 'markup'),
++            'jpe' => array('type' => 'image/jpeg', 'icon' => 'jpeg', 'groups' => array('image', 'web_image'), 'string' => 'image'),
++            'jpeg' => array('type' => 'image/jpeg', 'icon' => 'jpeg', 'groups' => array('image', 'web_image'), 'string' => 'image'),
++            'jpg' => array('type' => 'image/jpeg', 'icon' => 'jpeg', 'groups' => array('image', 'web_image'), 'string' => 'image'),
++            'jqz' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'js' => array('type' => 'application/x-javascript', 'icon' => 'text', 'groups' => array('web_file')),
++            'latex' => array('type' => 'application/x-latex', 'icon' => 'text'),
++            'm' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'mbz' => array('type' => 'application/vnd.moodle.backup', 'icon' => 'moodle'),
++            'mdb' => array('type' => 'application/x-msaccess', 'icon' => 'base'),
++            'mht' => array('type' => 'message/rfc822', 'icon' => 'archive'),
++            'mhtml' => array('type' => 'message/rfc822', 'icon' => 'archive'),
++            'mov' => array('type' => 'video/quicktime', 'icon' => 'quicktime',
++                    'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'movie' => array('type' => 'video/x-sgi-movie', 'icon' => 'quicktime', 'groups' => array('video'), 'string' => 'video'),
++            'mw' => array('type' => 'application/maple', 'icon' => 'math'),
++            'mws' => array('type' => 'application/maple', 'icon' => 'math'),
++            'm3u' => array('type' => 'audio/x-mpegurl', 'icon' => 'mp3', 'groups' => array('audio'), 'string' => 'audio'),
++            'mp3' => array('type' => 'audio/mp3', 'icon' => 'mp3', 'groups' => array('audio', 'web_audio'), 'string' => 'audio'),
++            'mp4' => array('type' => 'video/mp4', 'icon' => 'mpeg', 'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'm4v' => array('type' => 'video/mp4', 'icon' => 'mpeg', 'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'm4a' => array('type' => 'audio/mp4', 'icon' => 'mp3', 'groups' => array('audio'), 'string' => 'audio'),
++            'mpeg' => array('type' => 'video/mpeg', 'icon' => 'mpeg', 'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'mpe' => array('type' => 'video/mpeg', 'icon' => 'mpeg', 'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'mpg' => array('type' => 'video/mpeg', 'icon' => 'mpeg', 'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'mpr' => array('type' => 'application/vnd.moodle.profiling', 'icon' => 'moodle'),
++
++            'nbk' => array('type' => 'application/x-smarttech-notebook', 'icon' => 'archive'),
++            'notebook' => array('type' => 'application/x-smarttech-notebook', 'icon' => 'archive'),
++
++            'odt' => array('type' => 'application/vnd.oasis.opendocument.text', 'icon' => 'writer', 'groups' => array('document')),
++            'ott' => array('type' => 'application/vnd.oasis.opendocument.text-template',
++                    'icon' => 'writer', 'groups' => array('document')),
++            'oth' => array('type' => 'application/vnd.oasis.opendocument.text-web', 'icon' => 'oth', 'groups' => array('document')),
++            'odm' => array('type' => 'application/vnd.oasis.opendocument.text-master', 'icon' => 'writer'),
++            'odg' => array('type' => 'application/vnd.oasis.opendocument.graphics', 'icon' => 'draw'),
++            'otg' => array('type' => 'application/vnd.oasis.opendocument.graphics-template', 'icon' => 'draw'),
++            'odp' => array('type' => 'application/vnd.oasis.opendocument.presentation', 'icon' => 'impress'),
++            'otp' => array('type' => 'application/vnd.oasis.opendocument.presentation-template', 'icon' => 'impress'),
++            'ods' => array('type' => 'application/vnd.oasis.opendocument.spreadsheet',
++                    'icon' => 'calc', 'groups' => array('spreadsheet')),
++            'ots' => array('type' => 'application/vnd.oasis.opendocument.spreadsheet-template',
++                    'icon' => 'calc', 'groups' => array('spreadsheet')),
++            'odc' => array('type' => 'application/vnd.oasis.opendocument.chart', 'icon' => 'chart'),
++            'odf' => array('type' => 'application/vnd.oasis.opendocument.formula', 'icon' => 'math'),
++            'odb' => array('type' => 'application/vnd.oasis.opendocument.database', 'icon' => 'base'),
++            'odi' => array('type' => 'application/vnd.oasis.opendocument.image', 'icon' => 'draw'),
++            'oga' => array('type' => 'audio/ogg', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++            'ogg' => array('type' => 'audio/ogg', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++            'ogv' => array('type' => 'video/ogg', 'icon' => 'video', 'groups' => array('video'), 'string' => 'video'),
++
++            'pct' => array('type' => 'image/pict', 'icon' => 'image', 'groups' => array('image'), 'string' => 'image'),
++            'pdf' => array('type' => 'application/pdf', 'icon' => 'pdf'),
++            'php' => array('type' => 'text/plain', 'icon' => 'sourcecode'),
++            'pic' => array('type' => 'image/pict', 'icon' => 'image', 'groups' => array('image'), 'string' => 'image'),
++            'pict' => array('type' => 'image/pict', 'icon' => 'image', 'groups' => array('image'), 'string' => 'image'),
++            'png' => array('type' => 'image/png', 'icon' => 'png', 'groups' => array('image', 'web_image'), 'string' => 'image'),
++            'pps' => array('type' => 'application/vnd.ms-powerpoint', 'icon' => 'powerpoint', 'groups' => array('presentation')),
++            'ppt' => array('type' => 'application/vnd.ms-powerpoint', 'icon' => 'powerpoint', 'groups' => array('presentation')),
++            'pptx' => array('type' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
++                    'icon' => 'powerpoint'),
++            'pptm' => array('type' => 'application/vnd.ms-powerpoint.presentation.macroEnabled.12', 'icon' => 'powerpoint'),
++            'potx' => array('type' => 'application/vnd.openxmlformats-officedocument.presentationml.template',
++                    'icon' => 'powerpoint'),
++            'potm' => array('type' => 'application/vnd.ms-powerpoint.template.macroEnabled.12', 'icon' => 'powerpoint'),
++            'ppam' => array('type' => 'application/vnd.ms-powerpoint.addin.macroEnabled.12', 'icon' => 'powerpoint'),
++            'ppsx' => array('type' => 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
++                    'icon' => 'powerpoint'),
++            'ppsm' => array('type' => 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12', 'icon' => 'powerpoint'),
++            'ps' => array('type' => 'application/postscript', 'icon' => 'pdf'),
++            'pub' => array('type' => 'application/x-mspublisher', 'icon' => 'publisher', 'groups' => array('presentation')),
++
++            'qt' => array('type' => 'video/quicktime', 'icon' => 'quicktime',
++                    'groups' => array('video', 'web_video'), 'string' => 'video'),
++            'ra' => array('type' => 'audio/x-realaudio-plugin', 'icon' => 'audio',
++                    'groups' => array('audio', 'web_audio'), 'string' => 'audio'),
++            'ram' => array('type' => 'audio/x-pn-realaudio-plugin', 'icon' => 'audio',
++                    'groups' => array('audio'), 'string' => 'audio'),
++            'rar' => array('type' => 'application/x-rar-compressed', 'icon' => 'archive',
++                    'groups' => array('archive'), 'string' => 'archive'),
++            'rhb' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'rm' => array('type' => 'audio/x-pn-realaudio-plugin', 'icon' => 'audio',
++                    'groups' => array('audio'), 'string' => 'audio'),
++            'rmvb' => array('type' => 'application/vnd.rn-realmedia-vbr', 'icon' => 'video',
++                    'groups' => array('video'), 'string' => 'video'),
++            'rtf' => array('type' => 'text/rtf', 'icon' => 'text', 'groups' => array('document')),
++            'rtx' => array('type' => 'text/richtext', 'icon' => 'text'),
++            'rv' => array('type' => 'audio/x-pn-realaudio-plugin', 'icon' => 'audio',
++                    'groups' => array('video'), 'string' => 'video'),
++            'sh' => array('type' => 'application/x-sh', 'icon' => 'sourcecode'),
++            'sit' => array('type' => 'application/x-stuffit', 'icon' => 'archive',
++                    'groups' => array('archive'), 'string' => 'archive'),
++            'smi' => array('type' => 'application/smil', 'icon' => 'text'),
++            'smil' => array('type' => 'application/smil', 'icon' => 'text'),
++            'sqt' => array('type' => 'text/xml', 'icon' => 'markup'),
++            'svg' => array('type' => 'image/svg+xml', 'icon' => 'image',
++                    'groups' => array('image', 'web_image'), 'string' => 'image'),
++            'svgz' => array('type' => 'image/svg+xml', 'icon' => 'image',
++                    'groups' => array('image', 'web_image'), 'string' => 'image'),
++            'swa' => array('type' => 'application/x-director', 'icon' => 'flash'),
++            'swf' => array('type' => 'application/x-shockwave-flash', 'icon' => 'flash', 'groups' => array('video', 'web_video')),
++            'swfl' => array('type' => 'application/x-shockwave-flash', 'icon' => 'flash', 'groups' => array('video', 'web_video')),
++
++            'sxw' => array('type' => 'application/vnd.sun.xml.writer', 'icon' => 'writer'),
++            'stw' => array('type' => 'application/vnd.sun.xml.writer.template', 'icon' => 'writer'),
++            'sxc' => array('type' => 'application/vnd.sun.xml.calc', 'icon' => 'calc'),
++            'stc' => array('type' => 'application/vnd.sun.xml.calc.template', 'icon' => 'calc'),
++            'sxd' => array('type' => 'application/vnd.sun.xml.draw', 'icon' => 'draw'),
++            'std' => array('type' => 'application/vnd.sun.xml.draw.template', 'icon' => 'draw'),
++            'sxi' => array('type' => 'application/vnd.sun.xml.impress', 'icon' => 'impress'),
++            'sti' => array('type' => 'application/vnd.sun.xml.impress.template', 'icon' => 'impress'),
++            'sxg' => array('type' => 'application/vnd.sun.xml.writer.global', 'icon' => 'writer'),
++            'sxm' => array('type' => 'application/vnd.sun.xml.math', 'icon' => 'math'),
++
++            'tar' => array('type' => 'application/x-tar', 'icon' => 'archive', 'groups' => array('archive'), 'string' => 'archive'),
++            'tif' => array('type' => 'image/tiff', 'icon' => 'tiff', 'groups' => array('image'), 'string' => 'image'),
++            'tiff' => array('type' => 'image/tiff', 'icon' => 'tiff', 'groups' => array('image'), 'string' => 'image'),
++            'tex' => array('type' => 'application/x-tex', 'icon' => 'text'),
++            'texi' => array('type' => 'application/x-texinfo', 'icon' => 'text'),
++            'texinfo' => array('type' => 'application/x-texinfo', 'icon' => 'text'),
++            'tsv' => array('type' => 'text/tab-separated-values', 'icon' => 'text'),
++            'txt' => array('type' => 'text/plain', 'icon' => 'text', 'defaulticon' => true),
++            'wav' => array('type' => 'audio/wav', 'icon' => 'wav', 'groups' => array('audio'), 'string' => 'audio'),
++            'webm' => array('type' => 'video/webm', 'icon' => 'video', 'groups' => array('video'), 'string' => 'video'),
++            'wmv' => array('type' => 'video/x-ms-wmv', 'icon' => 'wmv', 'groups' => array('video'), 'string' => 'video'),
++            'asf' => array('type' => 'video/x-ms-asf', 'icon' => 'wmv', 'groups' => array('video'), 'string' => 'video'),
++            'wma' => array('type' => 'audio/x-ms-wma', 'icon' => 'audio', 'groups' => array('audio'), 'string' => 'audio'),
++
++            'xbk' => array('type' => 'application/x-smarttech-notebook', 'icon' => 'archive'),
++            'xdp' => array('type' => 'application/pdf', 'icon' => 'pdf'),
++            'xfd' => array('type' => 'application/pdf', 'icon' => 'pdf'),
++            'xfdf' => array('type' => 'application/pdf', 'icon' => 'pdf'),
++
++            'xls' => array('type' => 'application/vnd.ms-excel', 'icon' => 'spreadsheet', 'groups' => array('spreadsheet')),
++            'xlsx' => array('type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'icon' => 'spreadsheet'),
++            'xlsm' => array('type' => 'application/vnd.ms-excel.sheet.macroEnabled.12',
++                    'icon' => 'spreadsheet', 'groups' => array('spreadsheet')),
++            'xltx' => array('type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
++                    'icon' => 'spreadsheet'),
++            'xltm' => array('type' => 'application/vnd.ms-excel.template.macroEnabled.12', 'icon' => 'spreadsheet'),
++            'xlsb' => array('type' => 'application/vnd.ms-excel.sheet.binary.macroEnabled.12', 'icon' => 'spreadsheet'),
++            'xlam' => array('type' => 'application/vnd.ms-excel.addin.macroEnabled.12', 'icon' => 'spreadsheet'),
++
++            'xml' => array('type' => 'application/xml', 'icon' => 'markup'),
++            'xsl' => array('type' => 'text/xml', 'icon' => 'markup'),
++
++            'zip' => array('type' => 'application/zip', 'icon' => 'archive', 'groups' => array('archive'), 'string' => 'archive')
++        );
++    }
++
++    /**
++     * Gets all the current types.
++     *
++     * @return array Associative array from extension to array of data about type
++     */
++    public static function &get_types() {
++        // If it was already done in this request, use cache.
++        if (self::$cachedtypes) {
++            return self::$cachedtypes;
++        }
++
++        // Get defaults.
++        $mimetypes = self::get_default_types();
++
++        // If there are no custom types, just return.
++        $custom = self::get_custom_types();
++        if (empty($custom)) {
++            return $mimetypes;
++        }
++
++        // Check value is an array.
++        if (!is_array($custom)) {
++            debugging('Invalid $CFG->customfiletypes (not array)', DEBUG_DEVELOPER);
++            return $mimetypes;
++        }
++
++        foreach ($custom as $customentry) {
++            // Each entry is a stdClass object similar to the array values above.
++            if (empty($customentry->extension)) {
++                debugging('Invalid $CFG->customfiletypes entry (extension field required)',
++                        DEBUG_DEVELOPER);
++                continue;
++            }
++
++            // To delete a standard entry, set 'deleted' to true.
++            if (!empty($customentry->deleted)) {
++                unset($mimetypes[$customentry->extension]);
++                continue;
++            }
++
++            // Check required fields.
++            if (empty($customentry->type) || empty($customentry->icon)) {
++                debugging('Invalid $CFG->customfiletypes entry ' . $customentry->extension .
++                        ' (type and icon fields required)', DEBUG_DEVELOPER);
++                continue;
++            }
++
++            // Build result array.
++            $result = array('type' => $customentry->type, 'icon' => $customentry->icon);
++            if (!empty($customentry->groups)) {
++                if (!is_array($customentry->groups)) {
++                    debugging('Invalid $CFG->customfiletypes entry ' . $customentry->extension .
++                            ' (groups field not array)', DEBUG_DEVELOPER);
++                    continue;
++                }
++                $result['groups'] = $customentry->groups;
++            }
++            if (!empty($customentry->string)) {
++                if (!is_string($customentry->string)) {
++                    debugging('Invalid $CFG->customfiletypes entry ' . $customentry->extension .
++                            ' (string field not string)', DEBUG_DEVELOPER);
++                    continue;
++                }
++                $result['string'] = $customentry->string;
++            }
++            if (!empty($customentry->defaulticon)) {
++                if (!is_bool($customentry->defaulticon)) {
++                    debugging('Invalid $CFG->customfiletypes entry ' . $customentry->extension .
++                            ' (defaulticon field not bool)', DEBUG_DEVELOPER);
++                    continue;
++                }
++                $result['defaulticon'] = $customentry->defaulticon;
++            }
++            if (!empty($customentry->customdescription)) {
++                if (!is_string($customentry->customdescription)) {
++                    debugging('Invalid $CFG->customfiletypes entry ' . $customentry->extension .
++                            ' (customdescription field not string)', DEBUG_DEVELOPER);
++                    continue;
++                }
++                // As the name suggests, this field is used only for custom entries.
++                $result['customdescription'] = $customentry->customdescription;
++            }
++
++            // Track whether it is a custom filetype or a modified existing
++            // filetype.
++            if (array_key_exists($customentry->extension, $mimetypes)) {
++                $result['modified'] = true;
++            } else {
++                $result['custom'] = true;
++            }
++
++            // Add result array to list.
++            $mimetypes[$customentry->extension] = $result;
++        }
++
++        self::$cachedtypes = $mimetypes;
++        return self::$cachedtypes;
++    }
++
++    /**
++     * Gets custom types from config variable, after decoding the JSON if required.
++     *
++     * @return array Array of custom types (empty array if none)
++     */
++    protected static function get_custom_types() {
++        global $CFG;
++        if (!empty($CFG->customfiletypes)) {
++            if (is_array($CFG->customfiletypes)) {
++                // You can define this as an array in config.php...
++                return $CFG->customfiletypes;
++            } else {
++                // Or as a JSON string in the config table.
++                return json_decode($CFG->customfiletypes);
++            }
++        } else {
++            return array();
++        }
++    }
++
++    /**
++     * Sets the custom types into config variable, encoding into JSON.
++     *
++     * @param array $types Array of custom types
++     * @throws coding_exception If the custom types are fixed in config.php.
++     */
++    protected static function set_custom_types(array $types) {
++        global $CFG;
++        // Check the setting hasn't been forced.
++        if (array_key_exists('customfiletypes', $CFG->config_php_settings)) {
++            throw new coding_exception('Cannot set custom filetypes because they ' .
++                    'are defined in config.php');
++        }
++        if (empty($types)) {
++            unset_config('customfiletypes');
++        } else {
++            set_config('customfiletypes', json_encode(array_values($types)));
++        }
++
++        // Clear the cached type list.
++        self::reset_caches();
++    }
++
++    /**
++     * Clears the type cache. This is not needed in normal use as the
++     * set_custom_types function automatically clears the cache. Intended for
++     * use in unit tests.
++     */
++    public static function reset_caches() {
++        self::$cachedtypes = null;
++    }
++
++    /**
++     * Gets the default types that have been deleted. Returns an array containing
++     * the defaults of all those types.
++     *
++     * @return array Array (same format as get_mimetypes_array)
++     */
++    public static function get_deleted_types() {
++        $defaults = self::get_default_types();
++        $deleted = array();
++        foreach (self::get_custom_types() as $customentry) {
++            if (!empty($customentry->deleted)) {
++                $deleted[$customentry->extension] = $defaults[$customentry->extension];
++            }
++        }
++        return $deleted;
++    }
++
++    /**
++     * Adds a new entry to the list of custom filetypes.
++     *
++     * @param string $extension File extension without dot, e.g. 'doc'
++     * @param string $mimetype MIME type e.g. 'application/msword'
++     * @param string $coreicon Core icon to use e.g. 'document'
++     * @param array $groups Array of group strings that this type belongs to
++     * @param string $corestring Custom lang string name in mimetypes.php
++     * @param string $customdescription Custom description (plain text/multilang)
++     * @param bool $defaulticon True if this should be the default icon for the type
++     * @throws coding_exception If the extension already exists, or otherwise invalid
++     */
++    public static function add_type($extension, $mimetype, $coreicon,
++            array $groups = array(), $corestring = '', $customdescription = '',
++            $defaulticon = false) {
++        // Check for blank extensions or incorrectly including the dot.
++        $extension = (string)$extension;
++        if ($extension === '' || $extension[0] === '.') {
++            throw new coding_exception('Invalid extension .' . $extension);
++        }
++
++        // Check extension not already used.
++        $mimetypes = get_mimetypes_array();
++        if (array_key_exists($extension, $mimetypes)) {
++            throw new coding_exception('Extension ' . $extension . ' already exists');
++        }
++
++        // For default icon, check there isn't already something with default icon
++        // set for that MIME type.
++        if ($defaulticon) {
++            foreach ($mimetypes as $type) {
++                if ($type['type'] === $mimetype && !empty($type['defaulticon'])) {
++                    throw new coding_exception('MIME type ' . $mimetype .
++                            ' already has a default icon set');
++                }
++            }
++        }
++
++        // Get existing custom filetype list.
++        $customs = self::get_custom_types();
++
++        // Check if there's a 'deleted' entry for the extension, if so then get
++        // rid of it.
++        foreach ($customs as $key => $custom) {
++            if ($custom->extension === $extension) {
++                unset($customs[$key]);
++            }
++        }
++
++        // Set up config record for new type.
++        $newtype = self::create_config_record($extension, $mimetype, $coreicon, $groups,
++                $corestring, $customdescription, $defaulticon);
++
++        // See if there's a default value with this extension.
++        $needsadding = true;
++        $defaults = self::get_default_types();
++        if (array_key_exists($extension, $defaults)) {
++            // If it has the same values, we don't need to add it.
++            $defaultvalue = $defaults[$extension];
++            $modified = (array)$newtype;
++            unset($modified['extension']);
++            ksort($defaultvalue);
++            ksort($modified);
++            if ($modified === $defaultvalue) {
++                $needsadding = false;
++            }
++        }
++
++        // Add to array and set in config.
++        if ($needsadding) {
++            $customs[] = $newtype;
++        }
++        self::set_custom_types($customs);
++    }
++
++    /**
++     * Updates an entry in the list of filetypes in config.
++     *
++     * @param string $extension File extension without dot, e.g. 'doc'
++     * @param string $newextension New file extension (same if not changing)
++     * @param string $mimetype MIME type e.g. 'application/msword'
++     * @param string $coreicon Core icon to use e.g. 'document'
++     * @param array $groups Array of group strings that this type belongs to
++     * @param string $corestring Custom lang string name in mimetypes.php
++     * @param string $customdescription Custom description (plain text/multilang)
++     * @param bool $defaulticon True if this should be the default icon for the type
++     * @throws coding_exception If the new extension already exists, or otherwise invalid
++     */
++    public static function update_type($extension, $newextension, $mimetype, $coreicon,
++            array $groups = array(), $corestring = '', $customdescription = '',
++            $defaulticon = false) {
++
++        // Extension must exist.
++        $extension = (string)$extension;
++        $mimetypes = get_mimetypes_array();
++        if (!array_key_exists($extension, $mimetypes)) {
++            throw new coding_exception('Extension ' . $extension . ' not found');
++        }
++
++        // If there's a new extension then this must not exist.
++        $newextension = (string)$newextension;
++        if ($newextension !== $extension) {
++            if ($newextension === '' || $newextension[0] === '.') {
++                throw new coding_exception('Invalid extension .' . $newextension);
++            }
++            if (array_key_exists($newextension, $mimetypes)) {
++                throw new coding_exception('Extension ' . $newextension . ' already exists');
++            }
++        }
++
++        // For default icon, check there isn't already something with default icon
++        // set for that MIME type (unless it's this).
++        if ($defaulticon) {
++            foreach ($mimetypes as $ext => $type) {
++                if ($ext !== $extension && $type['type'] === $mimetype &&
++                        !empty($type['defaulticon'])) {
++                    throw new coding_exception('MIME type ' . $mimetype .
++                            ' already has a default icon set');
++                }
++            }
++        }
++
++        // Delete the old extension and then add the new one (may be same). This
++        // will correctly handle cases when a default type is involved.
++        self::delete_type($extension);
++        self::add_type($newextension, $mimetype, $coreicon, $groups, $corestring,
++                $customdescription, $defaulticon);
++    }
++
++    /**
++     * Deletes a file type from the config list (or, for a standard one, marks it
++     * as deleted).
++     *
++     * @param string $extension File extension without dot, e.g. 'doc'
++     * @throws coding_exception If the extension does not exist, or otherwise invalid
++     */
++    public static function delete_type($extension) {
++        // Extension must exist.
++        $mimetypes = get_mimetypes_array();
++        if (!array_key_exists($extension, $mimetypes)) {
++            throw new coding_exception('Extension ' . $extension . ' not found');
++        }
++
++        // Get existing custom filetype list.
++        $customs = self::get_custom_types();
++
++        // Remove any entries for this extension.
++        foreach ($customs as $key => $custom) {
++            if ($custom->extension === $extension && empty($custom->deleted)) {
++                unset($customs[$key]);
++            }
++        }
++
++        // If it was a standard entry (doesn't have 'custom' set) then add a
++        // deleted marker.
++        if (empty($mimetypes[$extension]['custom'])) {
++            $customs[] = (object)array('extension' => $extension, 'deleted' => true);
++        }
++
++        // Save and reset cache.
++        self::set_custom_types($customs);
++    }
++
++    /**
++     * Reverts a file type to the default. May only be called on types that have
++     * default values. This will undelete the type if necessary or set its values.
++     * If the type is already at default values, does nothing.
++     *
++     * @param string $extension File extension without dot, e.g. 'doc'
++     * @return bool True if anything was changed, false if it was already default
++     * @throws coding_exception If the extension is not a default type.
++     */
++    public static function revert_type_to_default($extension) {
++        $extension = (string)$extension;
++
++        // Check it actually is a default type.
++        $defaults = self::get_default_types();
++        if (!array_key_exists($extension, $defaults)) {
++            throw new coding_exception('Extension ' . $extension . ' is not a default type');
++        }
++
++        // Loop through all the custom settings.
++        $changed = false;
++        $customs = self::get_custom_types();
++        foreach ($customs as $key => $customentry) {
++            if ($customentry->extension === $extension) {
++                unset($customs[$key]);
++                $changed = true;
++            }
++        }
++
++        // Save changes if any.
++        if ($changed) {
++            self::set_custom_types($customs);
++        }
++        return $changed;
++    }
++
++    /**
++     * Converts function parameters into a record for storing in the JSON value.
++     *
++     * @param string $extension File extension without dot, e.g. 'doc'
++     * @param string $mimetype MIME type e.g. 'application/msword'
++     * @param string $coreicon Core icon to use e.g. 'document'
++     * @param array $groups Array of group strings that this type belongs to
++     * @param string $corestring Custom lang string name in mimetypes.php
++     * @param string $customdescription Custom description (plain text/multilang)
++     * @param bool $defaulticon True if this should be the default icon for the type
++     * @return stdClass Record matching the parameters
++     */
++    protected static function create_config_record($extension, $mimetype,
++            $coreicon, array $groups, $corestring, $customdescription, $defaulticon) {
++        // Construct new entry.
++        $newentry = (object)array('extension' => (string)$extension, 'type' => (string)$mimetype,
++                'icon' => (string)$coreicon);
++        if ($groups) {
++            if (!is_array($groups)) {
++                throw new coding_exception('Groups must be an array');
++            }
++            foreach ($groups as $group) {
++                if (!is_string($group)) {
++                    throw new coding_exception('Groups must be an array of strings');
++                }
++            }
++            $newentry->groups = $groups;
++        }
++        if ($corestring) {
++            $newentry->string = (string)$corestring;
++        }
++        if ($customdescription) {
++            $newentry->customdescription = (string)$customdescription;
++        }
++        if ($defaulticon) {
++            $newentry->defaulticon = true;
++        }
++        return $newentry;
++    }
++}
+diff --git a/lib/filelib.php b/lib/filelib.php
+index 8c2ef35466d..d2a32a544c5 100644
+--- a/lib/filelib.php
++++ b/lib/filelib.php
+@@ -1386,206 +1386,8 @@ function download_file_content($url, $headers=null, $postdata=null, $fullrespons
+  *   Unknown types should use the 'xxx' entry which includes defaults.
+  */
+ function &get_mimetypes_array() {
+-    static $mimearray = array (
+-        'xxx'  => array ('type'=>'document/unknown', 'icon'=>'unknown'),
+-        '3gp'  => array ('type'=>'video/quicktime', 'icon'=>'quicktime', 'groups'=>array('video'), 'string'=>'video'),
+-        '7z'  => array ('type'=>'application/x-7z-compressed', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'aac'  => array ('type'=>'audio/aac', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'accdb'  => array ('type'=>'application/msaccess', 'icon'=>'base'),
+-        'ai'   => array ('type'=>'application/postscript', 'icon'=>'eps', 'groups'=>array('image'), 'string'=>'image'),
+-        'aif'  => array ('type'=>'audio/x-aiff', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'aiff' => array ('type'=>'audio/x-aiff', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'aifc' => array ('type'=>'audio/x-aiff', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'applescript'  => array ('type'=>'text/plain', 'icon'=>'text'),
+-        'asc'  => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'asm'  => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'au'   => array ('type'=>'audio/au', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'avi'  => array ('type'=>'video/x-ms-wm', 'icon'=>'avi', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'bmp'  => array ('type'=>'image/bmp', 'icon'=>'bmp', 'groups'=>array('image'), 'string'=>'image'),
+-        'c'    => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'cct'  => array ('type'=>'shockwave/director', 'icon'=>'flash'),
+-        'cpp'  => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'cs'   => array ('type'=>'application/x-csh', 'icon'=>'sourcecode'),
+-        'css'  => array ('type'=>'text/css', 'icon'=>'text', 'groups'=>array('web_file')),
+-        'csv'  => array ('type'=>'text/csv', 'icon'=>'spreadsheet', 'groups'=>array('spreadsheet')),
+-        'dv'   => array ('type'=>'video/x-dv', 'icon'=>'quicktime', 'groups'=>array('video'), 'string'=>'video'),
+-        'dmg'  => array ('type'=>'application/octet-stream', 'icon'=>'unknown'),
+-
+-        'doc'  => array ('type'=>'application/msword', 'icon'=>'document', 'groups'=>array('document')),
+-        'bdoc' => array ('type'=>'application/x-digidoc', 'icon'=>'document', 'groups'=>array('archive')),
+-        'cdoc' => array ('type'=>'application/x-digidoc', 'icon'=>'document', 'groups'=>array('archive')),
+-        'ddoc' => array ('type'=>'application/x-digidoc', 'icon'=>'document', 'groups'=>array('archive')),
+-        'docx' => array ('type'=>'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'icon'=>'document', 'groups'=>array('document')),
+-        'docm' => array ('type'=>'application/vnd.ms-word.document.macroEnabled.12', 'icon'=>'document'),
+-        'dotx' => array ('type'=>'application/vnd.openxmlformats-officedocument.wordprocessingml.template', 'icon'=>'document'),
+-        'dotm' => array ('type'=>'application/vnd.ms-word.template.macroEnabled.12', 'icon'=>'document'),
+-
+-        'dcr'  => array ('type'=>'application/x-director', 'icon'=>'flash'),
+-        'dif'  => array ('type'=>'video/x-dv', 'icon'=>'quicktime', 'groups'=>array('video'), 'string'=>'video'),
+-        'dir'  => array ('type'=>'application/x-director', 'icon'=>'flash'),
+-        'dxr'  => array ('type'=>'application/x-director', 'icon'=>'flash'),
+-        'eps'  => array ('type'=>'application/postscript', 'icon'=>'eps'),
+-        'epub' => array ('type'=>'application/epub+zip', 'icon'=>'epub', 'groups'=>array('document')),
+-        'fdf'  => array ('type'=>'application/pdf', 'icon'=>'pdf'),
+-        'flv'  => array ('type'=>'video/x-flv', 'icon'=>'flash', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'f4v'  => array ('type'=>'video/mp4', 'icon'=>'flash', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-
+-        'gallery'           => array ('type'=>'application/x-smarttech-notebook', 'icon'=>'archive'),
+-        'galleryitem'       => array ('type'=>'application/x-smarttech-notebook', 'icon'=>'archive'),
+-        'gallerycollection' => array ('type'=>'application/x-smarttech-notebook', 'icon'=>'archive'),
+-        'gif'  => array ('type'=>'image/gif', 'icon'=>'gif', 'groups'=>array('image', 'web_image'), 'string'=>'image'),
+-        'gtar' => array ('type'=>'application/x-gtar', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'tgz'  => array ('type'=>'application/g-zip', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'gz'   => array ('type'=>'application/g-zip', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'gzip' => array ('type'=>'application/g-zip', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'h'    => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'hpp'  => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'hqx'  => array ('type'=>'application/mac-binhex40', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'htc'  => array ('type'=>'text/x-component', 'icon'=>'markup'),
+-        'html' => array ('type'=>'text/html', 'icon'=>'html', 'groups'=>array('web_file')),
+-        'xhtml'=> array ('type'=>'application/xhtml+xml', 'icon'=>'html', 'groups'=>array('web_file')),
+-        'htm'  => array ('type'=>'text/html', 'icon'=>'html', 'groups'=>array('web_file')),
+-        'ico'  => array ('type'=>'image/vnd.microsoft.icon', 'icon'=>'image', 'groups'=>array('image'), 'string'=>'image'),
+-        'ics'  => array ('type'=>'text/calendar', 'icon'=>'text'),
+-        'isf'  => array ('type'=>'application/inspiration', 'icon'=>'isf'),
+-        'ist'  => array ('type'=>'application/inspiration.template', 'icon'=>'isf'),
+-        'java' => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'jar'  => array ('type'=>'application/java-archive', 'icon' => 'archive'),
+-        'jcb'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'jcl'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'jcw'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'jmt'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'jmx'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'jnlp' => array ('type'=>'application/x-java-jnlp-file', 'icon'=>'markup'),
+-        'jpe'  => array ('type'=>'image/jpeg', 'icon'=>'jpeg', 'groups'=>array('image', 'web_image'), 'string'=>'image'),
+-        'jpeg' => array ('type'=>'image/jpeg', 'icon'=>'jpeg', 'groups'=>array('image', 'web_image'), 'string'=>'image'),
+-        'jpg'  => array ('type'=>'image/jpeg', 'icon'=>'jpeg', 'groups'=>array('image', 'web_image'), 'string'=>'image'),
+-        'jqz'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'js'   => array ('type'=>'application/x-javascript', 'icon'=>'text', 'groups'=>array('web_file')),
+-        'latex'=> array ('type'=>'application/x-latex', 'icon'=>'text'),
+-        'm'    => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'mbz'  => array ('type'=>'application/vnd.moodle.backup', 'icon'=>'moodle'),
+-        'mdb'  => array ('type'=>'application/x-msaccess', 'icon'=>'base'),
+-        'mht'  => array ('type'=>'message/rfc822', 'icon'=>'archive'),
+-        'mhtml'=> array ('type'=>'message/rfc822', 'icon'=>'archive'),
+-        'mov'  => array ('type'=>'video/quicktime', 'icon'=>'quicktime', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'movie'=> array ('type'=>'video/x-sgi-movie', 'icon'=>'quicktime', 'groups'=>array('video'), 'string'=>'video'),
+-        'mw'   => array ('type'=>'application/maple', 'icon'=>'math'),
+-        'mws'  => array ('type'=>'application/maple', 'icon'=>'math'),
+-        'm3u'  => array ('type'=>'audio/x-mpegurl', 'icon'=>'mp3', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'mp3'  => array ('type'=>'audio/mp3', 'icon'=>'mp3', 'groups'=>array('audio','web_audio'), 'string'=>'audio'),
+-        'mp4'  => array ('type'=>'video/mp4', 'icon'=>'mpeg', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'm4v'  => array ('type'=>'video/mp4', 'icon'=>'mpeg', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'm4a'  => array ('type'=>'audio/mp4', 'icon'=>'mp3', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'mpeg' => array ('type'=>'video/mpeg', 'icon'=>'mpeg', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'mpe'  => array ('type'=>'video/mpeg', 'icon'=>'mpeg', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'mpg'  => array ('type'=>'video/mpeg', 'icon'=>'mpeg', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'mpr'  => array ('type'=>'application/vnd.moodle.profiling', 'icon'=>'moodle'),
+-
+-        'nbk'       => array ('type'=>'application/x-smarttech-notebook', 'icon'=>'archive'),
+-        'notebook'  => array ('type'=>'application/x-smarttech-notebook', 'icon'=>'archive'),
+-
+-        'odt'  => array ('type'=>'application/vnd.oasis.opendocument.text', 'icon'=>'writer', 'groups'=>array('document')),
+-        'ott'  => array ('type'=>'application/vnd.oasis.opendocument.text-template', 'icon'=>'writer', 'groups'=>array('document')),
+-        'oth'  => array ('type'=>'application/vnd.oasis.opendocument.text-web', 'icon'=>'oth', 'groups'=>array('document')),
+-        'odm'  => array ('type'=>'application/vnd.oasis.opendocument.text-master', 'icon'=>'writer'),
+-        'odg'  => array ('type'=>'application/vnd.oasis.opendocument.graphics', 'icon'=>'draw'),
+-        'otg'  => array ('type'=>'application/vnd.oasis.opendocument.graphics-template', 'icon'=>'draw'),
+-        'odp'  => array ('type'=>'application/vnd.oasis.opendocument.presentation', 'icon'=>'impress'),
+-        'otp'  => array ('type'=>'application/vnd.oasis.opendocument.presentation-template', 'icon'=>'impress'),
+-        'ods'  => array ('type'=>'application/vnd.oasis.opendocument.spreadsheet', 'icon'=>'calc', 'groups'=>array('spreadsheet')),
+-        'ots'  => array ('type'=>'application/vnd.oasis.opendocument.spreadsheet-template', 'icon'=>'calc', 'groups'=>array('spreadsheet')),
+-        'odc'  => array ('type'=>'application/vnd.oasis.opendocument.chart', 'icon'=>'chart'),
+-        'odf'  => array ('type'=>'application/vnd.oasis.opendocument.formula', 'icon'=>'math'),
+-        'odb'  => array ('type'=>'application/vnd.oasis.opendocument.database', 'icon'=>'base'),
+-        'odi'  => array ('type'=>'application/vnd.oasis.opendocument.image', 'icon'=>'draw'),
+-        'oga'  => array ('type'=>'audio/ogg', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'ogg'  => array ('type'=>'audio/ogg', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'ogv'  => array ('type'=>'video/ogg', 'icon'=>'video', 'groups'=>array('video'), 'string'=>'video'),
+-
+-        'pct'  => array ('type'=>'image/pict', 'icon'=>'image', 'groups'=>array('image'), 'string'=>'image'),
+-        'pdf'  => array ('type'=>'application/pdf', 'icon'=>'pdf'),
+-        'php'  => array ('type'=>'text/plain', 'icon'=>'sourcecode'),
+-        'pic'  => array ('type'=>'image/pict', 'icon'=>'image', 'groups'=>array('image'), 'string'=>'image'),
+-        'pict' => array ('type'=>'image/pict', 'icon'=>'image', 'groups'=>array('image'), 'string'=>'image'),
+-        'png'  => array ('type'=>'image/png', 'icon'=>'png', 'groups'=>array('image', 'web_image'), 'string'=>'image'),
+-        'pps'  => array ('type'=>'application/vnd.ms-powerpoint', 'icon'=>'powerpoint', 'groups'=>array('presentation')),
+-        'ppt'  => array ('type'=>'application/vnd.ms-powerpoint', 'icon'=>'powerpoint', 'groups'=>array('presentation')),
+-        'pptx' => array ('type'=>'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'icon'=>'powerpoint'),
+-        'pptm' => array ('type'=>'application/vnd.ms-powerpoint.presentation.macroEnabled.12', 'icon'=>'powerpoint'),
+-        'potx' => array ('type'=>'application/vnd.openxmlformats-officedocument.presentationml.template', 'icon'=>'powerpoint'),
+-        'potm' => array ('type'=>'application/vnd.ms-powerpoint.template.macroEnabled.12', 'icon'=>'powerpoint'),
+-        'ppam' => array ('type'=>'application/vnd.ms-powerpoint.addin.macroEnabled.12', 'icon'=>'powerpoint'),
+-        'ppsx' => array ('type'=>'application/vnd.openxmlformats-officedocument.presentationml.slideshow', 'icon'=>'powerpoint'),
+-        'ppsm' => array ('type'=>'application/vnd.ms-powerpoint.slideshow.macroEnabled.12', 'icon'=>'powerpoint'),
+-        'ps'   => array ('type'=>'application/postscript', 'icon'=>'pdf'),
+-        'pub'  => array ('type'=>'application/x-mspublisher', 'icon'=>'publisher', 'groups'=>array('presentation')),
+-
+-        'qt'   => array ('type'=>'video/quicktime', 'icon'=>'quicktime', 'groups'=>array('video','web_video'), 'string'=>'video'),
+-        'ra'   => array ('type'=>'audio/x-realaudio-plugin', 'icon'=>'audio', 'groups'=>array('audio','web_audio'), 'string'=>'audio'),
+-        'ram'  => array ('type'=>'audio/x-pn-realaudio-plugin', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'rar'  => array ('type'=>'application/x-rar-compressed', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'rhb'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'rm'   => array ('type'=>'audio/x-pn-realaudio-plugin', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'rmvb' => array ('type'=>'application/vnd.rn-realmedia-vbr', 'icon'=>'video', 'groups'=>array('video'), 'string'=>'video'),
+-        'rtf'  => array ('type'=>'text/rtf', 'icon'=>'text', 'groups'=>array('document')),
+-        'rtx'  => array ('type'=>'text/richtext', 'icon'=>'text'),
+-        'rv'   => array ('type'=>'audio/x-pn-realaudio-plugin', 'icon'=>'audio', 'groups'=>array('video'), 'string'=>'video'),
+-        'sh'   => array ('type'=>'application/x-sh', 'icon'=>'sourcecode'),
+-        'sit'  => array ('type'=>'application/x-stuffit', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'smi'  => array ('type'=>'application/smil', 'icon'=>'text'),
+-        'smil' => array ('type'=>'application/smil', 'icon'=>'text'),
+-        'sqt'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-        'svg'  => array ('type'=>'image/svg+xml', 'icon'=>'image', 'groups'=>array('image','web_image'), 'string'=>'image'),
+-        'svgz' => array ('type'=>'image/svg+xml', 'icon'=>'image', 'groups'=>array('image','web_image'), 'string'=>'image'),
+-        'swa'  => array ('type'=>'application/x-director', 'icon'=>'flash'),
+-        'swf'  => array ('type'=>'application/x-shockwave-flash', 'icon'=>'flash', 'groups'=>array('video','web_video')),
+-        'swfl' => array ('type'=>'application/x-shockwave-flash', 'icon'=>'flash', 'groups'=>array('video','web_video')),
+-
+-        'sxw'  => array ('type'=>'application/vnd.sun.xml.writer', 'icon'=>'writer'),
+-        'stw'  => array ('type'=>'application/vnd.sun.xml.writer.template', 'icon'=>'writer'),
+-        'sxc'  => array ('type'=>'application/vnd.sun.xml.calc', 'icon'=>'calc'),
+-        'stc'  => array ('type'=>'application/vnd.sun.xml.calc.template', 'icon'=>'calc'),
+-        'sxd'  => array ('type'=>'application/vnd.sun.xml.draw', 'icon'=>'draw'),
+-        'std'  => array ('type'=>'application/vnd.sun.xml.draw.template', 'icon'=>'draw'),
+-        'sxi'  => array ('type'=>'application/vnd.sun.xml.impress', 'icon'=>'impress'),
+-        'sti'  => array ('type'=>'application/vnd.sun.xml.impress.template', 'icon'=>'impress'),
+-        'sxg'  => array ('type'=>'application/vnd.sun.xml.writer.global', 'icon'=>'writer'),
+-        'sxm'  => array ('type'=>'application/vnd.sun.xml.math', 'icon'=>'math'),
+-
+-        'tar'  => array ('type'=>'application/x-tar', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive'),
+-        'tif'  => array ('type'=>'image/tiff', 'icon'=>'tiff', 'groups'=>array('image'), 'string'=>'image'),
+-        'tiff' => array ('type'=>'image/tiff', 'icon'=>'tiff', 'groups'=>array('image'), 'string'=>'image'),
+-        'tex'  => array ('type'=>'application/x-tex', 'icon'=>'text'),
+-        'texi' => array ('type'=>'application/x-texinfo', 'icon'=>'text'),
+-        'texinfo'  => array ('type'=>'application/x-texinfo', 'icon'=>'text'),
+-        'tsv'  => array ('type'=>'text/tab-separated-values', 'icon'=>'text'),
+-        'txt'  => array ('type'=>'text/plain', 'icon'=>'text', 'defaulticon'=>true),
+-        'wav'  => array ('type'=>'audio/wav', 'icon'=>'wav', 'groups'=>array('audio'), 'string'=>'audio'),
+-        'webm'  => array ('type'=>'video/webm', 'icon'=>'video', 'groups'=>array('video'), 'string'=>'video'),
+-        'wmv'  => array ('type'=>'video/x-ms-wmv', 'icon'=>'wmv', 'groups'=>array('video'), 'string'=>'video'),
+-        'asf'  => array ('type'=>'video/x-ms-asf', 'icon'=>'wmv', 'groups'=>array('video'), 'string'=>'video'),
+-        'wma'  => array ('type'=>'audio/x-ms-wma', 'icon'=>'audio', 'groups'=>array('audio'), 'string'=>'audio'),
+-
+-        'xbk'  => array ('type'=>'application/x-smarttech-notebook', 'icon'=>'archive'),
+-        'xdp'  => array ('type'=>'application/pdf', 'icon'=>'pdf'),
+-        'xfd'  => array ('type'=>'application/pdf', 'icon'=>'pdf'),
+-        'xfdf' => array ('type'=>'application/pdf', 'icon'=>'pdf'),
+-
+-        'xls'  => array ('type'=>'application/vnd.ms-excel', 'icon'=>'spreadsheet', 'groups'=>array('spreadsheet')),
+-        'xlsx' => array ('type'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'icon'=>'spreadsheet'),
+-        'xlsm' => array ('type'=>'application/vnd.ms-excel.sheet.macroEnabled.12', 'icon'=>'spreadsheet', 'groups'=>array('spreadsheet')),
+-        'xltx' => array ('type'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.template', 'icon'=>'spreadsheet'),
+-        'xltm' => array ('type'=>'application/vnd.ms-excel.template.macroEnabled.12', 'icon'=>'spreadsheet'),
+-        'xlsb' => array ('type'=>'application/vnd.ms-excel.sheet.binary.macroEnabled.12', 'icon'=>'spreadsheet'),
+-        'xlam' => array ('type'=>'application/vnd.ms-excel.addin.macroEnabled.12', 'icon'=>'spreadsheet'),
+-
+-        'xml'  => array ('type'=>'application/xml', 'icon'=>'markup'),
+-        'xsl'  => array ('type'=>'text/xml', 'icon'=>'markup'),
+-
+-        'zip'  => array ('type'=>'application/zip', 'icon'=>'archive', 'groups'=>array('archive'), 'string'=>'archive')
+-    );
+-    return $mimearray;
++    // Get types from the core_filetypes function, which includes caching.
++    return core_filetypes::get_types();
+ }
+ 
+ /**
+@@ -1862,7 +1664,12 @@ function get_mimetype_description($obj, $capitalise=false) {
+     // MIME types may include + symbol but this is not permitted in string ids.
+     $safemimetype = str_replace('+', '_', $mimetype);
+     $safemimetypestr = str_replace('+', '_', $mimetypestr);
+-    if (get_string_manager()->string_exists($safemimetype, 'mimetypes')) {
++    $customdescription = mimeinfo('customdescription', $filename);
++    if ($customdescription) {
++        // Call format_string on the custom description so that multilang
++        // filter can be used (if enabled).
++        $result = format_string($customdescription);
++    } else if (get_string_manager()->string_exists($safemimetype, 'mimetypes')) {
+         $result = get_string($safemimetype, 'mimetypes', (object)$a);
+     } else if (get_string_manager()->string_exists($safemimetypestr, 'mimetypes')) {
+         $result = get_string($safemimetypestr, 'mimetypes', (object)$a);
+diff --git a/lib/phpunit/classes/util.php b/lib/phpunit/classes/util.php
+index 3144b932b59..3e8707c5243 100644
+--- a/lib/phpunit/classes/util.php
++++ b/lib/phpunit/classes/util.php
+@@ -202,6 +202,8 @@ class phpunit_util extends testing_util {
+         core_text::reset_caches();
+         get_message_processors(false, true);
+         filter_manager::reset_caches();
++        core_filetypes::reset_caches();
++
+         // Reset internal users.
+         core_user::reset_internal_users();
+         core_user::reset_caches();
+diff --git a/lib/tests/filelib_test.php b/lib/tests/filelib_test.php
+index 180c9d86a0c..cab417d00c2 100644
+--- a/lib/tests/filelib_test.php
++++ b/lib/tests/filelib_test.php
+@@ -824,4 +824,58 @@ EOF;
+         // Test it does nothing to the 'plain' data.
+         $this->assertSame($httpsexpected, curl::strip_double_headers($httpsexpected));
+     }
++
++    /**
++     * Tests the get_mimetype_description function.
++     */
++    public function test_get_mimetype_description() {
++        $this->resetAfterTest();
++
++        // Test example type (.doc).
++        $this->assertEquals(get_string('application/msword', 'mimetypes'),
++                get_mimetype_description(array('filename' => 'test.doc')));
++
++        // Test an unknown file type.
++        $this->assertEquals(get_string('document/unknown', 'mimetypes'),
++                get_mimetype_description(array('filename' => 'test.frog')));
++
++        // Test a custom filetype with no lang string specified.
++        core_filetypes::add_type('frog', 'application/x-frog', 'document');
++        $this->assertEquals('application/x-frog',
++                get_mimetype_description(array('filename' => 'test.frog')));
++
++        // Test custom description.
++        core_filetypes::update_type('frog', 'frog', 'application/x-frog', 'document',
++                array(), '', 'Froggy file');
++        $this->assertEquals('Froggy file',
++                get_mimetype_description(array('filename' => 'test.frog')));
++
++        // Test custom description using multilang filter.
++        filter_set_global_state('multilang', TEXTFILTER_ON);
++        filter_set_applies_to_strings('multilang', true);
++        core_filetypes::update_type('frog', 'frog', 'application/x-frog', 'document',
++                array(), '', '<span lang="en" class="multilang">Green amphibian</span>' .
++                '<span lang="fr" class="multilang">Amphibian vert</span>');
++        $this->assertEquals('Green amphibian',
++                get_mimetype_description(array('filename' => 'test.frog')));
++    }
++
++    /**
++     * Tests the get_mimetypes_array function.
++     */
++    public function test_get_mimetypes_array() {
++        $mimeinfo = get_mimetypes_array();
++
++        // Test example MIME type (doc).
++        $this->assertEquals('application/msword', $mimeinfo['doc']['type']);
++        $this->assertEquals('document', $mimeinfo['doc']['icon']);
++        $this->assertEquals(array('document'), $mimeinfo['doc']['groups']);
++        $this->assertFalse(isset($mimeinfo['doc']['string']));
++        $this->assertFalse(isset($mimeinfo['doc']['defaulticon']));
++        $this->assertFalse(isset($mimeinfo['doc']['customdescription']));
++
++        // Check the less common fields using other examples.
++        $this->assertEquals('image', $mimeinfo['png']['string']);
++        $this->assertEquals(true, $mimeinfo['txt']['defaulticon']);
++    }
+ }
+diff --git a/lib/tests/filetypes_test.php b/lib/tests/filetypes_test.php
+new file mode 100644
+index 00000000000..51153601f5c
+--- /dev/null
++++ b/lib/tests/filetypes_test.php
+@@ -0,0 +1,253 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Unit tests for /lib/classes/filetypes.php.
++ *
++ * @package core
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++defined('MOODLE_INTERNAL') || die();
++
++global $CFG;
++require_once($CFG->libdir . '/filelib.php');
++
++/**
++ * Unit tests for /lib/classes/filetypes.php.
++ *
++ * @package core
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class core_filetypes_testcase extends advanced_testcase {
++
++    public function test_add_type() {
++        $this->resetAfterTest();
++
++        // Check the filetypes to be added do not exist yet (basically this
++        // ensures we're testing the cache clear).
++        $types = get_mimetypes_array();
++        $this->assertArrayNotHasKey('frog', $types);
++        $this->assertArrayNotHasKey('zombie', $types);
++
++        // Add two filetypes (minimal, then all options).
++        core_filetypes::add_type('frog', 'application/x-frog', 'document');
++        core_filetypes::add_type('zombie', 'application/x-zombie', 'document',
++            array('document', 'image'), 'image', 'A zombie', true);
++
++        // Check they now exist, and check data.
++        $types = get_mimetypes_array();
++        $this->assertEquals('application/x-frog', $types['frog']['type']);
++        $this->assertEquals('document', $types['frog']['icon']);
++        $this->assertEquals(array('document', 'image'), $types['zombie']['groups']);
++        $this->assertEquals('image', $types['zombie']['string']);
++        $this->assertEquals(true, $types['zombie']['defaulticon']);
++        $this->assertEquals('A zombie', $types['zombie']['customdescription']);
++
++        // Test adding again causes exception.
++        try {
++            core_filetypes::add_type('frog', 'application/x-frog', 'document');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('already exists', $e->getMessage());
++            $this->assertContains('frog', $e->getMessage());
++        }
++
++        // Test bogus extension causes exception.
++        try {
++            core_filetypes::add_type('.frog', 'application/x-frog', 'document');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('Invalid extension', $e->getMessage());
++            $this->assertContains('..frog', $e->getMessage());
++        }
++        try {
++            core_filetypes::add_type('', 'application/x-frog', 'document');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('Invalid extension', $e->getMessage());
++        }
++
++        // Test there is an exception if you add something with defaulticon when
++        // there is already a type that has it.
++        try {
++            core_filetypes::add_type('gecko', 'text/plain', 'document',
++                    array(), '', '', true);
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('default icon set', $e->getMessage());
++            $this->assertContains('text/plain', $e->getMessage());
++        }
++    }
++
++    public function test_update_type() {
++        $this->resetAfterTest();
++
++        // Check previous value for the MIME type of Word documents.
++        $types = get_mimetypes_array();
++        $this->assertEquals('application/msword', $types['doc']['type']);
++
++        // Change it.
++        core_filetypes::update_type('doc', 'doc', 'application/x-frog', 'document');
++
++        // Check the MIME type is now set and also the other (not specified)
++        // options, like groups, were removed.
++        $types = get_mimetypes_array();
++        $this->assertEquals('application/x-frog', $types['doc']['type']);
++        $this->assertArrayNotHasKey('groups', $types['doc']);
++
++        // This time change the extension.
++        core_filetypes::update_type('doc', 'docccc', 'application/x-frog', 'document');
++        $types = get_mimetypes_array();
++        $this->assertEquals('application/x-frog', $types['docccc']['type']);
++        $this->assertArrayNotHasKey('doc', $types);
++
++        // Test unknown extension.
++        try {
++            core_filetypes::update_type('doc', 'doc', 'application/x-frog', 'document');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('not found', $e->getMessage());
++            $this->assertContains('doc', $e->getMessage());
++        }
++
++        // Test bogus extension causes exception.
++        try {
++            core_filetypes::update_type('docccc', '.frog', 'application/x-frog', 'document');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('Invalid extension', $e->getMessage());
++            $this->assertContains('.frog', $e->getMessage());
++        }
++        try {
++            core_filetypes::update_type('docccc', '', 'application/x-frog', 'document');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('Invalid extension', $e->getMessage());
++        }
++
++        // Test defaulticon changes.
++        try {
++            core_filetypes::update_type('docccc', 'docccc', 'text/plain', 'document',
++                    array(), '', '', true);
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('default icon set', $e->getMessage());
++            $this->assertContains('text/plain', $e->getMessage());
++        }
++    }
++
++    public function test_delete_type() {
++        $this->resetAfterTest();
++
++        // Filetype exists.
++        $types = get_mimetypes_array();
++        $this->assertArrayHasKey('doc', $types);
++
++        // Remove it.
++        core_filetypes::delete_type('doc');
++        $types = get_mimetypes_array();
++        $this->assertArrayNotHasKey('doc', $types);
++
++        // Test removing one that doesn't exist causes exception.
++        try {
++            core_filetypes::delete_type('doc');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('not found', $e->getMessage());
++            $this->assertContains('doc', $e->getMessage());
++        }
++
++        // Try a custom type (slightly different).
++        core_filetypes::add_type('frog', 'application/x-frog', 'document');
++        $types = get_mimetypes_array();
++        $this->assertArrayHasKey('frog', $types);
++        core_filetypes::delete_type('frog');
++        $types = get_mimetypes_array();
++        $this->assertArrayNotHasKey('frog', $types);
++    }
++
++    public function test_revert_type_to_default() {
++        $this->resetAfterTest();
++
++        // Delete and then revert.
++        core_filetypes::delete_type('doc');
++        $this->assertArrayNotHasKey('doc', get_mimetypes_array());
++        core_filetypes::revert_type_to_default('doc');
++        $this->assertArrayHasKey('doc', get_mimetypes_array());
++
++        // Update and then revert.
++        core_filetypes::update_type('asm', 'asm', 'text/plain', 'sourcecode', array(), '', 'An asm file');
++        $types = get_mimetypes_array();
++        $this->assertEquals('An asm file', $types['asm']['customdescription']);
++        core_filetypes::revert_type_to_default('asm');
++        $types = get_mimetypes_array();
++        $this->assertArrayNotHasKey('customdescription', $types['asm']);
++
++        // Test reverting a non-default type causes exception.
++        try {
++            core_filetypes::revert_type_to_default('frog');
++            $this->fail();
++        } catch (coding_exception $e) {
++            $this->assertContains('not a default type', $e->getMessage());
++            $this->assertContains('frog', $e->getMessage());
++        }
++    }
++
++    /**
++     * Check that the logic cleans up the variable by deleting parts that are
++     * no longer needed.
++     */
++    public function test_cleanup() {
++        global $CFG;
++        $this->resetAfterTest();
++
++        // The custom filetypes setting is empty to start with.
++        $this->assertObjectNotHasAttribute('customfiletypes', $CFG);
++
++        // Add a custom filetype, then delete it.
++        core_filetypes::add_type('frog', 'application/x-frog', 'document');
++        $this->assertObjectHasAttribute('customfiletypes', $CFG);
++        core_filetypes::delete_type('frog');
++        $this->assertObjectNotHasAttribute('customfiletypes', $CFG);
++
++        // Change a standard filetype, then change it back.
++        core_filetypes::update_type('asm', 'asm', 'text/plain', 'document');
++        $this->assertObjectHasAttribute('customfiletypes', $CFG);
++        core_filetypes::update_type('asm', 'asm', 'text/plain', 'sourcecode');
++        $this->assertObjectNotHasAttribute('customfiletypes', $CFG);
++
++        // Delete a standard filetype, then add it back (the same).
++        core_filetypes::delete_type('asm');
++        $this->assertObjectHasAttribute('customfiletypes', $CFG);
++        core_filetypes::add_type('asm', 'text/plain', 'sourcecode');
++        $this->assertObjectNotHasAttribute('customfiletypes', $CFG);
++
++        // Revert a changed type.
++        core_filetypes::update_type('asm', 'asm', 'text/plain', 'document');
++        $this->assertObjectHasAttribute('customfiletypes', $CFG);
++        core_filetypes::revert_type_to_default('asm');
++        $this->assertObjectNotHasAttribute('customfiletypes', $CFG);
++
++        // Revert a deleted type.
++        core_filetypes::delete_type('asm');
++        $this->assertObjectHasAttribute('customfiletypes', $CFG);
++        core_filetypes::revert_type_to_default('asm');
++        $this->assertObjectNotHasAttribute('customfiletypes', $CFG);
++    }
++}
+-- 
+2.17.1
+
+
+From 8dbd82be3052be34facd02931a1e7522c0773425 Mon Sep 17 00:00:00 2001
+From: Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
+Date: Fri, 3 Jul 2020 14:37:55 +1000
+Subject: [PATCH 14/15] MDL-42616 filelib: New user interface to edit and add
+ file types (2/2)
+
+New admin tool tool_filetypes which uses the new API to add and modify file type definitions.
+---
+ admin/tool/filetypes/classes/utils.php        | 122 ++++++++++++
+ admin/tool/filetypes/delete.php               |  60 ++++++
+ admin/tool/filetypes/edit.php                 | 111 +++++++++++
+ admin/tool/filetypes/edit_form.php            | 115 +++++++++++
+ admin/tool/filetypes/index.php                |  48 +++++
+ .../tool/filetypes/lang/en/tool_filetypes.php |  69 +++++++
+ admin/tool/filetypes/renderer.php             | 179 ++++++++++++++++++
+ admin/tool/filetypes/revert.php               |  60 ++++++
+ admin/tool/filetypes/settings.php             |  31 +++
+ admin/tool/filetypes/styles.css               |  32 ++++
+ .../tests/behat/add_filetypes.feature         | 107 +++++++++++
+ .../tool/filetypes/tests/fixtures/frog-24.png | Bin 0 -> 67 bytes
+ .../tool/filetypes/tests/fixtures/frog-48.png | Bin 0 -> 67 bytes
+ admin/tool/filetypes/tests/fixtures/test.frog |   1 +
+ .../tool/filetypes/tests/fixtures/zombie.gif  | Bin 0 -> 43 bytes
+ .../filetypes/tests/tool_filetypes_test.php   |  86 +++++++++
+ admin/tool/filetypes/version.php              |  29 +++
+ 17 files changed, 1050 insertions(+)
+ create mode 100644 admin/tool/filetypes/classes/utils.php
+ create mode 100644 admin/tool/filetypes/delete.php
+ create mode 100644 admin/tool/filetypes/edit.php
+ create mode 100644 admin/tool/filetypes/edit_form.php
+ create mode 100644 admin/tool/filetypes/index.php
+ create mode 100644 admin/tool/filetypes/lang/en/tool_filetypes.php
+ create mode 100644 admin/tool/filetypes/renderer.php
+ create mode 100644 admin/tool/filetypes/revert.php
+ create mode 100644 admin/tool/filetypes/settings.php
+ create mode 100644 admin/tool/filetypes/styles.css
+ create mode 100644 admin/tool/filetypes/tests/behat/add_filetypes.feature
+ create mode 100644 admin/tool/filetypes/tests/fixtures/frog-24.png
+ create mode 100644 admin/tool/filetypes/tests/fixtures/frog-48.png
+ create mode 100644 admin/tool/filetypes/tests/fixtures/test.frog
+ create mode 100644 admin/tool/filetypes/tests/fixtures/zombie.gif
+ create mode 100644 admin/tool/filetypes/tests/tool_filetypes_test.php
+ create mode 100644 admin/tool/filetypes/version.php
+
+diff --git a/admin/tool/filetypes/classes/utils.php b/admin/tool/filetypes/classes/utils.php
+new file mode 100644
+index 00000000000..45a1c6b2790
+--- /dev/null
++++ b/admin/tool/filetypes/classes/utils.php
+@@ -0,0 +1,122 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Class with static back-end methods used by the file type tool.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++namespace tool_filetypes;
++
++defined('MOODLE_INTERNAL') || die();
++
++/**
++ * Class with static back-end methods used by the file type tool.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class utils {
++    /**
++     * Checks if the given file type extension is invalid.
++     * The added file type extension must be unique and must not begin with a dot.
++     *
++     * @param string $extension Extension of the file type to add
++     * @param string $oldextension Extension prior to update (empty string if adding new type)
++     * @return bool True if it the file type trying to add already exists
++     */
++    public static function is_extension_invalid($extension, $oldextension = '') {
++        $extension = trim($extension);
++        if ($extension === '' || $extension[0] === '.') {
++            return true;
++        }
++
++        $mimeinfo = get_mimetypes_array();
++        if ($oldextension !== '') {
++            unset($mimeinfo[$oldextension]);
++        }
++
++        return array_key_exists($extension, $mimeinfo);
++    }
++
++    /**
++     * Checks if we are allowed to turn on the 'default icon' option. You can
++     * only have one of these for a given MIME type.
++     *
++     * @param string $mimetype MIME type
++     * @param string $oldextension File extension name (before any change)
++     */
++    public static function is_defaulticon_allowed($mimetype, $oldextension = '') {
++        $mimeinfo = get_mimetypes_array();
++        if ($oldextension !== '') {
++            unset($mimeinfo[$oldextension]);
++        }
++        foreach ($mimeinfo as $extension => $values) {
++            if ($values['type'] !== $mimetype) {
++                continue;
++            }
++            if (!empty($values['defaulticon'])) {
++                return false;
++            }
++        }
++        return true;
++    }
++
++    /**
++     * Gets all unique file type icons from a specific path, not including
++     * sub-directories.
++     *
++     * Icon files such as pdf.png, pdf-24.png and pdf-36.png etc. are counted as
++     * the same icon type.
++     *
++     * The resultant array has both key and value set to the icon name prefix,
++     * such as 'pdf' => 'pdf'.
++     *
++     * @param string $path The path of the icon path
++     * @return array An array of unique file icons within the given path
++     */
++    public static function get_icons_from_path($path) {
++        $icons = array();
++        if ($handle = @opendir($path)) {
++            while (($file = readdir($handle)) !== false) {
++                $matches = array();
++                if (preg_match('~(.+?)(?:-24|-32|-48|-64|-72|-80|-96|-128|-256)?\.(?:gif|png)$~',
++                        $file, $matches)) {
++                    $key = $matches[1];
++                    $icons[$key] = $key;
++                }
++            }
++            closedir($handle);
++        }
++        ksort($icons);
++        return $icons;
++    }
++
++    /**
++     * Gets unique file type icons from pix/f folder.
++     *
++     * @return array An array of unique file type icons e.g. 'pdf' => 'pdf'
++     */
++    public static function get_file_icons() {
++        global $CFG;
++        $path = $CFG->dirroot . '/pix/f';
++        return self::get_icons_from_path($path);
++    }
++}
+diff --git a/admin/tool/filetypes/delete.php b/admin/tool/filetypes/delete.php
+new file mode 100644
+index 00000000000..8b73f2bceab
+--- /dev/null
++++ b/admin/tool/filetypes/delete.php
+@@ -0,0 +1,60 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Delete a file type with a confirmation box.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++require(__DIR__ . '/../../../config.php');
++require_once($CFG->libdir . '/adminlib.php');
++
++admin_externalpage_setup('tool_filetypes');
++
++$extension = required_param('extension', PARAM_ALPHANUMEXT);
++$redirecturl = new \moodle_url('/admin/tool/filetypes/index.php');
++
++if (optional_param('delete', 0, PARAM_INT)) {
++    require_sesskey();
++
++    // Delete the file type from the config.
++    core_filetypes::delete_type($extension);
++    redirect($redirecturl);
++}
++
++// Page settings.
++$title = get_string('deletefiletypes', 'tool_filetypes');
++
++$context = context_system::instance();
++$PAGE->set_url(new \moodle_url('/admin/tool/filetypes/delete.php', array('extension' => $extension)));
++$PAGE->navbar->add($title);
++$PAGE->set_context($context);
++$PAGE->set_pagelayout('admin');
++$PAGE->set_title($SITE->fullname. ': ' . $title);
++
++// Display the page.
++echo $OUTPUT->header();
++
++$message = get_string('delete_confirmation', 'tool_filetypes', $extension);
++$deleteurl = new \moodle_url('delete.php', array('extension' => $extension, 'delete' => 1));
++$yesbutton = new single_button($deleteurl, get_string('yes'));
++$nobutton = new single_button($redirecturl, get_string('no'), 'get');
++echo $OUTPUT->confirm($message, $yesbutton, $nobutton);
++
++echo $OUTPUT->footer();
+diff --git a/admin/tool/filetypes/edit.php b/admin/tool/filetypes/edit.php
+new file mode 100644
+index 00000000000..33d934bee1d
+--- /dev/null
++++ b/admin/tool/filetypes/edit.php
+@@ -0,0 +1,111 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Display the file type updating page.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++require(__DIR__ . '/../../../config.php');
++require_once($CFG->libdir . '/adminlib.php');
++require_once('edit_form.php');
++
++admin_externalpage_setup('tool_filetypes');
++
++$oldextension = optional_param('oldextension', '', PARAM_ALPHANUMEXT);
++$mform = new tool_filetypes_form('edit.php', array('oldextension' => $oldextension));
++$title = get_string('addfiletypes', 'tool_filetypes');
++
++if ($oldextension) {
++    // This is editing an existing filetype, load data to the form.
++    $mimetypes = get_mimetypes_array();
++    if (!array_key_exists($oldextension, $mimetypes)) {
++        throw new moodle_exception('error_notfound', 'tool_filetypes');
++    }
++    $typeinfo = $mimetypes[$oldextension];
++    $formdata = array(
++        'extension' => $oldextension,
++        'mimetype' => $typeinfo['type'],
++        'icon' => $typeinfo['icon'],
++        'oldextension' => $oldextension,
++        'description' => '',
++        'groups' => '',
++        'corestring' => '',
++        'defaulticon' => 0
++    );
++    if (!empty($typeinfo['customdescription'])) {
++        $formdata['description'] = $typeinfo['customdescription'];
++    }
++    if (!empty($typeinfo['groups'])) {
++        $formdata['groups'] = implode(', ', $typeinfo['groups']);
++    }
++    if (!empty($typeinfo['string'])) {
++        $formdata['corestring'] = $typeinfo['string'];
++    }
++    if (!empty($typeinfo['defaulticon'])) {
++        $formdata['defaulticon'] = 1;
++    }
++
++    $mform->set_data($formdata);
++    $title = get_string('editfiletypes', 'tool_filetypes');
++}
++
++$backurl = new \moodle_url('/admin/tool/filetypes/index.php');
++if ($mform->is_cancelled()) {
++    redirect($backurl);
++} else if ($data = $mform->get_data()) {
++    // Convert the groups value back into an array.
++    $data->groups = trim($data->groups);
++    if ($data->groups) {
++        $data->groups = preg_split('~,\s*~', $data->groups);
++    } else {
++        $data->groups = array();
++    }
++    if (empty($data->defaulticon)) {
++        $data->defaulticon = 0;
++    }
++    if (empty($data->corestring)) {
++        $data->corestring = '';
++    }
++    if (empty($data->description)) {
++        $data->description = '';
++    }
++    if ($data->oldextension) {
++        // Update an existing file type.
++        core_filetypes::update_type($data->oldextension, $data->extension, $data->mimetype, $data->icon,
++            $data->groups, $data->corestring, $data->description, (bool)$data->defaulticon);
++    } else {
++        // Add a new file type entry.
++        core_filetypes::add_type($data->extension, $data->mimetype, $data->icon,
++            $data->groups, $data->corestring, $data->description, (bool)$data->defaulticon);
++    }
++    redirect($backurl);
++}
++
++// Page settings.
++$context = context_system::instance();
++$PAGE->set_url(new \moodle_url('/admin/tool/filetypes/edit.php', array('oldextension' => $oldextension)));
++$PAGE->navbar->add($oldextension ? s($oldextension) : $title);
++$PAGE->set_context($context);
++$PAGE->set_pagelayout('admin');
++$PAGE->set_title($SITE->fullname. ': ' . $title);
++
++// Display the page.
++echo $OUTPUT->header();
++$mform->display();
++echo $OUTPUT->footer();
+diff --git a/admin/tool/filetypes/edit_form.php b/admin/tool/filetypes/edit_form.php
+new file mode 100644
+index 00000000000..5d16177212f
+--- /dev/null
++++ b/admin/tool/filetypes/edit_form.php
+@@ -0,0 +1,115 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Customised file types editing form.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++require_once($CFG->dirroot . '/lib/formslib.php');
++
++/**
++ * Form for adding a new custom file type or updating an existing custom file type.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class tool_filetypes_form extends moodleform {
++
++    public function definition() {
++        global $CFG;
++        $mform = $this->_form;
++        $oldextension = $this->_customdata['oldextension'];
++
++        $mform->addElement('text', 'extension', get_string('extension', 'tool_filetypes'));
++        $mform->setType('extension', PARAM_ALPHANUMEXT);
++        $mform->addRule('extension', null, 'required', null, 'client');
++        $mform->addHelpButton('extension', 'extension', 'tool_filetypes');
++
++        $mform->addElement('text', 'mimetype',  get_string('mimetype', 'tool_filetypes'));
++        $mform->setType('mimetype', PARAM_RAW);
++        $mform->addRule('mimetype', null, 'required', null, 'client');
++        $mform->addHelpButton('mimetype', 'mimetype', 'tool_filetypes');
++
++        $fileicons = \tool_filetypes\utils::get_file_icons();
++        $mform->addElement('select', 'icon',
++                get_string('icon', 'tool_filetypes'), $fileicons);
++        $mform->addHelpButton('icon', 'icon', 'tool_filetypes');
++
++        $mform->addElement('text', 'groups',  get_string('groups', 'tool_filetypes'));
++        $mform->setType('groups', PARAM_RAW);
++        $mform->addHelpButton('groups', 'groups', 'tool_filetypes');
++
++        $mform->addElement('select', 'descriptiontype', get_string('descriptiontype', 'tool_filetypes'),
++                array('' => get_string('descriptiontype_default', 'tool_filetypes'),
++                'custom' => get_string('descriptiontype_custom', 'tool_filetypes'),
++                'lang' => get_string('descriptiontype_lang', 'tool_filetypes')));
++
++        $mform->addElement('text', 'description',  get_string('description', 'tool_filetypes'));
++        $mform->setType('description', PARAM_TEXT);
++        $mform->addHelpButton('description', 'description', 'tool_filetypes');
++        $mform->disabledIf('description', 'descriptiontype', 'ne', 'custom');
++
++        $mform->addElement('text', 'corestring',  get_string('corestring', 'tool_filetypes'));
++        $mform->setType('corestring', PARAM_ALPHANUMEXT);
++        $mform->addHelpButton('corestring', 'corestring', 'tool_filetypes');
++        $mform->disabledIf('corestring', 'descriptiontype', 'ne', 'lang');
++
++        $mform->addElement('checkbox', 'defaulticon',  get_string('defaulticon', 'tool_filetypes'));
++        $mform->addHelpButton('defaulticon', 'defaulticon', 'tool_filetypes');
++
++        $mform->addElement('hidden', 'oldextension', $oldextension);
++        $mform->setType('oldextension', PARAM_RAW);
++        $this->add_action_buttons(true, get_string('savechanges'));
++    }
++
++    public function set_data($data) {
++        // Set up the description type.
++        if (!empty($data['corestring'])) {
++            $data['descriptiontype'] = 'lang';
++        } else if (!empty($data['description'])) {
++            $data['descriptiontype'] = 'custom';
++        } else {
++            $data['descriptiontype'] = '';
++        }
++
++        // Call parent.
++        parent::set_data($data);
++    }
++
++    public function validation($data, $files) {
++        $errors = parent::validation($data, $files);
++
++        // Check the extension isn't already in use.
++        $oldextension = $data['oldextension'];
++        $extension = trim($data['extension']);
++        if (\tool_filetypes\utils::is_extension_invalid($extension, $oldextension)) {
++            $errors['extension'] = get_string('error_extension', 'tool_filetypes', $extension);
++        }
++
++        // Check the 'default icon' setting doesn't conflict with an existing one.
++        if (!empty($data['defaulticon']) && !\tool_filetypes\utils::is_defaulticon_allowed(
++                $data['mimetype'], $oldextension)) {
++            $errors['defaulticon'] = get_string('error_defaulticon', 'tool_filetypes', $extension);
++        }
++
++        return $errors;
++    }
++}
+diff --git a/admin/tool/filetypes/index.php b/admin/tool/filetypes/index.php
+new file mode 100644
+index 00000000000..6ac20dcd682
+--- /dev/null
++++ b/admin/tool/filetypes/index.php
+@@ -0,0 +1,48 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Display the custom file type settings page.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++require(__DIR__ . '/../../../config.php');
++require_once($CFG->libdir . '/adminlib.php');
++
++admin_externalpage_setup('tool_filetypes');
++
++// Page settings.
++$title = get_string('pluginname', 'tool_filetypes');
++
++$context = context_system::instance();
++$PAGE->set_url(new \moodle_url('/admin/tool/filetypes/index.php'));
++$PAGE->set_context($context);
++$PAGE->set_pagelayout('admin');
++$PAGE->set_title($SITE->fullname. ': ' . $title);
++
++$renderer = $PAGE->get_renderer('tool_filetypes');
++
++// Is it restricted because set in config.php?
++$restricted = array_key_exists('customfiletypes', $CFG->config_php_settings);
++
++// Display the page.
++echo $renderer->header();
++echo $renderer->edit_table(get_mimetypes_array(), core_filetypes::get_deleted_types(),
++        $restricted);
++echo $renderer->footer();
+diff --git a/admin/tool/filetypes/lang/en/tool_filetypes.php b/admin/tool/filetypes/lang/en/tool_filetypes.php
+new file mode 100644
+index 00000000000..2640b44f7d3
+--- /dev/null
++++ b/admin/tool/filetypes/lang/en/tool_filetypes.php
+@@ -0,0 +1,69 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Strings for custom file types.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++$string['addfiletypes'] = 'Add a new file type';
++$string['corestring'] = 'Alternative language string';
++$string['corestring_help'] = 'This setting can be used to select a different language string from the core mimetypes.php language file. Generally it should be left blank. For custom types, use the description field.';
++$string['defaulticon'] = 'Default icon for MIME type';
++$string['defaulticon_help'] = 'If there are multiple file extensions with the same MIME type, select this option for one of the extensions so that its icon will be used when determining an icon from the MIME type.';
++$string['delete_confirmation'] = 'Are you absolutely sure you want to remove <strong>.{$a}</strong>?';
++$string['deletea'] = 'Delete {$a}';
++$string['deletefiletypes'] = 'Delete a file type';
++$string['description'] = 'Custom description';
++$string['description_help'] = 'Simple file type description, e.g. &lsquo;Kindle ebook&rsquo;. If your site supports multiple languages and uses the multi-language filter, you can enter multi-language tags in this field to supply a description in different languages.';
++$string['descriptiontype'] = 'Description type';
++$string['descriptiontype_help'] = 'There are three possible ways to specify a description.
++
++* Default behaviour uses the MIME type. If there is a language string in mimetypes.php corresponding to that MIME type, it will be used; otherwise the MIME type itself will be displayed to users.
++* You can specify a custom description on this form.
++* You can specify the name of a languge string in mimetypes.php to use instead of the MIME type.';
++$string['descriptiontype_default'] = 'Default (MIME type or corresponding language string if available)';
++$string['descriptiontype_custom'] = 'Custom description specified in this form';
++$string['descriptiontype_lang'] = 'Alternative language string (from mimetypes.php)';
++$string['displaydescription'] = 'Description';
++$string['editfiletypes'] = 'Edit an existing file type';
++$string['emptylist'] = 'There are no file types defined.';
++$string['error_addentry'] = 'The file type extension, description,  MIME type, and icon must not contain line feed and semicolon characters.';
++$string['error_defaulticon'] = 'Another file extension with the same MIME type is already marked as the default icon.';
++$string['error_extension'] = 'The file type extension <strong>{$a}</strong> already exists or is invalid. File extensions must be unique and must not contain special characters.';
++$string['error_notfound'] = 'The file type with extension {$a} cannot be found.';
++$string['extension'] = 'Extension';
++$string['extension_help'] = 'File name extension without the dot, e.g. &lsquo;mobi&rsquo;';
++$string['groups'] = 'Type groups';
++$string['groups_help'] = 'Optional list of file type groups that this type belongs to. These are generic categories such as &lsquo;document&rsquo; and &lsquo;image&rsquo;.';
++$string['icon'] = 'File icon';
++$string['icon_help'] = 'Icon filename.
++
++The list of icons is taken from the /pix/f directory inside your Moodle installation. You can add custom icons to this folder if required.';
++$string['mimetype'] = 'MIME type';
++$string['mimetype_help'] = 'MIME type associated with this file type, e.g. &lsquo;application/x-mobipocket-ebook&rsquo;';
++$string['pluginname'] = 'File types';
++$string['revert'] = 'Restore {$a} to Moodle defaults';
++$string['revert_confirmation'] = 'Are you sure you want to restore <strong>.{$a}</strong> to Moodle defaults, discarding your changes?';
++$string['revertfiletype'] = 'Restore a file type';
++$string['source'] = 'Type';
++$string['source_custom'] = 'Custom';
++$string['source_deleted'] = 'Deleted';
++$string['source_modified'] = 'Modified';
++$string['source_standard'] = 'Standard';
+diff --git a/admin/tool/filetypes/renderer.php b/admin/tool/filetypes/renderer.php
+new file mode 100644
+index 00000000000..dee5281585f
+--- /dev/null
++++ b/admin/tool/filetypes/renderer.php
+@@ -0,0 +1,179 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Renderer.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++defined('MOODLE_INTERNAL') || die();
++
++/**
++ * Class containing the renderer functions for displaying file types.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class tool_filetypes_renderer extends plugin_renderer_base {
++
++    /**
++     * Renderer for displaying the file type edit table.
++     *
++     * @param array $filetypes An array of file type objects (from get_mimetypes_array)
++     * @param array $deleted An array of deleted file types
++     * @param bool $restricted If true, cannot be edited because set in config.php.
++     * @return string HTML code
++     */
++    public function edit_table(array $filetypes, array $deleted, $restricted) {
++        // Get combined array of all types, with deleted marker.
++        $combined = array_merge($filetypes, $deleted);
++        foreach ($deleted as $ext => $value) {
++            $combined[$ext]['deleted'] = true;
++        }
++        ksort($combined);
++
++        $out = $this->heading(get_string('pluginname', 'tool_filetypes'));
++        if ($restricted) {
++            $out .= html_writer::div(
++                    html_writer::div(get_string('configoverride', 'admin'), 'form-overridden'),
++                    '', array('id' => 'adminsettings'));
++        }
++        if (count($combined) > 1) {
++            // Display the file type table if any file types exist (other than 'xxx').
++            $table = new html_table();
++            $headings = new html_table_row();
++            $headings->cells = array();
++            $headings->cells[] = new html_table_cell(get_string('extension', 'tool_filetypes'));
++            if (!$restricted) {
++                $headings->cells[] =
++                        new html_table_cell(html_writer::span(get_string('edit'), 'accesshide'));
++            }
++            $headings->cells[] = new html_table_cell(get_string('source', 'tool_filetypes'));
++            $headings->cells[] = new html_table_cell(get_string('mimetype', 'tool_filetypes'));
++            $headings->cells[] = new html_table_cell(get_string('groups', 'tool_filetypes'));
++            $headings->cells[] = new html_table_cell(get_string('displaydescription', 'tool_filetypes'));
++            foreach ($headings->cells as $cell) {
++                $cell->header = true;
++            }
++            $table->data = array($headings);
++            foreach ($combined as $extension => $filetype) {
++                if ($extension === 'xxx') {
++                    continue;
++                }
++                $row = new html_table_row();
++                $row->cells = array();
++
++                // First cell has icon and extension.
++                $icon = $this->pix_icon('f/' . $filetype['icon'], '');
++                $row->cells[] = new html_table_cell($icon . ' ' . html_writer::span(s($extension)));
++
++                // Reset URL and button if needed.
++                $reverturl = new \moodle_url('/admin/tool/filetypes/revert.php',
++                        array('extension' => $extension));
++                $revertbutton = html_writer::link($reverturl, $this->pix_icon('t/restore',
++                        get_string('revert', 'tool_filetypes', s($extension))));
++                if ($restricted) {
++                    $revertbutton = '';
++                }
++
++                // Rest is different for deleted items.
++                if (!empty($filetype['deleted'])) {
++                    // Show deleted standard types differently.
++                    if (!$restricted) {
++                        $row->cells[] = new html_table_cell('');
++                    }
++                    $source = new html_table_cell(get_string('source_deleted', 'tool_filetypes') .
++                            ' ' . $revertbutton);
++                    $source->attributes = array('class' => 'nonstandard');
++                    $row->cells[] = $source;
++
++                    // Other cells are blank.
++                    $row->cells[] = new html_table_cell('');
++                    $row->cells[] = new html_table_cell('');
++                    $row->cells[] = new html_table_cell('');
++                    $row->attributes = array('class' => 'deleted');
++                } else {
++                    if (!$restricted) {
++                        // Edit icons. For accessibility, the name of these links should
++                        // be different for each row, so we have to include the extension.
++                        $editurl = new \moodle_url('/admin/tool/filetypes/edit.php',
++                                array('oldextension' => $extension));
++                        $editbutton = html_writer::link($editurl, $this->pix_icon('t/edit',
++                                get_string('edita', '', s($extension))));
++                        $deleteurl = new \moodle_url('/admin/tool/filetypes/delete.php',
++                                array('extension' => $extension));
++                        $deletebutton = html_writer::link($deleteurl, $this->pix_icon('t/delete',
++                                get_string('deletea', 'tool_filetypes', s($extension))));
++                        $row->cells[] = new html_table_cell($editbutton . '&nbsp;' . $deletebutton);
++                    }
++
++                    // Source.
++                    $sourcestring = 'source_';
++                    if (!empty($filetype['custom'])) {
++                        $sourcestring .= 'custom';
++                    } else if (!empty($filetype['modified'])) {
++                        $sourcestring .= 'modified';
++                    } else {
++                        $sourcestring .= 'standard';
++                    }
++                    $source = new html_table_cell(get_string($sourcestring, 'tool_filetypes') .
++                            ($sourcestring === 'source_modified' ? ' ' . $revertbutton : ''));
++                    if ($sourcestring !== 'source_standard') {
++                        $source->attributes = array('class' => 'nonstandard');
++                    }
++                    $row->cells[] = $source;
++
++                    // MIME type.
++                    $mimetype = html_writer::div(s($filetype['type']), 'mimetype');
++                    if (!empty($filetype['defaulticon'])) {
++                        // Include the 'default for MIME type' info in the MIME type cell.
++                        $mimetype .= html_writer::div(html_writer::tag('i',
++                                get_string('defaulticon', 'tool_filetypes')));
++                    }
++                    $row->cells[] = new html_table_cell($mimetype);
++
++                    // Groups.
++                    $groups = !empty($filetype['groups']) ? implode(', ', $filetype['groups']) : '';
++                    $row->cells[] = new html_table_cell(s($groups));
++
++                    // Description.
++                    $description = get_mimetype_description(array('filename' => 'a.' . $extension));
++                    // Don't show the description if it's just a copy of the MIME type,
++                    // it makes the table ugly with the long duplicate text; leave blank instead.
++                    if ($description === $filetype['type']) {
++                        $description = '';
++                    }
++                    $row->cells[] = new html_table_cell($description);
++                }
++
++                $table->data[] = $row;
++            }
++            $out .= html_writer::table($table);
++        } else {
++            $out .= html_writer::tag('div', get_string('emptylist', 'tool_filetypes'));
++        }
++        // Displaying the 'Add' button.
++        if (!$restricted) {
++            $out .= $this->single_button(new moodle_url('/admin/tool/filetypes/edit.php',
++                    array('name' => 'add')), get_string('addfiletypes', 'tool_filetypes'), 'get');
++        }
++        return $out;
++    }
++}
+diff --git a/admin/tool/filetypes/revert.php b/admin/tool/filetypes/revert.php
+new file mode 100644
+index 00000000000..549f460371d
+--- /dev/null
++++ b/admin/tool/filetypes/revert.php
+@@ -0,0 +1,60 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Resets a file type to the default Moodle values.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++require(__DIR__ . '/../../../config.php');
++require_once($CFG->libdir . '/adminlib.php');
++
++admin_externalpage_setup('tool_filetypes');
++
++$extension = required_param('extension', PARAM_RAW);
++$redirecturl = new \moodle_url('/admin/tool/filetypes/index.php');
++
++if (optional_param('revert', 0, PARAM_INT)) {
++    require_sesskey();
++
++    // Reset the file type in config.
++    core_filetypes::revert_type_to_default($extension);
++    redirect($redirecturl);
++}
++
++// Page settings.
++$title = get_string('revertfiletype', 'tool_filetypes');
++
++$context = context_system::instance();
++$PAGE->set_url(new \moodle_url('/admin/tool/filetypes/revert.php', array('extension' => $extension)));
++$PAGE->navbar->add($title);
++$PAGE->set_context($context);
++$PAGE->set_pagelayout('admin');
++$PAGE->set_title($SITE->fullname. ': ' . $title);
++
++// Display the page.
++echo $OUTPUT->header();
++
++$message = get_string('revert_confirmation', 'tool_filetypes', $extension);
++$reverturl = new \moodle_url('revert.php', array('extension' => $extension, 'revert' => 1));
++$yesbutton = new single_button($reverturl, get_string('yes'));
++$nobutton = new single_button($redirecturl, get_string('no'), 'get');
++echo $OUTPUT->confirm($message, $yesbutton, $nobutton);
++
++echo $OUTPUT->footer();
+diff --git a/admin/tool/filetypes/settings.php b/admin/tool/filetypes/settings.php
+new file mode 100644
+index 00000000000..2028b0dd1e7
+--- /dev/null
++++ b/admin/tool/filetypes/settings.php
+@@ -0,0 +1,31 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Configure the setting page of the custom file type as an external page.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++defined('MOODLE_INTERNAL') || die;
++
++if ($hassiteconfig) {
++    $ADMIN->add('server', new admin_externalpage('tool_filetypes',
++            new lang_string('pluginname', 'tool_filetypes'),
++            $CFG->wwwroot . '/admin/tool/filetypes/index.php'));
++}
+diff --git a/admin/tool/filetypes/styles.css b/admin/tool/filetypes/styles.css
+new file mode 100644
+index 00000000000..ed2353ab9fd
+--- /dev/null
++++ b/admin/tool/filetypes/styles.css
+@@ -0,0 +1,32 @@
++/**
++ * Styles for admin tool page.
++ */
++
++/* Fix bad default table wrap (caused by the long mimetype field). */
++.path-admin-tool-filetypes .generaltable .c0,
++.path-admin-tool-filetypes .generaltable .c1,
++.path-admin-tool-filetypes .generaltable .c2,
++.path-admin-tool-filetypes .generaltable th {
++    white-space: nowrap;
++}
++
++/* Formatting for deleted lines. */
++.path-admin-tool-filetypes .generaltable .deleted .c0 img {
++    opacity: 0.2;
++}
++
++.path-admin-tool-filetypes .generaltable .deleted .c0 span {
++    text-decoration: line-through;
++}
++
++/* Custom types show bold */
++.path-admin-tool-filetypes .generaltable .nonstandard {
++    font-weight: bold;
++}
++
++/* Spacing around the 'Defined in config.php' stripe */
++.path-admin-tool-filetypes .form-overridden {
++    display: inline-block;
++    margin-bottom: 1em;
++    padding: 4px 6px;
++}
+diff --git a/admin/tool/filetypes/tests/behat/add_filetypes.feature b/admin/tool/filetypes/tests/behat/add_filetypes.feature
+new file mode 100644
+index 00000000000..18d043e91c2
+--- /dev/null
++++ b/admin/tool/filetypes/tests/behat/add_filetypes.feature
+@@ -0,0 +1,107 @@
++@tool @tool_filetypes
++Feature: Add customised file types
++  In order to support a file mime type which doesn't exist in Moodle
++  As an administrator
++  I need to add a new customised file type
++
++  Scenario: Add a new file type
++    Given I log in as "admin"
++    And I navigate to "File types" node in "Site administration > Server"
++    And I press "Add"
++    # Try setting all the form fields, not just the optional ones.
++    And I set the following fields to these values:
++      | Extension                  | frog                                      |
++      | MIME type                  | application/x-frog                        |
++      | File icon                  | archive                                   |
++      | Type groups                | document                                  |
++      | Description type           | Custom description specified in this form |
++      | Custom description         | Froggy file                               |
++      | Default icon for MIME type | 1                                         |
++    When I press "Save changes"
++    Then I should see "Froggy file" in the "application/x-frog" "table_row"
++    And I should see "document" in the "application/x-frog" "table_row"
++    And I should see "frog" in the "application/x-frog" "table_row"
++    And "//img[contains(@src, 'archive')]" "xpath_element" should exist in the "application/x-frog" "table_row"
++
++  Scenario: Update an existing file type
++    Given I log in as "admin"
++    And I navigate to "File types" node in "Site administration > Server"
++    When I click on "Edit 7z" "link"
++    And I set the following fields to these values:
++      | Extension | doc |
++    And I press "Save changes"
++    Then I should see "File extensions must be unique"
++    And I set the following fields to these values:
++      | Extension | frog |
++    And I press "Save changes"
++    And I should see "frog" in the "application/x-7z-compressed" "table_row"
++
++  Scenario: Delete an existing file type
++    Given I log in as "admin"
++    And I navigate to "File types" node in "Site administration > Server"
++    When I click on "Delete 7z" "link"
++    Then I should see "Are you absolutely sure you want to remove .7z?"
++    And I press "Yes"
++    And I should see "Deleted" in the "7z" "table_row"
++
++  Scenario: Delete a custom file type
++    Given I log in as "admin"
++    And I navigate to "File types" node in "Site administration > Server"
++    And I press "Add"
++    And I set the following fields to these values:
++      | Extension                  | frog                                      |
++      | MIME type                  | application/x-frog                        |
++    And I press "Save changes"
++    When I click on "Delete frog" "link"
++    And I press "Yes"
++    Then I should not see "frog"
++
++  Scenario: Revert changes to deleted file type
++    Given I log in as "admin"
++    And I navigate to "File types" node in "Site administration > Server"
++    When I click on "Delete 7z" "link"
++    And I press "Yes"
++    And I follow "Restore 7z to Moodle defaults"
++    And I press "Yes"
++    Then I should not see "Deleted" in the "7z" "table_row"
++
++  Scenario: Revert changes to updated file type
++    Given I log in as "admin"
++    And I navigate to "File types" node in "Site administration > Server"
++    And I click on "Edit 7z" "link"
++    And I set the following fields to these values:
++      | File icon | document |
++    And I press "Save changes"
++    When I follow "Restore 7z to Moodle defaults"
++    And I press "Yes"
++    Then "//img[contains(@src, 'archive')]" "xpath_element" should exist in the "7z" "table_row"
++
++  @javascript
++  Scenario: Create a resource activity which contains a customised file type
++    Given the following "courses" exist:
++      | fullname | shortname |
++      | Course 1 | C1        |
++    And I log in as "admin"
++    And I navigate to "File types" node in "Site administration > Server"
++    And I press "Add"
++    And I set the following fields to these values:
++      | Extension          | frog                                      |
++      | MIME type          | application/x-frog                        |
++      | File icon          | archive                                   |
++      | Description type   | Custom description specified in this form |
++      | Custom description | Froggy file                               |
++    And I press "Save changes"
++    # Create a resource activity and add it to a course
++    And I am on homepage
++    And I follow "Course 1"
++    And I turn editing mode on
++    When I add a "File" to section "1"
++    And I set the following fields to these values:
++      | Name        | An example of customised file type |
++      | Description | File description                   |
++    And I upload "admin/tool/filetypes/tests/fixtures/test.frog" file to "Select files" filemanager
++    And I expand all fieldsets
++    And I set the field "Show type" to "1"
++    And I press "Save and return to course"
++    Then I should see "Froggy file"
++    And the "src" attribute of ".modtype_resource a img" "css_element" should contain "archive"
+diff --git a/admin/tool/filetypes/tests/fixtures/frog-24.png b/admin/tool/filetypes/tests/fixtures/frog-24.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..91a99b94e23a00cc8133f22e3fe2a0b48a015808
+GIT binary patch
+literal 67
+zcmeAS@N?(olHy`uVBq!ia0vp^j3CUx1|;Q0k8}blE>9Q7kcv6UAQ@H$MqV!6EkIEQ
+MPgg&ebxsLQ07X&@0{{R3
+
+literal 0
+HcmV?d00001
+
+diff --git a/admin/tool/filetypes/tests/fixtures/frog-48.png b/admin/tool/filetypes/tests/fixtures/frog-48.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..91a99b94e23a00cc8133f22e3fe2a0b48a015808
+GIT binary patch
+literal 67
+zcmeAS@N?(olHy`uVBq!ia0vp^j3CUx1|;Q0k8}blE>9Q7kcv6UAQ@H$MqV!6EkIEQ
+MPgg&ebxsLQ07X&@0{{R3
+
+literal 0
+HcmV?d00001
+
+diff --git a/admin/tool/filetypes/tests/fixtures/test.frog b/admin/tool/filetypes/tests/fixtures/test.frog
+new file mode 100644
+index 00000000000..f9819bb6649
+--- /dev/null
++++ b/admin/tool/filetypes/tests/fixtures/test.frog
+@@ -0,0 +1 @@
++This is not a real file format.
+\ No newline at end of file
+diff --git a/admin/tool/filetypes/tests/fixtures/zombie.gif b/admin/tool/filetypes/tests/fixtures/zombie.gif
+new file mode 100644
+index 0000000000000000000000000000000000000000..9884f476b9c7cec495c94005574d7eb7a39475fa
+GIT binary patch
+literal 43
+ucmZ?wbhEHbWMp7uXkcXc|NlP&1B2pE7Dg_hfDVuiq!<|(n3#MR8LR=x#0L!k
+
+literal 0
+HcmV?d00001
+
+diff --git a/admin/tool/filetypes/tests/tool_filetypes_test.php b/admin/tool/filetypes/tests/tool_filetypes_test.php
+new file mode 100644
+index 00000000000..6d536835d4e
+--- /dev/null
++++ b/admin/tool/filetypes/tests/tool_filetypes_test.php
+@@ -0,0 +1,86 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Unit tests for the custom file types.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++defined('MOODLE_INTERNAL') || die();
++
++use tool_filetypes\utils;
++
++/**
++ * Unit tests for the custom file types.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++class tool_filetypes_test extends advanced_testcase {
++    /**
++     * Tests is_extension_invalid() function.
++     */
++    public function test_is_extension_invalid() {
++        // The pdf file extension already exists in default moodle minetypes.
++        $this->assertTrue(utils::is_extension_invalid('pdf'));
++
++        // The frog extension does not.
++        $this->assertFalse(utils::is_extension_invalid('frog'));
++
++        // However you could use the pdf extension when editing the pdf extension.
++        $this->assertFalse(utils::is_extension_invalid('pdf', 'pdf'));
++
++        // Blank extension is invalid.
++        $this->assertTrue(utils::is_extension_invalid(''));
++
++        // Extensions with dot are invalid.
++        $this->assertTrue(utils::is_extension_invalid('.frog'));
++    }
++
++    /**
++     * Tests is_defaulticon_allowed() function.
++     */
++    public function test_is_defaulticon_allowed() {
++        // You ARE allowed to set a default icon for a MIME type that hasn't
++        // been used yet.
++        $this->assertTrue(utils::is_defaulticon_allowed('application/x-frog'));
++
++        // You AREN'T allowed to set default icon for text/plain as there is
++        // already a type that has that set.
++        $this->assertFalse(utils::is_defaulticon_allowed('text/plain'));
++
++        // But you ARE still allowed to set it when actually editing txt, which
++        // is the default.
++        $this->assertTrue(utils::is_defaulticon_allowed('text/plain', 'txt'));
++    }
++
++    /**
++     * Tests get_icons_from_path() function.
++     */
++    public function test_get_icons_from_path() {
++        // Get icons from the fixtures folder.
++        $icons = utils::get_icons_from_path(__DIR__ . '/fixtures');
++
++        // The icons are returned alphabetically and with keys === values.
++        // For the icon with numbers after the name, only the base name is
++        // returned and only one of it.
++        $this->assertEquals(array('frog' => 'frog', 'zombie' => 'zombie'), $icons);
++    }
++}
+diff --git a/admin/tool/filetypes/version.php b/admin/tool/filetypes/version.php
+new file mode 100644
+index 00000000000..c9a67d5d7be
+--- /dev/null
++++ b/admin/tool/filetypes/version.php
+@@ -0,0 +1,29 @@
++<?php
++// This file is part of Moodle - http://moodle.org/
++//
++// Moodle is free software: you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation, either version 3 of the License, or
++// (at your option) any later version.
++//
++// Moodle is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
++
++/**
++ * Version details.
++ *
++ * @package tool_filetypes
++ * @copyright 2014 The Open University
++ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
++ */
++
++defined('MOODLE_INTERNAL') || die();
++
++$plugin->version = 2014051220;
++$plugin->requires = 2014051220;
++$plugin->component = 'tool_filetypes';
+-- 
+2.17.1
+
+
+From 1c75e2dd079b2a5007aa11e84197472a842dacc4 Mon Sep 17 00:00:00 2001
+From: Frederic Massart <fred@moodle.com>
+Date: Tue, 23 Dec 2014 12:04:02 +0800
+Subject: [PATCH 15/15] MDL-42616 core: Adding tool_filetypes to the standard
+ plugins list
+
+---
+ lib/classes/plugin_manager.php | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/classes/plugin_manager.php b/lib/classes/plugin_manager.php
+index dc3c854ffa1..8b0a8e114de 100644
+--- a/lib/classes/plugin_manager.php
++++ b/lib/classes/plugin_manager.php
+@@ -1135,7 +1135,7 @@ class core_plugin_manager {
+ 
+             'tool' => array(
+                 'assignmentupgrade', 'availabilityconditions', 'behat', 'capability', 'customlang',
+-                'dbtransfer', 'generator', 'health', 'innodb', 'installaddon',
++                'dbtransfer', 'filetypes', 'generator', 'health', 'innodb', 'installaddon',
+                 'langimport', 'log', 'multilangupgrade', 'phpunit', 'profiling',
+                 'replace', 'spamcleaner', 'task', 'timezoneimport',
+                 'unittest', 'uploadcourse', 'uploaduser', 'unsuproles', 'xmldb'
 -- 
 2.17.1
 
