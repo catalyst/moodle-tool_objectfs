@@ -570,16 +570,20 @@ class client extends object_client_base {
         if ($expires == 0) {
             $expires = $now + $this->expirationtime;
         }
-        // If it's already expired set it to now.
+        // If it's already expired set it to 1 minute.
         if ($expires < $now) {
-            $expires = $now;
+            $expires = $now + MINSECS;
+        }
+        // The expiration date of a signature version 4 presigned URL must be
+        // less than one week. So if it's greater than a week set it to 1 week.
+        // Use MINSECS as a healthy margin of error.
+        if ($expires - $now > WEEKSECS - MINSECS) {
+            $expires = $now + WEEKSECS - MINSECS;
         }
         if (is_null($expires) || false === $expires) {
             // Invalid date format use default instead.
             $expires = $now + $this->expirationtime;
         }
-        // We make sure we have at least 60s before the url expires.
-        $expires += MINSECS;
         return $expires;
     }
 
@@ -687,7 +691,11 @@ class client extends object_client_base {
      * @throws \coding_exception
      */
     public function curl_range_request_to_presigned_url($contenthash, $ranges, $headers) {
-        $url = $this->generate_presigned_url_s3($contenthash, $headers);
+        try {
+            $url = $this->generate_presigned_url_s3($contenthash, $headers);
+        } catch (\Exception $e) {
+            throw new \coding_exception('Failed to generate pre-signed url: ' . $e->getMessage());
+        }
         $headers = array(
             'HTTP/1.1 206 Partial Content',
             'Content-Length: '. $ranges->length,
