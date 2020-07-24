@@ -57,14 +57,9 @@ matrix:
       env: DB=pgsql  MOODLE_BRANCH=master
 
 before_install:
-  - export MOODLE_VERSION=$(echo "$MOODLE_BRANCH" | cut -d'_' -f 2)
   - phpenv config-rm xdebug.ini
   - cd ../..
-  - git clone --mirror 'https://github.com/moodlehq/moodle-behat-extension.git' '/home/travis/.composer/cache/vcs/git-github.com-moodlehq-moodle-behat-extension.git/' || true
-  - if [ "$MOODLE_VERSION" = 36 ] || [ "$MOODLE_VERSION" -le 34 ]; then NVMVERSION=8.9; else NVMVERSION=14.0.0; fi
-  - nvm install $NVMVERSION;
-  - nvm use $NVMVERSION;
-  - composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^2;
+  - composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3;
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
