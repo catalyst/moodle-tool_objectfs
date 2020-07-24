@@ -41,7 +41,7 @@ class tool_objectfs_privacy_testcase extends advanced_testcase {
      * Check the privacy provider implements null_provider.
      */
     public function test_provider_implements_null_provider() {
-        // Privacy classes may not exist in older Moodles/Totara
+        // Privacy classes may not exist in older Moodles/Totara.
         if (class_exists('\core_privacy\local\metadata\null_provider')) {
             $provider = new provider();
             $this->assertInstanceOf('\core_privacy\local\metadata\null_provider', $provider);

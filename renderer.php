@@ -194,10 +194,9 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @throws coding_exception
      */
     private function get_output($fs, $url, $file, $identifier) {
-        global $OUTPUT;
-        $redirect = $OUTPUT->pix_icon('i/grade_correct', '', 'moodle', ['class' => 'icon']) . 'Redirecting to external storage: ';
+        $redirect = $this->output->pix_icon('i/grade_correct', '', 'moodle', ['class' => 'icon']) . 'Redirecting to external storage: ';
         if (!$fs->presigned_url_should_redirect($file->get_contenthash())) {
-            $redirect = $OUTPUT->pix_icon('i/grade_incorrect', '', 'moodle', ['class' => 'icon']) . 'Not redirecting: ';
+            $redirect = $this->output->pix_icon('i/grade_incorrect', '', 'moodle', ['class' => 'icon']) . 'Not redirecting: ';
         }
         $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs') . ': '.
             '<a href="'. $url .'">'. $file->get_filename() . '</a>';
@@ -218,7 +217,6 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @throws /moodle_exception
      */
     public function object_status_history_page_header($reports, $reportid) {
-        global $OUTPUT;
         $output = '';
 
         $baseurl = '/admin/tool/objectfs/object_status.php';
@@ -256,17 +254,17 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         foreach ($reports as $id => $timestamp) {
             $userdates[$id] = userdate($timestamp, get_string('strftimedaydatetime'));
         }
-        $output .= $OUTPUT->box_start();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $oldestid), '<<', 'get', $prevdisabled);
-        $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $previd), '<', 'get', $prevdisabled);
-        $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_select(new \moodle_url($baseurl), 'reportid', $userdates, $reportid, false);
-        $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $nextid), '>', 'get', $nextdisabled);
-        $output .= $OUTPUT->spacer();
-        $output .= $OUTPUT->single_button(new \moodle_url($baseurl, $latestid), '>>', 'get', $nextdisabled);
-        $output .= $OUTPUT->box_end();
+        $output .= $this->output->box_start();
+        $output .= $this->output->single_button(new \moodle_url($baseurl, $oldestid), '<<', 'get', $prevdisabled);
+        $output .= $this->output->spacer();
+        $output .= $this->output->single_button(new \moodle_url($baseurl, $previd), '<', 'get', $prevdisabled);
+        $output .= $this->output->spacer();
+        $output .= $this->output->single_select(new \moodle_url($baseurl), 'reportid', $userdates, $reportid, false);
+        $output .= $this->output->spacer();
+        $output .= $this->output->single_button(new \moodle_url($baseurl, $nextid), '>', 'get', $nextdisabled);
+        $output .= $this->output->spacer();
+        $output .= $this->output->single_button(new \moodle_url($baseurl, $latestid), '>>', 'get', $nextdisabled);
+        $output .= $this->output->box_end();
 
         return $output;
     }
