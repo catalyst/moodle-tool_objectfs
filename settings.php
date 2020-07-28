@@ -159,7 +159,8 @@ if ($ADMIN->fulltree) {
             } else if ($connstatus) {
                 // Range request tests can only work if there is a valid connection.
                 if ($client->test_range_request(new $config->filesystem())) {
-                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeok', 'tool_objectfs'), 'notifysuccess');
+                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeok', 'tool_objectfs'),
+                        'notifysuccess');
                 } else {
                     $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeerror', 'tool_objectfs'));
                 }
