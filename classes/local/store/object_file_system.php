@@ -432,7 +432,8 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         if ($this->externalclient->support_presigned_urls() &&
-                $ranges = $this->get_valid_http_ranges($file->get_filesize())) {
+                $ranges = $this->get_valid_http_ranges($file->get_filesize()) &&
+                $this->is_file_readable_externally_by_hash($contenthash)) {
 
             return $this->externalclient->proxy_range_request($file, $ranges);
         }
