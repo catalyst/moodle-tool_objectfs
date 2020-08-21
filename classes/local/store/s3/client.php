@@ -297,7 +297,7 @@ class client extends object_client_base {
     protected function get_exception_details($exception) {
         $message = $exception->getMessage();
 
-        if (get_class($exception) !== '\Aws\S3\Exception\S3Exception') {
+        if (get_class($exception) !== 'Aws\S3\Exception\S3Exception') {
             return "Not a S3 exception : $message";
         }
 
@@ -738,5 +738,34 @@ class client extends object_client_base {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if the file is readable externally by contenthash.
+     * Returns true if the file is readable.
+     * Returns false if the file is missing externally.
+     * Throws an exceptions if there is any other issue with external storage.
+     *
+     * @param string $contenthash File content hash.
+     * @return bool
+     * @throws \coding_exception
+     */
+    public function is_file_readable_by_hash($contenthash) {
+        try {
+            $key = $this->get_filepath_from_hash($contenthash);
+            $this->client->headObject(array('Bucket' => $this->bucket, 'Key' => $key));
+        } catch (\Exception $e) {
+            $message = $this->get_exception_details($e);
+            if (strpos($message, 'ERROR CODE: NotFound') !== false) {
+                // The file is simply missing externally.
+                return false;
+            } else {
+                // Something is going wrong.
+                // Throw an exception here as we don't want to proceed.
+                throw new \coding_exception($message);
+            }
+        }
+        // The file is readable externally.
+        return true;
     }
 }

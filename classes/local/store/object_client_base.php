@@ -161,4 +161,21 @@ abstract class object_client_base implements object_client {
     public function test_permissions($testdelete) {
         return (object)['success' => false, 'details' => ''];
     }
+
+    /**
+     * Checks if the file is readable externally by contenthash.
+     * Returns true if the file is readable.
+     * Returns false if the file is missing externally.
+     * Throws an exceptions if there is any other issue with external storage.
+     * Base method uses basic is_readable() function, but should be overridden
+     * in client class to figure out why exactly the file is not readable.
+     *
+     * @param string $contenthash File content hash.
+     * @return bool
+     * @throws \coding_exception
+     */
+    public function is_file_readable_by_hash($contenthash) {
+        $path = $this->get_fullpath_from_hash($contenthash);
+        return is_readable($path);
+    }
 }
