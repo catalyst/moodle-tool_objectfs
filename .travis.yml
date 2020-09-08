@@ -8,10 +8,13 @@ cache:
     - $HOME/.composer/cache
     - $HOME/.npm
 
-dist: trusty
+dist: xenial
+
+services:
+  - mysql
 
 addons:
-  postgresql: "9.5"
+  postgresql: "9.6"
 
 matrix:
   include:

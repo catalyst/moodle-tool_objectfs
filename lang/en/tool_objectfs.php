@@ -50,6 +50,7 @@ $string['object_status:runningsize'] = 'Running total';
 $string['page:missingfiles'] = 'Missing from filedir and external storage files';
 
 $string['filename:missingfiles'] = 'missingfiles';
+$string['fixturefilemissing'] = 'The fixture file is missing';
 
 $string['object_status:location:error'] = 'Missing from filedir and external storage (<a href="/admin/tool/objectfs/missing_files.php">view files</a>)';
 $string['object_status:location:duplicated'] = 'Duplicated in filedir and external storage';
@@ -82,6 +83,7 @@ $string['object_status:filedir:update'] = 'Update stats';
 $string['object_status:last_run'] = 'This report was generated on {$a}';
 $string['object_status:never_run'] = 'The task to generate this report has not been run.';
 
+$string['rangerequestfailed'] = '<strong>URL</strong>: {$a->url}<br><strong>HTTP code</strong>: {$a->httpcode}<br><strong>Details</strong>: {$a->details}';
 $string['settings'] = 'Settings';
 $string['settings:enabletasks'] = 'Enable transfer tasks';
 $string['settings:enabletasks_help'] = 'Enable or disable the object file system tasks which move files between the filedir and external object storage.';
@@ -183,7 +185,7 @@ $string['settings:presignedurl:proxyrangerequests'] = 'Proxy range requests';
 $string['settings:presignedurl:proxyrangerequests_help'] = 'Pre-Signed URLs do not need to be enabled. S3 signing method will be used for this feature.';
 $string['settings:presignedurl:xsendfilefile'] = 'Backport MDL-68342 to get benefits of this setting.';
 $string['settings:presignedurl:testrangeok'] = 'Successfully tested range request.';
-$string['settings:presignedurl:testrangeerror'] = 'Test range request failed.';
+$string['settings:presignedurl:testrangeerror'] = 'Test range request failed';
 
 $string['settings:presignedurl:enablepresigneds3urls'] = 'S3 Pre-Signed URLs';
 $string['settings:presignedurl:enablepresigneds3urls_help'] = 'Enable Pre-Signed S3 URLs to request content directly from external storage.';

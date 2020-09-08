@@ -566,12 +566,14 @@ class client extends object_client_base {
             // Convert to a valid timestamp.
             $expires = strtotime($expires);
         }
-        // If it's set to 0, set it to default.
-        if ($expires == 0) {
-            $expires = $now + $this->expirationtime;
+        // If it's set to 0 or strtotime() returned false,
+        // set it to default + 1 min as a healthy margin.
+        if (empty($expires)) {
+            $expires = $now + $this->expirationtime + MINSECS;
         }
-        // If it's already expired set it to 1 minute.
-        if ($expires < $now) {
+        // If it's already expired or expires less than in a minute,
+        // set it to 1 minute.
+        if ($expires < $now + MINSECS) {
             $expires = $now + MINSECS;
         }
         // The expiration date of a signature version 4 presigned URL must be
@@ -715,7 +717,7 @@ class client extends object_client_base {
      * Test proxy range request.
      *
      * @param  object  $filesystem  Filesystem to be tested.
-     * @return bool
+     * @return object
      * @throws \coding_exception
      */
     public function test_range_request($filesystem) {
@@ -725,18 +727,17 @@ class client extends object_client_base {
         foreach ($testfiles as $file) {
             if ($file->get_filename() == 'testvideo.mp4') {
                 $ranges = (object)['rangefrom' => 0, 'rangeto' => 999, 'length' => 1000];
-                $response = $this->curl_range_request_to_presigned_url($file->get_contenthash(), $ranges, []);
+                $response = $this->curl_range_request_to_presigned_url($file->get_contenthash(),
+                    $ranges, ['Expires' => time() + HOURSECS]);
                 $httpcode = manager::get_header($response['responseheaders'], 'HTTP/1.1');
                 if ($response['content'] != '' && $httpcode == '206 Partial Content') {
-                    return true;
+                    return (object)['result' => true];
                 } else {
-                    debugging('Test range request to URL ' . $response['url'] .
-                        ' failed with HTTP code: ' . $httpcode . '. Details: ' . $response['content']);
-                    return false;
+                    $a = (object)['url' => $response['url'], 'httpcode' => $httpcode, 'details' => $response['content']];
+                    return (object)['result' => false, 'error' => get_string('rangerequestfailed', 'tool_objectfs', $a)];
                 }
-                break;
             }
         }
-        return false;
+        return (object)['result' => false, 'error' => get_string('fixturefilemissing', 'tool_objectfs')];
     }
 }
