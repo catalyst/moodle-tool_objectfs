@@ -135,10 +135,10 @@ abstract class object_client_base implements object_client {
      * Test proxy range request.
      *
      * @param  object  $filesystem  Filesystem to be tested.
-     * @return bool
+     * @return object
      */
     public function test_range_request($filesystem) {
-        return false;
+        return (object)['result' => false, 'error' => ''];
     }
 
     /**

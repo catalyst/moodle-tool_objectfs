@@ -714,26 +714,32 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $now = time();
         return [
             // Default Pre-Signed URL expiration time and int-like 'Expires' header.
-            [7200, $now, 0, $now + 7200],
+            [7200, $now, 0, $now + 7200 + MINSECS],
             [7200, $now, $now - 100, $now + MINSECS],
+            [7200, $now, $now + 30, $now + MINSECS],
             [7200, $now, $now + 100, $now + 100],
             [7200, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS],
 
             // Default Pre-Signed URL expiration time and string-like 'Expires' header.
-            [7200, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 7200],
+            [7200, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 7200 + MINSECS],
             [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
+            [7200, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
             [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100],
             [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS],
 
             // Custom Pre-Signed URL expiration time and int-like 'Expires' header.
-            [600, $now, 0, $now + 600],
+            [0, $now, 0, $now + MINSECS],
+            [600, $now, 0, $now + 600 + MINSECS],
             [600, $now, $now - 100, $now + MINSECS],
+            [600, $now, $now + 30, $now + MINSECS],
             [600, $now, $now + 100, $now + 100],
             [600, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS],
 
             // Custom Pre-Signed URL expiration time and string-like 'Expires' header.
-            [600, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 600],
+            [0, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + MINSECS],
+            [600, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 600 + MINSECS],
             [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
+            [600, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
             [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100],
             [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS],
         ];
@@ -869,9 +875,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_test_range_request() {
         $externalclient = $this->filesystem->get_external_client();
         if ($externalclient->support_presigned_urls()) {
-            $this->assertTrue($externalclient->test_range_request($this->filesystem));
+            $this->assertTrue($externalclient->test_range_request($this->filesystem)->result);
         } else {
-            $this->assertFalse($externalclient->test_range_request($this->filesystem));
+            $this->assertFalse($externalclient->test_range_request($this->filesystem)->result);
         }
     }
 
