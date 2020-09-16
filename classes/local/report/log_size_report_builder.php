@@ -51,9 +51,9 @@ class log_size_report_builder extends objectfs_report_builder {
         return $report;
     }
 
-    protected function compress_small_log_sizes(&$stats) {
+    public function compress_small_log_sizes(&$stats) {
         $smallstats = new \stdClass();
-        $smallstats->datakey = 'small';
+        $smallstats->datakey = 1;
         $smallstats->objectsum = 0;
         $smallstats->objectcount = 0;
 

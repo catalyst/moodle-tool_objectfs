@@ -27,10 +27,10 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
-use tool_objectfs\local\report\objectfs_report_builder;
 use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\report\object_status_history_table;
 use tool_objectfs\local\report\object_location_history_table;
+use tool_objectfs\local\report\log_size_report_builder;
 
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
@@ -104,7 +104,7 @@ class object_status_testcase extends tool_objectfs_testcase {
         $table->query_db(100, false);
         $this->assertEquals(1, count($table->rawdata));
         $record = reset($table->rawdata);
-        $this->assertEquals('small', $record->heading);
+        $this->assertEquals('1', $record->heading);
         $this->assertEquals('1', $record->count);
         $this->assertEquals('10', $record->size);
     }
@@ -215,7 +215,7 @@ class object_status_testcase extends tool_objectfs_testcase {
      */
     public function test_object_status_get_size_range_from_logsize_provider() {
         return [
-            ['small', '< 1KB'],
+            ['1', '< 1KB'],
             ['10', '1KB - 2KB'],
             ['11', '2KB - 4KB'],
             ['20', '1MB - 2MB'],
@@ -237,5 +237,26 @@ class object_status_testcase extends tool_objectfs_testcase {
         $table = new object_status_history_table('location', 0);
         $actual = $table->get_size_range_from_logsize($logsize);
         $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test that compress_small_log_sizes() correctly compresses small entries.
+     */
+    public function test_compress_small_log_sizes() {
+        $stats = [
+            (object)['datakey' => 1, 'objectsum' => 1, 'objectcount' => 10],
+            (object)['datakey' => 5, 'objectsum' => 1, 'objectcount' => 10],
+            (object)['datakey' => 9, 'objectsum' => 1, 'objectcount' => 10],
+            (object)['datakey' => 10, 'objectsum' => 1, 'objectcount' => 10],
+            (object)['datakey' => 15, 'objectsum' => 1, 'objectcount' => 10],
+        ];
+        $expected = [
+            (object)['datakey' => 1, 'objectsum' => 3, 'objectcount' => 30],
+            (object)['datakey' => 10, 'objectsum' => 1, 'objectcount' => 10],
+            (object)['datakey' => 15, 'objectsum' => 1, 'objectcount' => 10],
+        ];
+        $builder = new log_size_report_builder();
+        $builder->compress_small_log_sizes($stats);
+        $this->assertEquals($expected, $stats);
     }
 }

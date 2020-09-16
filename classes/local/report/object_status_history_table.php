@@ -88,9 +88,19 @@ class object_status_history_table extends \table_sql {
      */
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
+        switch ($this->reporttype) {
+            case 'mime_type':
+                $sort = 'size ASC';
+                break;
+
+            case 'location':
+            case 'log_size':
+            default:
+                $sort = 'heading ASC';
+        }
         $params = array('reporttype' => $this->reporttype, 'reportid' => $this->reportid);
         $fields = 'datakey AS heading, objectcount AS count, objectsum AS size';
-        $rows = $DB->get_records('tool_objectfs_report_data', $params, '', $fields);
+        $rows = $DB->get_records('tool_objectfs_report_data', $params, $sort, $fields);
         $this->rawdata = $rows;
 
         foreach ($rows as $row) {
@@ -232,7 +242,7 @@ class object_status_history_table extends \table_sql {
      */
     public function get_size_range_from_logsize($logsize) {
         // Small logsizes have been compressed.
-        if ($logsize == 'small') {
+        if ($logsize == 'small' || $logsize == 1) {
             return '< 1KB';
         }
         $floor = pow(2, $logsize);
