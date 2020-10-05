@@ -33,13 +33,9 @@ use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\report\object_status_history_table;
 
 $reportid = optional_param('reportid', 0, PARAM_INT);
-$params = array();
-if (!empty($reportid)) {
-    $params['reportid'] = $reportid;
-}
 
 $baseurl = '/admin/tool/objectfs/object_status.php';
-$pageurl = new \moodle_url($baseurl, $params);
+$pageurl = new \moodle_url($baseurl, ['reportid' => $reportid]);
 $heading = get_string('object_status:page', 'tool_objectfs');
 $PAGE->set_url($pageurl);
 $PAGE->set_context(context_system::instance());
@@ -51,11 +47,10 @@ $OUTPUT = $PAGE->get_renderer('tool_objectfs');
 echo $OUTPUT->header();
 
 if ($reports = objectfs_report::get_report_ids()) {
-    echo $OUTPUT->object_status_history_page_header($reports, $reportid);
-
     if (empty($reportid) || !array_key_exists($reportid, $reports)) {
         $reportid = key($reports);
     }
+    echo $OUTPUT->object_status_history_page_header($reports, $reportid);
 
     $reporttypes = objectfs_report::get_report_types();
     foreach ($reporttypes as $reporttype) {
