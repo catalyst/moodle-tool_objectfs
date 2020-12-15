@@ -18,41 +18,37 @@ addons:
 
 matrix:
   include:
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE CORE_PATCH=core33.diff
-    - php: 7.1
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_33_STABLE CORE_PATCH=core33.diff
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
     - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_310_STABLE
     - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_35_STABLE
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_310_STABLE
     - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_310_STABLE
     - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE CORE_PATCH=core38.diff
-    - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE CORE_PATCH=core38.diff
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_310_STABLE
+    - php: 7.4
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_310_STABLE
+    - php: 7.4
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_310_STABLE
     - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_39_STABLE
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_311_STABLE
+    - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_311_STABLE
     - php: 7.3
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_39_STABLE
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_311_STABLE
+    - php: 7.3
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_311_STABLE
+    - php: 7.4
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_311_STABLE
+    - php: 7.4
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_311_STABLE
     - php: 7.2
       env: DB=mysqli MOODLE_BRANCH=master
     - php: 7.2
+      env: DB=pgsql  MOODLE_BRANCH=master
+    - php: 7.3
+      env: DB=mysqli MOODLE_BRANCH=master
+    - php: 7.3
       env: DB=pgsql  MOODLE_BRANCH=master
     - php: 7.3
       env: DB=mysqli MOODLE_BRANCH=master
