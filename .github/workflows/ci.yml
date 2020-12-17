@@ -65,8 +65,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          # TODO: Check if we can support .nvmrc
-          node-version: '14.15.0'
+          node-version: '14.15'
 
       - name: Setup PHP environment
         uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
