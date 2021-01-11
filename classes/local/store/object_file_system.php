@@ -339,6 +339,19 @@ abstract class object_file_system extends \file_system_filedir {
         }
         $empty = true;
         foreach (glob($rootpath . DIRECTORY_SEPARATOR . '*') as $path) {
+            // If there are .tmp files here, they should be killed.
+            if (!is_dir($path) && pathinfo($path, PATHINFO_EXTENSION) === 'tmp') {
+                // Check timemodified, don't touch anything more recent than 24 hours.
+                $modified = filemtime($path);
+                if ($modified === false) {
+                    $modified = 0;
+                }
+                $delete = $modified <= (time() - DAYSECS);
+
+                if ($delete) {
+                    @unlink($path);
+                }
+            }
             $empty &= is_dir($path) && $this->delete_empty_dirs($path);
         }
         if ($rootpath === $this->filedir) {
