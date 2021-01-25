@@ -331,6 +331,10 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      */
     public function delete_empty_dirs($rootpath = '') {
+        global $DB;
+
+        $config = manager::get_objectfs_config();
+
         if (empty($rootpath)) {
             $rootpath = $this->filedir;
         }
@@ -339,19 +343,58 @@ abstract class object_file_system extends \file_system_filedir {
         }
         $empty = true;
         foreach (glob($rootpath . DIRECTORY_SEPARATOR . '*') as $path) {
-            // If there are .tmp files here, they should be killed.
-            if (!is_dir($path) && pathinfo($path, PATHINFO_EXTENSION) === 'tmp') {
+            if (is_file($path)) {
                 // Check timemodified, don't touch anything more recent than 24 hours.
                 $modified = filemtime($path);
                 if ($modified === false) {
                     $modified = 0;
                 }
-                $delete = $modified <= (time() - DAYSECS);
 
-                if ($delete) {
-                    @unlink($path);
+                if ($modified <= (time() - DAYSECS)) {
+                    $pathinfo = pathinfo($path);
+
+                    // If there are .tmp files here, they should be killed.
+                    if (!empty($pathinfo['extension']) && $pathinfo['extension'] === 'tmp') {
+                        @unlink($path);
+                    } else {
+                        if (!$config->deletelocal) {
+                            // If local objects aren't deleted, skip here.
+                            // Or it will take ages to grind through for little benefit.
+                            continue;
+                        }
+
+                        // If the file is 24hrs old, they may not be tracked by objectFS.
+                        // This means it may not exist in the files table at all.
+                        if ($config->sizethreshold > 0) {
+                            // Don't care about files underneath the size threshold.
+                            // Hurts performance for very little gain in space.
+                            if (filesize($path) < $this->config->sizethreshold) {
+                                continue;
+                            }
+                        }
+
+                        // Check the basename and filename, should catch hidden files and other junk.
+                        // Check pathnamehash as well. Should never happen, but any hash match should not be touched.
+                        $sql = "SELECT *
+                                  FROM {files}
+                                 WHERE contenthash = ?
+                                    OR contenthash = ?
+                                    OR pathnamehash = ?
+                                    OR pathnamehash = ?";
+                        $exists = $DB->record_exists_sql($sql, [
+                            $pathinfo['filename'],
+                            $pathinfo['basename'],
+                            $pathinfo['filename'],
+                            $pathinfo['basename']
+                        ]);
+
+                        if (!$exists) {
+                            @unlink($path);
+                        }
+                    }
                 }
             }
+
             $empty &= is_dir($path) && $this->delete_empty_dirs($path);
         }
         if ($rootpath === $this->filedir) {
