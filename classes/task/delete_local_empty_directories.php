@@ -26,6 +26,7 @@
 namespace tool_objectfs\task;
 
 use coding_exception;
+use tool_objectfs\local\manager;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,6 +43,11 @@ class delete_local_empty_directories  extends task {
      */
     public function execute() {
         if (!$this->enabled_tasks()) {
+            return;
+        }
+        // If config is set to not deletelocal objects, don't run directory clean up either.
+        $config = manager::get_objectfs_config();
+        if (!$config->deletelocal) {
             return;
         }
         $filesystem = new $this->config->filesystem();
