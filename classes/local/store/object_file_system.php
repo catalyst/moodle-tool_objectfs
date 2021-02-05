@@ -400,7 +400,10 @@ abstract class object_file_system extends \file_system_filedir {
         if ($rootpath === $this->filedir) {
             return false;
         }
-        return $empty && rmdir($rootpath);
+        if (!$empty) {
+            return false;
+        }
+        return rmdir($rootpath);
     }
 
     /**
