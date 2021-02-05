@@ -219,8 +219,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse(is_readable($localpath));
-        // If grandparent is empty it should be removed.
-        $this->assertFalse(is_readable(dirname(dirname($localpath))));
     }
 
     /**

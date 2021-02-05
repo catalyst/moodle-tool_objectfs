@@ -310,8 +310,6 @@ abstract class object_file_system extends \file_system_filedir {
                 $success = unlink($localpath);
 
                 if ($success) {
-                    // Check grandparent dir for empty dirs.
-                    $this->delete_empty_dirs(dirname(dirname($localpath)));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
@@ -729,10 +727,7 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function delete_local_file_from_hash($contenthash) {
         $path = $this->get_local_path_from_hash($contenthash);
-        if (unlink($path)) {
-            // Check grandparent dir for empty dirs.
-            $this->delete_empty_dirs(dirname(dirname($path)));
-        }
+        unlink($path);
     }
 
     /**
