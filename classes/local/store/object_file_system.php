@@ -366,7 +366,7 @@ abstract class object_file_system extends \file_system_filedir {
                         if ($config->sizethreshold > 0) {
                             // Don't care about files underneath the size threshold.
                             // Hurts performance for very little gain in space.
-                            if (filesize($path) < $this->config->sizethreshold) {
+                            if (filesize($path) < $config->sizethreshold) {
                                 continue;
                             }
                         }
