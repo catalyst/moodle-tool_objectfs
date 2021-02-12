@@ -1,6 +1,10 @@
-<a href="https://travis-ci.org/catalyst/moodle-tool_objectfs">
-<img src="https://travis-ci.org/catalyst/moodle-tool_objectfs.svg?branch=master">
+<a href="https://github.com/catalyst/moodle-tool_objectfs/actions?query=workflow%3A%22Run+all+tests%22">
+<img src="https://github.com/catalyst/moodle-tool_objectfs/workflows/Run%20all%20tests/badge.svg">
 </a>
+
+
+https://github.com/<OWNER>/<REPOSITORY>/workflows/<WORKFLOW_NAME>/badge.svg
+
 
 # moodle-tool_objectfs
 
