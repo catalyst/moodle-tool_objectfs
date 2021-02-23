@@ -25,7 +25,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   * [Amazon S3 settings](#amazon-s3-settings)
   * [Azure Blob Storage settings](#azure-blob-storage-settings)
   * [DigitalOcean Spaces settings](#digitalocean-spaces-settings)
-* [Backporting](#backporting)
+* [Applying core patches](#applying-core-patches)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 * [Contributing and support](#contributing-and-support)
 
