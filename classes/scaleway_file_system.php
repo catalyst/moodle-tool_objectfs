@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File system for Digital Ocean Storage.
+ * File system for Scaleway Object Storage.
  *
  * @package   tool_objectfs
  * @author    Alberto Buratti <alberto.buratti@gtsu.org>

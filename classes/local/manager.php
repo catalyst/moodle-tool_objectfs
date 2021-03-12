@@ -80,7 +80,7 @@ class manager {
         $config->do_space = '';
         $config->do_region = 'sfo2';
 
-        // Digital ocean file system.
+        // Scaleway file system.
         $config->scw_key = '';
         $config->scw_secret = '';
         $config->scw_space = '';
