@@ -283,6 +283,7 @@ class manager {
 
         $filesystems['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
         $filesystems['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
+        $filesystems['\tool_objectfs\scaleway_file_system'] = '\tool_objectfs\scaleway_file_system';
         $filesystems['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
         $filesystems['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
 
