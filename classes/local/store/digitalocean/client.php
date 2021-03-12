@@ -38,6 +38,11 @@ class client extends s3_client {
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
             $this->bucket = $config->do_space;
+            $this->maxupload = OBJECTFS_BYTES_IN_TERABYTE * 5;
+            $this->expirationtime = $config->expirationtime;
+            $this->presignedminfilesize = $config->presignedminfilesize;
+            $this->enablepresignedurls = $config->enablepresignedurls;
+            $this->signingmethod = $config->signingmethod;
             $this->set_client($config);
         } else {
             parent::__construct($config);
