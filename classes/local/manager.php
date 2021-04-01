@@ -242,7 +242,11 @@ class manager {
             return false;
         }
         $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
-        return $util->is_whitelisted($extension, $whitelist);
+        if (method_exists($util, 'is_listed')) {
+            return $util->is_listed($extension, $whitelist);
+        } else {
+            return $util->is_whitelisted($extension, $whitelist);
+        }
     }
 
     /**
