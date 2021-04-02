@@ -1,6 +1,6 @@
 {
     "name": "catalyst/moodle-tool_objectfs",
-    "type": "moodle-local",
+    "type": "moodle-tool",
     "require": {
         "composer/installers": "~1.0"
     },
