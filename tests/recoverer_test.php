@@ -27,7 +27,7 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 class recoverer_testcase extends tool_objectfs_testcase {
 
-    protected function setUp() {
+    protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();
         $this->candidatesfinder = new candidates_finder(recoverer::class, $config);
@@ -37,7 +37,7 @@ class recoverer_testcase extends tool_objectfs_testcase {
         ob_start();
     }
 
-    protected function tearDown() {
+    protected function tearDown(): void {
         ob_end_clean();
     }
 

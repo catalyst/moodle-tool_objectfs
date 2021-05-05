@@ -40,7 +40,7 @@ class object_status_testcase extends tool_objectfs_testcase {
     /**
      * Clean up after each test.
      */
-    protected function tearDown() {
+    protected function tearDown(): void {
         global $DB;
         $DB->delete_records('tool_objectfs_reports');
         parent::tearDown();

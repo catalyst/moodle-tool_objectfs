@@ -31,7 +31,7 @@ require_once(__DIR__ . '/classes/test_file_system.php');
 
 abstract class tool_objectfs_testcase extends \advanced_testcase {
 
-    protected function setUp() {
+    protected function setUp(): void {
         global $CFG;
         $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
         $CFG->tool_objectfs_delete_externally = 0;
@@ -40,7 +40,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $this->resetAfterTest(true);
     }
 
-    protected function tearDown() {
+    protected function tearDown(): void {
         $this->clear_file_dir();
         parent::tearDown();
     }

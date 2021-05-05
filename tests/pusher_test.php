@@ -30,7 +30,7 @@ class pusher_testcase extends tool_objectfs_testcase {
     /** @var string $manipulator */
     protected $manipulator = pusher::class;
 
-    protected function setUp() {
+    protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();
         $config->sizethreshold = 0;
@@ -41,7 +41,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         ob_start();
     }
 
-    protected function tearDown() {
+    protected function tearDown(): void {
         ob_end_clean();
     }
 
