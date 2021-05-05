@@ -96,7 +96,7 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient;
     }
 
-    protected abstract function initialise_external_client($config);
+    abstract protected function initialise_external_client($config);
 
     /**
      * Get the full path for the specified hash, including the path to the filedir.
