@@ -27,12 +27,12 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
  */
 class tasks_testcase extends tool_objectfs_testcase {
 
-    protected function setUp() {
+    protected function setUp(): void {
         parent::setUp();
         ob_start();
     }
 
-    protected function tearDown() {
+    protected function tearDown(): void {
         ob_end_clean();
     }
 
