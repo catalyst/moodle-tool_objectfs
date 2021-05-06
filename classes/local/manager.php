@@ -242,7 +242,12 @@ class manager {
             return false;
         }
         $extension = strtolower('.' . pathinfo($filename, PATHINFO_EXTENSION));
-        return $util->is_whitelisted($extension, $whitelist);
+        if (method_exists($util, 'is_listed')) {
+            return $util->is_listed($extension, $whitelist);
+        } else {
+            // TODO: Remove this when support for Moodle 3.9 is removed from this branch.
+            return $util->is_whitelisted($extension, $whitelist);
+        }
     }
 
     /**
