@@ -40,12 +40,14 @@ class files_table extends \table_sql {
     public function __construct($uniqueid, $objectlocation) {
         parent::__construct($uniqueid);
 
-        $fields = 'f.*';
-        $from = '{files} f LEFT JOIN {tool_objectfs_objects} o on f.contenthash = o.contenthash';
+        $fields = 'f.*, ctx.instanceid';
+        $from = '{files} f';
+        $from .= ' LEFT JOIN {tool_objectfs_objects} o on f.contenthash = o.contenthash';
+        $from .= ' LEFT JOIN {context} ctx ON f.contextid = ctx.id';
         $where = 'o.location = ?';
         $params = [$objectlocation];
 
-        $this->columns = $this->headers = ['id', 'contextid', 'contenthash', 'localpath', 'component',
+        $this->columns = $this->headers = ['id', 'contextid', 'contenthash', 'localpath', 'link', 'component',
             'filearea', 'filename', 'filepath', 'mimetype', 'filesize', 'timecreated'];
 
         $this->no_sorting('localpath');
@@ -106,4 +108,65 @@ class files_table extends \table_sql {
         return userdate($row->timecreated);
     }
 
+    public function col_link(\stdClass $row) {
+        global $DB;
+
+        switch ($row->component) {
+            case 'mod_book':
+                // The instanceid refers to {course_modules} => id.
+                // The itemid refers to {book_chapters} => id. This is not always a direct mapping.
+                $params = [
+                    'id' => $row->instanceid,
+                ];
+
+                $url = new \moodle_url("/mod/book/view.php", $params);
+                break;
+
+            case 'course':
+                if ($row->filearea === "legacy") {
+                    $params = ['contextid' => $row->contextid];
+                    $url = new \moodle_url("/files/index.php", $params);
+                }
+
+                if ($row->filearea === "section") {
+                    $params = ['id' => $row->instanceid];
+                    $url = new \moodle_url("/course/view.php", $params);
+                }
+                break;
+
+            case 'mod_resource':
+                $params = ['id' => $row->instanceid];
+                $url = new \moodle_url("/mod/resource/view.php", $params);
+                break;
+
+            case 'mod_page':
+                $params = ['id' => $row->instanceid];
+                $url = new \moodle_url("/mod/page/view.php", $params);
+                break;
+
+            case 'block_html':
+                $bi = $DB->get_record('block_instances', ['id' => $row->instanceid]);
+                $cctx = $DB->get_record('context', ['id' => $bi->parentcontextid]);
+                $params = ['id' => $cctx->instanceid];
+                $url = new \moodle_url("/course/view.php", $params);
+                break;
+
+            default;
+                break;
+        }
+
+        if ($this->is_downloading()) {
+            if (!empty($url)) {
+                return $url->out(false);
+            } else {
+                return '';
+            }
+        }
+
+        if (!empty($url)) {
+            return \html_writer::link($url, $url);
+        } else {
+            return '';
+        }
+    }
 }
