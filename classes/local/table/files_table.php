@@ -111,48 +111,28 @@ class files_table extends \table_sql {
     public function col_link(\stdClass $row) {
         global $DB;
 
-        switch ($row->component) {
-            case 'mod_book':
-                // The instanceid refers to {course_modules} => id.
-                // The itemid refers to {book_chapters} => id. This is not always a direct mapping.
-                $params = [
-                    'id' => $row->instanceid,
-                ];
+        if (substr($row->component, 0, strlen('mod_')) === "mod_") {
+            list ($course, $cm) = get_course_and_cm_from_cmid($row->instanceid);
+            if (!empty($cm)) {
+                $url = new \moodle_url($cm->url);
+            }
 
-                $url = new \moodle_url("/mod/book/view.php", $params);
-                break;
+        } else if ($row->component === 'course') {
+            if ($row->filearea === "legacy") {
+                $params = ['contextid' => $row->contextid];
+                $url = new \moodle_url("/files/index.php", $params);
 
-            case 'course':
-                if ($row->filearea === "legacy") {
-                    $params = ['contextid' => $row->contextid];
-                    $url = new \moodle_url("/files/index.php", $params);
-                }
-
-                if ($row->filearea === "section") {
-                    $params = ['id' => $row->instanceid];
-                    $url = new \moodle_url("/course/view.php", $params);
-                }
-                break;
-
-            case 'mod_resource':
+            } else if ($row->filearea === "section") {
                 $params = ['id' => $row->instanceid];
-                $url = new \moodle_url("/mod/resource/view.php", $params);
-                break;
-
-            case 'mod_page':
-                $params = ['id' => $row->instanceid];
-                $url = new \moodle_url("/mod/page/view.php", $params);
-                break;
-
-            case 'block_html':
-                $bi = $DB->get_record('block_instances', ['id' => $row->instanceid]);
-                $cctx = $DB->get_record('context', ['id' => $bi->parentcontextid]);
-                $params = ['id' => $cctx->instanceid];
                 $url = new \moodle_url("/course/view.php", $params);
-                break;
+            }
 
-            default;
-                break;
+        } else if ($row->component === 'block_html') {
+            // Internally blocks are different to course modules and require a different lookup.
+            $bi = $DB->get_record('block_instances', ['id' => $row->instanceid]);
+            $cctx = $DB->get_record('context', ['id' => $bi->parentcontextid]);
+            $params = ['id' => $cctx->instanceid];
+            $url = new \moodle_url("/course/view.php", $params);
         }
 
         if ($this->is_downloading()) {
