@@ -51,6 +51,7 @@ class files_table extends \table_sql {
             'filearea', 'filename', 'filepath', 'mimetype', 'filesize', 'timecreated'];
 
         $this->no_sorting('localpath');
+        $this->no_sorting('link');
 
         $this->define_columns($this->columns);
         $this->define_headers($this->headers);
