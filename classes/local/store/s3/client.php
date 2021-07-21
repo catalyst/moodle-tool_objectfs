@@ -170,7 +170,9 @@ class client extends object_client_base {
      * @path   string full path to S3 file.
      */
     public function delete_file($fullpath) {
-        unlink($fullpath);
+        $relativepath = $this->get_relative_path_from_fullpath($fullpath);
+
+        $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $relativepath));
     }
 
     /**
@@ -181,6 +183,18 @@ class client extends object_client_base {
      */
     public function rename_file($currentpath, $destinationpath) {
         rename($currentpath, $destinationpath);
+    }
+
+     /**
+      * Returns relative path to S3 file from fullpath to use with php file functions.
+      *
+      * @param    string    $fullpath full path to S3 file
+      * @return   string    relative path to S3 file.
+      */
+    public function get_relative_path_from_fullpath($fullpath) {
+        $relativepath = str_replace("s3://$this->bucket/", '', $fullpath);
+
+        return $relativepath;
     }
 
     /**
