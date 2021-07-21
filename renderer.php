@@ -194,7 +194,8 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * @throws coding_exception
      */
     private function get_output($fs, $url, $file, $identifier) {
-        $redirect = $this->output->pix_icon('i/grade_correct', '', 'moodle', ['class' => 'icon']) . 'Redirecting to external storage: ';
+        $icon = $this->output->pix_icon('i/grade_correct', '', 'moodle', ['class' => 'icon']);
+        $redirect = $icon . 'Redirecting to external storage: ';
         if (!$fs->presigned_url_should_redirect($file->get_contenthash())) {
             $redirect = $this->output->pix_icon('i/grade_incorrect', '', 'moodle', ['class' => 'icon']) . 'Not redirecting: ';
         }
