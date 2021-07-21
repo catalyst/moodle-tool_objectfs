@@ -40,6 +40,10 @@ jobs:
           - {moodle-branch: 'MOODLE_39_STABLE', php: '7.3', node: '14.15', database: 'pgsql'}
           - {moodle-branch: 'MOODLE_39_STABLE', php: '7.4', node: '14.15', database: 'mariadb'}
           - {moodle-branch: 'MOODLE_39_STABLE', php: '7.4', node: '14.15', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_310_STABLE', php: '7.4', node: '14.15.1', database: 'mariadb'}
+          - {moodle-branch: 'MOODLE_310_STABLE', php: '7.4', node: '14.15.1', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_311_STABLE', php: '7.4', node: '14.15.1', database: 'mariadb'}
+          - {moodle-branch: 'MOODLE_311_STABLE', php: '7.4', node: '14.15.1', database: 'pgsql'}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
