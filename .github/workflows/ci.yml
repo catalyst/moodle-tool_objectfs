@@ -28,54 +28,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '7.1'
-            moodle-branch: 'MOODLE_33_STABLE'
-            database: 'pgsql'
-            node: '8.9'
-          - php: '7.2'
-            moodle-branch: 'MOODLE_34_STABLE'
-            database: 'pgsql'
-            node: '8.9'
-          - php: '7.2'
-            moodle-branch: 'MOODLE_35_STABLE'
-            database: 'pgsql'
-            node: '14.15'
-          - php: '7.3'
-            moodle-branch: 'MOODLE_36_STABLE'
-            database: 'pgsql'
-            node: '8.9'
-          - php: '7.1'
-            moodle-branch: 'MOODLE_37_STABLE'
-            database: 'mariadb'
-            node: '14.15'
-          - php: '7.3'
-            moodle-branch: 'MOODLE_37_STABLE'
-            database: 'pgsql'
-            node: '14.15'
-          - php: '7.1'
-            moodle-branch: 'MOODLE_38_STABLE'
-            database: 'mariadb'
-            node: '14.15'
-          - php: '7.3'
-            moodle-branch: 'MOODLE_38_STABLE'
-            database: 'pgsql'
-            node: '14.15'
-          - php: '7.2'
-            moodle-branch: 'MOODLE_39_STABLE'
-            database: 'mariadb'
-            node: '14.15'
-          - php: '7.3'
-            moodle-branch: 'MOODLE_39_STABLE'
-            database: 'pgsql'
-            node: '14.15'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_39_STABLE'
-            database: 'mariadb'
-            node: '14.15'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_39_STABLE'
-            database: 'pgsql'
-            node: '14.15'
+          - {moodle-branch: 'MOODLE_33_STABLE', php: '7.1', node: '8.9', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_34_STABLE', php: '7.2', node: '8.9', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_35_STABLE', php: '7.2', node: '14.15', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_36_STABLE', php: '7.3', node: '8.9', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_37_STABLE', php: '7.1', node: '14.15', database: 'mariadb'}
+          - {moodle-branch: 'MOODLE_37_STABLE', php: '7.3', node: '14.15', database: 'pgsql' }
+          - {moodle-branch: 'MOODLE_38_STABLE', php: '7.1', node: '14.15', database: 'mariadb' }
+          - {moodle-branch: 'MOODLE_38_STABLE', php: '7.3', node: '14.15', database: 'pgsql' }
+          - {moodle-branch: 'MOODLE_39_STABLE', php: '7.2', node: '14.15', database: 'mariadb'}
+          - {moodle-branch: 'MOODLE_39_STABLE', php: '7.3', node: '14.15', database: 'pgsql'}
+          - {moodle-branch: 'MOODLE_39_STABLE', php: '7.4', node: '14.15', database: 'mariadb'}
+          - {moodle-branch: 'MOODLE_39_STABLE', php: '7.4', node: '14.15', database: 'pgsql'}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
