@@ -70,7 +70,7 @@ jobs:
           # PHPUnit depends on en_AU.UTF-8 locale
           sudo locale-gen en_AU.UTF-8
 
-      - name: Install moodle-plugin-ci
+      - name: Install Moodle
         # Need explicit IP to stop mysql client fail on attempt to use unix socket.
         run: moodle-plugin-ci install -vvv --plugin ./plugin --db-host=127.0.0.1
         env:
