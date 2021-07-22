@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * DigitalOcean Spaces client.
+ * Scaleway Spaces client.
  *
  * @package   tool_objectfs
- * @author    Brian Yanosik <kisonay@gmail.com>
+ * @author    Alberto Buratti <alberto.buratti@gtsu.org>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\local\store\digitalocean;
+namespace tool_objectfs\local\store\scaleway;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,7 +37,7 @@ class client extends s3_client {
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
-            $this->bucket = $config->do_space;
+            $this->bucket = $config->scw_space;
             $this->maxupload = OBJECTFS_BYTES_IN_TERABYTE * 5;
             $this->expirationtime = $config->expirationtime;
             $this->presignedminfilesize = $config->presignedminfilesize;
@@ -51,9 +51,9 @@ class client extends s3_client {
 
     public function set_client($config) {
         $this->client = \Aws\S3\S3Client::factory(array(
-            'credentials' => array('key' => $config->do_key, 'secret' => $config->do_secret),
-            'region' => $config->do_region,
-            'endpoint' => 'https://' . $config->do_region . '.digitaloceanspaces.com',
+            'credentials' => array('key' => $config->scw_key, 'secret' => $config->scw_secret),
+            'region' => $config->scw_region,
+            'endpoint' => 'https://s3.' . $config->scw_region . '.scw.cloud',
             'version' => AWS_API_VERSION
         ));
     }
@@ -66,31 +66,29 @@ class client extends s3_client {
     public function define_client_section($settings, $config) {
 
         $regionoptions = array(
-            'sfo2'      => 'sfo2 (San Fransisco)',
-            'nyc3'      => 'nyc3 (New York City)',
-            'ams3'      => 'ams3 (Amsterdam)',
-            'sgp1'      => 'spg1 (Singapore)',
-            'fra1'      => 'fra1 (Frankfurt)',
+            'nl-ams'      => 'nl-ams (Amsterdam, The Netherlands)',
+            'fr-par'      => 'fr-par (Paris, France)',
+            'pl-waw'      => 'pl-waw (Warsaw, Poland)',
         );
 
-        $settings->add(new \admin_setting_heading('tool_objectfs/do',
-            new \lang_string('settings:do:header', 'tool_objectfs'), ''));
+        $settings->add(new \admin_setting_heading('tool_objectfs/scw',
+            new \lang_string('settings:scw:header', 'tool_objectfs'), ''));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/do_key',
-            new \lang_string('settings:do:key', 'tool_objectfs'),
-            new \lang_string('settings:do:key_help', 'tool_objectfs'), ''));
+        $settings->add(new \admin_setting_configtext('tool_objectfs/scw_key',
+            new \lang_string('settings:scw:key', 'tool_objectfs'),
+            new \lang_string('settings:scw:key_help', 'tool_objectfs'), ''));
 
-        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/do_secret',
-            new \lang_string('settings:do:secret', 'tool_objectfs'),
-            new \lang_string('settings:do:secret_help', 'tool_objectfs'), ''));
+        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/scw_secret',
+            new \lang_string('settings:scw:secret', 'tool_objectfs'),
+            new \lang_string('settings:scw:secret_help', 'tool_objectfs'), ''));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/do_space',
-            new \lang_string('settings:do:space', 'tool_objectfs'),
-            new \lang_string('settings:do:space_help', 'tool_objectfs'), ''));
+        $settings->add(new \admin_setting_configtext('tool_objectfs/scw_space',
+            new \lang_string('settings:scw:space', 'tool_objectfs'),
+            new \lang_string('settings:scw:space_help', 'tool_objectfs'), ''));
 
-        $settings->add(new \admin_setting_configselect('tool_objectfs/do_region',
-            new \lang_string('settings:do:region', 'tool_objectfs'),
-            new \lang_string('settings:do:region_help', 'tool_objectfs'), '', $regionoptions));
+        $settings->add(new \admin_setting_configselect('tool_objectfs/scw_region',
+            new \lang_string('settings:scw:region', 'tool_objectfs'),
+            new \lang_string('settings:scw:region_help', 'tool_objectfs'), '', $regionoptions));
 
         return $settings;
     }
