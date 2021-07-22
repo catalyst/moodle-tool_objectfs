@@ -194,7 +194,15 @@ abstract class object_file_system extends \file_system_filedir {
         $path = $this->get_external_path_from_hash($contenthash, false);
 
         // Note - it is not possible to perform a content recovery safely from a hash alone.
-        return is_readable($path);
+        if (is_readable($path)) {
+            // File is readable externally, so everything is good here.
+            return true;
+        } else {
+            // Otherwise make a deeper check.
+            // This is needed to figure out if the file is simply missing externally or
+            // there is an issue with external storage.
+            return $this->externalclient->is_file_readable_by_hash($contenthash);
+        }
     }
 
     public function is_file_readable_externally_in_trash_by_hash($contenthash) {
