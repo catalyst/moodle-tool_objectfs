@@ -34,7 +34,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     protected function setUp(): void {
         global $CFG;
         $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
-        $CFG->tool_objectfs_delete_externally = 0;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
         $this->filesystem = new test_file_system();
         $this->logger = new \tool_objectfs\log\null_logger();
         $this->resetAfterTest(true);

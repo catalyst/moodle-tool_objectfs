@@ -129,5 +129,13 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020052600, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2021090100) {
+        // If set already, make sure we use the same default value.
+        if (isset($CFG->tool_objectfs_delete_externally)) {
+            set_config('deleteexternal', $CFG->tool_objectfs_delete_externally, 'tool_objectfs');
+        }
+
+        upgrade_plugin_savepoint(true, 2021090100, 'tool', 'objectfs');
+    }
     return true;
 }

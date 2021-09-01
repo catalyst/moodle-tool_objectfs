@@ -459,7 +459,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_local() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = true;
         $this->filesystem = new test_file_system();
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
@@ -473,7 +473,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_local() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 0;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
         $this->filesystem = new test_file_system();
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
@@ -487,7 +487,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_duplicated() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = true;
         $this->filesystem = new test_file_system();
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
@@ -501,7 +501,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_duplicated() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 0;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
         $this->filesystem = new test_file_system();
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
@@ -515,7 +515,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_remote() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = true;
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -529,7 +529,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_remote() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 0;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -563,7 +563,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_can_recover_object_if_deleted_while_duplicated() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = true;
         $this->filesystem = new test_file_system();
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
@@ -576,7 +576,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_can_recover_object_if_deleted_while_external() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = true;
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();

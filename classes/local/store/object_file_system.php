@@ -63,9 +63,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->preferexternal = $config->preferexternal;
         $this->filepermissions = $CFG->filepermissions;
         $this->dirpermissions = $CFG->directorypermissions;
-        if (isset($CFG->tool_objectfs_delete_externally)) {
-            $this->deleteexternally = $CFG->tool_objectfs_delete_externally;
-        }
+        $this->deleteexternally = $config->deleteexternal;
 
         if ($config->enablelogging) {
             $this->set_logger(new \tool_objectfs\log\real_time_logger());
@@ -735,7 +733,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     /**
      * Moves external file
-     * if $CFG->tool_objectfs_delete_externally is enabled.
+     * if deleteexternally is enabled.
      *
      * @param string $currentpath current path to file to be moved.
      * @param string $destinationpath destination path.

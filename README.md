@@ -99,14 +99,6 @@ $CFG->alternative_file_system_class = '\tool_objectfs\digitalocean_file_system';
 $CFG->alternative_file_system_class = '\tool_objectfs\swift_file_system';
 ```
 
-8. If you intend to allow deletion of remote files then add the following line.
-
-```php
-$CFG->tool_objectfs_delete_externally = 1;
-```
-
-This is not recommended if you intend to share one object store between multiple environments, however this is a requirement for GDPR compliance.
-
 ## Currently supported object stores
 
 ### Roadmap
