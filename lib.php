@@ -39,6 +39,10 @@ define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
 define('OBJECTFS_BYTES_IN_TERABYTE', 1099511627776);
 
+define('TOOL_OBJECTFS_DELETE_EXTERNAL_NO', 0);
+define('TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH', 1);
+define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
+
 // Legacy cron function.
 function tool_objectfs_cron() {
     mtrace('RUNNING legacy cron objectfs');

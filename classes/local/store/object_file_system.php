@@ -684,11 +684,15 @@ abstract class object_file_system extends \file_system_filedir {
      * @param string $contenthash file to be moved
      */
     public function move_external_file_to_trashdir_from_hash($contenthash) {
-        if ($this->deleteexternally) {
+        if (!empty($this->deleteexternally)) {
             $currentpath = $this->get_external_path_from_hash($contenthash);
-            $destinationpath = $this->get_external_trash_path_from_hash($contenthash);
+            if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {
+                $destinationpath = $this->get_external_trash_path_from_hash($contenthash);
 
-            $this->rename_external_file($currentpath, $destinationpath);
+                $this->rename_external_file($currentpath, $destinationpath);
+            } else if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_FULL) {
+                $this->externalclient->delete_file($currentpath);
+            }
         }
     }
 
