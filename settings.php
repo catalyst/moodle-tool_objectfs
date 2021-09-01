@@ -91,7 +91,7 @@ if ($ADMIN->fulltree) {
                 TOOL_OBJECTFS_DELETE_EXTERNAL_FULL => new lang_string('settings:fulldelete', 'tool_objectfs')];
     $settings->add(new admin_setting_configselect('tool_objectfs/deleteexternal',
         new lang_string('settings:deleteexternal', 'tool_objectfs'),
-        new lang_string('settings:deleteexternal_help', 'tool_objectfs'), false, $options));
+        new lang_string('settings:deleteexternal_help', 'tool_objectfs'), TOOL_OBJECTFS_DELETE_EXTERNAL_NO, $options));
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablelogging',
         new lang_string('settings:enablelogging', 'tool_objectfs'), '', ''));
