@@ -679,11 +679,11 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Moves external file to trashdir by its hash
+     * Deletes external file or moves to trashdir by its hash
      *
      * @param string $contenthash file to be moved
      */
-    public function move_external_file_to_trashdir_from_hash($contenthash) {
+    public function delete_external_file_from_hash($contenthash) {
         if (!empty($this->deleteexternally)) {
             $currentpath = $this->get_external_path_from_hash($contenthash);
             if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {
@@ -712,11 +712,11 @@ abstract class object_file_system extends \file_system_filedir {
 
             case OBJECT_LOCATION_DUPLICATED:
                 $this->delete_local_file_from_hash($contenthash);
-                $this->move_external_file_to_trashdir_from_hash($contenthash);
+                $this->delete_external_file_from_hash($contenthash);
                 break;
 
             case OBJECT_LOCATION_EXTERNAL:
-                $this->move_external_file_to_trashdir_from_hash($contenthash);
+                $this->delete_external_file_from_hash($contenthash);
                 break;
 
             case OBJECT_LOCATION_ERROR:
