@@ -161,6 +161,10 @@ $string['settings:batchsize'] = 'Number files in one batch';
 $string['settings:batchsize_help'] = 'Number of files to be transferred in one cron run';
 $string['settings:minimumage'] = 'Minimum age';
 $string['settings:minimumage_help'] = 'Minimum age that a object must exist on the local filedir before it will be considered for transfer.';
+$string['settings:deleteexternal'] = 'Delete external objects';
+$string['settings:deleteexternal_help'] = 'Delete external objects when the file is deleted in Moodle. This is not recommended if you intend to share one object store between multiple environments, however this is a requirement for GDPR compliance.
+<br/>Send to trash - will send the file to the external storage trashdir (safest method).
+<br/>Delete completely - will tell the external storage to delete the file immediately - (use with caution! - if the same file is being uploaded while being deleted issues could occur.)';
 $string['settings:deletelocal'] = 'Delete local objects';
 $string['settings:deletelocal_help'] = 'Delete local objects once they are in external object storage after the consistency delay.';
 $string['settings:consistencydelay'] = 'Consistency delay';
@@ -215,6 +219,8 @@ $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'cu
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
 $string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key content (.pem) is valid. OK';
 $string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key (.pem) is invalid.';
+$string['settings:sendtotrash'] = 'Send to external storage trashdir';
+$string['settings:fulldelete'] = 'Delete completely';
 
 $string['pleaseselect'] = 'Please, select';
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';

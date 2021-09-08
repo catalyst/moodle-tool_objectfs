@@ -63,9 +63,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->preferexternal = $config->preferexternal;
         $this->filepermissions = $CFG->filepermissions;
         $this->dirpermissions = $CFG->directorypermissions;
-        if (isset($CFG->tool_objectfs_delete_externally)) {
-            $this->deleteexternally = $CFG->tool_objectfs_delete_externally;
-        }
+        $this->deleteexternally = $config->deleteexternal;
 
         if ($config->enablelogging) {
             $this->set_logger(new \tool_objectfs\log\real_time_logger());
@@ -681,16 +679,20 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Moves external file to trashdir by its hash
+     * Deletes external file or moves to trashdir by its hash
      *
      * @param string $contenthash file to be moved
      */
-    public function move_external_file_to_trashdir_from_hash($contenthash) {
-        if ($this->deleteexternally) {
+    public function delete_external_file_from_hash($contenthash) {
+        if (!empty($this->deleteexternally)) {
             $currentpath = $this->get_external_path_from_hash($contenthash);
-            $destinationpath = $this->get_external_trash_path_from_hash($contenthash);
+            if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {
+                $destinationpath = $this->get_external_trash_path_from_hash($contenthash);
 
-            $this->rename_external_file($currentpath, $destinationpath);
+                $this->rename_external_file($currentpath, $destinationpath);
+            } else if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_FULL) {
+                $this->externalclient->delete_file($currentpath);
+            }
         }
     }
 
@@ -710,11 +712,11 @@ abstract class object_file_system extends \file_system_filedir {
 
             case OBJECT_LOCATION_DUPLICATED:
                 $this->delete_local_file_from_hash($contenthash);
-                $this->move_external_file_to_trashdir_from_hash($contenthash);
+                $this->delete_external_file_from_hash($contenthash);
                 break;
 
             case OBJECT_LOCATION_EXTERNAL:
-                $this->move_external_file_to_trashdir_from_hash($contenthash);
+                $this->delete_external_file_from_hash($contenthash);
                 break;
 
             case OBJECT_LOCATION_ERROR:
@@ -735,7 +737,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     /**
      * Moves external file
-     * if $CFG->tool_objectfs_delete_externally is enabled.
+     * if deleteexternally is enabled.
      *
      * @param string $currentpath current path to file to be moved.
      * @param string $destinationpath destination path.
