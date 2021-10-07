@@ -75,6 +75,7 @@ php admin/cli/scheduled_task.php --execute='\tool_objectfs\task\generate_status_
 14. Confirm, that _Status_ is _Enabled_ and _Last modified_ is changed from _Deploying_ to the date the distribution was created.
 15. Open your distribution.
 16. Write down _Distribution domain name_ (with https://).
+> Note: If you have already setup Moodle behind a CloudFront distribution, it is also possible to use that same CloudFront distribution to serve files from objectfs. In this scenario, a specific prefix in the URL path directs traffic to the S3 Bucket (moodle.domain/objectfs/ for example). To achieve that, use the key_prefix option to add a prefix on your Bucket, and configure a second Origin on your existing CloudFront distribution that points to your Bucket. Setup a Behavior that uses that new Origin with the same prefix as the one you used as key_prefix in your Bucket. Follow all other instructions.
 
 ### Generate keys
 1. Make a directory _$CFG->dataroot . '/objectfs/'_.
