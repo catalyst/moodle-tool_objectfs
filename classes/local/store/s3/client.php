@@ -454,7 +454,7 @@ class client extends object_client_base {
             $params['ResponseContentType'] = $contenttype;
         }
 
-        $key = $this->get_filepath_from_hash($contenthash);
+        $key = $this->bucketkeyprefix . $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $this->bucketkeyprefix . $key;
 
@@ -484,7 +484,7 @@ class client extends object_client_base {
      * @throws \Exception
      */
     private function generate_presigned_url_cloudfront($contenthash, array $headers = [], $nicefilename = true) {
-        $key = $this->get_filepath_from_hash($contenthash);
+        $key = $this->bucketkeyprefix . $this->get_filepath_from_hash($contenthash);
 
         $expires = $this->get_expiration_time(time(), manager::get_header($headers, 'Expires'));
 
