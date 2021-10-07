@@ -64,6 +64,7 @@ class client extends object_client_base {
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
             $this->signingmethod = $config->signingmethod;
+            $this->bucketkeyprefix = $config->key_prefix;
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -121,7 +122,7 @@ class client extends object_client_base {
             $key = $this->get_filepath_from_hash($contenthash);
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => $key));
+                            'Key' => $this->bucketkeyprefix . $key));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             return false;
         }
@@ -150,7 +151,7 @@ class client extends object_client_base {
      */
     public function get_fullpath_from_hash($contenthash) {
         $filepath = $this->get_filepath_from_hash($contenthash);
-        return "s3://$this->bucket/$filepath";
+        return "s3://$this->bucket/" . $this->bucketkeyprefix . $filepath;
     }
 
     /**
@@ -161,7 +162,7 @@ class client extends object_client_base {
      */
     public function get_trash_fullpath_from_hash($contenthash) {
         $filepath = $this->get_filepath_from_hash($contenthash);
-        return "s3://$this->bucket/trash/$filepath";
+        return "s3://$this->bucket/" . $this->bucketkeyprefix . "trash/$filepath";
     }
 
     /**
@@ -249,7 +250,7 @@ class client extends object_client_base {
         try {
             $result = $this->client->putObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => 'permissions_check_file',
+                            'Key' => $this->bucketkeyprefix . 'permissions_check_file',
                             'Body' => 'test content'));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $details = $this->get_exception_details($e);
@@ -260,7 +261,7 @@ class client extends object_client_base {
         try {
             $result = $this->client->getObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => 'permissions_check_file'));
+                            'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $errorcode = $e->getAwsErrorCode();
             // Write could have failed.
@@ -273,7 +274,7 @@ class client extends object_client_base {
 
         if ($testdelete) {
             try {
-                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => 'permissions_check_file'));
+                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
                 $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
                 $permissions->success = false;
             } catch (\Aws\S3\Exception\S3Exception $e) {
@@ -376,6 +377,10 @@ class client extends object_client_base {
             new \lang_string('settings:aws:base_url', 'tool_objectfs'),
             new \lang_string('settings:aws:base_url_help', 'tool_objectfs'), ''));
 
+        $settings->add(new \admin_setting_configtext('tool_objectfs/key_prefix',
+            new \lang_string('settings:aws:key_prefix', 'tool_objectfs'),
+            new \lang_string('settings:aws:key_prefix_help', 'tool_objectfs'), ''));
+
         return $settings;
     }
 
@@ -451,7 +456,7 @@ class client extends object_client_base {
 
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
-        $params['Key'] = $key;
+        $params['Key'] = $this->bucketkeyprefix . $key;
 
         $contentdisposition = manager::get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
