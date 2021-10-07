@@ -458,8 +458,6 @@ class client extends object_client_base {
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $this->bucketkeyprefix . $key;
         
-        print_r($params);
-
         $contentdisposition = manager::get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
             $params['ResponseContentDisposition'] = $contentdisposition;
