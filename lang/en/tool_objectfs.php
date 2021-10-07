@@ -119,6 +119,8 @@ $string['settings:aws:installneeded'] = 'Please install \'local_aws\' plugin.';
 $string['settings:aws:usesdkcreds'] = 'Use the default credential provider chain to find AWS credentials';
 $string['settings:aws:sdkcredsok'] = 'AWS credentials found. This setting can be safely enabled.';
 $string['settings:aws:sdkcredserror'] = 'Couldn\'t find AWS credentials. It\'s unsafe to enable this setting. Follow up <a href="https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html">AWS documentation</a>.';
+$string['settings:aws:key_prefix'] = 'Prefix to use in bucket';
+$string['settings:aws:key_prefix_help'] = 'Prefix to use inside Amazon S3 bucket. Must end with trailing slash when set. Leave blank to use root of bucket.';
 
 $string['settings:do:header'] = 'DigitalOcean Spaces Settings';
 $string['settings:do:key'] = 'Key';
