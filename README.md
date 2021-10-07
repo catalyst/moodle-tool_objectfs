@@ -285,6 +285,7 @@ S3 specific settings
 - **Bucket**: S3 bucket name to store files in.
 - **AWS region**: AWS API endpoint region to use.
 - **Base URL**: useful for s3-compatible providers *eg* set to `https://storage.googleapis.com` for gcs
+- **Key Prefix**: useful for adding a prefix for all data stored in bucket. Can be used to reuse the same CloudFront distribution for both Moodle itself and the pre-signed URLs files.
 
 ### Azure Blob Storage settings
 Azure Blob Storage specific settings
