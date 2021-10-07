@@ -401,7 +401,7 @@ class client extends object_client_base {
 
         try {
             $externalpath = $this->get_filepath_from_hash($contenthash);
-            $uploader = new \Aws\S3\ObjectUploader($this->client, $this->bucket, $externalpath, $filehandle);
+            $uploader = new \Aws\S3\ObjectUploader($this->client, $this->bucket, $this->bucketkeyprefix . $externalpath, $filehandle);
             $uploader->upload();
             fclose($filehandle);
         } catch (\Aws\Exception\MultipartUploadException $e) {
@@ -454,7 +454,7 @@ class client extends object_client_base {
             $params['ResponseContentType'] = $contenttype;
         }
 
-        $key = $this->bucketkeyprefix . $this->get_filepath_from_hash($contenthash);
+        $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $this->bucketkeyprefix . $key;
 
