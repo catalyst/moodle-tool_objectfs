@@ -456,7 +456,7 @@ class client extends object_client_base {
 
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
-        $params['Key'] = $key;
+        $params['Key'] = $this->bucketkeyprefix . $key;
         
         $contentdisposition = manager::get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
