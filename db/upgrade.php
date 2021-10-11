@@ -73,10 +73,6 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
             set_config('s3_region', $config->region, 'tool_objectfs');
         }
 
-        if (!empty($config->key_prefix)) {
-            set_config('key_prefix', $config->key_prefix, 'tool_objectfs');
-        }
-
         // Use the existing filesystem that was once hardcoded.
         set_config('filesystem', '\\tool_objectfs\\s3_file_system', 'tool_objectfs');
 
@@ -90,7 +86,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         unset_config('secret', 'tool_objectfs');
         unset_config('bucket', 'tool_objectfs');
         unset_config('region', 'tool_objectfs');
-        unset_confing('key_prefix', 'tool_objectfs');
+        unset_config('key_prefix', 'tool_objectfs');
 
         upgrade_plugin_savepoint(true, 2017111700, 'tool', 'objectfs');
     }
