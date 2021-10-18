@@ -463,7 +463,13 @@ class client extends object_client_base {
             $params['ResponseContentType'] = $contenttype;
         }
 
-        $command = $this->client->getCommand('GetObject', $params);
+        if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'HEAD') {
+            unset($params['ResponseContentType']);
+            unset($params['ResponseContentDisposition']);
+            $command = $this->client->getCommand('HeadObject', $params);
+        } else {
+            $command = $this->client->getCommand('GetObject', $params);
+        }
         $expires = $this->get_expiration_time(time(), manager::get_header($headers, 'Expires'));
         $request = $this->client->createPresignedRequest($command, $expires);
 
