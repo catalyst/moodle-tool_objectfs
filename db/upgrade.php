@@ -86,6 +86,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         unset_config('secret', 'tool_objectfs');
         unset_config('bucket', 'tool_objectfs');
         unset_config('region', 'tool_objectfs');
+        unset_config('key_prefix', 'tool_objectfs');
 
         upgrade_plugin_savepoint(true, 2017111700, 'tool', 'objectfs');
     }
