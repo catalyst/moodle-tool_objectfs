@@ -15,18 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Task that archivwes {tool_objectfs_object} records for deleted
+ * {files} records.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Nathan Mares <ngmares@gmail.com>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_objectfs\task;
+
+use tool_objectfs\local\object_manipulator\archiver;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021102602;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2021102602;      // Same as version.
-$plugin->requires  = 2013111811;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
+
+class archive_orphaned_objects extends task {
+
+    /** @var string $manipulator */
+    protected $manipulator = archiver::class;
+
+    /** @var string $stringname */
+    protected $stringname = 'archive_orphaned_objects_task';
+}
