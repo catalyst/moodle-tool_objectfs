@@ -54,6 +54,15 @@ $tasks = array(
         'month'     => '*'
     ),
     array(
+        'classname' => 'tool_objectfs\task\archive_orphaned_objects',
+        'blocking'  => 0,
+        'minute'    => '52',
+        'hour'      => '*/12',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*'
+    ),
+    array(
         'classname' => 'tool_objectfs\task\delete_local_empty_directories',
         'blocking'  => 0,
         'minute'    => '0',

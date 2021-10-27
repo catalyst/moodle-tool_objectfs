@@ -45,6 +45,7 @@ class manipulator_builder {
         pusher::class,
         recoverer::class,
         checker::class,
+        archiver::class
     ];
 
     /** @var string $manipulatorclass */
