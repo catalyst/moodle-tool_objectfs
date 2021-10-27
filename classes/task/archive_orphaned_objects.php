@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that archivwes {tool_objectfs_object} records for deleted
+ * Task that archives {tool_objectfs_object} records for deleted
  * {files} records.
  *
  * @package   tool_objectfs
