@@ -40,7 +40,7 @@ class files_table extends \table_sql {
     public function __construct($uniqueid, $objectlocation) {
         parent::__construct($uniqueid);
 
-        $fields = 'f.*, ctx.instanceid';
+        $fields = 'f.*, ctx.instanceid, ctx.contextlevel';
         $from = '{files} f';
         $from .= ' LEFT JOIN {tool_objectfs_objects} o on f.contenthash = o.contenthash';
         $from .= ' LEFT JOIN {context} ctx ON f.contextid = ctx.id';
@@ -113,11 +113,19 @@ class files_table extends \table_sql {
         global $DB;
 
         if (substr($row->component, 0, strlen('mod_')) === "mod_") {
-            list ($course, $cm) = get_course_and_cm_from_cmid($row->instanceid);
-            if (!empty($cm)) {
-                $url = new \moodle_url($cm->url);
+            switch ((int)$row->contextlevel) {
+                case CONTEXT_MODULE:
+                    list ($course, $cm) = get_course_and_cm_from_cmid($row->instanceid);
+                    if (!empty($cm)) {
+                        $url = new \moodle_url($cm->url);
+                    }
+                    break;
+                case CONTEXT_COURSE:
+                    $url = new \moodle_url("/course/view.php", ['id' => $row->instanceid]);
+                    break;
+                default:
+                    // Do nothing for now, in the future this can handle other contexts.
             }
-
         } else if ($row->component === 'course') {
             if ($row->filearea === "legacy") {
                 $params = ['contextid' => $row->contextid];
