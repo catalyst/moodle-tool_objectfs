@@ -2,13 +2,11 @@
 1. Login to AWS console https://aws.amazon.com/console/
 2. Navigate to _Services -> S3_.
 3. Click _Create bucket_.
-4. Fill out bucket name, region and click _Create bucket_.
-5. Navigate to _My Security Credentials_.
-6. In the _Access keys_ section click on the _Create New Access Key_ button.
-7. Write down your bucket name, region, key and secret.
-8. Edit the bucket again.
-9. Set _Default encryption_ to _Enabled_ with _Amazon S3 master-key (SSE-S3)_ server-side encryption.
-10. Set the following as _Cross-origin resource sharing (CORS)_:
+4. Fill out the bucket name and region
+5. Ensure _Block all public access_ is ticked
+6. Enable _Server-side encryption_ with _Amazon S3 key (SSE-S3)_
+7. Click _Create bucket_.
+8. Set the following as _Cross-origin resource sharing (CORS)_:
 ```
 [
     {
@@ -26,6 +24,8 @@
         "MaxAgeSeconds": 3000
     }
 ]
+9. Navigate to _My Security Credentials_.
+10. In the _Access keys_ section click on the _Create New Access Key_ button.
 ```
 
 ### Configure Objectfs
@@ -48,7 +48,7 @@ $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 ```
 3. Access the _/admin/settings.php?section=tool_objectfs_settings_ page.
 4. Confirm, that there is a green notification message _Could establish connection to the external object storage._ under the _Amazon S3 Settings_ section.
-5. Run the fllowing scheduled tasks:
+5. Run the following scheduled tasks:
 ```
 php admin/cli/scheduled_task.php --execute='\tool_objectfs\task\check_objects_location'
 php admin/cli/scheduled_task.php --execute='\tool_objectfs\task\push_objects_to_storage'
@@ -58,26 +58,9 @@ php admin/cli/scheduled_task.php --execute='\tool_objectfs\task\generate_status_
 6. Access the _/admin/tool/objectfs/object_status.php_ page.
 7. Confirm, that all files have been moved to the external storage: _Marked as only in filedir_ and _Duplicated in filedir and external storage_ should be 0.
 
-### Create CloudFront distribution
-1. Navigate to [https://console.aws.amazon.com/cloudfront/v3/home?region=ap-southeast-2#/welcome].
-2. Click on _Create a CloudFront distribution_.
-3. Choose your Amazon S3 bucket from _Origin domain_ dropdown menu.
-4. _S3 bucket access_: Choose _Yes use OAI (bucket can restrict access to only CloudFront)_ and click _Create new OAI_.
-5. _S3 bucket access -> Bucket policy_: Choose _Yes, update the bucket policy_.
-6. _Viewer protocol policy_: Choose _Redirect HTTP to HTTPS_.
-7. _Allowed HTTP methods_: Choose _GET, HEAD, OPTIONS_ and tick _OPTIONS_ under _Cache HTTP methods_.
-8. _Restrict viewer access_: Choose _Yes -> Trusted signer -> Self_.
-9. _Cache key and origin requests_: Choose _Legacy cache settings_.
-10. _Legacy cache settings -> Headers_: Choose _Include the following headers_ and add _Origin_, _Access-Control-Request-Method_, _Access-Control-Request-Headers_ headers from the dropdown menu.
-11. _Legacy cache settings -> Query strings_: Choose _All_.
-12. Click _Create distribution_.
-13. Navigate to [https://console.aws.amazon.com/cloudfront/v3/home?region=ap-southeast-2#/distributions].
-14. Confirm, that _Status_ is _Enabled_ and _Last modified_ is changed from _Deploying_ to the date the distribution was created.
-15. Open your distribution.
-16. Write down _Distribution domain name_ (with https://).
-> Note: If you have already setup Moodle behind a CloudFront distribution, it is also possible to use that same CloudFront distribution to serve files from objectfs. In this scenario, a specific prefix in the URL path directs traffic to the S3 Bucket (moodle.domain/objectfs/ for example). To achieve that, use the key_prefix option to add a prefix on your Bucket, and configure a second Origin on your existing CloudFront distribution that points to your Bucket. Setup a Behavior that uses that new Origin with the same prefix as the one you used as key_prefix in your Bucket. Follow all other instructions.
+### Generate CloudFront keys
+ObjectFS can use a CloudFront key from either the local filesystem or an admin setting. If using an admin setting, the key may be generated outside of the Moodle environment.
 
-### Generate keys
 1. Make a directory _$CFG->dataroot . '/objectfs/'_.
 2. Make it readable and writable:
 ```
@@ -93,16 +76,52 @@ chmod 777 cloudfront.pem
 ```
 openssl rsa -pubout -in cloudfront.pem -out public_key.pem
 ```
-5. Navigate to [https://console.aws.amazon.com/cloudfront/v3/home#/distributions].
-6. In the navigation menu, choose _Public keys_.
-7. Click _Create public key_.
-8. Enter key name.
-9. Enter key value. Use the following command to get the public key:
+5. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/publickey.
+6. Click _Create public key_.
+7. Enter key name.
+8. Enter key value. Use the following command to get the public key:
 ```
 cat public_key.pem
 ```
-10. Click _Create public key_.
-11. Write down key ID from the [https://console.aws.amazon.com/cloudfront/v3/home#/publickey] page.
+9. Click _Create public key_.
+10. Write down key ID from the https://console.aws.amazon.com/cloudfront/v3/home#/publickey page.
+11. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/keygrouplist
+12. Create a key group and select the public key created previously
+13. Store the public and private key files somewhere secure
+
+### Create CloudFront response headers policy
+
+1. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/policies/responseHeaders
+2. Click on _Create response headers policy_
+3. _Name_: CORS-with-preflight-and-SecurityHeadersPolicy-ReadOnly
+4. _Configure CORS_: disabled
+5. _Strict-Transport-Security_: Enabled, origin override enabled
+6. _X-Content-Type-Options_: Enabled, origin override enabled
+7. _X-Frame-Options_: Enabled, SAMEORIGIN, origin override enabled
+8. _X-XSS-Protection_: Enabled, block, origin override enabled
+9. _Referrer-Policy_: Enabled, strict-origin-when-cross-origin, origin override enabled
+10. _Content-Security-Policy_: disabled
+
+### Create CloudFront distribution
+1. Navigate to https://console.aws.amazon.com/cloudfront/.
+2. Click on _Create a CloudFront distribution_.
+3. Choose your Amazon S3 bucket from _Origin domain_ dropdown menu.
+4. _S3 bucket access_: Choose _Yes use OAI (bucket can restrict access to only CloudFront)_ and click _Create new OAI_.
+5. _S3 bucket access -> Bucket policy_: Choose _Yes, update the bucket policy_.
+6. _Viewer protocol policy_: Choose _Redirect HTTP to HTTPS_.
+7. _Allowed HTTP methods_: Choose _GET, HEAD, OPTIONS_ and tick _OPTIONS_ under _Cache HTTP methods_.
+8. _Restrict viewer access_: Choose _Yes -> Trusted key groups (recommended)_.
+9. Add key group created earlier
+10. _Cache key and origin requests_: Choose _Cache policy and origin request policy (recommended)_.
+11. _Cache policy_: Choose CachingOptimized
+12. _Origin request policy_: Choose CORS-S3Origin
+13. _Response headers policy_: Choose CORS-with-preflight-and-SecurityHeadersPolicy-ReadOnly
+14. Click _Create distribution_.
+15. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/distributions.
+16. Confirm, that _Status_ is _Enabled_ and _Last modified_ is changed from _Deploying_ to the date the distribution was created.
+17. Open your distribution.
+18. Write down _Distribution domain name_ (with https://).
+> Note: If you have already setup Moodle behind a CloudFront distribution, it is also possible to use that same CloudFront distribution to serve files from objectfs. In this scenario, a specific prefix in the URL path directs traffic to the S3 Bucket (moodle.domain/objectfs/ for example). To achieve that, use the key_prefix option to add a prefix on your Bucket, and configure a second Origin on your existing CloudFront distribution that points to your Bucket. Setup a Behavior that uses that new Origin with the same prefix as the one you used as key_prefix in your Bucket. Follow all other instructions.
 
 ### Configure CloudFront signing method in Objectfs:
 1. Run the following commands from the CLI to configure Objectfs:
