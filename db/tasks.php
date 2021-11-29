@@ -63,6 +63,15 @@ $tasks = array(
         'month'     => '*'
     ),
     array(
+        'classname' => 'tool_objectfs\task\delete_archived_object_metadata',
+        'blocking'  => 0,
+        'minute'    => 'R',
+        'hour'      => '*/12',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*'
+    ),
+    array(
         'classname' => 'tool_objectfs\task\delete_local_empty_directories',
         'blocking'  => 0,
         'minute'    => '0',

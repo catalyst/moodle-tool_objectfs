@@ -49,6 +49,8 @@ class object_location_history_table extends \table_sql {
             'local_size' => get_string('object_status:location:localsize', 'tool_objectfs'),
             'duplicated_count' => get_string('object_status:location:duplicatedcount', 'tool_objectfs'),
             'duplicated_size' => get_string('object_status:location:duplicatedsize', 'tool_objectfs'),
+            'archived_count' => get_string('object_status:location:archivedcount', 'tool_objectfs'),
+            'archived_size' => get_string('object_status:location:archivedsize', 'tool_objectfs'),
             'external_count' => get_string('object_status:location:externalcount', 'tool_objectfs'),
             'external_size' => get_string('object_status:location:externalsize', 'tool_objectfs'),
             'missing_count' => get_string('object_status:location:missingcount', 'tool_objectfs'),
@@ -86,23 +88,26 @@ class object_location_history_table extends \table_sql {
 
         foreach ($reports as $id => $timecreated) {
             $localcount = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->count + $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count;
-            $deltacount = abs($rawrecords[$id.'filedir']->count - $localcount);
+            $filedir = $rawrecords[$id.'filedir'];
+            $deltacount = abs($filedir->count - $localcount);
             $localsize = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->size + $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size;
-            $deltasize = abs($rawrecords[$id.'filedir']->size - $localsize);
+            $deltasize = abs($filedir->size - $localsize);
             $row['date'] = userdate($timecreated, get_string('strftimedaydatetime'));
             if ($this->is_downloading() && in_array($this->download, ['csv', 'excel', 'json', 'ods'])) {
                 $row['local_count'] = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->count;
                 $row['local_size'] = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->size;
                 $row['duplicated_count'] = $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count;
                 $row['duplicated_size'] = $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size;
+                $row['archived_count'] = $rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->count;
+                $row['archived_size'] = $rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->size;
                 $row['external_count'] = $rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->count;
                 $row['external_size'] = $rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->size;
                 $row['missing_count'] = $rawrecords[$id.OBJECT_LOCATION_ERROR]->count;
                 $row['missing_size'] = $rawrecords[$id.OBJECT_LOCATION_ERROR]->size;
                 $row['total_count'] = $rawrecords[$id.'total']->count;
                 $row['total_size'] = $rawrecords[$id.'total']->size;
-                $row['filedir_count'] = $rawrecords[$id.'filedir']->count;
-                $row['filedir_size'] = $rawrecords[$id.'filedir']->size;
+                $row['filedir_count'] = $filedir->count;
+                $row['filedir_size'] = $filedir->size;
                 $row['delta_count'] = $deltacount;
                 $row['delta_size'] = $deltasize;
             } else {
@@ -110,14 +115,16 @@ class object_location_history_table extends \table_sql {
                 $row['local_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_LOCAL]->size);
                 $row['duplicated_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count);
                 $row['duplicated_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size);
+                $row['archived_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->count);
+                $row['archived_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->size);
                 $row['external_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->count);
                 $row['external_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->size);
                 $row['missing_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_ERROR]->count);
                 $row['missing_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_ERROR]->size);
                 $row['total_count'] = number_format($rawrecords[$id.'total']->count);
                 $row['total_size'] = display_size($rawrecords[$id.'total']->size);
-                $row['filedir_count'] = number_format($rawrecords[$id.'filedir']->count);
-                $row['filedir_size'] = display_size($rawrecords[$id.'filedir']->size);
+                $row['filedir_count'] = number_format($filedir->count);
+                $row['filedir_size'] = display_size($filedir->size);
                 $row['delta_count'] = number_format($deltacount);
                 $row['delta_size'] = display_size($deltasize);
             }

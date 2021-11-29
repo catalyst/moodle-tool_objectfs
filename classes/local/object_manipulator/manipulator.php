@@ -119,12 +119,19 @@ abstract class manipulator implements object_manipulator {
     }
 
     /**
+     * Given an object record, the class implementing this will be able to manipulate
+     * the object, and return the new location of the object.
+     * @see examples in lib.php (OBJECT_LOCATION_*)
+     *
      * @param stdClass $objectrecord
-     * @return int
+     * @return int OBJECT_LOCATION_*
      */
     abstract public function manipulate_object(stdClass $objectrecord);
 
     /**
+     * Returns whether or not the particular manipulator will manipulate the
+     * object when execute is called.
+     *
      * @return bool
      */
     protected function manipulator_can_execute() {

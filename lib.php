@@ -28,6 +28,7 @@ use tool_objectfs\local\object_manipulator\manipulator_builder;
 defined('MOODLE_INTERNAL') || die;
 
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
+
 define('OBJECT_LOCATION_ARCHIVED', -2);
 define('OBJECT_LOCATION_ERROR', -1);
 define('OBJECT_LOCATION_LOCAL', 0);

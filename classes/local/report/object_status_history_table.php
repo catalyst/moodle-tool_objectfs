@@ -227,6 +227,7 @@ class object_status_history_table extends \table_sql {
             OBJECT_LOCATION_LOCAL => 'object_status:location:local',
             OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
             OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
+            OBJECT_LOCATION_ARCHIVED => 'object_status:location:archived',
         ];
         if (isset($locationstringmap[$filelocation])) {
             return get_string($locationstringmap[$filelocation], 'tool_objectfs');

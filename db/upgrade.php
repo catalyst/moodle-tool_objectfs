@@ -138,37 +138,5 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
 
         upgrade_plugin_savepoint(true, 2021090100, 'tool', 'objectfs');
     }
-
-    if ($oldversion < 2021102602) {
-      // Create the scheduled task for archiving orphaned {tool_objectfs_objects} records
-
-      $row = new stdclass;
-      $row->component = 'tool_objectfs';
-      $row->classname = '\tool_objectfs\task\archive_orphaned_objects';
-      $row->lastruntime = 0;
-      $row->nextruntime = time();
-      $row->blocking = 0;
-      $row->minute = 52;
-      $row->hour = '*/12';
-      $row->day = '*';
-      $row->month = '*';
-      $row->dayofweek = '*';
-      $row->faildelay = 0;
-      $row->customised = 0;
-      $row->disabled = 0;
-      $DB->insert_record('task_scheduled', $row);
-
-
-      //Bulk archive orphaned {tool_objectfs_object} records more efficiently than cron will.
-      $select = 'id IN (
-        SELECT o.id
-        FROM {tool_objectfs_objects} o
-        LEFT JOIN {files} f ON o.contenthash = f.contenthash
-        WHERE f.id is null
-      )';
-
-      $DB->set_field_select('tool_objectfs_objects', 'location', -2,  $select);
-      upgrade_plugin_savepoint(true, 2021102602, 'tool', 'objectfs');
-    }
     return true;
 }
