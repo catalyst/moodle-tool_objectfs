@@ -93,6 +93,10 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:deleteexternal', 'tool_objectfs'),
         new lang_string('settings:deleteexternal_help', 'tool_objectfs'), TOOL_OBJECTFS_DELETE_EXTERNAL_NO, $options));
 
+    $settings->add(new admin_setting_configduration('tool_objectfs/maxarchivedage',
+        new lang_string('settings:maxarchivedage', 'tool_objectfs'),
+        new lang_string('settings:maxarchivedage_help', 'tool_objectfs'), 0, DAYSECS));
+
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablelogging',
         new lang_string('settings:enablelogging', 'tool_objectfs'), '', ''));
 

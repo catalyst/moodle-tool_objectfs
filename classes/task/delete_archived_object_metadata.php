@@ -42,7 +42,12 @@ class delete_archived_object_metadata extends task {
         global $DB;
 
         $wheresql = 'location = :location and timeduplicated < :ageforremoval';
-        $ageforremoval = 30 * DAYSECS;
+        $ageforremoval = $this->config->maxarchivedage;
+        if (empty($ageforremoval)) {
+            mtrace('Skipping deletion of archived object metadata as maxarchivedage is set to an empty value.');
+            return;
+        }
+
         $params = [
             'location' => OBJECT_LOCATION_ARCHIVED,
             'ageforremoval' => time() - $ageforremoval
