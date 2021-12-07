@@ -99,7 +99,7 @@ class object_location_history_table extends \table_sql {
                 $row['duplicated_count'] = $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count;
                 $row['duplicated_size'] = $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size;
                 $row['orphaned_count'] = $rawrecords[$id.OBJECT_LOCATION_ORPHANED]->count;
-                $row['orphaned_size'] = $rawrecords[$id.OBJECT_LOCATION_ORPHANED]->size;
+                $row['orphaned_size'] = get_string('object_status:location:orphanedsizeunknown', 'tool_objectfs');
                 $row['external_count'] = $rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->count;
                 $row['external_size'] = $rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->size;
                 $row['missing_count'] = $rawrecords[$id.OBJECT_LOCATION_ERROR]->count;
@@ -116,7 +116,7 @@ class object_location_history_table extends \table_sql {
                 $row['duplicated_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count);
                 $row['duplicated_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size);
                 $row['orphaned_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_ORPHANED]->count);
-                $row['orphaned_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_ORPHANED]->size);
+                $row['orphaned_size'] = get_string('object_status:location:orphanedsizeunknown', 'tool_objectfs');
                 $row['external_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->count);
                 $row['external_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->size);
                 $row['missing_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_ERROR]->count);
