@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class archiver_candidates
+ * Class orphaner_candidates
  * @package tool_objectfs
  * @author Nathan Mares <ngmares@gmail.com>
  * @copyright Catalyst IT
@@ -26,10 +26,10 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 
 defined('MOODLE_INTERNAL') || die();
 
-class archiver_candidates extends manipulator_candidates_base {
+class orphaner_candidates extends manipulator_candidates_base {
 
     /** @var string $queryname */
-    protected $queryname = 'get_archive_candidates';
+    protected $queryname = 'get_orphan_candidates';
 
     /**
      * @inheritDoc
@@ -49,7 +49,7 @@ class archiver_candidates extends manipulator_candidates_base {
      */
     public function get_candidates_sql_params() {
         return [
-          'location' => OBJECT_LOCATION_ARCHIVED
+          'location' => OBJECT_LOCATION_ORPHANED
         ];
     }
 }

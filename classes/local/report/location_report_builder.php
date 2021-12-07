@@ -43,7 +43,7 @@ class location_report_builder extends objectfs_report_builder {
             OBJECT_LOCATION_LOCAL,
             OBJECT_LOCATION_DUPLICATED,
             OBJECT_LOCATION_EXTERNAL,
-            OBJECT_LOCATION_ARCHIVED,
+            OBJECT_LOCATION_ORPHANED,
             OBJECT_LOCATION_ERROR
         ];
 
@@ -66,11 +66,11 @@ class location_report_builder extends objectfs_report_builder {
                               HAVING o.location = ?' . $localsql .') AS sub
                      WHERE sub.filesize > 0';
 
-            if ($location !== OBJECT_LOCATION_ARCHIVED) {
+            if ($location !== OBJECT_LOCATION_ORPHANED) {
                 // Process the query normally.
                 $result = $DB->get_record_sql($sql, array($location));
-            } else if ($location === OBJECT_LOCATION_ARCHIVED) {
-                // Start the query from objectfs, for ARCHIVED objects, they are not located in the files table.
+            } else if ($location === OBJECT_LOCATION_ORPHANED) {
+                // Start the query from objectfs, for ORPHANED objects, they are not located in the files table.
                 $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) AS objectcount
                           FROM (SELECT o.contenthash
                                   FROM {tool_objectfs_objects} o

@@ -49,8 +49,8 @@ class object_location_history_table extends \table_sql {
             'local_size' => get_string('object_status:location:localsize', 'tool_objectfs'),
             'duplicated_count' => get_string('object_status:location:duplicatedcount', 'tool_objectfs'),
             'duplicated_size' => get_string('object_status:location:duplicatedsize', 'tool_objectfs'),
-            'archived_count' => get_string('object_status:location:archivedcount', 'tool_objectfs'),
-            'archived_size' => get_string('object_status:location:archivedsize', 'tool_objectfs'),
+            'orphaned_count' => get_string('object_status:location:orphanedcount', 'tool_objectfs'),
+            'orphaned_size' => get_string('object_status:location:orphanedsize', 'tool_objectfs'),
             'external_count' => get_string('object_status:location:externalcount', 'tool_objectfs'),
             'external_size' => get_string('object_status:location:externalsize', 'tool_objectfs'),
             'missing_count' => get_string('object_status:location:missingcount', 'tool_objectfs'),
@@ -98,8 +98,8 @@ class object_location_history_table extends \table_sql {
                 $row['local_size'] = $rawrecords[$id.OBJECT_LOCATION_LOCAL]->size;
                 $row['duplicated_count'] = $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count;
                 $row['duplicated_size'] = $rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size;
-                $row['archived_count'] = $rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->count;
-                $row['archived_size'] = $rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->size;
+                $row['orphaned_count'] = $rawrecords[$id.OBJECT_LOCATION_ORPHANED]->count;
+                $row['orphaned_size'] = $rawrecords[$id.OBJECT_LOCATION_ORPHANED]->size;
                 $row['external_count'] = $rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->count;
                 $row['external_size'] = $rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->size;
                 $row['missing_count'] = $rawrecords[$id.OBJECT_LOCATION_ERROR]->count;
@@ -115,8 +115,8 @@ class object_location_history_table extends \table_sql {
                 $row['local_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_LOCAL]->size);
                 $row['duplicated_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->count);
                 $row['duplicated_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_DUPLICATED]->size);
-                $row['archived_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->count);
-                $row['archived_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_ARCHIVED]->size);
+                $row['orphaned_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_ORPHANED]->count);
+                $row['orphaned_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_ORPHANED]->size);
                 $row['external_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->count);
                 $row['external_size'] = display_size($rawrecords[$id.OBJECT_LOCATION_EXTERNAL]->size);
                 $row['missing_count'] = number_format($rawrecords[$id.OBJECT_LOCATION_ERROR]->count);

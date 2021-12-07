@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Archives {tool_objectfs_objects} records for files that have been
+ * Orphans {tool_objectfs_objects} records for files that have been
  * deleted from the core {files} table.
  *
  * @package   tool_objectfs
@@ -31,7 +31,7 @@ use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
-class archiver extends manipulator {
+class orphaner extends manipulator {
 
     /**
      * Updates the location of {tool_objectfs_objects} records for files that
@@ -41,6 +41,6 @@ class archiver extends manipulator {
      * @return int
      */
     public function manipulate_object(stdClass $objectrecord): int {
-        return OBJECT_LOCATION_ARCHIVED;
+        return OBJECT_LOCATION_ORPHANED;
     }
 }

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that checks for old archived objects, and removes their metadata
+ * Task that checks for old orphaned objects, and removes their metadata
  * (record) as it is no longer useful/relevant.
  *
  * @package   tool_objectfs
@@ -30,10 +30,10 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../lib.php');
 
-class delete_archived_object_metadata extends task {
+class delete_orphaned_object_metadata extends task {
 
     /** @var string $stringname */
-    protected $stringname = 'delete_archived_object_metadata_task';
+    protected $stringname = 'delete_orphaned_object_metadata_task';
 
     /**
      * Execute task
@@ -42,19 +42,19 @@ class delete_archived_object_metadata extends task {
         global $DB;
 
         $wheresql = 'location = :location and timeduplicated < :ageforremoval';
-        $ageforremoval = $this->config->maxarchivedage;
+        $ageforremoval = $this->config->maxorphanedage;
         if (empty($ageforremoval)) {
-            mtrace('Skipping deletion of archived object metadata as maxarchivedage is set to an empty value.');
+            mtrace('Skipping deletion of orphaned object metadata as maxorphanedage is set to an empty value.');
             return;
         }
 
         $params = [
-            'location' => OBJECT_LOCATION_ARCHIVED,
+            'location' => OBJECT_LOCATION_ORPHANED,
             'ageforremoval' => time() - $ageforremoval
         ];
         $count = $DB->count_records_select('tool_objectfs_objects', $wheresql, $params);
         if (!empty($count)) {
-            mtrace("Deleting $count records with orphaned metadata (archived tool_objectfs_objects)");
+            mtrace("Deleting $count records with orphaned metadata (orphaned tool_objectfs_objects)");
             $DB->delete_records_select('tool_objectfs_objects', $wheresql, $params);
         }
     }

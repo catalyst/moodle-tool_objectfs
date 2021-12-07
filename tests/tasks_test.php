@@ -63,7 +63,7 @@ class tasks_testcase extends tool_objectfs_testcase {
             'push_objects_to_storage',
             'recover_error_objects',
             'check_objects_location',
-            'delete_archived_object_metadata',
+            'delete_orphaned_object_metadata',
         ];
 
         foreach ($scheduledtasknames as $taskname) {

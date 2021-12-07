@@ -31,7 +31,7 @@ use tool_objectfs\local\object_manipulator\deleter;
 use tool_objectfs\local\object_manipulator\puller;
 use tool_objectfs\local\object_manipulator\pusher;
 use tool_objectfs\local\object_manipulator\recoverer;
-use tool_objectfs\local\object_manipulator\archiver;
+use tool_objectfs\local\object_manipulator\orphaner;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -44,7 +44,7 @@ class candidates_factory {
         puller::class => puller_candidates::class,
         pusher::class => pusher_candidates::class,
         recoverer::class => recoverer_candidates::class,
-        archiver::class => archiver_candidates::class,
+        orphaner::class => orphaner_candidates::class,
     ];
 
     /**

@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die;
 
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
 
-define('OBJECT_LOCATION_ARCHIVED', -2);
+define('OBJECT_LOCATION_ORPHANED', -2);
 define('OBJECT_LOCATION_ERROR', -1);
 define('OBJECT_LOCATION_LOCAL', 0);
 define('OBJECT_LOCATION_DUPLICATED', 1);

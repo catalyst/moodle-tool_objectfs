@@ -54,7 +54,7 @@ $tasks = array(
         'month'     => '*'
     ),
     array(
-        'classname' => 'tool_objectfs\task\archive_orphaned_objects',
+        'classname' => 'tool_objectfs\task\orphan_objects',
         'blocking'  => 0,
         'minute'    => 'R',
         'hour'      => 'R',
@@ -63,7 +63,7 @@ $tasks = array(
         'month'     => '*'
     ),
     array(
-        'classname' => 'tool_objectfs\task\delete_archived_object_metadata',
+        'classname' => 'tool_objectfs\task\delete_orphaned_object_metadata',
         'blocking'  => 0,
         'minute'    => 'R',
         'hour'      => 'R',

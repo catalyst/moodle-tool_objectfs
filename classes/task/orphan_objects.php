@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that archives {tool_objectfs_object} records for deleted
+ * Task that orphans {tool_objectfs_object} records for deleted
  * {files} records.
  *
  * @package   tool_objectfs
@@ -26,16 +26,16 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\local\object_manipulator\archiver;
+use tool_objectfs\local\object_manipulator\orphaner;
 
 defined('MOODLE_INTERNAL') || die();
 
 
-class archive_orphaned_objects extends task {
+class orphan_objects extends task {
 
     /** @var string $manipulator */
-    protected $manipulator = archiver::class;
+    protected $manipulator = orphaner::class;
 
     /** @var string $stringname */
-    protected $stringname = 'archive_orphaned_objects_task';
+    protected $stringname = 'orphan_objects_task';
 }
