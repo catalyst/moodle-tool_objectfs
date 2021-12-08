@@ -29,10 +29,36 @@ defined('MOODLE_INTERNAL') || die;
 
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
 
+/**
+ * Location enum of the object
+ * ORPHANED is when the {objectfs_objects} table contains a record linking to a
+ * moodle {files} record which is no longer present.
+ */
 define('OBJECT_LOCATION_ORPHANED', -2);
+
+/**
+ * Location enum of the object
+ * ERROR is when the file is missing when it is expected to be there.
+ * @see tests/object_file_system_test.php for examples.
+ */
 define('OBJECT_LOCATION_ERROR', -1);
+
+/**
+ * Location enum of the object
+ * LOCAL is when the object exists locally only.
+ */
 define('OBJECT_LOCATION_LOCAL', 0);
+
+/**
+ * Location enum of the object
+ * DUPLICATED is when the object exists both locally, and remotely.
+ */
 define('OBJECT_LOCATION_DUPLICATED', 1);
+
+/**
+ * Location enum of the object
+ * EXTERNAL is when when the object lives remotely only.
+ */
 define('OBJECT_LOCATION_EXTERNAL', 2);
 
 define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
