@@ -441,9 +441,10 @@ class client extends object_client_base {
     /**
      * @param string $contenthash
      * @param array $headers
+     * @param bool $nicefilename
      * @return string
      */
-    private function generate_presigned_url_s3($contenthash, $headers) {
+    private function generate_presigned_url_s3($contenthash, array $headers = [], $nicefilename = true) {
         $contentdisposition = manager::get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
             $params['ResponseContentDisposition'] = $contentdisposition;
@@ -458,14 +459,12 @@ class client extends object_client_base {
         $params['Bucket'] = $this->bucket;
         $params['Key'] = $this->bucketkeyprefix . $key;
 
-        $contentdisposition = manager::get_header($headers, 'Content-Disposition');
-        if ($contentdisposition !== '') {
-            $params['ResponseContentDisposition'] = $contentdisposition;
-        }
-
-        $contenttype = manager::get_header($headers, 'Content-Type');
-        if ($contenttype !== '') {
-            $params['ResponseContentType'] = $contenttype;
+        if ($nicefilename) {
+            $result = $this->get_nice_filename($headers);
+            if (!empty($result)) {
+                $params['ResponseContentDisposition'] = $result['Content-Disposition'] . '; ' . $result['filename'];
+                $params['ResponseContentType'] = $result['Content-Type'];
+            }
         }
 
         $command = $this->client->getCommand('GetObject', $params);
@@ -489,7 +488,14 @@ class client extends object_client_base {
         $expires = $this->get_expiration_time(time(), manager::get_header($headers, 'Expires'));
 
         if ($nicefilename) {
-            $key .= $this->get_nice_filename($headers);
+            $result = $this->get_nice_filename($headers);
+            if (!empty($result)) {
+                $key .= '?response-content-disposition=' .
+                    rawurlencode($result['Content-Disposition'] . ';' . $result['filename']) .
+                    '&response-content-type=' . rawurlencode($result['Content-Type']);
+            } else {
+                $key .= '';
+            }
         }
         $resource = $this->config->cloudfrontresourcedomain . '/' . $key;
         // This is the id of the Cloudfront key pair you generated.
@@ -527,11 +533,12 @@ class client extends object_client_base {
 
     /**
      * @param $headers
-     * @return string
+     * @return array
      */
     private function get_nice_filename($headers) {
         // We are trying to deliver original filename rather than hash filename to client.
         $originalfilename = '';
+	$result = [];
         $contentdisposition = trim(manager::get_header($headers, 'Content-Disposition'));
         $originalcontenttype = trim(manager::get_header($headers, 'Content-Type'));
 
@@ -551,12 +558,12 @@ class client extends object_client_base {
             }
 
             if (!empty($originalfilename)) {
-                return '?response-content-disposition=' .
-                    rawurlencode($contentdisposition . ';filename="' . utf8_encode($originalfilename) . '"') .
-                    '&response-content-type=' . rawurlencode($originalcontenttype);
+                $result['Content-Disposition'] = $contentdisposition;
+                $result['filename'] = 'filename="' . utf8_encode($originalfilename) . '"';
+                $result['Content-Type'] = $originalcontenttype;
             }
         }
-        return '';
+        return $result;
     }
 
     /**
