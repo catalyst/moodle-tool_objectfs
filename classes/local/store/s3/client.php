@@ -571,26 +571,32 @@ class client extends object_client_base {
             // Convert to a valid timestamp.
             $expires = strtotime($expires);
         }
+        // Invalid or already expired:
         // If it's set to 0 or strtotime() returned false,
         // set it to default + 1 min as a healthy margin.
         if (empty($expires)) {
             $expires = $now + $this->expirationtime + MINSECS;
         }
-        // If it's already expired or expires less than in a minute,
-        // set it to 1 minute.
-        if ($expires < $now + MINSECS) {
-            $expires = $now + MINSECS;
+        // Expiry too short, push it out to the next 2 minutes (will round down later):
+        // If it's already expired or expires less than 2 minutes, set it to 2
+        // minutes. This works together with rounding down later on to ensure a
+        // non zero expiry time, and a minimum expiry of 1 minute.
+        if ($expires < $now + (2 * MINSECS)) {
+            $expires = $now + (2 * MINSECS);
         }
+        // Checks upper bound:
         // The expiration date of a signature version 4 presigned URL must be
         // less than one week. So if it's greater than a week set it to 1 week.
         // Use MINSECS as a healthy margin of error.
         if ($expires - $now > WEEKSECS - MINSECS) {
             $expires = $now + WEEKSECS - MINSECS;
         }
-        if (is_null($expires) || false === $expires) {
-            // Invalid date format use default instead.
-            $expires = $now + $this->expirationtime;
-        }
+        // Rounds (down) to nearest minute:
+        // With our new expiry time, ensure we round down to the nearest minute
+        // (#457) to ensure expiry of potentially the same file will use the
+        // same URL, and will result in less duplicate requests.
+        $expires -= ($expires % MINSECS);
+
         return $expires;
     }
 
