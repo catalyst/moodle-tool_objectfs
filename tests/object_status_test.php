@@ -85,8 +85,8 @@ class object_status_testcase extends tool_objectfs_testcase {
         $table->define_baseurl($CFG->wwwroot);
         $table->setup();
         $table->query_db(100, false);
-        // 7 is expected number of rows for location section of Object status report.
-        $this->assertEquals(7, count($table->rawdata));
+        // 8 is expected number of rows for location section of Object status report.
+        $this->assertEquals(8, count($table->rawdata));
     }
 
     /**

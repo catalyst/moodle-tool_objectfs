@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class pusher_candidates
+ * Class orphaner_candidates
  * @package tool_objectfs
- * @author Gleimer Mora <gleimermora@catalyst-au.net>
+ * @author Nathan Mares <ngmares@gmail.com>
  * @copyright Catalyst IT
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,28 +26,21 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/tests/classes/test_client.php');
-
-class pusher_candidates extends manipulator_candidates_base {
+class orphaner_candidates extends manipulator_candidates_base {
 
     /** @var string $queryname */
-    protected $queryname = 'get_push_candidates';
+    protected $queryname = 'get_orphan_candidates';
 
     /**
      * @inheritDoc
      * @return string
      */
     public function get_candidates_sql() {
-        return 'SELECT MAX(f.id),
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
-                  FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE f.filesize > :threshold
-                   AND f.filesize < :maximum_file_size
-                   AND f.timecreated <= :maxcreatedtimestamp
-                   AND o.location = :object_location
-              GROUP BY f.contenthash, o.location';
+        return 'SELECT o.id, o.contenthash, o.location
+                  FROM {tool_objectfs_objects} o
+             LEFT JOIN {files} f ON o.contenthash = f.contenthash
+                 WHERE f.id is null
+                   AND o.location != :location';
     }
 
     /**
@@ -55,12 +48,8 @@ class pusher_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        $filesystem = new $this->config->filesystem;
         return [
-            'maxcreatedtimestamp' => time() - $this->config->minimumage,
-            'threshold' => $this->config->sizethreshold,
-            'maximum_file_size' => $filesystem->get_maximum_upload_filesize(),
-            'object_location' => OBJECT_LOCATION_LOCAL,
+          'location' => OBJECT_LOCATION_ORPHANED
         ];
     }
 }

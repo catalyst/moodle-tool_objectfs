@@ -154,6 +154,10 @@ class object_status_history_table extends \table_sql {
      * @return string
      */
     public function col_size(\stdClass $row) {
+        // For orphaned entries, the filesize is N/A or Unknown. Note: non-strict check as the heading is a string.
+        if ($row->heading == OBJECT_LOCATION_ORPHANED) {
+            return get_string('object_status:location:orphanedsizeunknown', 'tool_objectfs');
+        }
         return $this->add_barchart($row->size, $this->maxsize, 'size');
     }
 
@@ -227,6 +231,7 @@ class object_status_history_table extends \table_sql {
             OBJECT_LOCATION_LOCAL => 'object_status:location:local',
             OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
             OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
+            OBJECT_LOCATION_ORPHANED => 'object_status:location:orphaned',
         ];
         if (isset($locationstringmap[$filelocation])) {
             return get_string($locationstringmap[$filelocation], 'tool_objectfs');
