@@ -713,36 +713,44 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      */
     public function test_get_expiration_time_method_if_supported_provider() {
         $now = time();
+
+        // Seconds after the minute from X.
+        $secondsafternow = ($now % MINSECS);
+        $secondsafternowsub100 = $secondsafternow;
+        $secondsafternowadd30 = $secondsafternow;
+        $secondsafternowadd100 = $secondsafternow;
+        $secondsafternowaddweek = ($now + WEEKSECS) % MINSECS;
+
         return [
             // Default Pre-Signed URL expiration time and int-like 'Expires' header.
-            [7200, $now, 0, $now + 7200 + MINSECS],
-            [7200, $now, $now - 100, $now + MINSECS],
-            [7200, $now, $now + 30, $now + MINSECS],
-            [7200, $now, $now + 100, $now + 100],
-            [7200, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS],
+            [7200, $now, 0, $now + 7200 + MINSECS - $secondsafternow],
+            [7200, $now, $now - 100, $now + (2 * MINSECS) - $secondsafternowsub100],
+            [7200, $now, $now + 30, $now + (2 * MINSECS) - $secondsafternowadd30],
+            [7200, $now, $now + 100, $now + (2 * MINSECS) - $secondsafternowadd100],
+            [7200, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Default Pre-Signed URL expiration time and string-like 'Expires' header.
-            [7200, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 7200 + MINSECS],
-            [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [7200, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100],
-            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS],
+            [7200, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 7200 + MINSECS - $secondsafternow],
+            [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
+            [7200, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
+            [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
+            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Custom Pre-Signed URL expiration time and int-like 'Expires' header.
-            [0, $now, 0, $now + MINSECS],
-            [600, $now, 0, $now + 600 + MINSECS],
-            [600, $now, $now - 100, $now + MINSECS],
-            [600, $now, $now + 30, $now + MINSECS],
-            [600, $now, $now + 100, $now + 100],
-            [600, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS],
+            [0, $now, 0, $now + (2 * MINSECS) - $secondsafternow],
+            [600, $now, 0, $now + 600 + MINSECS - $secondsafternow],
+            [600, $now, $now - 100, $now + (2 * MINSECS) - $secondsafternowsub100],
+            [600, $now, $now + 30, $now + (2 * MINSECS) - $secondsafternowadd30],
+            [600, $now, $now + 100, $now + (2 * MINSECS) - $secondsafternowadd100],
+            [600, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Custom Pre-Signed URL expiration time and string-like 'Expires' header.
-            [0, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + MINSECS],
-            [600, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 600 + MINSECS],
-            [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [600, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100],
-            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS],
+            [0, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + (2 * MINSECS) - $secondsafternow],
+            [600, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 600 + MINSECS - $secondsafternow],
+            [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
+            [600, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
+            [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
+            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
         ];
     }
 
