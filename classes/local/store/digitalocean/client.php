@@ -35,7 +35,6 @@ class client extends s3_client {
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
         $this->testdelete = false;
 
-
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
             $this->bucket = $config->do_space;
