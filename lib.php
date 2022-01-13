@@ -125,3 +125,20 @@ function tool_objectfs_status_checks() {
 
     return [];
 }
+
+/**
+ * Convert presigned URLs in $text to the origin URL.
+ *
+ * @param   string  $text The content that may contain ULRs in need of rewriting.
+ * @param   int     $contextid This parameter and the next two identify the file area to use.
+ * @return  string  The processed text.
+ */
+function tool_objectfs_file_rewrite_urls($text, $contextid) {
+    $fs = get_file_storage()->get_file_system();
+
+    if (!isset($fs->objectfs)) {
+        return $text;
+    }
+
+    return $fs->rewrite_pluginfile_urls($text);
+}

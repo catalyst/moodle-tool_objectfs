@@ -24,7 +24,7 @@ use tool_objectfs\local\manager;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class object_file_system_testcase extends tool_objectfs_testcase {
+class object_file_system_test extends tool_objectfs_testcase {
 
     public function set_externalclient_config($key, $value) {
         // Get a reflection of externalclient object as a property.
@@ -898,5 +898,88 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->filesystem->is_configured());
         unset($CFG->alternative_file_system_class);
         $this->assertFalse($this->filesystem->is_configured());
+    }
+
+    /**
+     * @return array
+     */
+    public function rewrite_pluginfile_urls_s3_provider() {
+        return [
+            ['/pluginfile.php', '/3854/tool_objectfs/content/1/test.pdf'],
+        ];
+    }
+
+    /**
+     * Test rewrite_pluginfile_urls() S3
+     *
+     * @dataProvider rewrite_pluginfile_urls_s3_provider
+     *
+     * @param string $script
+     * @param int    $pluginfile
+     */
+    public function test_rewrite_pluginfile_urls_s3_proper($script, $pluginfile) {
+        global $CFG, $ME;
+
+        if (!$CFG->phpunit_objectfs_s3_integration_test_credentials) {
+            $this->markTestSkipped('No S3 test credentials in config file');
+        }
+
+        $ME = "$script$pluginfile";
+        $bucket = $CFG->phpunit_objectfs_s3_integration_test_credentials['s3_bucket'];
+        $s3_region = $CFG->phpunit_objectfs_s3_integration_test_credentials['s3_region'];
+        $bucketkeyprefix = 'test/';
+        $presignedurl = "https://$bucket.s3.$s3_region.amazonaws.com/$bucketkeyprefix?param1=val1&param2=val2";
+
+        $this->filesystem = new test_file_system();
+        $externalclient = $this->filesystem->get_external_client();
+        $this->set_externalclient_config('enablepresignedurls', '1');
+        $this->set_externalclient_config('signingmethod', 's3');
+        $this->set_externalclient_config('bucketkeyprefix', $bucketkeyprefix);
+        $this->assertTrue($this->filesystem->presigned_url_configured());
+
+        $embedded = $this->filesystem->embed_origin_url($presignedurl);
+        $textformat = 'Fake test with pdf %s';
+        $originaltext = sprintf($textformat, $embedded);
+
+        $this->assertEquals(
+            sprintf($textformat, $CFG->wwwroot.$ME),
+            $this->filesystem->rewrite_pluginfile_urls($originaltext)
+        );
+    }
+
+    /**
+     * Test rewrite_pluginfile_urls() CloudFront
+     *
+     * @dataProvider rewrite_pluginfile_urls_s3_provider
+     *
+     * @param string $script
+     * @param int    $pluginfile
+     */
+    public function test_rewrite_pluginfile_urls_s3_cf($script, $pluginfile) {
+        global $CFG, $ME;
+
+        if (!$CFG->phpunit_objectfs_s3_integration_test_credentials) {
+            $this->markTestSkipped('No S3 test credentials in config file');
+        }
+
+        $ME = "$script$pluginfile";
+        $cloudfrontresourcedomain = 'https://presigned.url';
+        $presignedurl = "$cloudfrontresourcedomain/x?param1=val1&param2=val2";
+
+        $this->filesystem = new test_file_system();
+        $externalclient = $this->filesystem->get_external_client();
+        $this->set_externalclient_config('enablepresignedurls', '1');
+        $this->set_externalclient_config('signingmethod', 'cf');
+        $this->set_externalclient_config('cloudfrontresourcedomain', $cloudfrontresourcedomain);
+        $this->assertTrue($this->filesystem->presigned_url_configured());
+
+        $embedded = $this->filesystem->embed_origin_url($presignedurl);
+        $textformat = 'Fake test with pdf %s';
+        $originaltext = sprintf($textformat, $embedded);
+
+        $this->assertEquals(
+            sprintf($textformat, $CFG->wwwroot.$ME),
+            $this->filesystem->rewrite_pluginfile_urls($originaltext)
+        );
     }
 }
