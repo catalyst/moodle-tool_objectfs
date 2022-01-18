@@ -33,8 +33,6 @@ use tool_objectfs\local\object_manipulator\pusher;
 use tool_objectfs\local\object_manipulator\recoverer;
 use tool_objectfs\local\object_manipulator\orphaner;
 
-defined('MOODLE_INTERNAL') || die();
-
 class candidates_factory {
 
     /** @var array $manipulatormap */

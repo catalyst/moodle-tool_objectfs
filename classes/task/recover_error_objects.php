@@ -27,8 +27,6 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\recoverer;
 
-defined('MOODLE_INTERNAL') || die();
-
 class recover_error_objects extends task {
 
     /** @var string $manipulator */

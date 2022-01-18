@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\store\digitalocean;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\s3\client as s3_client;
 
 class client extends s3_client {

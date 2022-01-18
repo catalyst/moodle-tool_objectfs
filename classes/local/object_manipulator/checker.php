@@ -29,8 +29,6 @@ use stdClass;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
-defined('MOODLE_INTERNAL') || die();
-
 class checker extends manipulator {
 
     /**

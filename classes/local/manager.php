@@ -28,8 +28,6 @@ namespace tool_objectfs\local;
 use stdClass;
 use tool_objectfs\local\store\object_file_system;
 
-defined('MOODLE_INTERNAL') || die();
-
 class manager {
 
     /**

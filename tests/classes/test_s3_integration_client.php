@@ -16,8 +16,6 @@
 
 namespace tool_objectfs\tests;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\s3\client;
 
 class test_s3_integration_client extends client {

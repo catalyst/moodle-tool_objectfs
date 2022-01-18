@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
-defined('MOODLE_INTERNAL') || die();
-
 class recoverer_candidates extends manipulator_candidates_base {
 
     /** @var string $queryname */

@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\store;
 
-defined('MOODLE_INTERNAL') || die();
-
 abstract class object_client_base implements object_client {
 
     protected $autoloader;

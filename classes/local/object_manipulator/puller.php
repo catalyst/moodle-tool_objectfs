@@ -27,8 +27,6 @@ namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
 
-defined('MOODLE_INTERNAL') || die();
-
 class puller extends manipulator {
 
     /**

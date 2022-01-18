@@ -27,8 +27,6 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 use moodle_exception;
 use stdClass;
 
-defined('MOODLE_INTERNAL') || die();
-
 class candidates_finder {
 
     /** @var string $finder */
