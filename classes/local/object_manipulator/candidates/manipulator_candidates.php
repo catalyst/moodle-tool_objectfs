@@ -26,8 +26,6 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 
 use dml_exception;
 
-defined('MOODLE_INTERNAL') || die();
-
 interface manipulator_candidates {
 
     /**

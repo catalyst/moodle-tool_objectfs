@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\store;
 
-defined('MOODLE_INTERNAL') || die();
-
 interface object_client {
     public function __construct($config);
     public function register_stream_wrapper();

@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\store\swift;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\swift\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 

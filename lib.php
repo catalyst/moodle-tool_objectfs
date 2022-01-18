@@ -25,8 +25,6 @@
 
 use tool_objectfs\local\object_manipulator\manipulator_builder;
 
-defined('MOODLE_INTERNAL') || die;
-
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
 
 /**

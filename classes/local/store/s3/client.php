@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\store\s3;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 use local_aws\admin_settings_aws_region;

@@ -28,8 +28,6 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\orphaner;
 
-defined('MOODLE_INTERNAL') || die();
-
 
 class orphan_objects extends task {
 

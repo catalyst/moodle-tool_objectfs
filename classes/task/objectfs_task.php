@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 interface objectfs_task {
 
     /**

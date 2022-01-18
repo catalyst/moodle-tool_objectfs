@@ -28,8 +28,6 @@ namespace tool_objectfs\local\report;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 
-defined('MOODLE_INTERNAL') || die();
-
 class location_report_builder extends objectfs_report_builder {
 
     /**

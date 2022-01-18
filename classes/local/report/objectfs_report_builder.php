@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\report;
 
-defined('MOODLE_INTERNAL') || die();
-
 abstract class objectfs_report_builder {
 
     abstract public function build_report($reportid);

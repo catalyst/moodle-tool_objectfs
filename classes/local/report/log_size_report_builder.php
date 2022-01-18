@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\report;
 
-defined('MOODLE_INTERNAL') || die();
-
 class log_size_report_builder extends objectfs_report_builder {
 
     public function build_report($reportid) {

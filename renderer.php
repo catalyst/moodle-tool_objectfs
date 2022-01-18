@@ -27,8 +27,6 @@ use tool_objectfs\local\manager;
 use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\store\object_file_system;
 
-defined('MOODLE_INTERNAL') || die();
-
 class tool_objectfs_renderer extends plugin_renderer_base {
 
     /**

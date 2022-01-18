@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\store\azure;
 
-defined('MOODLE_INTERNAL') || die();
-
 use SimpleXMLElement;
 use stdClass;
 use tool_objectfs\local\store\azure\stream_wrapper;
