@@ -320,19 +320,6 @@ class client extends object_client_base {
     }
 
     /**
-     * Returns swift trash fullpath to use with php file functions.
-     *
-     * @param string $contenthash contenthash used as key in swift.
-     * @return string
-     * @throws \Exception if fails
-     */
-    public function get_trash_fullpath_from_hash($contenthash) {
-        $container = $this->get_container();
-        $filepath = $this->get_filepath_from_hash($contenthash);
-        return "swift://$container->name/trash/$filepath";
-    }
-
-    /**
      * Returns relative path to blob from fullpath to use with php file functions.
      *
      * @param string $fullpath full path to azure blob.

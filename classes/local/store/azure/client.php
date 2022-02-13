@@ -106,17 +106,6 @@ class client extends object_client_base {
     }
 
     /**
-     * Returns azure trash fullpath to use with php file functions.
-     *
-     * @param  string $contenthash contenthash used as key in azure.
-     * @return string trash fullpath to azure object.
-     */
-    public function get_trash_fullpath_from_hash($contenthash) {
-        $filepath = $this->get_filepath_from_hash($contenthash);
-        return "blob://$this->container/trash/$filepath";
-    }
-
-    /**
      * Deletes file (blob) in azure blob storage.
      *
      * @param string $fullpath path to azure blob.

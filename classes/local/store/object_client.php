@@ -29,7 +29,6 @@ interface object_client {
     public function __construct($config);
     public function register_stream_wrapper();
     public function get_fullpath_from_hash($contenthash);
-    public function get_trash_fullpath_from_hash($contenthash);
     public function delete_file($fullpath);
     public function rename_file($currentpath, $destinationpath);
     public function get_seekable_stream_context();

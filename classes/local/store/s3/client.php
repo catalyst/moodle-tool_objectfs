@@ -153,17 +153,6 @@ class client extends object_client_base {
     }
 
     /**
-     * Returns s3 trash fullpath to use with php file functions.
-     *
-     * @param  string $contenthash contenthash used as key in s3.
-     * @return string trash fullpath to s3 object.
-     */
-    public function get_trash_fullpath_from_hash($contenthash) {
-        $filepath = $this->get_filepath_from_hash($contenthash);
-        return "s3://$this->bucket/" . $this->bucketkeyprefix . "trash/$filepath";
-    }
-
-    /**
      * Deletes a file in S3 storage.
      *
      * @path   string full path to S3 file.
