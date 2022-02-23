@@ -122,12 +122,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         return $reflection->invokeArgs($this->filesystem, [$contenthash]);
     }
 
-    protected function get_external_trash_path_from_hash($contenthash) {
-        $reflection = new \ReflectionMethod(object_file_system::class, 'get_external_trash_path_from_hash');
-        $reflection->setAccessible(true);
-        return $reflection->invokeArgs($this->filesystem, [$contenthash]);
-    }
-
     protected function get_external_path_from_storedfile($file) {
         $contenthash = $file->get_contenthash();
         return $this->get_external_path_from_hash($contenthash);
@@ -136,12 +130,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
     // We want acces to local path for testing so we use a reflection method as opposed to rewriting here.
     protected function get_local_path_from_hash($contenthash) {
         $reflection = new \ReflectionMethod(object_file_system::class, 'get_local_path_from_hash');
-        $reflection->setAccessible(true);
-        return $reflection->invokeArgs($this->filesystem, [$contenthash]);
-    }
-
-    protected function get_trash_fullpath_from_hash($contenthash) {
-        $reflection = new \ReflectionMethod(object_file_system::class, 'get_trash_fullpath_from_hash');
         $reflection->setAccessible(true);
         return $reflection->invokeArgs($this->filesystem, [$contenthash]);
     }
@@ -203,16 +191,6 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $reflection = new \ReflectionMethod(object_file_system::class, 'acquire_object_lock');
         $reflection->setAccessible(true);
         return $reflection->invokeArgs($this->filesystem, [$filehash, $timeout]);
-    }
-
-    protected function is_locally_readable_by_hash_in_trashdir($contenthash) {
-        $externalpath = $this->get_trash_fullpath_from_hash($contenthash);
-        return is_readable($externalpath);
-    }
-
-    protected function is_externally_readable_by_hash_in_trashdir($contenthash) {
-        $externalpath = $this->get_external_trash_path_from_hash($contenthash);
-        return is_readable($externalpath);
     }
 
     protected function delete_draft_files($contenthash) {

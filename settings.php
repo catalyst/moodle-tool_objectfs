@@ -87,7 +87,7 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:maxtaskruntime', 'tool_objectfs'), '', HOURSECS, MINSECS));
 
     $options = [TOOL_OBJECTFS_DELETE_EXTERNAL_NO => new lang_string('no'),
-                TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH => new lang_string('settings:sendtotrash', 'tool_objectfs'),
+                TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH => new lang_string('settings:relyonorphancleanup', 'tool_objectfs'),
                 TOOL_OBJECTFS_DELETE_EXTERNAL_FULL => new lang_string('settings:fulldelete', 'tool_objectfs')];
     $settings->add(new admin_setting_configselect('tool_objectfs/deleteexternal',
         new lang_string('settings:deleteexternal', 'tool_objectfs'),

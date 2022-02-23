@@ -159,10 +159,6 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient->get_fullpath_from_hash($contenthash);
     }
 
-    protected function get_external_trash_path_from_hash($contenthash) {
-        return $this->externalclient->get_trash_fullpath_from_hash($contenthash);
-    }
-
     protected function get_external_path_from_storedfile(\stored_file $file) {
         return $this->get_external_path_from_hash($file->get_contenthash());
     }
@@ -190,19 +186,6 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $path = $this->get_external_path_from_hash($contenthash, false);
-
-        // Note - it is not possible to perform a content recovery safely from a hash alone.
-        return is_readable($path);
-    }
-
-    public function is_file_readable_externally_in_trash_by_hash($contenthash) {
-        if ($contenthash === sha1('')) {
-            // Files with empty size are either directories or empty.
-            // We handle these virtually.
-            return true;
-        }
-
-        $path = $this->get_external_trash_path_from_hash($contenthash, false);
 
         // Note - it is not possible to perform a content recovery safely from a hash alone.
         return is_readable($path);
@@ -597,7 +580,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Extends recover_file to recover missing content of file from trash.
+     * Extends recover_file to recover missing content of file.
      *
      * @param stored_file $file stored_file instance
      * @return bool success
@@ -610,23 +593,7 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
-        $contenthash = $file->get_contenthash();
-        $externalreadable = $this->is_file_readable_externally_in_trash_by_hash($contenthash);
-
-        if ($externalreadable) {
-            $trashfile = $this->get_external_trash_path_from_hash($contenthash);
-
-            if (filesize($trashfile) != $file->get_filesize() or $this->hash_from_path($trashfile) != $contenthash) {
-                // The files are different. Leave this one in trash - something seems to be wrong with it.
-                return false;
-            }
-
-            $this->rename_external_file($trashfile, $contentfile);
-            return true;
-
-        } else {
-            return parent::recover_file($file);
-        }
+        return parent::recover_file($file);
     }
 
     /**
@@ -652,47 +619,14 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Copies local file to trashdir by its hash
-     *
-     * @param string $contenthash file to be copied
-     */
-    public function copy_local_file_to_trashdir_from_hash($contenthash) {
-        $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
-        $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
-
-        if (!is_dir($trashpath)) {
-            mkdir($trashpath, $this->dirpermissions, true);
-        }
-
-        if (file_exists($trashfile)) {
-            // A copy of this file is already in the trash.
-            return;
-        }
-
-        $this->copy_file_from_hash_to_path($contenthash, $trashfile);
-
-        // Fix permissions, only if needed.
-        $currentperms = octdec(substr(decoct(fileperms($trashfile)), -4));
-        if ((int)$this->filepermissions !== $currentperms) {
-            chmod($trashfile, $this->filepermissions);
-        }
-    }
-
-    /**
-     * Deletes external file or moves to trashdir by its hash
+     * Deletes external file depending on deleteexternal settings.
      *
      * @param string $contenthash file to be moved
      */
-    public function delete_external_file_from_hash($contenthash) {
-        if (!empty($this->deleteexternally)) {
+    public function delete_external_file_from_hash($contenthash, $force = false) {
+        if ($force || (!empty($this->deleteexternally) && $this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_FULL)) {
             $currentpath = $this->get_external_path_from_hash($contenthash);
-            if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {
-                $destinationpath = $this->get_external_trash_path_from_hash($contenthash);
-
-                $this->rename_external_file($currentpath, $destinationpath);
-            } else if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_FULL) {
-                $this->externalclient->delete_file($currentpath);
-            }
+            $this->externalclient->delete_file($currentpath);
         }
     }
 
@@ -706,7 +640,6 @@ abstract class object_file_system extends \file_system_filedir {
 
         switch ($location) {
             case OBJECT_LOCATION_LOCAL:
-                $this->copy_local_file_to_trashdir_from_hash($contenthash);
                 $this->delete_local_file_from_hash($contenthash);
                 break;
 
@@ -1029,5 +962,32 @@ abstract class object_file_system extends \file_system_filedir {
 
         // Looks like all checks have been passed.
         return true;
+    }
+
+    /**
+     * No cleanup required - don't trigger filesystem trash clear.
+     */
+    public function cron() {
+        return true;
+    }
+
+    /**
+     * Object fs doens't use trashdir - trigger exception.
+     *
+     * @param string $contenthash The content hash
+     * @return string The full path to the trash directory
+     */
+    protected function get_trash_fulldir_from_hash($contenthash) {
+        throw new \coding_exception('Objectfs does not implement a trashdir.');
+    }
+
+    /**
+     * Object fs doens't use trashdir - trigger exception.
+     *
+     * @param string $contenthash The content hash
+     * @return string The full path to the trash file
+     */
+    protected function get_trash_fullpath_from_hash($contenthash) {
+        throw new \coding_exception('Objectfs does not implement a trashdir.');
     }
 }
