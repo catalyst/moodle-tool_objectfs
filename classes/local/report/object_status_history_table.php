@@ -248,7 +248,7 @@ class object_status_history_table extends \table_sql {
     public function get_size_range_from_logsize($logsize) {
         // Small logsizes have been compressed.
         if ($logsize == 'small' || $logsize == 1) {
-            return '< 1KB';
+            return '< ' . display_size(1024);
         }
         $floor = pow(2, $logsize);
         $roof = ($floor * 2);

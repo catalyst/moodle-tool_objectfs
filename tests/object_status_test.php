@@ -176,18 +176,22 @@ class object_status_testcase extends tool_objectfs_testcase {
     public function test_object_status_add_barchart_method_provider() {
         return [
             [0, 0, '', 0, '0'],
-            [0, 100, 'count', 0, '<div class="ofs-bar" style="width:0%">0</div>'],
-            [0, 100, 'size', 0, '<div class="ofs-bar" style="width:0%">0 bytes</div>'],
-            [0, 100, 'runningsize', 0, '<div class="ofs-bar" style="width:0%">0% (0 bytes)</div>'],
-            [0, 100, 'count', 2, '<div class="ofs-bar" style="width:0%">0</div>'],
-            [0, 100, 'size', 2, '<div class="ofs-bar" style="width:0%">0 bytes</div>'],
-            [0, 100, 'runningsize', 2, '<div class="ofs-bar" style="width:0%">0.00% (0 bytes)</div>'],
-            [10, 100, 'count', 2, '<div class="ofs-bar" style="width:10%">10</div>'],
-            [10, 100, 'size', 2, '<div class="ofs-bar" style="width:10%">10 bytes</div>'],
-            [10, 100, 'runningsize', 2, '<div class="ofs-bar" style="width:10%">10.00% (10 bytes)</div>'],
-            [12345678, 123456789, 'count', 0, '<div class="ofs-bar" style="width:10%">12,345,678</div>'],
-            [12345678, 123456789, 'size', 0, '<div class="ofs-bar" style="width:10%">11.8MB</div>'],
-            [12345678, 123456789, 'runningsize', 2, '<div class="ofs-bar" style="width:10%">10.00% (11.8MB)</div>'],
+            [0, 100, 'count', 0, '<div class="ofs-bar" style="width:0%">' . number_format(0) . '</div>'],
+            [0, 100, 'size', 0, '<div class="ofs-bar" style="width:0%">' . display_size(0) . '</div>'],
+            [0, 100, 'runningsize', 0,
+                '<div class="ofs-bar" style="width:0%">' . number_format(0) . '% (' . display_size(0) . ')</div>'],
+            [0, 100, 'count', 2, '<div class="ofs-bar" style="width:0%">' . number_format(0) . '</div>'],
+            [0, 100, 'size', 2, '<div class="ofs-bar" style="width:0%">' . display_size(0) . '</div>'],
+            [0, 100, 'runningsize', 2,
+                '<div class="ofs-bar" style="width:0%">' . number_format(0, 2) . '% (' . display_size(0) . ')</div>'],
+            [10, 100, 'count', 2, '<div class="ofs-bar" style="width:10%">' . number_format(10) . '</div>'],
+            [10, 100, 'size', 2, '<div class="ofs-bar" style="width:10%">' . display_size(10) . '</div>'],
+            [10, 100, 'runningsize', 2,
+                '<div class="ofs-bar" style="width:10%">' . number_format(10, 2) . '% (' . display_size(10) . ')</div>'],
+            [12345678, 123456789, 'count', 0, '<div class="ofs-bar" style="width:10%">' . number_format(12345678) . '</div>'],
+            [12345678, 123456789, 'size', 0, '<div class="ofs-bar" style="width:10%">' . display_size(12345678) . '</div>'],
+            [12345678, 123456789, 'runningsize', 2,
+                '<div class="ofs-bar" style="width:10%">' . number_format(10, 2) . '% (' . display_size(12345678) . ')</div>'],
         ];
     }
 
@@ -215,13 +219,13 @@ class object_status_testcase extends tool_objectfs_testcase {
      */
     public function test_object_status_get_size_range_from_logsize_provider() {
         return [
-            ['1', '< 1KB'],
-            ['10', '1KB - 2KB'],
-            ['11', '2KB - 4KB'],
-            ['20', '1MB - 2MB'],
-            ['21', '2MB - 4MB'],
-            ['30', '1GB - 2GB'],
-            ['31', '2GB - 4GB'],
+            ['1', '< ' . display_size(1024)],
+            ['10', display_size(1024) . ' - ' . display_size(2048)],
+            ['11', display_size(2048) . ' - ' . display_size(4096)],
+            ['20', display_size(1048576) . ' - ' . display_size(2097152)],
+            ['21', display_size(2097152) . ' - ' . display_size(4194304)],
+            ['30', display_size(1073741824) . ' - ' . display_size(2147483648)],
+            ['31', display_size(2147483648) . ' - ' . display_size(4294967296)],
         ];
     }
 
