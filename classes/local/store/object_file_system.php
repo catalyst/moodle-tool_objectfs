@@ -736,8 +736,29 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function redirect_to_presigned_url($contenthash, $headers = array()) {
+        global $FULLME;
         try {
-            redirect($this->externalclient->generate_presigned_url($contenthash, $headers));
+            $signedurl = $this->externalclient->generate_presigned_url($contenthash, $headers);
+            if (headers_sent()) {
+                debugging('objectfs redirect for ' . $contenthash . ' from ' . $FULLME .
+                        ': headers already sent; redirect may be incorrectly cached in browser');
+            } else {
+                // Remove all previously-set headers.
+                foreach (headers_list() as $header) {
+                    // Get header name (text before the colon).
+                    if (preg_match('~^([^:]+):~', $header, $matches)) {
+                        header_remove($matches[1]);
+                    }
+                }
+                // Set expires and cache-control values to match the presigned URL expiry, which may be
+                // different to values previously set.
+                header('Expires: '. gmdate('D, d M Y H:i:s', $signedurl->expiresat) .' GMT');
+                // Use 'private' to allow browser caching only, otherwise via a shared cache users might
+                // be able to redirect to content that was only supposed to be displayed to a different
+                // user.
+                header('Cache-Control: private, max-age=' . ($signedurl->expiresat - time()));
+            }
+            redirect($signedurl->url);
         } catch (\Exception $e) {
             debugging('Failed to redirect to pre-signed url: ' . $e->getMessage());
             return false;
