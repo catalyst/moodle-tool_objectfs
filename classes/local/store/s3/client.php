@@ -27,6 +27,7 @@ namespace tool_objectfs\local\store\s3;
 
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
+use tool_objectfs\local\store\signed_url;
 use local_aws\admin_settings_aws_region;
 
 define('AWS_API_VERSION', '2006-03-01');
@@ -415,7 +416,7 @@ class client extends object_client_base {
      * @param string $contenthash file content hash.
      * @param array $headers request headers.
      *
-     * @return string.
+     * @return signed_url
      * @throws \Exception
      */
     public function generate_presigned_url($contenthash, $headers = array()) {
@@ -428,7 +429,7 @@ class client extends object_client_base {
     /**
      * @param string $contenthash
      * @param array $headers
-     * @return string
+     * @return signed_url
      */
     private function generate_presigned_url_s3($contenthash, $headers) {
         $contentdisposition = manager::get_header($headers, 'Content-Disposition');
@@ -460,14 +461,14 @@ class client extends object_client_base {
         $request = $this->client->createPresignedRequest($command, $expires);
 
         $signedurl = (string)$request->getUri();
-        return $signedurl;
+        return new signed_url(new \moodle_url($signedurl), $expires);
     }
 
     /**
      * @param string $contenthash
      * @param array $headers
      * @param bool $nicefilename
-     * @return string
+     * @return signed_url
      * @throws \Exception
      */
     private function generate_presigned_url_cloudfront($contenthash, array $headers = [], $nicefilename = true) {
@@ -509,7 +510,7 @@ class client extends object_client_base {
 
         // Construct the URL.
         $params = ['Expires' => $expires, 'Signature' => $signature, 'Key-Pair-Id' => $keypairid];
-        return new \moodle_url($resource, $params);
+        return new signed_url(new \moodle_url($resource, $params), $expires);
     }
 
     /**
@@ -692,7 +693,8 @@ class client extends object_client_base {
      */
     public function curl_range_request_to_presigned_url($contenthash, $ranges, $headers) {
         try {
-            $url = $this->generate_presigned_url_s3($contenthash, $headers);
+            $signedurl = $this->generate_presigned_url_s3($contenthash, $headers);
+            $url = $signedurl->url;
         } catch (\Exception $e) {
             throw new \coding_exception('Failed to generate pre-signed url: ' . $e->getMessage());
         }
