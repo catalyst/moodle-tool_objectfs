@@ -743,20 +743,30 @@ abstract class object_file_system extends \file_system_filedir {
                 debugging('objectfs redirect for ' . $contenthash . ' from ' . $FULLME .
                         ': headers already sent; redirect may be incorrectly cached in browser');
             } else {
-                // Remove all previously-set headers.
+                // Remove all previously-set headers, and look for cache-control setting.
+                $cachecontrol = '';
                 foreach (headers_list() as $header) {
                     // Get header name (text before the colon).
-                    if (preg_match('~^([^:]+):~', $header, $matches)) {
+                    if (preg_match('~^([^:]+):(.*)$~', $header, $matches)) {
+                        if (strtolower($matches[1]) === 'cache-control') {
+                            $cachecontrol = $matches[2];
+                        }
                         header_remove($matches[1]);
                     }
                 }
                 // Set expires and cache-control values to match the presigned URL expiry, which may be
                 // different to values previously set.
                 header('Expires: '. gmdate('D, d M Y H:i:s', $signedurl->expiresat) .' GMT');
-                // Use 'private' to allow browser caching only, otherwise via a shared cache users might
+                // Unless cache-control was previously set to 'public' by Moodle for the actual file send,
+                // use 'private' to allow browser caching only; otherwise via a shared cache users might
                 // be able to redirect to content that was only supposed to be displayed to a different
                 // user.
-                header('Cache-Control: private, max-age=' . ($signedurl->expiresat - time()));
+                if (strpos($cachecontrol, 'public') !== false) {
+                    $publicprivate = 'public';
+                } else {
+                    $publicprivate = 'private';
+                }
+                header('Cache-Control: ' . $publicprivate . ', max-age=' . ($signedurl->expiresat - time()));
             }
             redirect($signedurl->url);
         } catch (\Exception $e) {
