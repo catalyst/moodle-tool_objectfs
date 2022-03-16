@@ -748,10 +748,11 @@ abstract class object_file_system extends \file_system_filedir {
                 foreach (headers_list() as $header) {
                     // Get header name (text before the colon).
                     if (preg_match('~^([^:]+):(.*)$~', $header, $matches)) {
-                        if (strtolower($matches[1]) === 'cache-control') {
-                            $cachecontrol = $matches[2];
+                        [, $headername, $headervalue] = $matches;
+                        if (strtolower($headername) === 'cache-control') {
+                            $cachecontrol = $headervalue;
                         }
-                        header_remove($matches[1]);
+                        header_remove($headername);
                     }
                 }
                 // Set expires and cache-control values to match the presigned URL expiry, which may be
@@ -761,12 +762,11 @@ abstract class object_file_system extends \file_system_filedir {
                 // use 'private' to allow browser caching only; otherwise via a shared cache users might
                 // be able to redirect to content that was only supposed to be displayed to a different
                 // user.
+                $cachevisibility = 'private';
                 if (strpos($cachecontrol, 'public') !== false) {
-                    $publicprivate = 'public';
-                } else {
-                    $publicprivate = 'private';
+                    $cachevisibility = 'public';
                 }
-                header('Cache-Control: ' . $publicprivate . ', max-age=' . ($signedurl->expiresat - time()));
+                header('Cache-Control: ' . $cachevisibility . ', max-age=' . ($signedurl->expiresat - time()));
             }
             redirect($signedurl->url);
         } catch (\Exception $e) {
