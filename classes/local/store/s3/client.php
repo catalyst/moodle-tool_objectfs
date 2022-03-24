@@ -107,7 +107,7 @@ class client extends object_client_base {
             return false;
         }
 
-        if (empty($config->s3_usesdkcreds) && empty($config->s3_key) && empty($config->s3_secret)) {
+        if (empty($config->s3_usesdkcreds) && (empty($config->s3_key) || empty($config->s3_secret))) {
             return false;
         }
 
