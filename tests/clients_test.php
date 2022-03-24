@@ -48,7 +48,7 @@ class clients_test extends \advanced_testcase {
     /**
      * Test client without configuration.
      *
-     * @dataProvider  s3_client_test_connection_if_not_configured_properly_data_provider
+     * @dataProvider s3_client_test_connection_if_not_configured_properly_data_provider
      * @param array $config Config to test on.
      *
      */
@@ -68,7 +68,7 @@ class clients_test extends \advanced_testcase {
     }
 
     /**
-     * Data provider for testing s3 client connection.
+     * Data provider for testing digitalocean client connection.
      *
      * @return \array[][]
      */
@@ -88,7 +88,7 @@ class clients_test extends \advanced_testcase {
     /**
      * Test client without configuration.
      *
-     * @dataProvider  digitalocean_client_test_connection_if_not_configured_properly_data_provider
+     * @dataProvider digitalocean_client_test_connection_if_not_configured_properly_data_provider
      * @param array $config Config to test on.
      *
      */
