@@ -79,10 +79,52 @@ class client extends object_client_base {
         // it will be serialised, so re-retrive them now.
         $config = manager::get_objectfs_config();
         $this->set_client($config);
-        $this->client->registerStreamWrapper();
+        if ($this->is_functional()) {
+            $this->client->registerStreamWrapper();
+        }
     }
 
+    /**
+     * Check if the client is functional.
+     * @return bool
+     */
+    protected function is_functional() {
+        return isset($this->client);
+    }
+
+    /**
+     * Check if the client configured properly.
+     *
+     * @param \stdClass $config Client config.
+     * @return bool
+     */
+    protected function is_configured($config) {
+        if (empty($config->s3_bucket)) {
+            return false;
+        }
+
+        if (empty($config->s3_region)) {
+            return false;
+        }
+
+        if (empty($config->s3_usesdkcreds) && (empty($config->s3_key) || empty($config->s3_secret))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Set the client.
+     *
+     * @param \stdClass $config Client config.
+     */
     public function set_client($config) {
+        if (!$this->is_configured($config)) {
+            $this->client = null;
+            return;
+        }
+
         $options = array(
             'region' => $config->s3_region,
             'version' => AWS_API_VERSION
@@ -109,7 +151,7 @@ class client extends object_client_base {
      *
      */
     public function register_stream_wrapper() {
-        if ($this->get_availability()) {
+        if ($this->get_availability() && $this->is_functional()) {
             $this->client->registerStreamWrapper();
         } else {
             parent::register_stream_wrapper();
@@ -117,6 +159,10 @@ class client extends object_client_base {
     }
 
     private function get_md5_from_hash($contenthash) {
+        if (!$this->is_functional()) {
+            return false;
+        }
+
         try {
             $key = $this->get_filepath_from_hash($contenthash);
             $result = $this->client->headObject(array(
@@ -207,7 +253,12 @@ class client extends object_client_base {
         $connection->details = '';
 
         try {
-            $this->client->headBucket(array('Bucket' => $this->bucket));
+            if (!$this->is_functional()) {
+                $connection->success = false;
+                $connection->details = get_string('settings:notconfigured', 'tool_objectfs');
+            } else {
+                $this->client->headBucket(array('Bucket' => $this->bucket));
+            }
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $connection->success = false;
             $connection->details = $this->get_exception_details($e);
@@ -235,11 +286,17 @@ class client extends object_client_base {
         $permissions->success = true;
         $permissions->messages = array();
 
+        if ($this->is_functional()) {
+            $permissions->success = false;
+            $permissions->messages = array();
+            return $permissions;
+        }
+
         try {
             $result = $this->client->putObject(array(
-                            'Bucket' => $this->bucket,
-                            'Key' => $this->bucketkeyprefix . 'permissions_check_file',
-                            'Body' => 'test content'));
+                'Bucket' => $this->bucket,
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file',
+                'Body' => 'test content'));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
@@ -248,8 +305,8 @@ class client extends object_client_base {
 
         try {
             $result = $this->client->getObject(array(
-                            'Bucket' => $this->bucket,
-                            'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+                'Bucket' => $this->bucket,
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $errorcode = $e->getAwsErrorCode();
             // Write could have failed.

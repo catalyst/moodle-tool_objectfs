@@ -250,7 +250,7 @@ $string['presignedurl_testing:checkclientsettings'] = 'Check client settings at 
 $string['presignedurl_testing:checkfssettings'] = 'Check filesystem settings at ';
 
 $string['settings:connectionsuccess'] = 'Could establish connection to the external object storage.';
-$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage.';
+$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage. {$a}';
 $string['settings:writefailure'] = 'Could not write object to the external object storage. ';
 $string['settings:readfailure'] = 'Could not read object from the external object storage. ';
 $string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
@@ -262,5 +262,6 @@ $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
 
 $string['settings:error:numeric'] = 'Please enter a number which is greater than or equal 0.';
+$string['settings:notconfigured'] = 'Missing configuration.';
 $string['total_deleted_dirs'] = 'Total number of deleted directories: ';
 $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up https://github.com/catalyst/moodle-tool_objectfs#applying-core-patches';
