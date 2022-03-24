@@ -89,7 +89,7 @@ class client extends object_client_base {
      * @return bool
      */
     private function is_functional() {
-        return !is_null($this->client);
+        return isset($this->client);
     }
 
     /**
@@ -107,10 +107,8 @@ class client extends object_client_base {
             return false;
         }
 
-        if (empty($config->s3_usesdkcreds)) {
-            if (empty($config->s3_key) && empty($config->s3_secret)) {
-                return false;
-            }
+        if (empty($config->s3_usesdkcreds) && empty($config->s3_key) && empty($config->s3_secret)) {
+            return false;
         }
 
         return true;
@@ -124,27 +122,28 @@ class client extends object_client_base {
     public function set_client($config) {
         if (!$this->is_configured($config)) {
             $this->client = null;
-        } else {
-            $options = array(
-                'region' => $config->s3_region,
-                'version' => AWS_API_VERSION
-            );
-
-            if (empty($config->s3_usesdkcreds)) {
-                $options['credentials'] = array('key' => $config->s3_key, 'secret' => $config->s3_secret);
-            }
-
-            if ($config->useproxy) {
-                $options['http'] = array('proxy' => $this->get_proxy_string());
-            }
-
-            // Support base_url config for aws api compatible endpoints.
-            if ($config->s3_base_url) {
-                $options['endpoint'] = $config->s3_base_url;
-            }
-
-            $this->client = \Aws\S3\S3Client::factory($options);
+            return;
         }
+
+        $options = array(
+            'region' => $config->s3_region,
+            'version' => AWS_API_VERSION
+        );
+
+        if (empty($config->s3_usesdkcreds)) {
+            $options['credentials'] = array('key' => $config->s3_key, 'secret' => $config->s3_secret);
+        }
+
+        if ($config->useproxy) {
+            $options['http'] = array('proxy' => $this->get_proxy_string());
+        }
+
+        // Support base_url config for aws api compatible endpoints.
+        if ($config->s3_base_url) {
+            $options['endpoint'] = $config->s3_base_url;
+        }
+
+        $this->client = \Aws\S3\S3Client::factory($options);
     }
 
     /**
@@ -253,23 +252,22 @@ class client extends object_client_base {
         $connection->success = true;
         $connection->details = '';
 
-        if (!$this->is_functional()) {
-            $connection->success = false;
-            $connection->details = '';
-        } else {
-            try {
+        try {
+            if (!$this->is_functional()) {
+                $connection->success = false;
+                $connection->details = get_string('settings:notconfigured', 'tool_objectfs');
+            } else {
                 $this->client->headBucket(array('Bucket' => $this->bucket));
-            } catch (\Aws\S3\Exception\S3Exception $e) {
-                $connection->success = false;
-                $connection->details = $this->get_exception_details($e);
-            } catch (\GuzzleHttp\Exception\InvalidArgumentException $e) {
-                $connection->success = false;
-                $connection->details = $this->get_exception_details($e);
-            } catch (\Aws\Exception\CredentialsException $e) {
-                $connection->success = false;
-                $connection->details = $this->get_exception_details($e);
             }
-
+        } catch (\Aws\S3\Exception\S3Exception $e) {
+            $connection->success = false;
+            $connection->details = $this->get_exception_details($e);
+        } catch (\GuzzleHttp\Exception\InvalidArgumentException $e) {
+            $connection->success = false;
+            $connection->details = $this->get_exception_details($e);
+        } catch (\Aws\Exception\CredentialsException $e) {
+            $connection->success = false;
+            $connection->details = $this->get_exception_details($e);
         }
 
         return $connection;
@@ -288,54 +286,55 @@ class client extends object_client_base {
         $permissions->success = true;
         $permissions->messages = array();
 
-        if (!$this->is_functional()) {
+        if ($this->is_functional()) {
             $permissions->success = false;
             $permissions->messages = array();
-        } else {
-            try {
-                $result = $this->client->putObject(array(
-                    'Bucket' => $this->bucket,
-                    'Key' => $this->bucketkeyprefix . 'permissions_check_file',
-                    'Body' => 'test content'));
-            } catch (\Aws\S3\Exception\S3Exception $e) {
+            return  $permissions;
+        }
+
+        try {
+            $result = $this->client->putObject(array(
+                'Bucket' => $this->bucket,
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file',
+                'Body' => 'test content'));
+        } catch (\Aws\S3\Exception\S3Exception $e) {
+            $details = $this->get_exception_details($e);
+            $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
+            $permissions->success = false;
+        }
+
+        try {
+            $result = $this->client->getObject(array(
+                'Bucket' => $this->bucket,
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+        } catch (\Aws\S3\Exception\S3Exception $e) {
+            $errorcode = $e->getAwsErrorCode();
+            // Write could have failed.
+            if ($errorcode !== 'NoSuchKey') {
                 $details = $this->get_exception_details($e);
-                $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
+                $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
                 $permissions->success = false;
             }
+        }
 
+        if ($testdelete) {
             try {
-                $result = $this->client->getObject(array(
-                    'Bucket' => $this->bucket,
-                    'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+                $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
+                $permissions->success = false;
             } catch (\Aws\S3\Exception\S3Exception $e) {
                 $errorcode = $e->getAwsErrorCode();
-                // Write could have failed.
-                if ($errorcode !== 'NoSuchKey') {
+                // Something else went wrong.
+                if ($errorcode !== 'AccessDenied') {
                     $details = $this->get_exception_details($e);
-                    $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
+                    $permissions->messages[get_string('settings:deleteerror', 'tool_objectfs') . $details] = 'notifyproblem';
                     $permissions->success = false;
                 }
             }
+        }
 
-            if ($testdelete) {
-                try {
-                    $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
-                    $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
-                    $permissions->success = false;
-                } catch (\Aws\S3\Exception\S3Exception $e) {
-                    $errorcode = $e->getAwsErrorCode();
-                    // Something else went wrong.
-                    if ($errorcode !== 'AccessDenied') {
-                        $details = $this->get_exception_details($e);
-                        $permissions->messages[get_string('settings:deleteerror', 'tool_objectfs') . $details] = 'notifyproblem';
-                        $permissions->success = false;
-                    }
-                }
-            }
-
-            if ($permissions->success) {
-                $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
-            }
+        if ($permissions->success) {
+            $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
         }
 
         return $permissions;
