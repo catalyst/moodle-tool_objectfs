@@ -289,7 +289,7 @@ class client extends object_client_base {
         if ($this->is_functional()) {
             $permissions->success = false;
             $permissions->messages = array();
-            return  $permissions;
+            return $permissions;
         }
 
         try {
