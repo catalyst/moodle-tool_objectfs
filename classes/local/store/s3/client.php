@@ -88,7 +88,7 @@ class client extends object_client_base {
      * Check if the client is functional.
      * @return bool
      */
-    private function is_functional() {
+    protected function is_functional() {
         return isset($this->client);
     }
 
@@ -98,7 +98,7 @@ class client extends object_client_base {
      * @param \stdClass $config Client config.
      * @return bool
      */
-    private function is_configured($config) {
+    protected function is_configured($config) {
         if (empty($config->s3_bucket)) {
             return false;
         }
