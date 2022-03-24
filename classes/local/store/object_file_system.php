@@ -1009,6 +1009,8 @@ abstract class object_file_system extends \file_system_filedir {
      * @return string The full path to the trash directory
      */
     protected function get_trash_fulldir_from_hash($contenthash) {
+        // Nothing should be asking objectstorage for it's trashdir path - it doesn't exist.
+        // However let's throw an exception unless something else comes up that suggests we need to change it.
         throw new \coding_exception('Objectfs does not implement a trashdir.');
     }
 
@@ -1019,6 +1021,9 @@ abstract class object_file_system extends \file_system_filedir {
      * @return string The full path to the trash file
      */
     protected function get_trash_fullpath_from_hash($contenthash) {
-        throw new \coding_exception('Objectfs does not implement a trashdir.');
+        // Method get_trash_fullpath_from_hash called by core filelib functions,
+        // and we can't easily change those across stables. So add debugging here.
+        debugging('Objectfs does not implement a trashdir.');
+        return '';
     }
 }
