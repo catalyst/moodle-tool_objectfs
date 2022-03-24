@@ -1009,6 +1009,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return string The full path to the trash directory
      */
     protected function get_trash_fulldir_from_hash($contenthash) {
+        debugging('Objectfs does not implement a trashdir.');
         return '';
     }
 
@@ -1019,6 +1020,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return string The full path to the trash file
      */
     protected function get_trash_fullpath_from_hash($contenthash) {
+        debugging('Objectfs does not implement a trashdir.');
         return '';
     }
 }
