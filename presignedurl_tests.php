@@ -64,7 +64,7 @@ if ($support) {
             $testfiles = $output->presignedurl_tests_load_files($fs);
             echo $output->presignedurl_tests_content($fs, $testfiles);
         } else {
-            echo $output->notification(get_string('settings:connectionfailure', 'tool_objectfs') . $connection->details,
+            echo $output->notification(get_string('settings:connectionfailure', 'tool_objectfs', $connection->details),
                 'notifyproblem');
             echo $output->heading(get_string('presignedurl_testing:checkconnectionsettings', 'tool_objectfs').$settingslink, 5);
         }

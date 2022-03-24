@@ -250,7 +250,7 @@ $string['presignedurl_testing:checkclientsettings'] = 'Check client settings at 
 $string['presignedurl_testing:checkfssettings'] = 'Check filesystem settings at ';
 
 $string['settings:connectionsuccess'] = 'Could establish connection to the external object storage.';
-$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage.';
+$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage. {$a}';
 $string['settings:writefailure'] = 'Could not write object to the external object storage. ';
 $string['settings:readfailure'] = 'Could not read object from the external object storage. ';
 $string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
