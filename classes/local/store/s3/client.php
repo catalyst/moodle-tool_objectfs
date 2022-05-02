@@ -751,7 +751,7 @@ class client extends object_client_base {
     public function curl_range_request_to_presigned_url($contenthash, $ranges, $headers) {
         try {
             $signedurl = $this->generate_presigned_url_s3($contenthash, $headers);
-            $url = $signedurl->url;
+            $url = $signedurl->url->out(false);
         } catch (\Exception $e) {
             throw new \coding_exception('Failed to generate pre-signed url: ' . $e->getMessage());
         }
