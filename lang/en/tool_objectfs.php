@@ -265,3 +265,6 @@ $string['settings:error:numeric'] = 'Please enter a number which is greater than
 $string['settings:notconfigured'] = 'Missing configuration.';
 $string['total_deleted_dirs'] = 'Total number of deleted directories: ';
 $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up https://github.com/catalyst/moodle-tool_objectfs#applying-core-patches';
+
+$string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
+$string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';

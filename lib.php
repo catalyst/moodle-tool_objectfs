@@ -110,3 +110,18 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
     send_stored_file($file, $lifetime, 0, $forcedownload, $options);
     return true;
 }
+
+/**
+ * Get status checks for tool_objectfs.
+ *
+ * @return array
+ */
+function tool_objectfs_status_checks() {
+    if (get_config('tool_objectfs', 'proxyrangerequests')) {
+        return [
+            new tool_objectfs\check\proxy_range_request()
+        ];
+    }
+
+    return [];
+}
