@@ -143,6 +143,10 @@ class client extends object_client_base {
             $options['endpoint'] = $config->s3_base_url;
         }
 
+        if ($config->s3_use_path_style_endpoint) {
+            $options['use_path_style_endpoint'] = $config->s3_use_path_style_endpoint;
+        }
+
         $this->client = \Aws\S3\S3Client::factory($options);
     }
 
@@ -425,6 +429,11 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_configtext('tool_objectfs/key_prefix',
             new \lang_string('settings:aws:key_prefix', 'tool_objectfs'),
             new \lang_string('settings:aws:key_prefix_help', 'tool_objectfs'), ''));
+
+        $settings->add(new \admin_setting_configcheckbox('tool_objectfs/s3_use_path_style_endpoint',
+            new \lang_string('settings:aws:usepathstyle', 'tool_objectfs'),
+            new \lang_string('settings:aws:usepathstyle_help', 'tool_objectfs'),
+            '0'));
 
         return $settings;
     }
