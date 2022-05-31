@@ -36,13 +36,6 @@ class tasks_testcase extends tool_objectfs_testcase {
         ob_end_clean();
     }
 
-    public function test_run_legacy_cron() {
-        $config = manager::get_objectfs_config();
-        $config->enabletasks = true;
-        manager::set_objectfs_config($config);
-        tool_objectfs_cron();
-    }
-
     public function test_run_scheduled_tasks() {
         global $CFG;
         // If tasks not implemented.
