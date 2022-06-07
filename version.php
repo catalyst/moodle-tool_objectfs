@@ -30,3 +30,4 @@ $plugin->release   = 2021122302;      // Same as version.
 $plugin->requires  = 2013111811;      // Requires Filesystem API.
 $plugin->component = "tool_objectfs";
 $plugin->maturity  = MATURITY_STABLE;
+$plugin->supported = [310, 400];
