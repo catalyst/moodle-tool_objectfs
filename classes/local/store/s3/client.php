@@ -25,10 +25,9 @@
 
 namespace tool_objectfs\local\store\s3;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
+use tool_objectfs\local\store\signed_url;
 use local_aws\admin_settings_aws_region;
 
 define('AWS_API_VERSION', '2006-03-01');
@@ -64,6 +63,7 @@ class client extends object_client_base {
             $this->presignedminfilesize = $config->presignedminfilesize;
             $this->enablepresignedurls = $config->enablepresignedurls;
             $this->signingmethod = $config->signingmethod;
+            $this->bucketkeyprefix = $config->key_prefix;
             $this->set_client($config);
         } else {
             parent::__construct($config);
@@ -79,10 +79,52 @@ class client extends object_client_base {
         // it will be serialised, so re-retrive them now.
         $config = manager::get_objectfs_config();
         $this->set_client($config);
-        $this->client->registerStreamWrapper();
+        if ($this->is_functional()) {
+            $this->client->registerStreamWrapper();
+        }
     }
 
+    /**
+     * Check if the client is functional.
+     * @return bool
+     */
+    protected function is_functional() {
+        return isset($this->client);
+    }
+
+    /**
+     * Check if the client configured properly.
+     *
+     * @param \stdClass $config Client config.
+     * @return bool
+     */
+    protected function is_configured($config) {
+        if (empty($config->s3_bucket)) {
+            return false;
+        }
+
+        if (empty($config->s3_region)) {
+            return false;
+        }
+
+        if (empty($config->s3_usesdkcreds) && (empty($config->s3_key) || empty($config->s3_secret))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Set the client.
+     *
+     * @param \stdClass $config Client config.
+     */
     public function set_client($config) {
+        if (!$this->is_configured($config)) {
+            $this->client = null;
+            return;
+        }
+
         $options = array(
             'region' => $config->s3_region,
             'version' => AWS_API_VERSION
@@ -109,7 +151,7 @@ class client extends object_client_base {
      *
      */
     public function register_stream_wrapper() {
-        if ($this->get_availability()) {
+        if ($this->get_availability() && $this->is_functional()) {
             $this->client->registerStreamWrapper();
         } else {
             parent::register_stream_wrapper();
@@ -117,11 +159,15 @@ class client extends object_client_base {
     }
 
     private function get_md5_from_hash($contenthash) {
+        if (!$this->is_functional()) {
+            return false;
+        }
+
         try {
             $key = $this->get_filepath_from_hash($contenthash);
             $result = $this->client->headObject(array(
                             'Bucket' => $this->bucket,
-                            'Key' => $key));
+                            'Key' => $this->bucketkeyprefix . $key));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             return false;
         }
@@ -150,18 +196,7 @@ class client extends object_client_base {
      */
     public function get_fullpath_from_hash($contenthash) {
         $filepath = $this->get_filepath_from_hash($contenthash);
-        return "s3://$this->bucket/$filepath";
-    }
-
-    /**
-     * Returns s3 trash fullpath to use with php file functions.
-     *
-     * @param  string $contenthash contenthash used as key in s3.
-     * @return string trash fullpath to s3 object.
-     */
-    public function get_trash_fullpath_from_hash($contenthash) {
-        $filepath = $this->get_filepath_from_hash($contenthash);
-        return "s3://$this->bucket/trash/$filepath";
+        return "s3://$this->bucket/" . $this->bucketkeyprefix . $filepath;
     }
 
     /**
@@ -218,7 +253,12 @@ class client extends object_client_base {
         $connection->details = '';
 
         try {
-            $this->client->headBucket(array('Bucket' => $this->bucket));
+            if (!$this->is_functional()) {
+                $connection->success = false;
+                $connection->details = get_string('settings:notconfigured', 'tool_objectfs');
+            } else {
+                $this->client->headBucket(array('Bucket' => $this->bucket));
+            }
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $connection->success = false;
             $connection->details = $this->get_exception_details($e);
@@ -246,11 +286,17 @@ class client extends object_client_base {
         $permissions->success = true;
         $permissions->messages = array();
 
+        if ($this->is_functional()) {
+            $permissions->success = false;
+            $permissions->messages = array();
+            return $permissions;
+        }
+
         try {
             $result = $this->client->putObject(array(
-                            'Bucket' => $this->bucket,
-                            'Key' => 'permissions_check_file',
-                            'Body' => 'test content'));
+                'Bucket' => $this->bucket,
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file',
+                'Body' => 'test content'));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
@@ -259,8 +305,8 @@ class client extends object_client_base {
 
         try {
             $result = $this->client->getObject(array(
-                            'Bucket' => $this->bucket,
-                            'Key' => 'permissions_check_file'));
+                'Bucket' => $this->bucket,
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $errorcode = $e->getAwsErrorCode();
             // Write could have failed.
@@ -273,7 +319,7 @@ class client extends object_client_base {
 
         if ($testdelete) {
             try {
-                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => 'permissions_check_file'));
+                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
                 $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
                 $permissions->success = false;
             } catch (\Aws\S3\Exception\S3Exception $e) {
@@ -376,6 +422,10 @@ class client extends object_client_base {
             new \lang_string('settings:aws:base_url', 'tool_objectfs'),
             new \lang_string('settings:aws:base_url_help', 'tool_objectfs'), ''));
 
+        $settings->add(new \admin_setting_configtext('tool_objectfs/key_prefix',
+            new \lang_string('settings:aws:key_prefix', 'tool_objectfs'),
+            new \lang_string('settings:aws:key_prefix_help', 'tool_objectfs'), ''));
+
         return $settings;
     }
 
@@ -396,7 +446,7 @@ class client extends object_client_base {
 
         try {
             $externalpath = $this->get_filepath_from_hash($contenthash);
-            $uploader = new \Aws\S3\ObjectUploader($this->client, $this->bucket, $externalpath, $filehandle);
+            $uploader = new \Aws\S3\ObjectUploader($this->client, $this->bucket, $this->bucketkeyprefix . $externalpath, $filehandle);
             $uploader->upload();
             fclose($filehandle);
         } catch (\Aws\Exception\MultipartUploadException $e) {
@@ -423,7 +473,7 @@ class client extends object_client_base {
      * @param string $contenthash file content hash.
      * @param array $headers request headers.
      *
-     * @return string.
+     * @return signed_url
      * @throws \Exception
      */
     public function generate_presigned_url($contenthash, $headers = array()) {
@@ -436,7 +486,7 @@ class client extends object_client_base {
     /**
      * @param string $contenthash
      * @param array $headers
-     * @return string
+     * @return signed_url
      */
     private function generate_presigned_url_s3($contenthash, $headers) {
         $contentdisposition = manager::get_header($headers, 'Content-Disposition');
@@ -451,7 +501,7 @@ class client extends object_client_base {
 
         $key = $this->get_filepath_from_hash($contenthash);
         $params['Bucket'] = $this->bucket;
-        $params['Key'] = $key;
+        $params['Key'] = $this->bucketkeyprefix . $key;
 
         $contentdisposition = manager::get_header($headers, 'Content-Disposition');
         if ($contentdisposition !== '') {
@@ -468,14 +518,14 @@ class client extends object_client_base {
         $request = $this->client->createPresignedRequest($command, $expires);
 
         $signedurl = (string)$request->getUri();
-        return $signedurl;
+        return new signed_url(new \moodle_url($signedurl), $expires);
     }
 
     /**
      * @param string $contenthash
      * @param array $headers
      * @param bool $nicefilename
-     * @return string
+     * @return signed_url
      * @throws \Exception
      */
     private function generate_presigned_url_cloudfront($contenthash, array $headers = [], $nicefilename = true) {
@@ -517,7 +567,7 @@ class client extends object_client_base {
 
         // Construct the URL.
         $params = ['Expires' => $expires, 'Signature' => $signature, 'Key-Pair-Id' => $keypairid];
-        return new \moodle_url($resource, $params);
+        return new signed_url(new \moodle_url($resource, $params), $expires);
     }
 
     /**
@@ -566,26 +616,32 @@ class client extends object_client_base {
             // Convert to a valid timestamp.
             $expires = strtotime($expires);
         }
+        // Invalid or already expired:
         // If it's set to 0 or strtotime() returned false,
         // set it to default + 1 min as a healthy margin.
         if (empty($expires)) {
             $expires = $now + $this->expirationtime + MINSECS;
         }
-        // If it's already expired or expires less than in a minute,
-        // set it to 1 minute.
-        if ($expires < $now + MINSECS) {
-            $expires = $now + MINSECS;
+        // Expiry too short, push it out to the next 2 minutes (will round down later):
+        // If it's already expired or expires less than 2 minutes, set it to 2
+        // minutes. This works together with rounding down later on to ensure a
+        // non zero expiry time, and a minimum expiry of 1 minute.
+        if ($expires < $now + (2 * MINSECS)) {
+            $expires = $now + (2 * MINSECS);
         }
+        // Checks upper bound:
         // The expiration date of a signature version 4 presigned URL must be
         // less than one week. So if it's greater than a week set it to 1 week.
         // Use MINSECS as a healthy margin of error.
         if ($expires - $now > WEEKSECS - MINSECS) {
             $expires = $now + WEEKSECS - MINSECS;
         }
-        if (is_null($expires) || false === $expires) {
-            // Invalid date format use default instead.
-            $expires = $now + $this->expirationtime;
-        }
+        // Rounds (down) to nearest minute:
+        // With our new expiry time, ensure we round down to the nearest minute
+        // (#457) to ensure expiry of potentially the same file will use the
+        // same URL, and will result in less duplicate requests.
+        $expires -= ($expires % MINSECS);
+
         return $expires;
     }
 
@@ -694,7 +750,8 @@ class client extends object_client_base {
      */
     public function curl_range_request_to_presigned_url($contenthash, $ranges, $headers) {
         try {
-            $url = $this->generate_presigned_url_s3($contenthash, $headers);
+            $signedurl = $this->generate_presigned_url_s3($contenthash, $headers);
+            $url = $signedurl->url->out(false);
         } catch (\Exception $e) {
             throw new \coding_exception('Failed to generate pre-signed url: ' . $e->getMessage());
         }

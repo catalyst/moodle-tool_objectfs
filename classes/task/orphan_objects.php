@@ -15,30 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Object manipulator interface class.
+ * Task that orphans {tool_objectfs_object} records for deleted
+ * {files} records.
  *
  * @package   tool_objectfs
- * @author    Gleimer Mora <gleimermora@catalyst-au.net>
+ * @author    Nathan Mares <ngmares@gmail.com>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\local\object_manipulator;
+namespace tool_objectfs\task;
 
-use stdClass;
-
-interface object_manipulator {
+use tool_objectfs\local\object_manipulator\orphaner;
 
 
-    /**
-     * @param array $objects
-     * @return mixed
-     */
-    public function execute(array $objects);
+class orphan_objects extends task {
 
-    /**
-     * @param stdClass $objectrecord
-     * @return int
-     */
-    public function manipulate_object(stdClass $objectrecord);
+    /** @var string $manipulator */
+    protected $manipulator = orphaner::class;
+
+    /** @var string $stringname */
+    protected $stringname = 'orphan_objects_task';
 }

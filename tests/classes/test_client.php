@@ -16,8 +16,6 @@
 
 namespace tool_objectfs\tests;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\object_client_base;
 
 class test_client extends object_client_base {
@@ -41,14 +39,6 @@ class test_client extends object_client_base {
         if (!is_dir($this->bucketpath)) {
             mkdir($this->bucketpath);
         }
-        // Trashdir for local storage.
-        if (!is_dir($this->bucketpath . '/trashdir')) {
-            mkdir($this->bucketpath . '/trashdir');
-        }
-        // Trashdir for external storage.
-        if (!is_dir($this->bucketpath . '/trash')) {
-            mkdir($this->bucketpath . '/trash');
-        }
     }
 
     public function get_seekable_stream_context() {
@@ -60,9 +50,6 @@ class test_client extends object_client_base {
         return "$this->bucketpath/{$contenthash}";
     }
 
-    public function get_trash_fullpath_from_hash($contenthash) {
-        return "$this->bucketpath/trashdir/{$contenthash}";
-    }
 
     public function delete_file($fullpath) {
         return unlink($fullpath);
@@ -70,10 +57,6 @@ class test_client extends object_client_base {
 
     public function rename_file($currentpath, $destinationpath) {
         return rename($currentpath, $destinationpath);
-    }
-
-    public function get_external_trash_path_from_hash($contenthash) {
-        return "$this->bucketpath/trash/{$contenthash}";
     }
 
     public function register_stream_wrapper() {

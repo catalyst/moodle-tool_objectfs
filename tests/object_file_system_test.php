@@ -219,8 +219,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse(is_readable($localpath));
-        // If grandparent is empty it should be removed.
-        $this->assertFalse(is_readable(dirname(dirname($localpath))));
     }
 
     /**
@@ -296,6 +294,9 @@ class object_file_system_testcase extends tool_objectfs_testcase {
             $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
         }
         $this->assertEquals($expectedgrandparentpathreadable, is_readable($testdir));
+
+        // Totara 12 clean-up.
+        remove_dir($testdir);
     }
 
     public function test_readfile_if_object_is_local() {
@@ -461,13 +462,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_local() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_FULL;
         $this->filesystem = new test_file_system();
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
         $this->delete_draft_files($filehash);
         $this->filesystem->remove_file($filehash);
-        $this->assertTrue($this->is_locally_readable_by_hash_in_trashdir($filehash));
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
     }
@@ -475,13 +475,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_local() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 0;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
         $this->filesystem = new test_file_system();
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
         $this->delete_draft_files($filehash);
         $this->filesystem->remove_file($filehash);
-        $this->assertTrue($this->is_locally_readable_by_hash_in_trashdir($filehash));
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
     }
@@ -489,7 +488,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_duplicated() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_FULL;
         $this->filesystem = new test_file_system();
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
@@ -497,13 +496,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem->remove_file($filehash);
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
-        $this->assertTrue($this->is_externally_readable_by_hash_in_trashdir($filehash));
     }
 
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_duplicated() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 0;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
         $this->filesystem = new test_file_system();
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
@@ -511,13 +509,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem->remove_file($filehash);
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
-        $this->assertFalse($this->is_externally_readable_by_hash_in_trashdir($filehash));
     }
 
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_remote() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_FULL;
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -525,13 +522,12 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem->remove_file($filehash);
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
-        $this->assertTrue($this->is_externally_readable_by_hash_in_trashdir($filehash));
     }
 
     public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_remote() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 0;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -539,7 +535,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem->remove_file($filehash);
         $this->assertFalse($this->is_locally_readable_by_hash($filehash));
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
-        $this->assertFalse($this->is_externally_readable_by_hash_in_trashdir($filehash));
     }
 
     public function test_object_storage_locker_can_acquire_lock_if_object_is_not_locked() {
@@ -552,20 +547,10 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $lock->release();
     }
 
-    public function test_can_recover_object_if_deleted_while_local() {
-        $this->filesystem = new test_file_system();
-        $file = $this->create_local_file();
-        $filehash = $file->get_contenthash();
-        $this->delete_draft_files($filehash);
-        $this->filesystem->remove_file($filehash);
-        $this->recover_file($file);
-        $this->assertTrue($this->is_locally_readable_by_hash($filehash));
-    }
-
     public function test_can_recover_object_if_deleted_while_duplicated() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH;
         $this->filesystem = new test_file_system();
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
@@ -578,7 +563,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     public function test_can_recover_object_if_deleted_while_external() {
         global $CFG;
 
-        $CFG->tool_objectfs_delete_externally = 1;
+        $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH;
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -586,21 +571,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem->remove_file($filehash);
         $this->recover_file($file);
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
-    }
-
-    public function test_can_delete_local_file_if_exists_in_trashdir() {
-        $this->filesystem = new test_file_system();
-        $file = $this->create_local_file();
-        $filehash = $file->get_contenthash();
-        $this->delete_draft_files($filehash);
-        $this->filesystem->remove_file($filehash);
-        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
-
-        $file = $this->create_local_file();
-        $filehash = $file->get_contenthash();
-        $this->delete_draft_files($filehash);
-        $this->filesystem->remove_file($filehash);
-        $this->assertFalse($this->is_locally_readable_by_hash($filehash));
     }
 
     public function test_can_generate_signed_url_by_hash_if_object_is_external() {
@@ -712,36 +682,44 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      */
     public function test_get_expiration_time_method_if_supported_provider() {
         $now = time();
+
+        // Seconds after the minute from X.
+        $secondsafternow = ($now % MINSECS);
+        $secondsafternowsub100 = $secondsafternow;
+        $secondsafternowadd30 = $secondsafternow;
+        $secondsafternowadd100 = $secondsafternow;
+        $secondsafternowaddweek = ($now + WEEKSECS) % MINSECS;
+
         return [
             // Default Pre-Signed URL expiration time and int-like 'Expires' header.
-            [7200, $now, 0, $now + 7200 + MINSECS],
-            [7200, $now, $now - 100, $now + MINSECS],
-            [7200, $now, $now + 30, $now + MINSECS],
-            [7200, $now, $now + 100, $now + 100],
-            [7200, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS],
+            [7200, $now, 0, $now + 7200 + MINSECS - $secondsafternow],
+            [7200, $now, $now - 100, $now + (2 * MINSECS) - $secondsafternowsub100],
+            [7200, $now, $now + 30, $now + (2 * MINSECS) - $secondsafternowadd30],
+            [7200, $now, $now + 100, $now + (2 * MINSECS) - $secondsafternowadd100],
+            [7200, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Default Pre-Signed URL expiration time and string-like 'Expires' header.
-            [7200, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 7200 + MINSECS],
-            [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [7200, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100],
-            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS],
+            [7200, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 7200 + MINSECS - $secondsafternow],
+            [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
+            [7200, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
+            [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
+            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Custom Pre-Signed URL expiration time and int-like 'Expires' header.
-            [0, $now, 0, $now + MINSECS],
-            [600, $now, 0, $now + 600 + MINSECS],
-            [600, $now, $now - 100, $now + MINSECS],
-            [600, $now, $now + 30, $now + MINSECS],
-            [600, $now, $now + 100, $now + 100],
-            [600, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS],
+            [0, $now, 0, $now + (2 * MINSECS) - $secondsafternow],
+            [600, $now, 0, $now + 600 + MINSECS - $secondsafternow],
+            [600, $now, $now - 100, $now + (2 * MINSECS) - $secondsafternowsub100],
+            [600, $now, $now + 30, $now + (2 * MINSECS) - $secondsafternowadd30],
+            [600, $now, $now + 100, $now + (2 * MINSECS) - $secondsafternowadd100],
+            [600, $now, $now + WEEKSECS + HOURSECS, $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Custom Pre-Signed URL expiration time and string-like 'Expires' header.
-            [0, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + MINSECS],
-            [600, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 600 + MINSECS],
-            [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [600, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + MINSECS],
-            [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + 100],
-            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS],
+            [0, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + (2 * MINSECS) - $secondsafternow],
+            [600, $now, 'Thu, 01 Jan 1970 00:00:00 GMT', $now + 600 + MINSECS - $secondsafternow],
+            [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
+            [600, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
+            [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
+            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
         ];
     }
 

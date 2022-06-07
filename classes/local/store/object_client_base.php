@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\store;
 
-defined('MOODLE_INTERNAL') || die();
-
 abstract class object_client_base implements object_client {
 
     protected $autoloader;
@@ -105,8 +103,10 @@ abstract class object_client_base implements object_client {
                 }
             }
         } else {
-            $output .= $OUTPUT->notification(get_string('settings:connectionfailure', 'tool_objectfs').
-                $connection->details, 'notifyproblem');
+            $output .= $OUTPUT->notification(
+                get_string('settings:connectionfailure', 'tool_objectfs', $connection->details),
+                'notifyproblem'
+            );
         }
         return $output;
     }

@@ -63,9 +63,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->preferexternal = $config->preferexternal;
         $this->filepermissions = $CFG->filepermissions;
         $this->dirpermissions = $CFG->directorypermissions;
-        if (isset($CFG->tool_objectfs_delete_externally)) {
-            $this->deleteexternally = $CFG->tool_objectfs_delete_externally;
-        }
+        $this->deleteexternally = $config->deleteexternal;
 
         if ($config->enablelogging) {
             $this->set_logger(new \tool_objectfs\log\real_time_logger());
@@ -96,7 +94,7 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient;
     }
 
-    protected abstract function initialise_external_client($config);
+    abstract protected function initialise_external_client($config);
 
     /**
      * Get the full path for the specified hash, including the path to the filedir.
@@ -161,10 +159,6 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient->get_fullpath_from_hash($contenthash);
     }
 
-    protected function get_external_trash_path_from_hash($contenthash) {
-        return $this->externalclient->get_trash_fullpath_from_hash($contenthash);
-    }
-
     protected function get_external_path_from_storedfile(\stored_file $file) {
         return $this->get_external_path_from_hash($file->get_contenthash());
     }
@@ -192,19 +186,6 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $path = $this->get_external_path_from_hash($contenthash, false);
-
-        // Note - it is not possible to perform a content recovery safely from a hash alone.
-        return is_readable($path);
-    }
-
-    public function is_file_readable_externally_in_trash_by_hash($contenthash) {
-        if ($contenthash === sha1('')) {
-            // Files with empty size are either directories or empty.
-            // We handle these virtually.
-            return true;
-        }
-
-        $path = $this->get_external_trash_path_from_hash($contenthash, false);
 
         // Note - it is not possible to perform a content recovery safely from a hash alone.
         return is_readable($path);
@@ -310,8 +291,6 @@ abstract class object_file_system extends \file_system_filedir {
                 $success = unlink($localpath);
 
                 if ($success) {
-                    // Check grandparent dir for empty dirs.
-                    $this->delete_empty_dirs(dirname(dirname($localpath)));
                     $finallocation = OBJECT_LOCATION_EXTERNAL;
                 }
             }
@@ -331,6 +310,10 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      */
     public function delete_empty_dirs($rootpath = '') {
+        global $DB;
+
+        $config = manager::get_objectfs_config();
+
         if (empty($rootpath)) {
             $rootpath = $this->filedir;
         }
@@ -339,25 +322,67 @@ abstract class object_file_system extends \file_system_filedir {
         }
         $empty = true;
         foreach (glob($rootpath . DIRECTORY_SEPARATOR . '*') as $path) {
-            // If there are .tmp files here, they should be killed.
-            if (!is_dir($path) && pathinfo($path, PATHINFO_EXTENSION) === 'tmp') {
+            if (is_file($path)) {
                 // Check timemodified, don't touch anything more recent than 24 hours.
                 $modified = filemtime($path);
                 if ($modified === false) {
                     $modified = 0;
                 }
-                $delete = $modified <= (time() - DAYSECS);
 
-                if ($delete) {
-                    @unlink($path);
+                if ($modified <= (time() - DAYSECS)) {
+                    $pathinfo = pathinfo($path);
+
+                    // If there are .tmp files here, they should be killed.
+                    if (!empty($pathinfo['extension']) && $pathinfo['extension'] === 'tmp') {
+                        @unlink($path);
+                    } else {
+                        if (!$config->deletelocal) {
+                            // If local objects aren't deleted, skip here.
+                            // Or it will take ages to grind through for little benefit.
+                            continue;
+                        }
+
+                        // If the file is 24hrs old, they may not be tracked by objectFS.
+                        // This means it may not exist in the files table at all.
+                        if ($config->sizethreshold > 0) {
+                            // Don't care about files underneath the size threshold.
+                            // Hurts performance for very little gain in space.
+                            if (filesize($path) < $config->sizethreshold) {
+                                continue;
+                            }
+                        }
+
+                        // Check the basename and filename, should catch hidden files and other junk.
+                        // Check pathnamehash as well. Should never happen, but any hash match should not be touched.
+                        $sql = "SELECT *
+                                  FROM {files}
+                                 WHERE contenthash = ?
+                                    OR contenthash = ?
+                                    OR pathnamehash = ?
+                                    OR pathnamehash = ?";
+                        $exists = $DB->record_exists_sql($sql, [
+                            $pathinfo['filename'],
+                            $pathinfo['basename'],
+                            $pathinfo['filename'],
+                            $pathinfo['basename']
+                        ]);
+
+                        if (!$exists) {
+                            @unlink($path);
+                        }
+                    }
                 }
             }
+
             $empty &= is_dir($path) && $this->delete_empty_dirs($path);
         }
         if ($rootpath === $this->filedir) {
             return false;
         }
-        return $empty && rmdir($rootpath);
+        if (!$empty) {
+            return false;
+        }
+        return rmdir($rootpath);
     }
 
     /**
@@ -555,7 +580,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Extends recover_file to recover missing content of file from trash.
+     * Extends recover_file to recover missing content of file.
      *
      * @param stored_file $file stored_file instance
      * @return bool success
@@ -568,23 +593,7 @@ abstract class object_file_system extends \file_system_filedir {
             return true;
         }
 
-        $contenthash = $file->get_contenthash();
-        $externalreadable = $this->is_file_readable_externally_in_trash_by_hash($contenthash);
-
-        if ($externalreadable) {
-            $trashfile = $this->get_external_trash_path_from_hash($contenthash);
-
-            if (filesize($trashfile) != $file->get_filesize() or $this->hash_from_path($trashfile) != $contenthash) {
-                // The files are different. Leave this one in trash - something seems to be wrong with it.
-                return false;
-            }
-
-            $this->rename_external_file($trashfile, $contentfile);
-            return true;
-
-        } else {
-            return parent::recover_file($file);
-        }
+        return parent::recover_file($file);
     }
 
     /**
@@ -610,43 +619,14 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Copies local file to trashdir by its hash
-     *
-     * @param string $contenthash file to be copied
-     */
-    public function copy_local_file_to_trashdir_from_hash($contenthash) {
-        $trashpath  = $this->get_trash_fulldir_from_hash($contenthash);
-        $trashfile  = $this->get_trash_fullpath_from_hash($contenthash);
-
-        if (!is_dir($trashpath)) {
-            mkdir($trashpath, $this->dirpermissions, true);
-        }
-
-        if (file_exists($trashfile)) {
-            // A copy of this file is already in the trash.
-            return;
-        }
-
-        $this->copy_file_from_hash_to_path($contenthash, $trashfile);
-
-        // Fix permissions, only if needed.
-        $currentperms = octdec(substr(decoct(fileperms($trashfile)), -4));
-        if ((int)$this->filepermissions !== $currentperms) {
-            chmod($trashfile, $this->filepermissions);
-        }
-    }
-
-    /**
-     * Moves external file to trashdir by its hash
+     * Deletes external file depending on deleteexternal settings.
      *
      * @param string $contenthash file to be moved
      */
-    public function move_external_file_to_trashdir_from_hash($contenthash) {
-        if ($this->deleteexternally) {
+    public function delete_external_file_from_hash($contenthash, $force = false) {
+        if ($force || (!empty($this->deleteexternally) && $this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_FULL)) {
             $currentpath = $this->get_external_path_from_hash($contenthash);
-            $destinationpath = $this->get_external_trash_path_from_hash($contenthash);
-
-            $this->rename_external_file($currentpath, $destinationpath);
+            $this->externalclient->delete_file($currentpath);
         }
     }
 
@@ -660,17 +640,16 @@ abstract class object_file_system extends \file_system_filedir {
 
         switch ($location) {
             case OBJECT_LOCATION_LOCAL:
-                $this->copy_local_file_to_trashdir_from_hash($contenthash);
                 $this->delete_local_file_from_hash($contenthash);
                 break;
 
             case OBJECT_LOCATION_DUPLICATED:
                 $this->delete_local_file_from_hash($contenthash);
-                $this->move_external_file_to_trashdir_from_hash($contenthash);
+                $this->delete_external_file_from_hash($contenthash);
                 break;
 
             case OBJECT_LOCATION_EXTERNAL:
-                $this->move_external_file_to_trashdir_from_hash($contenthash);
+                $this->delete_external_file_from_hash($contenthash);
                 break;
 
             case OBJECT_LOCATION_ERROR:
@@ -686,15 +665,12 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function delete_local_file_from_hash($contenthash) {
         $path = $this->get_local_path_from_hash($contenthash);
-        if (unlink($path)) {
-            // Check grandparent dir for empty dirs.
-            $this->delete_empty_dirs(dirname(dirname($path)));
-        }
+        unlink($path);
     }
 
     /**
      * Moves external file
-     * if $CFG->tool_objectfs_delete_externally is enabled.
+     * if deleteexternally is enabled.
      *
      * @param string $currentpath current path to file to be moved.
      * @param string $destinationpath destination path.
@@ -760,8 +736,39 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function redirect_to_presigned_url($contenthash, $headers = array()) {
+        global $FULLME;
         try {
-            redirect($this->externalclient->generate_presigned_url($contenthash, $headers));
+            $signedurl = $this->externalclient->generate_presigned_url($contenthash, $headers);
+            if (headers_sent()) {
+                debugging('objectfs redirect for ' . $contenthash . ' from ' . $FULLME .
+                        ': headers already sent; redirect may be incorrectly cached in browser');
+            } else {
+                // Remove all previously-set headers, and look for cache-control setting.
+                $cachecontrol = '';
+                foreach (headers_list() as $header) {
+                    // Get header name (text before the colon).
+                    if (preg_match('~^([^:]+):(.*)$~', $header, $matches)) {
+                        [, $headername, $headervalue] = $matches;
+                        if (strtolower($headername) === 'cache-control') {
+                            $cachecontrol = $headervalue;
+                        }
+                        header_remove($headername);
+                    }
+                }
+                // Set expires and cache-control values to match the presigned URL expiry, which may be
+                // different to values previously set.
+                header('Expires: '. gmdate('D, d M Y H:i:s', $signedurl->expiresat) .' GMT');
+                // Unless cache-control was previously set to 'public' by Moodle for the actual file send,
+                // use 'private' to allow browser caching only; otherwise via a shared cache users might
+                // be able to redirect to content that was only supposed to be displayed to a different
+                // user.
+                $cachevisibility = 'private';
+                if (strpos($cachecontrol, 'public') !== false) {
+                    $cachevisibility = 'public';
+                }
+                header('Cache-Control: ' . $cachevisibility . ', max-age=' . ($signedurl->expiresat - time()));
+            }
+            redirect($signedurl->url);
         } catch (\Exception $e) {
             debugging('Failed to redirect to pre-signed url: ' . $e->getMessage());
             return false;
@@ -986,5 +993,37 @@ abstract class object_file_system extends \file_system_filedir {
 
         // Looks like all checks have been passed.
         return true;
+    }
+
+    /**
+     * No cleanup required - don't trigger filesystem trash clear.
+     */
+    public function cron() {
+        return true;
+    }
+
+    /**
+     * Object fs doens't use trashdir - trigger exception.
+     *
+     * @param string $contenthash The content hash
+     * @return string The full path to the trash directory
+     */
+    protected function get_trash_fulldir_from_hash($contenthash) {
+        // Nothing should be asking objectstorage for it's trashdir path - it doesn't exist.
+        // However let's throw an exception unless something else comes up that suggests we need to change it.
+        throw new \coding_exception('Objectfs does not implement a trashdir.');
+    }
+
+    /**
+     * Object fs doens't use trashdir - trigger exception.
+     *
+     * @param string $contenthash The content hash
+     * @return string The full path to the trash file
+     */
+    protected function get_trash_fullpath_from_hash($contenthash) {
+        // Method get_trash_fullpath_from_hash called by core filelib functions,
+        // and we can't easily change those across stables. So add debugging here.
+        debugging('Objectfs does not implement a trashdir.');
+        return '';
     }
 }

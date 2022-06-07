@@ -28,11 +28,13 @@ $string['pluginname'] = 'Object storage file system';
 $string['pluginsettings'] = 'Plugin Settings';
 $string['privacy:metadata'] = 'The tool objectfs plugin does not store any personal data.';
 $string['push_objects_to_storage_task'] = 'Object file system upload task';
+$string['delete_orphaned_object_metadata_task'] = 'Object file system delete orphaned metadata task';
 $string['delete_local_objects_task'] = 'Object file system delete local objects task';
 $string['delete_local_empty_directories_task'] = 'Object file system delete local empty directories task';
 $string['pull_objects_from_storage_task'] = 'Object file system download objects task';
 $string['recover_error_objects_task'] = 'Object error recovery task';
 $string['check_objects_location_task'] = 'Object file system check objects location task';
+$string['orphan_objects_task'] = 'Object file system orphan objects task';
 
 $string['generate_status_report_task'] = 'Object status report generator task';
 $string['not_enabled'] = 'The object file system background tasks are not enabled. No objects will move location until you do.';
@@ -55,6 +57,7 @@ $string['fixturefilemissing'] = 'The fixture file is missing';
 $string['object_status:location:error'] = 'Missing from filedir and external storage (<a href="/admin/tool/objectfs/missing_files.php">view files</a>)';
 $string['object_status:location:duplicated'] = 'Duplicated in filedir and external storage';
 $string['object_status:location:local'] = 'Marked as only in filedir';
+$string['object_status:location:orphaned'] = 'Marked as orphaned (not in the {files} table)';
 $string['object_status:location:external'] = 'Only in external storage';
 $string['object_status:location:unknown'] = 'Unknown object location';
 $string['object_status:location:total'] = 'Total';
@@ -62,6 +65,9 @@ $string['object_status:location:localcount'] = 'Local (count)';
 $string['object_status:location:localsize'] = 'Local (size)';
 $string['object_status:location:duplicatedcount'] = 'Duplicated (count)';
 $string['object_status:location:duplicatedsize'] = 'Duplicated (size)';
+$string['object_status:location:orphanedcount'] = 'Orphaned (count)';
+$string['object_status:location:orphanedsize'] = 'Orphaned (size)';
+$string['object_status:location:orphanedsizeunknown'] = 'Unknown';
 $string['object_status:location:externalcount'] = 'External (count)';
 $string['object_status:location:externalsize'] = 'External (size)';
 $string['object_status:location:missingcount'] = 'Error (count)';
@@ -85,7 +91,7 @@ $string['object_status:never_run'] = 'The task to generate this report has not b
 
 $string['rangerequestfailed'] = '<strong>URL</strong>: {$a->url}<br><strong>HTTP code</strong>: {$a->httpcode}<br><strong>Details</strong>: {$a->details}';
 $string['settings'] = 'Settings';
-$string['settings:enabletasks'] = 'Enable transfer tasks';
+$string['settings:enabletasks'] = 'Enable background transfer tasks';
 $string['settings:enabletasks_help'] = 'Enable or disable the object file system tasks which move files between the filedir and external object storage.';
 $string['settings:enablelogging'] = 'Enable real time logging';
 $string['settings:enablelogging_help'] = 'Enable or disable file system logging. Will output diagnostic information to the php error log. ';
@@ -119,6 +125,8 @@ $string['settings:aws:installneeded'] = 'Please install \'local_aws\' plugin.';
 $string['settings:aws:usesdkcreds'] = 'Use the default credential provider chain to find AWS credentials';
 $string['settings:aws:sdkcredsok'] = 'AWS credentials found. This setting can be safely enabled.';
 $string['settings:aws:sdkcredserror'] = 'Couldn\'t find AWS credentials. It\'s unsafe to enable this setting. Follow up <a href="https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html">AWS documentation</a>.';
+$string['settings:aws:key_prefix'] = 'Prefix to use in bucket';
+$string['settings:aws:key_prefix_help'] = 'Prefix to use inside Amazon S3 bucket. Must end with trailing slash when set. Leave blank to use root of bucket.';
 
 $string['settings:do:header'] = 'DigitalOcean Spaces Settings';
 $string['settings:do:key'] = 'Key';
@@ -159,8 +167,14 @@ $string['settings:sizethreshold'] = 'Minimum size threshold (bytes)';
 $string['settings:sizethreshold_help'] = 'Minimum size threshold for transfering objects to external object storage. If objects are over this size they will be transfered.';
 $string['settings:batchsize'] = 'Number files in one batch';
 $string['settings:batchsize_help'] = 'Number of files to be transferred in one cron run';
+$string['settings:maxorphanedage'] = 'Max orphaned object age';
+$string['settings:maxorphanedage_help'] = 'If set to zero, this will not delete old orphaned metadata for objects. Otherwise, it will remove these records as they are no longer relevant. An orphaned object is one where the metadata exists on the {tool_objectfs_objects} table but referenced file no longer exists.';
 $string['settings:minimumage'] = 'Minimum age';
 $string['settings:minimumage_help'] = 'Minimum age that a object must exist on the local filedir before it will be considered for transfer.';
+$string['settings:deleteexternal'] = 'Delete external objects';
+$string['settings:deleteexternal_help'] = 'Delete external objects when the file is deleted in Moodle. This is not recommended if you intend to share one object store between multiple environments, however this is a requirement for GDPR compliance.
+<br/>Delete external file on orphan clean-up - This will delete the external file when the delete orphaned metadata task task runs.
+<br/>Delete completely - will tell the external storage to delete the file immediately - (use with caution! - if the same file is being uploaded while being deleted issues could occur.)';
 $string['settings:deletelocal'] = 'Delete local objects';
 $string['settings:deletelocal_help'] = 'Delete local objects once they are in external object storage after the consistency delay.';
 $string['settings:consistencydelay'] = 'Consistency delay';
@@ -178,7 +192,7 @@ $string['settings:presignedurl:warning'] = 'Before enabling Pre-Signed URL, plea
 $string['settings:presignedurl:enablepresignedurls'] = 'Enable Pre-Signed URLs';
 $string['settings:presignedurl:enablepresignedurls_help'] = 'Enable Pre-Signed URLs to request content directly from external storage.';
 $string['settings:presignedurl:expirationtime'] = 'Pre-Signed URL expiration time';
-$string['settings:presignedurl:expirationtime_help'] = 'The time after which the Pre-Signed URL should expire.';
+$string['settings:presignedurl:expirationtime_help'] = 'All expirations are inherited from the Expires header sent by Moodle. If no headers are sent the Expiration defaults to this setting.';
 $string['settings:presignedurl:presignedminfilesize'] = 'Minimum size for Pre-Signed URL (bytes)';
 $string['settings:presignedurl:presignedminfilesize_help'] = 'Minimum file size to be redirected to Pre-Signed URL.';
 $string['settings:presignedurl:proxyrangerequests'] = 'Proxy range requests';
@@ -215,6 +229,8 @@ $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json'] = '\'cu
 $string['settings:presignedcloudfronturl:cloudfront_custom_policy_json_help'] = 'AWS Distribution "custom policy" JSON (advanced!)';
 $string['settings:presignedcloudfronturl:cloudfront_pem_found'] = 'Cloudfront private key content (.pem) is valid. OK';
 $string['settings:presignedcloudfronturl:cloudfront_pem_not_found'] = 'Cloudfront private key (.pem) is invalid.';
+$string['settings:relyonorphancleanup'] = 'Delete external file on orphan clean-up';
+$string['settings:fulldelete'] = 'Delete completely';
 
 $string['pleaseselect'] = 'Please, select';
 $string['presignedurl_testing:page'] = 'Pre-Signed URL Testing';
@@ -234,7 +250,7 @@ $string['presignedurl_testing:checkclientsettings'] = 'Check client settings at 
 $string['presignedurl_testing:checkfssettings'] = 'Check filesystem settings at ';
 
 $string['settings:connectionsuccess'] = 'Could establish connection to the external object storage.';
-$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage.';
+$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage. {$a}';
 $string['settings:writefailure'] = 'Could not write object to the external object storage. ';
 $string['settings:readfailure'] = 'Could not read object from the external object storage. ';
 $string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
@@ -246,5 +262,9 @@ $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
 
 $string['settings:error:numeric'] = 'Please enter a number which is greater than or equal 0.';
+$string['settings:notconfigured'] = 'Missing configuration.';
 $string['total_deleted_dirs'] = 'Total number of deleted directories: ';
 $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up https://github.com/catalyst/moodle-tool_objectfs#applying-core-patches';
+
+$string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
+$string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';

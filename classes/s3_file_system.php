@@ -28,8 +28,6 @@
 
 namespace tool_objectfs;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\s3\file_system;
 
 class s3_file_system extends file_system {

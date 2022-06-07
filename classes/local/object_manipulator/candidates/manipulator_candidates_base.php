@@ -27,8 +27,6 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 use dml_exception;
 use stdClass;
 
-defined('MOODLE_INTERNAL') || die();
-
 abstract class manipulator_candidates_base implements manipulator_candidates {
 
     /** @var stdClass $config */
