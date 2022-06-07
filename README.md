@@ -60,11 +60,11 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 
 ## Branches
 
-| Moodle version   | Totara version           | Branch       | PHP  |
-|------------------|--------------------------|--------------|------|
-| Moodle 3.4 +     |                          | master       | 7.1+ |
-| Moodle 3.3       | Totara 12                | master       | 7.1+ |
-| Moodle 2.7 - 3.2 | Totara 2.7 - 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE) | 5.5+ |
+| Moodle version   | Totara version           | Branch                                                                                       | PHP  |
+|------------------|--------------------------|----------------------------------------------------------------------------------------------|------|
+| Moodle 3.10 +    |                          | [MOODLE_310_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_310_STABLE) | 7.2+ |
+| Moodle 3.3 - 3.9 | Totara 12                | [MOODLE_33_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_33_STABLE)   | 7.1+ |
+| Moodle 2.7 - 3.2 | Totara 2.7 - 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE)           | 5.5+ |
 
 
 ## Installation
