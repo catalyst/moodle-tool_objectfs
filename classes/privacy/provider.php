@@ -22,7 +22,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace tool_objectfs\privacy;
-defined('MOODLE_INTERNAL') || die;
 use core_privacy\local\metadata\null_provider;
 use core_privacy\local\legacy_polyfill;
 /**

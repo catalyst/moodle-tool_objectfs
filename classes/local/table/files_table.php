@@ -40,15 +40,18 @@ class files_table extends \table_sql {
     public function __construct($uniqueid, $objectlocation) {
         parent::__construct($uniqueid);
 
-        $fields = 'f.*';
-        $from = '{files} f LEFT JOIN {tool_objectfs_objects} o on f.contenthash = o.contenthash';
+        $fields = 'f.*, ctx.instanceid, ctx.contextlevel';
+        $from = '{files} f';
+        $from .= ' LEFT JOIN {tool_objectfs_objects} o on f.contenthash = o.contenthash';
+        $from .= ' LEFT JOIN {context} ctx ON f.contextid = ctx.id';
         $where = 'o.location = ?';
         $params = [$objectlocation];
 
-        $this->columns = $this->headers = ['id', 'contextid', 'contenthash', 'localpath', 'component',
+        $this->columns = $this->headers = ['id', 'contextid', 'contenthash', 'localpath', 'link', 'component',
             'filearea', 'filename', 'filepath', 'mimetype', 'filesize', 'timecreated'];
 
         $this->no_sorting('localpath');
+        $this->no_sorting('link');
 
         $this->define_columns($this->columns);
         $this->define_headers($this->headers);
@@ -106,4 +109,53 @@ class files_table extends \table_sql {
         return userdate($row->timecreated);
     }
 
+    public function col_link(\stdClass $row) {
+        global $DB;
+
+        if (substr($row->component, 0, strlen('mod_')) === "mod_") {
+            switch ((int)$row->contextlevel) {
+                case CONTEXT_MODULE:
+                    list ($course, $cm) = get_course_and_cm_from_cmid($row->instanceid);
+                    if (!empty($cm)) {
+                        $url = new \moodle_url($cm->url);
+                    }
+                    break;
+                case CONTEXT_COURSE:
+                    $url = new \moodle_url("/course/view.php", ['id' => $row->instanceid]);
+                    break;
+                default:
+                    // Do nothing for now, in the future this can handle other contexts.
+            }
+        } else if ($row->component === 'course') {
+            if ($row->filearea === "legacy") {
+                $params = ['contextid' => $row->contextid];
+                $url = new \moodle_url("/files/index.php", $params);
+
+            } else if ($row->filearea === "section") {
+                $params = ['id' => $row->instanceid];
+                $url = new \moodle_url("/course/view.php", $params);
+            }
+
+        } else if ($row->component === 'block_html') {
+            // Internally blocks are different to course modules and require a different lookup.
+            $bi = $DB->get_record('block_instances', ['id' => $row->instanceid]);
+            $cctx = $DB->get_record('context', ['id' => $bi->parentcontextid]);
+            $params = ['id' => $cctx->instanceid];
+            $url = new \moodle_url("/course/view.php", $params);
+        }
+
+        if ($this->is_downloading()) {
+            if (!empty($url)) {
+                return $url->out(false);
+            } else {
+                return '';
+            }
+        }
+
+        if (!empty($url)) {
+            return \html_writer::link($url, $url);
+        } else {
+            return '';
+        }
+    }
 }

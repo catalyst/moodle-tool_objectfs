@@ -432,6 +432,33 @@ class stream_wrapper {
     }
 
     /**
+     * Rename object
+     *
+     * @param string $path
+     * @return boolean
+     */
+
+    public function rename($currentpath, $destinationpath) {
+        $currenturl = $this->parse_url($currentpath);
+        $destinationurl = $this->parse_url($destinationpath);
+
+        $options = ['destination' => $destinationurl['host'] . '/' . $destinationurl['path']];
+        try {
+            $this->get_container($currenturl['host'])->getObject($currenturl['path'])->copy($options);
+        } catch (\OpenStack\Common\Error\BadResponseError $e) {
+            trigger_error("Unable to copy file, errorcode:". $e->getResponse()->getStatusCode(), E_USER_WARNING);
+            return false;
+
+        } catch (\Exception $e) {
+            trigger_error("Unable to copy file", E_USER_WARNING);
+            return false;
+
+        }
+        // Now delete the original file.
+        return unlink($currentpath);
+    }
+
+    /**
      * Stat file based on path
      *
      * @param string $path

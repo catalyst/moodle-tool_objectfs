@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\store\swift;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\swift\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
@@ -137,7 +135,7 @@ class client extends object_client_base {
 
             $obj->retrieve();
 
-        } catch (BadResponseError $e) {
+        } catch (\OpenStack\Common\Error\BadResponseError $e) {
             return false;
         }
 
@@ -179,7 +177,7 @@ class client extends object_client_base {
 
         try {
             $container->createObject(['name' => 'connection_check_file', 'content' => 'connection_check_file']);
-        } catch (BadResponseError $e) {
+        } catch (\OpenStack\Common\Error\BadResponseError $e) {
             $connection->success = false;
             $connection->details = $this->get_exception_details($e);
         } catch (Exception $e) {
@@ -198,7 +196,7 @@ class client extends object_client_base {
 
         try {
             $result = $container->createObject(['name' => 'permissions_check_file', 'content' => 'permissions_check_file']);
-        } catch (BadResponseError $e) {
+        } catch (\OpenStack\Common\Error\BadResponseError $e) {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
@@ -206,7 +204,7 @@ class client extends object_client_base {
 
         try {
             $result = $container->getObject('permissions_check_file')->download();
-        } catch (BadResponseError $e) {
+        } catch (\OpenStack\Common\Error\BadResponseError $e) {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
@@ -235,7 +233,7 @@ class client extends object_client_base {
         return $permissions;
     }
 
-    protected function get_exception_details(BadResponseError $e) {
+    protected function get_exception_details(\OpenStack\Common\Error\BadResponseError $e) {
 
         $message = $e->getResponse()->getReasonPhrase();
         $details = ' ';
@@ -319,19 +317,6 @@ class client extends object_client_base {
      */
     public function rename_file($currentpath, $destinationpath) {
         rename($currentpath, $destinationpath);
-    }
-
-    /**
-     * Returns swift trash fullpath to use with php file functions.
-     *
-     * @param string $contenthash contenthash used as key in swift.
-     * @return string
-     * @throws \Exception if fails
-     */
-    public function get_trash_fullpath_from_hash($contenthash) {
-        $container = $this->get_container();
-        $filepath = $this->get_filepath_from_hash($contenthash);
-        return "swift://$container->name/trash/$filepath";
     }
 
     /**

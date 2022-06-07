@@ -15,10 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Object manipulator interface class.
+ * Orphans {tool_objectfs_objects} records for files that have been
+ * deleted from the core {files} table.
  *
  * @package   tool_objectfs
- * @author    Gleimer Mora <gleimermora@catalyst-au.net>
+ * @author    Nathan Mares <ngmares@gmail.com>
+ * @author    Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,18 +29,16 @@ namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
 
-interface object_manipulator {
-
-
-    /**
-     * @param array $objects
-     * @return mixed
-     */
-    public function execute(array $objects);
+class orphaner extends manipulator {
 
     /**
-     * @param stdClass $objectrecord
+     * Updates the location of {tool_objectfs_objects} records for files that
+     * have been deleted from the core {files} table.
+     *
+     * @param \stdClass $objectrecord
      * @return int
      */
-    public function manipulate_object(stdClass $objectrecord);
+    public function manipulate_object(stdClass $objectrecord): int {
+        return OBJECT_LOCATION_ORPHANED;
+    }
 }

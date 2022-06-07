@@ -27,8 +27,6 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\checker;
 
-defined('MOODLE_INTERNAL') || die();
-
 class check_objects_location extends task {
 
     /** @var string $manipulator */

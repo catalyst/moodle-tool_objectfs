@@ -25,8 +25,6 @@
 
 namespace tool_objectfs\local\report;
 
-defined('MOODLE_INTERNAL') || die();
-
 class objectfs_report implements \renderable {
 
     /** @var string $reporttype */

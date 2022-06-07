@@ -15,44 +15,39 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class candidates_finder
+ * Class orphaner_candidates
  * @package tool_objectfs
- * @author Gleimer Mora <gleimermora@catalyst-au.net>
+ * @author Nathan Mares <ngmares@gmail.com>
  * @copyright Catalyst IT
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
-use moodle_exception;
-use stdClass;
+class orphaner_candidates extends manipulator_candidates_base {
 
-class candidates_finder {
-
-    /** @var string $finder */
-    private $finder = '';
+    /** @var string $queryname */
+    protected $queryname = 'get_orphan_candidates';
 
     /**
-     * candidates_finder constructor.
-     * @param string $manipulator
-     * @param stdClass $config
-     * @throws moodle_exception
-     */
-    public function __construct($manipulator, stdClass $config) {
-        $this->finder = candidates_factory::finder($manipulator, $config);
-    }
-
-    /**
-     * @return array
-     */
-    public function get() {
-        return $this->finder->get();
-    }
-
-    /**
+     * @inheritDoc
      * @return string
      */
-    public function get_query_name() {
-        return $this->finder->get_query_name();
+    public function get_candidates_sql() {
+        return 'SELECT o.id, o.contenthash, o.location
+                  FROM {tool_objectfs_objects} o
+             LEFT JOIN {files} f ON o.contenthash = f.contenthash
+                 WHERE f.id is null
+                   AND o.location != :location';
+    }
+
+    /**
+     * @inheritDoc
+     * @return array
+     */
+    public function get_candidates_sql_params() {
+        return [
+          'location' => OBJECT_LOCATION_ORPHANED
+        ];
     }
 }

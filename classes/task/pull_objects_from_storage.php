@@ -27,8 +27,6 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\puller;
 
-defined('MOODLE_INTERNAL') || die();
-
 class pull_objects_from_storage extends task {
 
     /** @var string $manipulator */

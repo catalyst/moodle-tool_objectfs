@@ -62,7 +62,7 @@ abstract class objectfs_logger {
         return;
     }
 
-    public abstract function log_object_read($readname, $objectpath, $objectsize = 0);
-    public abstract function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0);
-    public abstract function log_object_query($queryname, $objectcount, $objectsum = 0);
+    abstract public function log_object_read($readname, $objectpath, $objectsize = 0);
+    abstract public function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0);
+    abstract public function log_object_query($queryname, $objectcount, $objectsum = 0);
 }

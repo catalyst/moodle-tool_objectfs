@@ -27,8 +27,6 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\pusher;
 
-defined('MOODLE_INTERNAL') || die();
-
 class push_objects_to_storage extends task {
 
     /** @var string $manipulator */

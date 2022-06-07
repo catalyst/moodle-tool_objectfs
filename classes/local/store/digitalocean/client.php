@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\store\digitalocean;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\s3\client as s3_client;
 
 class client extends s3_client {
@@ -44,7 +42,26 @@ class client extends s3_client {
         }
     }
 
+    /**
+     * Check if the client configured properly.
+     *
+     * @param \stdClass $config Client config.
+     * @return bool
+     */
+    protected function is_configured($config) {
+        if (empty($config->do_key) || empty($config->do_secret) || empty($config->do_region)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function set_client($config) {
+        if (!$this->is_configured($config)) {
+            $this->client = null;
+            return;
+        }
+
         $this->client = \Aws\S3\S3Client::factory(array(
             'credentials' => array('key' => $config->do_key, 'secret' => $config->do_secret),
             'region' => $config->do_region,

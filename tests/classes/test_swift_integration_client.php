@@ -16,8 +16,6 @@
 
 namespace tool_objectfs\tests;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\swift\client;
 
 class test_swift_integration_client extends client {

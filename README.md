@@ -1,5 +1,5 @@
-<a href="https://travis-ci.org/catalyst/moodle-tool_objectfs">
-<img src="https://travis-ci.org/catalyst/moodle-tool_objectfs.svg?branch=master">
+<a href="https://github.com/catalyst/moodle-tool_objectfs/actions?query=workflow%3A%22Run+all+tests%22">
+<img src="https://github.com/catalyst/moodle-tool_objectfs/workflows/Run%20all%20tests/badge.svg">
 </a>
 
 # moodle-tool_objectfs
@@ -25,7 +25,8 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   * [Amazon S3 settings](#amazon-s3-settings)
   * [Azure Blob Storage settings](#azure-blob-storage-settings)
   * [DigitalOcean Spaces settings](#digitalocean-spaces-settings)
-* [Backporting](#backporting)
+* [Integration testing](#integration-testing)
+* [Applying core patches](#applying-core-patches)
 * [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 * [Contributing and support](#contributing-and-support)
 
@@ -59,11 +60,11 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 
 ## Branches
 
-| Moodle version   | Totara version           | Branch       | PHP  |
-|------------------|--------------------------|--------------|------|
-| Moodle 3.4 - 3.9 |                          | master       | 7.0+ |
-| Moodle 3.3       | Totara 12                | master       | 7.0+ |
-| Moodle 2.7 - 3.2 | Totara 2.7 - 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE) | 5.5+ |
+| Moodle version   | Totara version           | Branch                                                                                       | PHP  |
+|------------------|--------------------------|----------------------------------------------------------------------------------------------|------|
+| Moodle 3.10 +    |                          | [MOODLE_310_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_310_STABLE) | 7.2+ |
+| Moodle 3.3 - 3.9 | Totara 12                | [MOODLE_33_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_33_STABLE)   | 7.1+ |
+| Moodle 2.7 - 3.2 | Totara 2.7 - 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE)           | 5.5+ |
 
 
 ## Installation
@@ -98,14 +99,6 @@ $CFG->alternative_file_system_class = '\tool_objectfs\digitalocean_file_system';
 ```php
 $CFG->alternative_file_system_class = '\tool_objectfs\swift_file_system';
 ```
-
-8. If you intend to allow deletion of remote files then add the following line.
-
-```php
-$CFG->tool_objectfs_delete_externally = 1;
-```
-
-This is not recommended if you intend to share one object store between multiple environments, however this is a requirement for GDPR compliance.
 
 ## Currently supported object stores
 
@@ -272,19 +265,18 @@ These settings control the movement of files to and from object storage.
 - **Pre-Signed URL whitelist**: Specify file extensions eligible to generate a **Pre-Signed URL**. If left empty requests will not be redirected to an external storage even if **Enable Pre-Signed URLs** is **ON**.  
 - **Signing method**: Define the desired client to generate **Pre-Signed URLs**.
     * Options available:
-        - **S3**
-        - **CloudFront**
-    * S3: Inherits the settings from [Amazon S3 settings](#amazon-s3-settings)
-    * Cloudfront: It requires to create a [Cloudfront Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-creating-console.html) with **Query String Forwarding** set to **Forward all**
-        * **DOMAIN (inc. https://)**: Domain name where the content requests will be redirected to.
-        * **Key_Pair ID from AWS**: Key to identify your trusted signers. [Creating CloudFront Key Pairs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html#private-content-creating-cloudfront-key-pairs)
-        * **PRIVATE Key .pem**:
-            * can be one of the following:
-                * A file name with the pem extension e.g.: cloudfront.pem. The file should be located under the following path: **$CFG->dataroot . '/objectfs/'**
-                * A PEM formatted string. e.g.:
-                <pre>-----BEGIN RSA PRIVATE KEY-----
-              S3O3BrpoUCwYTF5Vn9EQhkjsu8s...
-              -----END RSA PRIVATE KEY-----</pre>
+        - **S3**. Inherits the settings from [Amazon S3 settings](#amazon-s3-settings)
+        - **CloudFront**. It requires to create a [Cloudfront Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-creating-console.html). See [CLOUDFRONT.md](CLOUDFRONT.md) for more details.
+- **DOMAIN (inc. https://)**: Domain name where the content requests will be redirected to.
+- **Key_Pair ID from AWS**: Key to identify your trusted signers. [Creating CloudFront Key Pairs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html#private-content-creating-cloudfront-key-pairs)
+- **PRIVATE Key .pem**: Can be one of the following:
+    * A file name with the pem extension e.g.: cloudfront.pem. The file should be located under the following path: **$CFG->dataroot . '/objectfs/'**
+    * A PEM formatted string. e.g.:
+```
+      -----BEGIN RSA PRIVATE KEY-----
+      S3O3BrpoUCwYTF5Vn9EQhkjsu8s...
+      -----END RSA PRIVATE KEY-----
+```
  
 ### Amazon S3 settings
 S3 specific settings
@@ -293,6 +285,7 @@ S3 specific settings
 - **Bucket**: S3 bucket name to store files in.
 - **AWS region**: AWS API endpoint region to use.
 - **Base URL**: useful for s3-compatible providers *eg* set to `https://storage.googleapis.com` for gcs
+- **Key Prefix**: useful for adding a prefix for all data stored in bucket. Can be used to reuse the same CloudFront distribution for both Moodle itself and the pre-signed URLs files.
 
 ### Azure Blob Storage settings
 Azure Blob Storage specific settings
@@ -317,6 +310,9 @@ Openstack Object Storage settings
 - **Tenant Name**: Openstack tenant name
 - **Project ID**: Openstack project ID
 - **Container**: Name of the storage container
+
+## Integration testing
+Objectfs supports integration testing with S3, Azure and Swift storages. Please refer to [TESTING.md](TESTING.md) for more detail.
 
 ## Applying core patches
 

@@ -73,6 +73,7 @@ class manager {
         $config->s3_bucket = '';
         $config->s3_region = 'us-east-1';
         $config->s3_base_url = '';
+        $config->key_prefix = '';
 
         // Digital ocean file system.
         $config->do_key = '';
@@ -179,7 +180,7 @@ class manager {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    static public function cloudfront_pem_exists() {
+    public static function cloudfront_pem_exists() {
         global $OUTPUT;
         $config = self::get_objectfs_config();
         if ('cf' !== $config->signingmethod) {

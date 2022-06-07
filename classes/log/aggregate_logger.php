@@ -106,6 +106,8 @@ class aggregate_logger extends objectfs_logger {
                 return 'duplicated';
             case OBJECT_LOCATION_EXTERNAL:
                 return 'remote';
+            case OBJECT_LOCATION_ORPHANED:
+                return 'orphaned';
             default:
                 return $location;
         }

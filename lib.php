@@ -25,12 +25,38 @@
 
 use tool_objectfs\local\object_manipulator\manipulator_builder;
 
-defined('MOODLE_INTERNAL') || die;
-
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
+
+/**
+ * Location enum of the object
+ * ORPHANED is when the {objectfs_objects} table contains a record linking to a
+ * moodle {files} record which is no longer present.
+ */
+define('OBJECT_LOCATION_ORPHANED', -2);
+
+/**
+ * Location enum of the object
+ * ERROR is when the file is missing when it is expected to be there.
+ * @see tests/object_file_system_test.php for examples.
+ */
 define('OBJECT_LOCATION_ERROR', -1);
+
+/**
+ * Location enum of the object
+ * LOCAL is when the object exists locally only.
+ */
 define('OBJECT_LOCATION_LOCAL', 0);
+
+/**
+ * Location enum of the object
+ * DUPLICATED is when the object exists both locally, and remotely.
+ */
 define('OBJECT_LOCATION_DUPLICATED', 1);
+
+/**
+ * Location enum of the object
+ * EXTERNAL is when when the object lives remotely only.
+ */
 define('OBJECT_LOCATION_EXTERNAL', 2);
 
 define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
@@ -38,6 +64,10 @@ define('OBJECTFS_REPORT_LOG_SIZE', 1);
 define('OBJECTFS_REPORT_MIME_TYPE', 2);
 
 define('OBJECTFS_BYTES_IN_TERABYTE', 1099511627776);
+
+define('TOOL_OBJECTFS_DELETE_EXTERNAL_NO', 0);
+define('TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH', 1);
+define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
 
 // Legacy cron function.
 function tool_objectfs_cron() {
@@ -79,4 +109,19 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
     \core\session\manager::write_close();
     send_stored_file($file, $lifetime, 0, $forcedownload, $options);
     return true;
+}
+
+/**
+ * Get status checks for tool_objectfs.
+ *
+ * @return array
+ */
+function tool_objectfs_status_checks() {
+    if (get_config('tool_objectfs', 'proxyrangerequests')) {
+        return [
+            new tool_objectfs\check\proxy_range_request()
+        ];
+    }
+
+    return [];
 }

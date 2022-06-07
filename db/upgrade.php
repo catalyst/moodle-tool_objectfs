@@ -23,8 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 function xmldb_tool_objectfs_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
@@ -86,6 +84,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         unset_config('secret', 'tool_objectfs');
         unset_config('bucket', 'tool_objectfs');
         unset_config('region', 'tool_objectfs');
+        unset_config('key_prefix', 'tool_objectfs');
 
         upgrade_plugin_savepoint(true, 2017111700, 'tool', 'objectfs');
     }
@@ -129,5 +128,13 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020052600, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2021090100) {
+        // If set already, make sure we use the same default value.
+        if (isset($CFG->tool_objectfs_delete_externally)) {
+            set_config('deleteexternal', $CFG->tool_objectfs_delete_externally, 'tool_objectfs');
+        }
+
+        upgrade_plugin_savepoint(true, 2021090100, 'tool', 'objectfs');
+    }
     return true;
 }

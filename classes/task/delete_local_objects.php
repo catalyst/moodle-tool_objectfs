@@ -27,8 +27,6 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\deleter;
 
-defined('MOODLE_INTERNAL') || die();
-
 
 class delete_local_objects extends task {
 

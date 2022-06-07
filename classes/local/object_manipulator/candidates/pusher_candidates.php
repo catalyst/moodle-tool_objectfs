@@ -45,7 +45,7 @@ class pusher_candidates extends manipulator_candidates_base {
                   JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE f.filesize > :threshold
                    AND f.filesize < :maximum_file_size
-                   AND f.timecreated <= :maxcreatedtimstamp
+                   AND f.timecreated <= :maxcreatedtimestamp
                    AND o.location = :object_location
               GROUP BY f.contenthash, o.location';
     }
@@ -57,7 +57,7 @@ class pusher_candidates extends manipulator_candidates_base {
     public function get_candidates_sql_params() {
         $filesystem = new $this->config->filesystem;
         return [
-            'maxcreatedtimstamp' => time() - $this->config->minimumage,
+            'maxcreatedtimestamp' => time() - $this->config->minimumage,
             'threshold' => $this->config->sizethreshold,
             'maximum_file_size' => $filesystem->get_maximum_upload_filesize(),
             'object_location' => OBJECT_LOCATION_LOCAL,

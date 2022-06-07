@@ -25,8 +25,6 @@
 
 namespace tool_objectfs;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_objectfs\local\store\swift\file_system;
 
 class swift_file_system extends file_system {
