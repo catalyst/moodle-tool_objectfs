@@ -1,0 +1,17 @@
+# .github/workflows/moodle-release.yml
+name: Releasing in the Plugins directory
+
+on:
+  push:
+    branches:
+      - MOODLE_33_STABLE
+    paths:
+      - 'version.php'
+
+jobs:
+  release:
+    uses: catalyst/catalyst-moodle-workflows/.github/workflows/group-33-to-39-release.yml@main
+    with:
+      plugin_name: tool_objectfs
+    secrets:
+      moodle_org_token: ${{ secrets.MOODLE_ORG_TOKEN }}
