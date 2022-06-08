@@ -756,11 +756,10 @@ class client extends object_client_base {
             throw new \coding_exception('Failed to generate pre-signed url: ' . $e->getMessage());
         }
         $headers = array(
-            'HTTP/1.1 206 Partial Content',
-            'Content-Length: '. $ranges->length,
             'Range: bytes=' . $ranges->rangefrom . '-' . $ranges->rangeto,
         );
         $curl = new \curl();
+        $curl->setopt(array('CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1));
         $curl->setopt(array('CURLOPT_RETURNTRANSFER' => true));
         $curl->setopt(array('CURLOPT_SSL_VERIFYPEER' => false));
         $curl->setopt(array('CURLOPT_CONNECTTIMEOUT' => 15));
