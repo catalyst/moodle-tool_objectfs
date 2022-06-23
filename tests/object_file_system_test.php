@@ -585,6 +585,39 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         }
     }
 
+    public function test_can_generate_signed_url_with_headers() {
+        $this->filesystem = new test_file_system();
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+        try {
+            $headers = [
+                'Content-Disposition' => 'attachment; filename="filename.txt"',
+                'Content-Type' => 'text/plain',
+            ];
+            $signedurl = $this->filesystem->externalclient->generate_presigned_url($filehash, $headers);
+            $this->assertTrue($this->is_externally_readable_by_url($signedurl));
+        } catch (\coding_exception $e) {
+            $this->assertEquals($e->a, 'Pre-signed URLs not supported');
+        }
+    }
+
+    public function test_can_generate_signed_url_with_unicode_filename() {
+        $this->filesystem = new test_file_system();
+        $file = $this->create_remote_file();
+        $filehash = $file->get_contenthash();
+        try {
+            $headers = [
+                    'Content-Disposition' => 'attachment; filename="😀.txt"',
+                    'Content-Type' => 'text/plain',
+            ];
+            $signedurl = $this->filesystem->externalclient->generate_presigned_url($filehash, $headers);
+            $this->assertTrue($this->is_externally_readable_by_url($signedurl));
+
+        } catch (\coding_exception $e) {
+            $this->assertEquals($e->a, 'Pre-signed URLs not supported');
+        }
+    }
+
     public function test_presigned_url_configured_method_returns_false_if_not_configured() {
         $this->filesystem = new test_file_system();
         $this->assertFalse($this->filesystem->presigned_url_configured());
