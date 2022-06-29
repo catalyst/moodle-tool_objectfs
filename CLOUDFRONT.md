@@ -97,7 +97,7 @@ cat public_key.pem
 4. _Configure CORS_: disabled
 5. _Strict-Transport-Security_: Enabled, origin override enabled
 6. _X-Content-Type-Options_: Enabled, origin override enabled
-7. _X-Frame-Options_: Enabled, SAMEORIGIN, origin override enabled
+7. _X-Frame-Options_: Disabled
 8. _X-XSS-Protection_: Enabled, block, origin override enabled
 9. _Referrer-Policy_: Enabled, strict-origin-when-cross-origin, origin override enabled
 10. _Content-Security-Policy_: disabled
@@ -112,15 +112,17 @@ cat public_key.pem
 7. _Allowed HTTP methods_: Choose _GET, HEAD, OPTIONS_ and tick _OPTIONS_ under _Cache HTTP methods_.
 8. _Restrict viewer access_: Choose _Yes -> Trusted key groups (recommended)_.
 9. Add key group created earlier
-10. _Cache key and origin requests_: Choose _Cache policy and origin request policy (recommended)_.
-11. _Cache policy_: Choose CachingOptimized
-12. _Origin request policy_: Choose CORS-S3Origin
-13. _Response headers policy_: Choose CORS-with-preflight-and-SecurityHeadersPolicy-ReadOnly
-14. Click _Create distribution_.
-15. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/distributions.
-16. Confirm, that _Status_ is _Enabled_ and _Last modified_ is changed from _Deploying_ to the date the distribution was created.
-17. Open your distribution.
-18. Write down _Distribution domain name_ (with https://).
+10. _Cache key and origin requests_: Choose _Legacy cache settings_.
+11. _Headers_: Choose _Include the following headers_, and add these: _Origins_, _Access-Control-Request-Method_, _Access-Control-Request-Headers_
+12. _Query strings_: Choose _All_
+13. _Cookies_: Choose _None_
+14. _Object caching_: _Use origin cache headers_
+15. _Response headers policy_: Choose CORS-with-preflight-and-SecurityHeadersPolicy-ReadOnly
+16. Click _Create distribution_.
+17. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/distributions.
+18. Confirm, that _Status_ is _Enabled_ and _Last modified_ is changed from _Deploying_ to the date the distribution was created.
+19. Open your distribution.
+20. Write down _Distribution domain name_ (with https://).
 > Note: If you have already setup Moodle behind a CloudFront distribution, it is also possible to use that same CloudFront distribution to serve files from objectfs. In this scenario, a specific prefix in the URL path directs traffic to the S3 Bucket (moodle.domain/objectfs/ for example). To achieve that, use the key_prefix option to add a prefix on your Bucket, and configure a second Origin on your existing CloudFront distribution that points to your Bucket. Setup a Behavior that uses that new Origin with the same prefix as the one you used as key_prefix in your Bucket. Follow all other instructions.
 
 ### Configure CloudFront signing method in Objectfs:
