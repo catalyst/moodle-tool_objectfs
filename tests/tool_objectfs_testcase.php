@@ -25,7 +25,6 @@ use stored_file;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\store\object_file_system;
-use tool_objectfs\local\store\signed_url;
 
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/classes/test_file_system.php');
@@ -199,9 +198,9 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         $DB->delete_records('files', array('contenthash' => $contenthash));
     }
 
-    protected function is_externally_readable_by_url(signed_url $signedurl) {
+    protected function is_externally_readable_by_url($url) {
         try {
-            $file = fopen($signedurl->url->out(false), 'r');
+            $file = fopen($url, 'r');
             if ($file === false) {
                 $result = false;
             } else {
