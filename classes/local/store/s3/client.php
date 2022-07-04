@@ -536,7 +536,7 @@ class client extends object_client_base {
             $result = $this->get_nice_filename($headers);
             if (!empty($result)) {
                 $key .= '?response-content-disposition=' .
-                    rawurlencode($result['Content-Disposition']) . ';' . $result['filename'] .
+                    rawurlencode($result['Content-Disposition'] . ';' . $result['filename']) .
                     '&response-content-type=' . rawurlencode($result['Content-Type']);
             } else {
                 $key .= '';
@@ -604,7 +604,7 @@ class client extends object_client_base {
 
             if (!empty($originalfilename)) {
                 $result['Content-Disposition'] = $contentdisposition;
-                $result['filename'] = "filename*=utf-8''" . rawurlencode($originalfilename);
+                $result['filename'] = 'filename="' . utf8_encode($originalfilename) . '"';
                 $result['Content-Type'] = $originalcontenttype;
             }
         }
