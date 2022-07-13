@@ -607,7 +607,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $filehash = $file->get_contenthash();
         try {
             $headers = [
-                    'Content-Disposition' => 'attachment; filename="😀.txt"',
+                    'Content-Disposition' => 'attachment; filename="试.txt"',
                     'Content-Type' => 'text/plain',
             ];
             $signedurl = $this->filesystem->externalclient->generate_presigned_url($filehash, $headers);
