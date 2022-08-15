@@ -34,17 +34,12 @@ class deleter_candidates extends manipulator_candidates_base {
      * @return string
      */
     public function get_candidates_sql() {
-        return 'SELECT MAX(f.id),
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
-                  FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE o.timeduplicated <= :consistancythreshold
-                   AND o.location = :location
-                   AND f.filesize > :sizethreshold
-              GROUP BY f.contenthash,
-                       f.filesize,
-                       o.location';
+        return 'SELECT contenthash,
+                       filesize
+                  FROM {tool_objectfs_objects}
+                 WHERE timeduplicated <= :consistancythreshold
+                   AND location = :location
+                   AND filesize > :sizethreshold';
     }
 
     /**
