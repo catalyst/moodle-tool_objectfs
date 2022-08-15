@@ -146,10 +146,17 @@ class manager {
                 return $oldobject;
             }
 
+            // Make sure filesize is populated.
+            if (empty($oldobject->filesize)) {
+                $newobject->filesize = $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
+            } else {
+                $newobject->filesize = $oldobject->filesize;
+            }
             return self::update_object($newobject, $newlocation);
         }
         $newobject->timeduplicated = time();
         $newobject->location = $newlocation;
+        $newobject->filesize = $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
         $DB->insert_record('tool_objectfs_objects', $newobject);
 
         return $newobject;
