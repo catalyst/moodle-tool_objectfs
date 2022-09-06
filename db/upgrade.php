@@ -137,7 +137,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021090100, 'tool', 'objectfs');
     }
 
-    if ($oldversion < 2021122304) {
+    if ($oldversion < 2021122305) {
 
         // Add filesize field to objects table.
         $table = new xmldb_table('tool_objectfs_objects');
@@ -149,7 +149,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         // Populate the filesize field.
         \core\task\manager::queue_adhoc_task(new \tool_objectfs\task\populate_objects_filesize());
 
-        upgrade_plugin_savepoint(true, 2021122304, 'tool', 'objectfs');
+        upgrade_plugin_savepoint(true, 2021122305, 'tool', 'objectfs');
     }
     return true;
 }

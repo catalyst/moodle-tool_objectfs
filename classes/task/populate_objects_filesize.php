@@ -51,18 +51,22 @@ class populate_objects_filesize extends adhoc_task {
               GROUP BY o.id,
                        o.contenthash,
                        f.filesize";
-        $records = $DB->get_records_sql($sql);
+        $records = $DB->get_recordset_sql($sql);
 
         // If more records found than the max number of updates, only process max updates then queue new task.
-        $queueadditionaltask = false;
-        // If there are more records than the max number of updates, take the first batch.
-        if (count($records) > $maxupdates) {
-            $queueadditionaltask = true;
-            $records = array_splice($records, 0, $maxupdates);
-        }
+        $queueadditionaltask = iterator_count($records) > $maxupdates;
+
+        $records->rewind();
+        $updatecount = 0;
         foreach ($records as $record) {
             $DB->update_record('tool_objectfs_objects', $record, true);
+            $updatecount += 1;
+            if ($updatecount > $maxupdates) {
+                break;
+            }
         }
+        $records->close();
+
         if ($queueadditionaltask) {
             manager::queue_adhoc_task(new populate_objects_filesize());
         }
