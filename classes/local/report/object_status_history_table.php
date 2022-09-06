@@ -71,6 +71,7 @@ class object_status_history_table extends \table_sql {
             $columnheaders['runningsize'] = get_string('object_status:runningsize', 'tool_objectfs');
         }
 
+        $this->set_attribute('class', 'table-sm');
         $this->define_columns(array_keys($columnheaders));
         $this->define_headers(array_values($columnheaders));
         $this->collapsible(false);
