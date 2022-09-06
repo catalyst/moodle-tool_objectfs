@@ -54,16 +54,16 @@ class populate_objects_filesize extends adhoc_task {
         $records = $DB->get_recordset_sql($sql);
 
         // If more records found than the max number of updates, only process max updates then queue new task.
-        $queueadditionaltask = iterator_count($records) > $maxupdates;
+        $queueadditionaltask = false;
 
-        $records->rewind();
         $updatecount = 0;
         foreach ($records as $record) {
-            $DB->update_record('tool_objectfs_objects', $record, true);
-            $updatecount += 1;
-            if ($updatecount > $maxupdates) {
+            if ($updatecount >= $maxupdates) {
+                $queueadditionaltask = true;
                 break;
             }
+            $DB->update_record('tool_objectfs_objects', $record, true);
+            $updatecount += 1;
         }
         $records->close();
 
