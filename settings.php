@@ -112,6 +112,18 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('tool_objectfs/sizethreshold',
         new lang_string('settings:sizethreshold', 'tool_objectfs'), '', 1024 * 10, PARAM_INT));
 
+    $settings->add(new admin_setting_configtext('tool_objectfs/filtercomponent',
+        new lang_string('settings:filtercomponent', 'tool_objectfs'),
+        new lang_string('settings:filtercomponent_help', 'tool_objectfs'), '', PARAM_TEXT));
+
+    $settings->add(new admin_setting_configtext('tool_objectfs/filterfilearea',
+        new lang_string('settings:filterfilearea', 'tool_objectfs'),
+        new lang_string('settings:filterfilearea_help', 'tool_objectfs'), '', PARAM_TEXT));
+
+    $settings->add(new admin_setting_configtext('tool_objectfs/filtermimetype',
+        new lang_string('settings:filtermimetype', 'tool_objectfs'),
+        new lang_string('settings:filtermimetype_help', 'tool_objectfs'), '', PARAM_TEXT));
+
     $settings->add(new admin_setting_configtext('tool_objectfs/batchsize',
         new lang_string('settings:batchsize', 'tool_objectfs'), '', 10000, PARAM_INT));
 

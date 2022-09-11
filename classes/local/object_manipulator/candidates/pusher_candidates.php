@@ -38,12 +38,58 @@ class pusher_candidates extends manipulator_candidates_base {
      * @return string
      */
     public function get_candidates_sql() {
+
+        // Filter file component.
+        $filtercomponent = [];
+        if (!empty($this->config->filtercomponent)) {
+            foreach(explode(',', $this->config->filtercomponent) as $item){
+                if(!empty(trim($item))){
+                    $filtercomponent[] = trim($item);
+                }
+            }
+
+            $filtercomponent = array_unique($filtercomponent);
+        }
+
+        $strcomponent = !empty($filtercomponent) ? " AND f.component IN ('".implode("','", $filtercomponent)."') " : '';
+
+        // Filter file filearea.
+        $filterfilearea = [];
+        if (!empty($this->config->filterfilearea)) {
+            foreach(explode(',', $this->config->filterfilearea) as $item){
+                if(!empty(trim($item))){
+                    $filterfilearea[] = trim($item);
+                }
+            }
+
+            $filterfilearea = array_unique($filterfilearea);
+        }
+
+        $strfilearea = !empty($filterfilearea) ? " AND f.filearea IN ('".implode("','", $filterfilearea)."') " : '';
+
+        // Filter file mimetype.
+        $filtermimetype = [];
+        if (!empty($this->config->filtermimetype)) {
+            foreach(explode(',', $this->config->filtermimetype) as $item){
+                if(!empty(trim($item))){
+                    $filtermimetype[] = trim($item);
+                }
+            }
+
+            $filtermimetype = array_unique($filtermimetype);
+        }
+
+        $strmimetype = !empty($filtermimetype) ? " AND f.mimetype IN ('".implode("','", $filtermimetype)."') " : '';
+
         return 'SELECT MAX(f.id),
                        f.contenthash,
                        MAX(f.filesize) AS filesize
                   FROM {files} f
                   JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE f.filesize > :threshold
+                   '.$strcomponent.'
+                   '.$strfilearea.'
+                   '.$strmimetype.'
                    AND f.filesize < :maximum_file_size
                    AND f.timecreated <= :maxcreatedtimestamp
                    AND o.location = :object_location
@@ -59,6 +105,9 @@ class pusher_candidates extends manipulator_candidates_base {
         return [
             'maxcreatedtimestamp' => time() - $this->config->minimumage,
             'threshold' => $this->config->sizethreshold,
+            'component' => $this->config->component,
+            'filearea' => $this->config->filearea,
+            'mimetype' => $this->config->mimetype,
             'maximum_file_size' => $filesystem->get_maximum_upload_filesize(),
             'object_location' => OBJECT_LOCATION_LOCAL,
         ];

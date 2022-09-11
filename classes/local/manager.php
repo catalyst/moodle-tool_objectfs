@@ -49,6 +49,9 @@ class manager {
         $config->enabletasks = 0;
         $config->enablelogging = 0;
         $config->sizethreshold = 1024 * 10;
+        $config->filtercomponent = '';
+        $config->filterfilearea = '';
+        $config->filtermimetype = '';
         $config->minimumage = 7 * DAYSECS;
         $config->deletelocal = 0;
         $config->consistencydelay = 10 * MINSECS;
