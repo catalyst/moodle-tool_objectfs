@@ -70,7 +70,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         global $DB;
         $object = $this->create_local_object();
         $maximumfilesize = $this->filesystem->get_maximum_upload_filesize() + 1;
-        $DB->set_field('files', 'filesize', $maximumfilesize, array('contenthash' => $object->contenthash));
+        $DB->set_field('tool_objectfs_objects', 'filesize', $maximumfilesize, array('contenthash' => $object->contenthash));
 
         self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
@@ -79,7 +79,7 @@ class pusher_testcase extends tool_objectfs_testcase {
         global $DB;
         $this->set_pusher_config('sizethreshold', 100);
         $object = $this->create_local_object();
-        $DB->set_field('files', 'filesize', 10, array('contenthash' => $object->contenthash));
+        $DB->set_field('tool_objectfs_objects', 'filesize', 10, array('contenthash' => $object->contenthash));
 
         self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
@@ -164,33 +164,5 @@ class pusher_testcase extends tool_objectfs_testcase {
         $objects = $finder->get();
 
         $this->assertEquals(1, count($objects));
-    }
-
-    public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_filesize() {
-        global $DB;
-        // Push initial objects so they arnt candidates.
-        $config = manager::get_objectfs_config();
-        $config->filesystem = get_class($this->filesystem);
-        $finder = new candidates_finder($this->manipulator, $config);
-        $objects = $finder->get();
-        $this->pusher->execute($objects);
-
-        $object = $this->create_local_object();
-        $file = $DB->get_record('files', array('contenthash' => $object->contenthash));
-
-        // Update filesize to something different and insert as new file.
-        $file->filesize = $this->filesystem->get_maximum_upload_filesize() + 100;
-        $file->pathnamehash = '1234';
-        $DB->insert_record('files', $file);
-
-        $file->filesize = $this->filesystem->get_maximum_upload_filesize() - 100;
-        $file->pathnamehash = '12345';
-        $DB->insert_record('files', $file);
-
-        $objects = $finder->get();
-
-        $this->assertEquals(1, count($objects));
-        $this->assertEquals($this->filesystem->get_maximum_upload_filesize() - 100, reset($objects)->filesize);
-        $this->assertEquals($file->contenthash, reset($objects)->contenthash);
     }
 }

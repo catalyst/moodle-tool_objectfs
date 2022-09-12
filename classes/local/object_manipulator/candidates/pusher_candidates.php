@@ -38,16 +38,13 @@ class pusher_candidates extends manipulator_candidates_base {
      * @return string
      */
     public function get_candidates_sql() {
-        return 'SELECT MAX(f.id),
-                       f.contenthash,
-                       MAX(f.filesize) AS filesize
-                  FROM {files} f
-                  JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE f.filesize > :threshold
-                   AND f.filesize < :maximum_file_size
-                   AND f.timecreated <= :maxcreatedtimestamp
-                   AND o.location = :object_location
-              GROUP BY f.contenthash, o.location';
+        return 'SELECT contenthash,
+                       filesize
+                  FROM {tool_objectfs_objects}
+                 WHERE filesize > :threshold
+                   AND filesize < :maximum_file_size
+                   AND timeduplicated <= :maxcreatedtimestamp
+                   AND location = :object_location';
     }
 
     /**
