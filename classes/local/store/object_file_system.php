@@ -865,7 +865,7 @@ abstract class object_file_system extends \file_system_filedir {
         $result = parent::add_file_from_path($pathname, $contenthash);
 
         $location = $this->get_object_location_from_hash($result[0]);
-        manager::update_object_by_hash($result[0], $location);
+        manager::update_object_by_hash($result[0], $location, $result[1]);
 
         return $result;
     }
@@ -880,7 +880,7 @@ abstract class object_file_system extends \file_system_filedir {
         $result = parent::add_file_from_string($content);
 
         $location = $this->get_object_location_from_hash($result[0]);
-        manager::update_object_by_hash($result[0], $location);
+        manager::update_object_by_hash($result[0], $location, $result[1]);
 
         return $result;
     }
