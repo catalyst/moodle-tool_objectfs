@@ -152,6 +152,9 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         $this->assertCount(2, $updatedobjects);
 
         // Test new adhoc task was scheduled.
+        if (!method_exists(\core\task\manager::class, 'get_adhoc_tasks')) {
+            $this->markTestSkipped('\core\task\manager::get_adhoc_tasks() not available before Moodle 3.4');
+        }
         $adhoctasks = \core\task\manager::get_adhoc_tasks(populate_objects_filesize::class);
         $this->assertCount(1, $adhoctasks);
     }
@@ -187,6 +190,9 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
 
         // There are 5 objects and a max update limit of 4 but as one filesize is empty, there
         // should not be another task scheduled.
+        if (!method_exists(\core\task\manager::class, 'get_adhoc_tasks')) {
+            $this->markTestSkipped('\core\task\manager::get_adhoc_tasks() not available before Moodle 3.4');
+        }
         $adhoctasks = \core\task\manager::get_adhoc_tasks(populate_objects_filesize::class);
         $this->assertCount(0, $adhoctasks);
     }
