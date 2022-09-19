@@ -126,11 +126,11 @@ class manager {
     /**
      * @param $contenthash
      * @param $newlocation
-     * @param int $filesize Size of the file in bytes. Falls back to stored value if not provided.
+     * @param int|null $filesize Size of the file in bytes. Falls back to stored value if not provided.
      * @return mixed|stdClass
      * @throws \dml_exception
      */
-    public static function update_object_by_hash($contenthash, $newlocation, $filesize = 0) {
+    public static function update_object_by_hash($contenthash, $newlocation, $filesize = null) {
         global $DB;
         $newobject = new stdClass();
         $newobject->contenthash = $contenthash;
@@ -141,12 +141,12 @@ class manager {
             $newobject->id = $oldobject->id;
 
             // If location hasn't changed we do not need to update unless filesize is not populated.
-            if ((int)$oldobject->location === $newlocation && !empty($oldobject->filesize)) {
+            if ((int)$oldobject->location === $newlocation && isset($oldobject->filesize)) {
                 return $oldobject;
             }
 
             // Make sure filesize is populated.
-            $newobject->filesize = !empty($oldobject->filesize) ? $oldobject->filesize :
+            $newobject->filesize = isset($oldobject->filesize) ? $oldobject->filesize :
                     $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
 
             return self::update_object($newobject, $newlocation);

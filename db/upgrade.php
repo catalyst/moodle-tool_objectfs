@@ -137,19 +137,22 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021090100, 'tool', 'objectfs');
     }
 
-    if ($oldversion < 2021122305) {
+    if ($oldversion < 2021122306) {
 
         // Add filesize field to objects table.
         $table = new xmldb_table('tool_objectfs_objects');
-        $field = new xmldb_field('filesize', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, false, 0);
+        $field = new xmldb_field('filesize', XMLDB_TYPE_INTEGER, '20');
         if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        } else {
+            $dbman->drop_field($table, $field);
             $dbman->add_field($table, $field);
         }
 
         // Populate the filesize field.
         \core\task\manager::queue_adhoc_task(new \tool_objectfs\task\populate_objects_filesize());
 
-        upgrade_plugin_savepoint(true, 2021122305, 'tool', 'objectfs');
+        upgrade_plugin_savepoint(true, 2021122306, 'tool', 'objectfs');
     }
     return true;
 }

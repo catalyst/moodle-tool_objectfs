@@ -52,8 +52,8 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         $this->create_local_file("Test 4");
         $this->create_local_file("This is a looong name");
 
-        // Set all objects to have a filesize of 0.
-        $DB->set_field('tool_objectfs_objects', 'filesize', 0);
+        // Set all objects to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -76,8 +76,8 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         global $DB;
         $this->create_local_file("");
 
-        // Set all objects to have a filesize of 0.
-        $DB->set_field('tool_objectfs_objects', 'filesize', 0);
+        // Set all objects to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -101,8 +101,8 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         $file1 = $this->create_local_file("four");
         $file2 = $this->create_local_file("five5");
 
-        // Set all objects to have a filesize of 0.
-        $DB->set_field('tool_objectfs_objects', 'filesize', 0);
+        // Set all objects to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -133,8 +133,8 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         $this->create_local_file("Test 4");
         $this->create_local_file("This is a looong name");
 
-        // Set all objects to have a filesize of 0.
-        $DB->set_field('tool_objectfs_objects', 'filesize', 0);
+        // Set all objects to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -144,7 +144,7 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         // Get all objects.
         $objects = $DB->get_records('tool_objectfs_objects');
         $updatedobjects = array_filter($objects, function($object) {
-            return !empty($object->filesize);
+            return isset($object->filesize);
         });
 
         // Test only 2 records have updated filesize.
@@ -160,40 +160,47 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
     }
 
     /**
-     * Test objects with empty file sizes are not included in the update.
+     * Test that filesizes that are already populated are not pulled again.
      */
-    public function test_empty_files_not_counted_towards_max_files() {
+    public function test_that_non_null_values_are_not_updated() {
         global $DB;
         $this->create_local_file("Test 1");
         $this->create_local_file("Test 2");
         $this->create_local_file("Test 3");
         $this->create_local_file("Test 4");
-        $this->create_local_file("");
+        $this->create_local_file("This is a looong name");
 
-        // Set all objects to have a filesize of 0.
-        $DB->set_field('tool_objectfs_objects', 'filesize', 0);
+        // Set all objects to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
-        $task->set_custom_data(['maxupdates' => 4]);
+        $task->set_custom_data(['maxupdates' => 2]);
         $task->execute();
 
         // Get all objects.
         $objects = $DB->get_records('tool_objectfs_objects');
         $updatedobjects = array_filter($objects, function($object) {
-            return !empty($object->filesize);
+            return isset($object->filesize);
         });
 
-        // Test only 4 records have updated filesize.
+        // Test only 2 records have updated filesize.
+        $this->assertCount(5, $objects);
+        $this->assertCount(2, $updatedobjects);
+
+        // Call ad-hoc task to populate filesizes.
+        $task = new \tool_objectfs\task\populate_objects_filesize();
+        $task->set_custom_data(['maxupdates' => 2]);
+        $task->execute();
+
+        // Get all objects.
+        $objects = $DB->get_records('tool_objectfs_objects');
+        $updatedobjects = array_filter($objects, function($object) {
+            return isset($object->filesize);
+        });
+
+        // Test that 4 records have now been updated.
         $this->assertCount(5, $objects);
         $this->assertCount(4, $updatedobjects);
-
-        // There are 5 objects and a max update limit of 4 but as one filesize is empty, there
-        // should not be another task scheduled.
-        if (!method_exists(\core\task\manager::class, 'get_adhoc_tasks')) {
-            $this->markTestSkipped('\core\task\manager::get_adhoc_tasks() not available before Moodle 3.4');
-        }
-        $adhoctasks = \core\task\manager::get_adhoc_tasks(populate_objects_filesize::class);
-        $this->assertCount(0, $adhoctasks);
     }
 }

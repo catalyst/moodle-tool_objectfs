@@ -46,8 +46,7 @@ class populate_objects_filesize extends adhoc_task {
         $sql = "SELECT o.id, o.contenthash, o.timeduplicated, o.location, f.filesize
                   FROM {tool_objectfs_objects} o
              LEFT JOIN {files} f ON o.contenthash = f.contenthash
-                 WHERE o.filesize = 0
-                   AND f.filesize <> 0
+                 WHERE o.filesize IS NULL
               GROUP BY o.id,
                        o.contenthash,
                        f.filesize";
