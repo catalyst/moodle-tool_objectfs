@@ -128,10 +128,11 @@ class manager {
     /**
      * @param $contenthash
      * @param $newlocation
+     * @param int|null $filesize Size of the file in bytes. Falls back to stored value if not provided.
      * @return mixed|stdClass
      * @throws \dml_exception
      */
-    public static function update_object_by_hash($contenthash, $newlocation) {
+    public static function update_object_by_hash($contenthash, $newlocation, $filesize = null) {
         global $DB;
         $newobject = new stdClass();
         $newobject->contenthash = $contenthash;
@@ -141,15 +142,28 @@ class manager {
             $newobject->timeduplicated = $oldobject->timeduplicated;
             $newobject->id = $oldobject->id;
 
-            // If location hasn't changed we do not need to update.
-            if ((int)$oldobject->location === $newlocation) {
+            // If location hasn't changed we do not need to update unless filesize is not populated.
+            if ((int)$oldobject->location === $newlocation && isset($oldobject->filesize)) {
                 return $oldobject;
             }
 
+            // Make sure filesize is populated.
+            $newobject->filesize = isset($oldobject->filesize) ? $oldobject->filesize :
+                    $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
+
             return self::update_object($newobject, $newlocation);
         }
-        $newobject->timeduplicated = time();
         $newobject->location = $newlocation;
+
+        // Use existing file data related to the object if it exists.
+        $filerecord = $DB->get_record('files', ['contenthash' => $contenthash], 'filesize,timecreated', IGNORE_MULTIPLE);
+        if (!empty($filerecord)) {
+            $newobject->filesize = $filerecord->filesize;
+            $newobject->timeduplicated = $filerecord->timecreated;
+        } else {
+            $newobject->filesize = $filesize;
+            $newobject->timeduplicated = time();
+        }
         $DB->insert_record('tool_objectfs_objects', $newobject);
 
         return $newobject;
