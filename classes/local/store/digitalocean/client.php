@@ -36,6 +36,7 @@ class client extends s3_client {
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
             $this->bucket = $config->do_space;
+            $this->bucketkeyprefix = "";
             $this->set_client($config);
         } else {
             parent::__construct($config);
