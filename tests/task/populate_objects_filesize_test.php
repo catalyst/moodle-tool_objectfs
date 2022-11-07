@@ -203,4 +203,68 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         $this->assertCount(5, $objects);
         $this->assertCount(4, $updatedobjects);
     }
+
+    /**
+     * Test objects that are marked as orphans and hence have no associated file record are not updated.
+     */
+    public function test_orphaned_objects_are_not_updated() {
+        global $DB;
+        $file1 = $this->create_local_file("Test 1");
+        $this->create_local_file("Test 2");
+        $this->create_local_file("Test 3");
+        $this->create_local_file("Test 4");
+        $this->create_local_file("This is a looong name");
+
+        // Set all objects to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null);
+
+        // Set first object to be orphaned.
+        $DB->set_field('tool_objectfs_objects', 'location', -2, ['contenthash' => $file1->get_contenthash()]);
+
+        // Call ad-hoc task to populate filesizes.
+        $task = new \tool_objectfs\task\populate_objects_filesize();
+        $task->execute();
+
+        // Get all objects.
+        $objects = $DB->get_records('tool_objectfs_objects');
+        $updatedobjects = array_filter($objects, function($object) {
+            return isset($object->filesize);
+        });
+
+        // Test that 4 records have now been updated.
+        $this->assertCount(5, $objects);
+        $this->assertCount(4, $updatedobjects);
+    }
+
+    /**
+     * Tests objects with an error for location are not updated to prevent unexpected behaviour.
+     */
+    public function test_objects_with_error_are_not_updated() {
+        global $DB;
+        $file1 = $this->create_local_file("Test 1");
+        $this->create_local_file("Test 2");
+        $this->create_local_file("Test 3");
+        $this->create_local_file("Test 4");
+        $this->create_local_file("This is a looong name");
+
+        // Set all objects to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null);
+
+        // Set first object to be orphaned.
+        $DB->set_field('tool_objectfs_objects', 'location', -1, ['contenthash' => $file1->get_contenthash()]);
+
+        // Call ad-hoc task to populate filesizes.
+        $task = new \tool_objectfs\task\populate_objects_filesize();
+        $task->execute();
+
+        // Get all objects.
+        $objects = $DB->get_records('tool_objectfs_objects');
+        $updatedobjects = array_filter($objects, function($object) {
+            return isset($object->filesize);
+        });
+
+        // Test that 4 records have now been updated.
+        $this->assertCount(5, $objects);
+        $this->assertCount(4, $updatedobjects);
+    }
 }
