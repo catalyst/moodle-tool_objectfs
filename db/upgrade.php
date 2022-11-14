@@ -154,5 +154,15 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
 
         upgrade_plugin_savepoint(true, 2021122306, 'tool', 'objectfs');
     }
+
+    if ($oldversion < 2021122307) {
+        // Check to make sure adhoc task not already running.
+        if (!$DB->record_exists('task_adhoc', ['classname' => '\tool_objectfs\task\populate_objects_filesize'])) {
+            // Populate the filesize field.
+            \core\task\manager::queue_adhoc_task(new \tool_objectfs\task\populate_objects_filesize());
+        }
+
+        upgrade_plugin_savepoint(true, 2021122307, 'tool', 'objectfs');
+    }
     return true;
 }
