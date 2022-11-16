@@ -47,6 +47,9 @@ require_once($CFG->libdir . '/filestorage/file_storage.php');
 
 abstract class object_file_system extends \file_system_filedir {
 
+    const PLUGINFILE_ORIGIN_SEGMENT_PREFIX = 'objectfs-origin=';
+
+    public $objectfs = true;
     public $externalclient;
     private $preferexternal;
     private $deleteexternally;
@@ -768,13 +771,60 @@ abstract class object_file_system extends \file_system_filedir {
                 }
                 header('Cache-Control: ' . $cachevisibility . ', max-age=' . ($signedurl->expiresat - time()));
             }
-            redirect($signedurl->url);
+            redirect($this->embed_origin_url(
+                $signedurl->url
+            ));
         } catch (\Exception $e) {
             debugging('Failed to redirect to pre-signed url: ' . $e->getMessage());
             return false;
         }
     }
 
+    /**
+     * Embed origin URL in presigned URL.
+     *
+     * @param string $presignedurl
+     * @return string $presignedurl with embedded origin
+     * @throws moodle_exception
+     */
+    public function embed_origin_url($presignedurl): string {
+        $me = me();
+        if (empty($me)) {
+            throw new moodle_exception('invalidurl');
+        }
+
+        return sprintf(
+            "%s#%s%s",
+            $presignedurl,
+            self::PLUGINFILE_ORIGIN_SEGMENT_PREFIX,
+            urlencode($me)
+        );
+    }
+
+    /**
+     * Convert redirected URLs in $text.
+     *
+     * @param string  $text The content that may contain URLs in need of rewriting.
+     * @return string The processed text.
+     */
+    public function rewrite_pluginfile_urls($text): string {
+        if (!$this->presigned_url_configured()) { // Do nothing.
+            return $text;
+        }
+
+        $re = sprintf(
+            '!https?://\S*?\#%s(\S+\w)!',
+            preg_quote(self::PLUGINFILE_ORIGIN_SEGMENT_PREFIX),
+        );
+        return preg_replace_callback(
+            $re,
+            function ($matches) {
+                global $CFG;
+                return sprintf('%s%s', $CFG->wwwroot, urldecode($matches[1]));
+            },
+            $text
+        );
+    }
 
     /**
      * Return if the file system supports presigned_urls.
