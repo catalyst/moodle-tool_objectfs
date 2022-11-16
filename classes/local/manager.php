@@ -79,6 +79,12 @@ class manager {
         $config->do_space = '';
         $config->do_region = 'sfo2';
 
+        // Scaleway file system.
+        $config->scw_key = '';
+        $config->scw_secret = '';
+        $config->scw_space = '';
+        $config->scw_region = 'fr-par';
+
         // Azure file system.
         $config->azure_accountname = '';
         $config->azure_container = '';
@@ -287,6 +293,7 @@ class manager {
 
         $filesystems['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
         $filesystems['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
+        $filesystems['\tool_objectfs\scaleway_file_system'] = '\tool_objectfs\scaleway_file_system';
         $filesystems['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
         $filesystems['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
 

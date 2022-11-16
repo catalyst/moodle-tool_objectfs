@@ -138,6 +138,16 @@ $string['settings:do:space_help'] = 'DO Space to store files in.';
 $string['settings:do:region'] = 'Region';
 $string['settings:do:region_help'] = 'DO Spaces API gateway region.';
 
+$string['settings:scw:header'] = 'Scaleway Object Storage Settings';
+$string['settings:scw:key'] = 'Key';
+$string['settings:scw:key_help'] = 'Scaleway Object Storage key credential.';
+$string['settings:scw:secret'] = 'Secret';
+$string['settings:scw:secret_help'] = 'Scaleway Object Storage secret credential.';
+$string['settings:scw:space'] = 'Space';
+$string['settings:scw:space_help'] = 'Scaleway Object Storage to store files in.';
+$string['settings:scw:region'] = 'Region';
+$string['settings:scw:region_help'] = 'Scaleway Object Storage API gateway region.';
+
 $string['settings:azure:header'] = 'Azure Blob Storage Settings';
 $string['settings:azure:accountname'] = 'Account name';
 $string['settings:azure:accountname_help'] = 'The name of the storage account.';
