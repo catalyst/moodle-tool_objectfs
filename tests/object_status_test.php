@@ -173,7 +173,7 @@ class object_status_test extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_object_status_add_barchart_method_provider() {
+    public function object_status_add_barchart_method_provider() {
         return [
             [0, 0, '', 0, '0'],
             [0, 100, 'count', 0, '<div class="ofs-bar" style="width:0%">' . number_format(0) . '</div>'],
@@ -198,7 +198,7 @@ class object_status_test extends tool_objectfs_testcase {
     /**
      * Test add_barchart() returns correct HTML string.
      *
-     * @dataProvider test_object_status_add_barchart_method_provider
+     * @dataProvider object_status_add_barchart_method_provider
      *
      * @param  int    $value     Table cell value
      * @param  int    $max       Maximum value for a given column
@@ -217,7 +217,7 @@ class object_status_test extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_object_status_get_size_range_from_logsize_provider() {
+    public function object_status_get_size_range_from_logsize_provider() {
         return [
             ['1', '< ' . display_size(1024)],
             ['10', display_size(1024) . ' - ' . display_size(2048)],
@@ -232,7 +232,7 @@ class object_status_test extends tool_objectfs_testcase {
     /**
      * Test get_size_range_from_logsize() returns correct HTML string.
      *
-     * @dataProvider test_object_status_get_size_range_from_logsize_provider
+     * @dataProvider object_status_get_size_range_from_logsize_provider
      *
      * @param  string $logsize   Log size to be ranged
      * @param  string $expected  Expected result

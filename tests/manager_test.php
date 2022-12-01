@@ -38,7 +38,7 @@ class manager_test extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_all_extensions_whitelisted_provider() {
+    public function all_extensions_whitelisted_provider() {
         return [
             [null, false],
             ['', false],
@@ -51,7 +51,7 @@ class manager_test extends tool_objectfs_testcase {
     /**
      * Test all_extensions_whitelisted().
      *
-     * @dataProvider test_all_extensions_whitelisted_provider
+     * @dataProvider all_extensions_whitelisted_provider
      *
      * @param  mixed  $signingwhitelist  Config setting
      * @param  bool   $result            Expected result
