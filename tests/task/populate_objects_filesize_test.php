@@ -46,21 +46,25 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
      */
     public function test_empty_filesizes_updated() {
         global $DB;
-        $this->create_local_file("Test 1");
-        $this->create_local_file("Test 2");
-        $this->create_local_file("Test 3");
-        $this->create_local_file("Test 4");
-        $this->create_local_file("This is a looong name");
+        $filehashes = [
+            $this->create_local_file("Test 1")->get_contenthash(),
+            $this->create_local_file("Test 2")->get_contenthash(),
+            $this->create_local_file("Test 3")->get_contenthash(),
+            $this->create_local_file("Test 4")->get_contenthash(),
+            $this->create_local_file("This is a looong name")->get_contenthash()
+        ];
 
         // Set all objects to have a filesize of null.
-        $DB->set_field('tool_objectfs_objects', 'filesize', null);
+        [$insql, $params] = $DB->get_in_or_equal($filehashes);
+        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
+                'contenthash ' . $insql, $params);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
         $task->execute();
 
         // Get all objects.
-        $objects = $DB->get_records('tool_objectfs_objects');
+        $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
 
         // Test all object records have populated file sizes.
         $this->assertCount(5, $objects);
@@ -74,17 +78,17 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
      */
     public function test_empty_filesizes_with_real_empty_files_not_updated() {
         global $DB;
-        $this->create_local_file("");
+        $filehash = $this->create_local_file("")->get_contenthash();
 
-        // Set all objects to have a filesize of null.
-        $DB->set_field('tool_objectfs_objects', 'filesize', null);
+        // Set object to have a filesize of null.
+        $DB->set_field('tool_objectfs_objects', 'filesize', null, ['contenthash' => $filehash]);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
         $task->execute();
 
         // Get all objects.
-        $objects = $DB->get_records('tool_objectfs_objects');
+        $objects = $DB->get_records('tool_objectfs_objects', ['contenthash' => $filehash]);
 
         // Test object record has empty file size.
         $this->assertCount(1, $objects);
@@ -100,16 +104,18 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         global $DB;
         $file1 = $this->create_local_file("four");
         $file2 = $this->create_local_file("five5");
+        $filehashes = [$file1->get_contenthash(), $file2->get_contenthash()];
 
         // Set all objects to have a filesize of null.
-        $DB->set_field('tool_objectfs_objects', 'filesize', null);
-
+        [$insql, $params] = $DB->get_in_or_equal($filehashes);
+        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
+                'contenthash ' . $insql, $params);
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
         $task->execute();
 
         // Get all objects.
-        $objects = $DB->get_records('tool_objectfs_objects');
+        $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
 
         // Test all object records have populated file sizes.
         $this->assertCount(2, $objects);
@@ -127,22 +133,25 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
      */
     public function test_only_max_update_records_are_updated() {
         global $DB;
-        $this->create_local_file("Test 1");
-        $this->create_local_file("Test 2");
-        $this->create_local_file("Test 3");
-        $this->create_local_file("Test 4");
-        $this->create_local_file("This is a looong name");
+        $filehashes = [
+            $this->create_local_file("Test 1")->get_contenthash(),
+            $this->create_local_file("Test 2")->get_contenthash(),
+            $this->create_local_file("Test 3")->get_contenthash(),
+            $this->create_local_file("Test 4")->get_contenthash(),
+            $this->create_local_file("This is a looong name")->get_contenthash()
+        ];
 
         // Set all objects to have a filesize of null.
-        $DB->set_field('tool_objectfs_objects', 'filesize', null);
-
+        [$insql, $params] = $DB->get_in_or_equal($filehashes);
+        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
+                'contenthash ' . $insql, $params);
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
         $task->set_custom_data(['maxupdates' => 2]);
         $task->execute();
 
         // Get all objects.
-        $objects = $DB->get_records('tool_objectfs_objects');
+        $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
         $updatedobjects = array_filter($objects, function($object) {
             return isset($object->filesize);
         });
@@ -164,14 +173,18 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
      */
     public function test_that_non_null_values_are_not_updated() {
         global $DB;
-        $this->create_local_file("Test 1");
-        $this->create_local_file("Test 2");
-        $this->create_local_file("Test 3");
-        $this->create_local_file("Test 4");
-        $this->create_local_file("This is a looong name");
+        $filehashes = [
+            $this->create_local_file("Test 1")->get_contenthash(),
+            $this->create_local_file("Test 2")->get_contenthash(),
+            $this->create_local_file("Test 3")->get_contenthash(),
+            $this->create_local_file("Test 4")->get_contenthash(),
+            $this->create_local_file("This is a looong name")->get_contenthash()
+        ];
 
         // Set all objects to have a filesize of null.
-        $DB->set_field('tool_objectfs_objects', 'filesize', null);
+        [$insql, $params] = $DB->get_in_or_equal($filehashes);
+        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
+                'contenthash ' . $insql, $params);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -179,7 +192,7 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         $task->execute();
 
         // Get all objects.
-        $objects = $DB->get_records('tool_objectfs_objects');
+        $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
         $updatedobjects = array_filter($objects, function($object) {
             return isset($object->filesize);
         });
@@ -194,7 +207,7 @@ class populate_objects_filesize_test extends tool_objectfs_testcase {
         $task->execute();
 
         // Get all objects.
-        $objects = $DB->get_records('tool_objectfs_objects');
+        $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
         $updatedobjects = array_filter($objects, function($object) {
             return isset($object->filesize);
         });
