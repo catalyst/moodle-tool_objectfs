@@ -46,5 +46,8 @@ function xmldb_tool_objectfs_install() {
         }
     }
 
+    // This prevents warnings on the admin screen if no file system is selected immediately after install.
+    set_config('expirationtime', 2 * HOURSECS, 'tool_objectfs');
+
     return true;
 }
