@@ -42,11 +42,11 @@ class privacy_test extends \advanced_testcase {
      */
     public function test_provider_implements_null_provider() {
         // Privacy classes may not exist in older Moodles/Totara.
-        if (class_exists('\core_privacy\local\metadata\null_provider')) {
+        if (interface_exists('\core_privacy\local\metadata\null_provider')) {
             $provider = new provider();
             $this->assertInstanceOf('\core_privacy\local\metadata\null_provider', $provider);
         } else {
-            $this->markTestSkipped('Class not found: \core_privacy\local\metadata\null_provider');
+            $this->markTestSkipped('Interface not found: \core_privacy\local\metadata\null_provider');
         }
     }
 }
