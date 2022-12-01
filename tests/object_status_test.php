@@ -35,7 +35,7 @@ use tool_objectfs\local\report\log_size_report_builder;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class object_status_testcase extends tool_objectfs_testcase {
+class object_status_test extends tool_objectfs_testcase {
 
     /**
      * Clean up after each test.

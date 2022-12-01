@@ -24,7 +24,7 @@ use tool_objectfs\local\manager;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class object_file_system_testcase extends tool_objectfs_testcase {
+class object_file_system_test extends tool_objectfs_testcase {
 
     public function set_externalclient_config($key, $value) {
         // Get a reflection of externalclient object as a property.

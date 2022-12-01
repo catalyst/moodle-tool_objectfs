@@ -25,7 +25,7 @@ use tool_objectfs\local\object_manipulator\recoverer;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class recoverer_testcase extends tool_objectfs_testcase {
+class recoverer_test extends tool_objectfs_testcase {
 
     protected function setUp(): void {
         parent::setUp();

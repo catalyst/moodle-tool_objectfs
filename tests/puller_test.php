@@ -24,7 +24,7 @@ use tool_objectfs\local\object_manipulator\puller;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class puller_testcase extends tool_objectfs_testcase {
+class puller_test extends tool_objectfs_testcase {
 
     /** @var string $manipulator */
     protected $manipulator = puller::class;

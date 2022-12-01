@@ -24,7 +24,7 @@ use tool_objectfs\local\object_manipulator\deleter;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class deleter_testcase extends tool_objectfs_testcase {
+class deleter_test extends tool_objectfs_testcase {
 
     /** @var string $manipulator */
     protected $manipulator = deleter::class;
