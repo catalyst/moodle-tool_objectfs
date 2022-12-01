@@ -40,7 +40,7 @@ class tasks_test extends tool_objectfs_testcase {
         $config = manager::get_objectfs_config();
         $config->enabletasks = true;
         manager::set_objectfs_config($config);
-        tool_objectfs_cron();
+        $this->assertTrue(tool_objectfs_cron());
     }
 
     public function test_run_scheduled_tasks() {
@@ -70,6 +70,7 @@ class tasks_test extends tool_objectfs_testcase {
             $task = \core\task\manager::get_scheduled_task('\\tool_objectfs\\task\\' . $taskname);
             $task->execute();
         }
+        $this->expectNotToPerformAssertions(); // Just check we get this far without any exceptions.
     }
 
 }
