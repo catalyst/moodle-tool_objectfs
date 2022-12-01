@@ -25,7 +25,7 @@ require_once(__DIR__ . '/tool_objectfs_testcase.php');
 /**
  * End to end tests for tasks. Make sure all the plumbing is ok.
  */
-class tasks_testcase extends tool_objectfs_testcase {
+class tasks_test extends tool_objectfs_testcase {
 
     protected function setUp(): void {
         parent::setUp();

@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class manager_testcase extends tool_objectfs_testcase {
+class manager_test extends tool_objectfs_testcase {
 
     /**
      * Data provider for test_all_extensions_whitelisted().

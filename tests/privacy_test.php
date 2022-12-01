@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_objectfs\tests;
+
 /**
  * Privacy test for Objectfs.
  *
@@ -33,7 +35,7 @@ use \tool_objectfs\privacy\provider;
  * @copyright  2020 Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_objectfs_privacy_testcase extends advanced_testcase {
+class privacy_test extends \advanced_testcase {
 
     /**
      * Check the privacy provider implements null_provider.

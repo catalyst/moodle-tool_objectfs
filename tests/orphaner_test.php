@@ -25,7 +25,7 @@ use tool_objectfs\local\object_manipulator\orphaner;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class orphaner_testcase extends tool_objectfs_testcase {
+class orphaner_test extends tool_objectfs_testcase {
 
     /** @var string $manipulator */
     protected $manipulator = orphaner::class;

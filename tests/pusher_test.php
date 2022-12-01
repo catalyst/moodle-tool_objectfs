@@ -25,7 +25,7 @@ use tool_objectfs\local\object_manipulator\pusher;
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
-class pusher_testcase extends tool_objectfs_testcase {
+class pusher_test extends tool_objectfs_testcase {
 
     /** @var string $manipulator */
     protected $manipulator = pusher::class;
