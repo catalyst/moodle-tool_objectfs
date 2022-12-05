@@ -16,13 +16,6 @@
 
 namespace tool_objectfs\task;
 
-use tool_objectfs\tests\tool_objectfs_testcase;
-
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once("$CFG->dirroot/admin/tool/objectfs/tests/tool_objectfs_testcase.php");
-
 /**
  * Test adhoc-task populate_objects_filesize.
  *
@@ -32,7 +25,7 @@ require_once("$CFG->dirroot/admin/tool/objectfs/tests/tool_objectfs_testcase.php
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \tool_objectfs\task\populate_objects_filesize
  */
-class populate_objects_filesize_test extends tool_objectfs_testcase {
+class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
 
     /**
      * This method runs before every test.

@@ -14,17 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_objectfs\tests;
-
-defined('MOODLE_INTERNAL') || die();
+namespace tool_objectfs;
 
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\local\manager;
+use tool_objectfs\tests\test_file_system;
 
-require_once(__DIR__ . '/classes/test_client.php');
-require_once(__DIR__ . '/tool_objectfs_testcase.php');
-
-class object_file_system_test extends tool_objectfs_testcase {
+/**
+ * Test basic operations of object file system.
+ *
+ * @covers \tool_objectfs\local\store\object_file_system
+ */
+class object_file_system_test extends tests\testcase {
 
     public function set_externalclient_config($key, $value) {
         // Get a reflection of externalclient object as a property.

@@ -14,18 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_objectfs\tests;
-
-use tool_objectfs\local\manager;
-
-defined('MOODLE_INTERNAL') || die();
-
-require_once(__DIR__ . '/tool_objectfs_testcase.php');
+namespace tool_objectfs\local;
 
 /**
  * End to end tests for tasks. Make sure all the plumbing is ok.
+ *
+ * @covers \tool_objectfs\local\manager
  */
-class tasks_test extends tool_objectfs_testcase {
+class tasks_test extends \tool_objectfs\tests\testcase {
 
     protected function setUp(): void {
         parent::setUp();
