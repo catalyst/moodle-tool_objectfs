@@ -21,17 +21,17 @@
  * @author    Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \tool_objectfs\local\manager
  */
 
-namespace tool_objectfs\tests;
+namespace tool_objectfs\local;
 
-use tool_objectfs\local\manager;
-
-defined('MOODLE_INTERNAL') || die();
-
-require_once(__DIR__ . '/tool_objectfs_testcase.php');
-
-class manager_test extends tool_objectfs_testcase {
+/**
+ * tool_objectfs manager class tests.
+ *
+ * @covers \tool_objectfs\local\manager
+ */
+class manager_test extends \tool_objectfs\tests\testcase {
 
     /**
      * Data provider for test_all_extensions_whitelisted().

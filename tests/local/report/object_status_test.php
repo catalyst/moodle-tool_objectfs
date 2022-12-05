@@ -23,19 +23,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\tests;
+namespace tool_objectfs\local\report;
 
-defined('MOODLE_INTERNAL') || die();
-
-use tool_objectfs\local\report\objectfs_report;
-use tool_objectfs\local\report\object_status_history_table;
-use tool_objectfs\local\report\object_location_history_table;
-use tool_objectfs\local\report\log_size_report_builder;
-
-require_once(__DIR__ . '/classes/test_client.php');
-require_once(__DIR__ . '/tool_objectfs_testcase.php');
-
-class object_status_test extends tool_objectfs_testcase {
+/**
+ * File status report tests.
+ *
+ * @covers \tool_objectfs\local\report\objectfs_report
+ */
+class object_status_test extends \tool_objectfs\tests\testcase {
 
     /**
      * Clean up after each test.

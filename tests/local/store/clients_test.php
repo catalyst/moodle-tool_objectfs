@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_objectfs\tests;
+namespace tool_objectfs\local\store;
 
-use tool_objectfs\local\store\digitalocean\client as digitaloceanclient;
-use tool_objectfs\local\store\s3\client as s3client;
+use \tool_objectfs\tests\test_digitalocean_integration_client as digitaloceanclient;
+use \tool_objectfs\tests\test_s3_integration_client as s3client;
 
 /**
  * Client tests.
@@ -50,7 +50,7 @@ class clients_test extends \advanced_testcase {
      *
      * @dataProvider s3_client_test_connection_if_not_configured_properly_data_provider
      * @param array $config Config to test on.
-     *
+     * @covers \tool_objectfs\local\store\s3\client
      */
     public function test_s3_client_test_connection_if_not_configured_properly(array $config) {
         if (!empty($config)) {
@@ -90,7 +90,7 @@ class clients_test extends \advanced_testcase {
      *
      * @dataProvider digitalocean_client_test_connection_if_not_configured_properly_data_provider
      * @param array $config Config to test on.
-     *
+     * @covers \tool_objectfs\local\store\digitalocean\client
      */
     public function test_digitalocean_client_test_connection_if_not_configured_properly(array $config) {
         if (!empty($config)) {

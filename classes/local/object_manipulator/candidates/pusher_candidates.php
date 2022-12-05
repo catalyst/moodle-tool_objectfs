@@ -26,8 +26,6 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/admin/tool/objectfs/tests/classes/test_client.php');
-
 class pusher_candidates extends manipulator_candidates_base {
 
     /** @var string $queryname */
