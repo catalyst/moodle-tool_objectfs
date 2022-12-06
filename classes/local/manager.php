@@ -94,6 +94,7 @@ class manager {
         $config->openstack_password = '';
         $config->openstack_tenantname = '';
         $config->openstack_projectid = '';
+        $config->openstack_authtoken = '';
 
         // Cloudfront CDN with Signed URLS - canned policy.
         $config->cloudfrontresourcedomain = '';
