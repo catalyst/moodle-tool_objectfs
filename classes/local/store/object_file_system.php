@@ -855,37 +855,6 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Add the supplied file to the file system and update its location.
-     *
-     * @param string $pathname Path to file currently on disk
-     * @param string $contenthash SHA1 hash of content if known (performance only)
-     * @return array (contenthash, filesize, newfile)
-     */
-    public function add_file_from_path($pathname, $contenthash = null) {
-        $result = parent::add_file_from_path($pathname, $contenthash);
-
-        $location = $this->get_object_location_from_hash($result[0]);
-        manager::update_object_by_hash($result[0], $location, $result[1]);
-
-        return $result;
-    }
-
-    /**
-     * Add a file with the supplied content to the file system and update its location.
-     *
-     * @param string $content file content - binary string
-     * @return array (contenthash, filesize, newfile)
-     */
-    public function add_file_from_string($content) {
-        $result = parent::add_file_from_string($content);
-
-        $location = $this->get_object_location_from_hash($result[0]);
-        manager::update_object_by_hash($result[0], $location, $result[1]);
-
-        return $result;
-    }
-
-    /**
      * Returns the total size of the filedir directory in bytes.
      * @return float|int
      */
