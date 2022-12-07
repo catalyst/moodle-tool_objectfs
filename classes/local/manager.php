@@ -59,6 +59,7 @@ class manager {
         $config->preferexternal = 0;
         $config->batchsize = 10000;
         $config->useproxy = 0;
+        $config->deleteexternal = 0;
 
         $config->filesystem = '';
         $config->enablepresignedurls = 0;
