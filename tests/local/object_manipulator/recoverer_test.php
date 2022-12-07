@@ -14,18 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_objectfs\tests;
-
-defined('MOODLE_INTERNAL') || die();
+namespace tool_objectfs\local\object_manipulator;
 
 use tool_objectfs\local\manager;
 use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
-use tool_objectfs\local\object_manipulator\recoverer;
 
-require_once(__DIR__ . '/classes/test_client.php');
-require_once(__DIR__ . '/tool_objectfs_testcase.php');
-
-class recoverer_testcase extends tool_objectfs_testcase {
+/**
+ * Tests for object recoverer.
+ *
+ * @covers \tool_objectfs\local\object_manipulator\recoverer
+ */
+class recoverer_test extends \tool_objectfs\tests\testcase {
 
     protected function setUp(): void {
         parent::setUp();

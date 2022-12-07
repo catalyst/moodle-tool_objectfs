@@ -39,3 +39,7 @@ $CFG->phpunit_objectfs_swift_integration_test_credentials = array(
 ```php
 vendor/bin/phpunit -c admin/tool/objectfs/
 ```
+* To run tests for core subsystems or other plugins that make use of the filesystem against Objectfs, add the following to config.php:
+```php
+$CFG->alternative_file_system_class = '\tool_objectfs\tests\test_file_system';
+```

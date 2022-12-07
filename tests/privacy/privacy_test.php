@@ -14,16 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Privacy test for Objectfs.
- *
- * @package    tool_objectfs
- * @category   test
- * @copyright  2020 Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-use \tool_objectfs\privacy\provider;
+namespace tool_objectfs\privacy;
 
 /**
  * Privacy test for Objectfs.
@@ -32,19 +23,20 @@ use \tool_objectfs\privacy\provider;
  * @category   test
  * @copyright  2020 Mikhail Golenkov <mikhailgolenkov@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \tool_objectfs\privacy\provider
  */
-class tool_objectfs_privacy_testcase extends advanced_testcase {
+class privacy_test extends \advanced_testcase {
 
     /**
      * Check the privacy provider implements null_provider.
      */
     public function test_provider_implements_null_provider() {
         // Privacy classes may not exist in older Moodles/Totara.
-        if (class_exists('\core_privacy\local\metadata\null_provider')) {
+        if (interface_exists('\core_privacy\local\metadata\null_provider')) {
             $provider = new provider();
             $this->assertInstanceOf('\core_privacy\local\metadata\null_provider', $provider);
         } else {
-            $this->markTestSkipped('Class not found: \core_privacy\local\metadata\null_provider');
+            $this->markTestSkipped('Interface not found: \core_privacy\local\metadata\null_provider');
         }
     }
 }
