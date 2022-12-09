@@ -187,6 +187,10 @@ if ($ADMIN->fulltree) {
                 new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs'), ''));
 
+            if ($PAGE->pagetype !== 'admin-upgradesettings' && get_config('tool_objectfs', 'expirationtime') === false) {
+                // In case expirationtime is empty after installation, set it to default to prevent warnings.
+                set_config('expirationtime', 2 * HOURSECS, 'tool_objectfs');
+            }
             $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
                 new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), 2 * HOURSECS, HOURSECS));
