@@ -537,7 +537,7 @@ class client extends object_client_base {
             if (!empty($result)) {
                 $key .= '?response-content-disposition=' .
                     rawurlencode($result['Content-Disposition'] . ';' . $result['filename']) .
-                    '&response-content-type=' . rawurlencode($result['Content-Type']);
+                    '&response-content-type=' . rawurlencode($result['Content-Type']) . '&Access-Control-Allow-Origin="*"';
             } else {
                 $key .= '';
             }
