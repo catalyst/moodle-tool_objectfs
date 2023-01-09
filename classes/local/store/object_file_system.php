@@ -462,10 +462,7 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $contenthash = $file->get_contenthash();
-        if ($this->presigned_url_configured() &&
-                $this->presigned_url_should_redirect_file($file) &&
-                $this->is_file_readable_externally_by_hash($contenthash)) {
-
+        if ($this->should_redirect_to_presigned_url($contenthash, $file)) {
             return $this->redirect_to_presigned_url($contenthash, headers_list());
         }
 
@@ -495,9 +492,7 @@ abstract class object_file_system extends \file_system_filedir {
             return parent::xsendfile($contenthash);
         }
         $headers = headers_list();
-        if ($this->presigned_url_configured() &&
-                $this->is_file_readable_externally_by_hash($contenthash) &&
-                $this->presigned_url_should_redirect($contenthash, $headers)) {
+        if ($this->should_redirect_to_presigned_url($contenthash, null, $headers)) {
 
             return $this->redirect_to_presigned_url($contenthash, $headers);
         }
@@ -962,6 +957,23 @@ abstract class object_file_system extends \file_system_filedir {
 
         // Looks like all checks have been passed.
         return true;
+    }
+
+    /**
+     * Run some checks whether file should be redirected to use a presigned url.
+     *
+     * @param stored_file $file Moodle file object.
+     * @param string $contenthash File content hash.
+     * @return bool
+     */
+    public function should_redirect_to_presigned_url(string $contenthash, stored_file $file = null, array $headers = []): bool {
+        $validsetup = $this->presigned_url_configured() &&
+                $this->is_file_readable_externally_by_hash($contenthash);
+        if (is_null($file)) {
+            return $validsetup && $this->presigned_url_should_redirect($contenthash, $headers);
+        } else {
+            return $validsetup && $this->presigned_url_should_redirect_file($file);
+        }
     }
 
     /**
