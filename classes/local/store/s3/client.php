@@ -543,7 +543,13 @@ class client extends object_client_base {
                 $key .= '';
             }
         }
-        $resource = $this->config->cloudfrontresourcedomain . '/' . $key;
+
+        if (!empty($this->bucketkeyprefix)) {
+            $resource = $this->config->cloudfrontresourcedomain . '/' . $this->bucketkeyprefix . $key;
+        } else {
+            $resource = $this->config->cloudfrontresourcedomain . '/' . $key;
+        }
+
         // This is the id of the Cloudfront key pair you generated.
         $keypairid = $this->config->cloudfrontkeypairid;
 
