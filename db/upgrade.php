@@ -154,5 +154,21 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
 
         upgrade_plugin_savepoint(true, 2022070401, 'tool', 'objectfs');
     }
+
+    if ($oldversion < 2022120806) {
+
+        // Define field timeorphaned to be added to tool_objectfs_objects.
+        $table = new xmldb_table('tool_objectfs_objects');
+        $field = new xmldb_field('timeorphaned', XMLDB_TYPE_INTEGER, '20', null, null, null, null, 'filesize');
+
+        // Conditionally launch add field timeorphaned.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Objectfs savepoint reached.
+        upgrade_plugin_savepoint(true, 2022120806, 'tool', 'objectfs');
+    }
+
     return true;
 }

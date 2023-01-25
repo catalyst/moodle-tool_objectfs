@@ -52,15 +52,23 @@ class delete_orphaned_object_metadata extends task {
             'ageforremoval' => time() - $ageforremoval
         ];
 
+        // Check for delay deletion if enabled.
+        $delayquery = '';
+        if (!empty($this->config->delaydeleteexternalobject)) {
+            $params['deletetime'] = time() - $this->config->delaydeleteexternalobject;
+            $delayquery = 'AND o.timeorphaned < :deletetime';
+        }
+
         if (!empty($this->config->deleteexternal) && $this->config->deleteexternal == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {
             // We need to delete the external files as well as the orphaned data.
             $filesystem = new $this->config->filesystem();
 
             // Join with files table to make extra sure we aren't deleting something that already exists.
-            $sql = 'SELECT o.*
+            $sql = "SELECT o.*
                       FROM {tool_objectfs_objects} o
                  LEFT JOIN {files} f ON o.contenthash = f.contenthash
-                     WHERE f.id is null AND o.location = :location AND timeduplicated < :ageforremoval';
+                     WHERE f.id is null AND o.location = :location AND o.timeduplicated < :ageforremoval
+                           $delayquery";
 
             $objects = $DB->get_recordset_sql($sql, $params);
             $count = 0;

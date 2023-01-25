@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/objectfs/db" VERSION="20161207" COMMENT="XMLDB file for Moodle tool/objectfs plugin"
+<XMLDB PATH="admin/tool/objectfs/db" VERSION="20230121" COMMENT="XMLDB file for Moodle tool/objectfs plugin"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -11,6 +11,7 @@
         <FIELD NAME="timeduplicated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="location" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="filesize" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timeorphaned" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="contenthash" TYPE="unique" FIELDS="contenthash"/>
