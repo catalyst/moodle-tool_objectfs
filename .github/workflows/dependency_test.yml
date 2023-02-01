@@ -1,0 +1,98 @@
+--- # 2022 12 01
+
+name: "Plugin Dependency Version Validator"
+on:
+  pull_request:
+    branches:
+      - master
+
+env:
+  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  MOODLE_LOCAL: moodle-dev
+  
+
+jobs:
+  config_version_validation:
+    runs-on: ubuntu-latest
+    outputs:
+      plugin_repo: ${{ steps.config.outputs.PLUGIN_REPO }}
+      plugin_ref: ${{ steps.config.outputs.PLUGIN_REF }}
+      plugin_path: ${{ steps.config.outputs.PLUGIN_PATH }}
+
+    steps:
+
+      - name: "devops: checkout"
+        uses: actions/checkout@v3
+        with:
+          repository: Aprende-com/devops-actions
+          path: devops-actions
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - run: |
+          echo "PLUGIN_REPO=$GITHUB_REPOSITORY" | tee -a "${GITHUB_ENV}"
+          echo "PLUGIN_REF=$GITHUB_HEAD_REF" | tee -a "${GITHUB_ENV}"
+          
+      - uses: ./devops-actions/lms/plugin-getpath
+
+      - id: config
+        run: |
+          echo "PLUGIN_REPO=${{ env.PLUGIN_REPO }}" >> $GITHUB_OUTPUT
+          echo "PLUGIN_REF=${{ env.PLUGIN_REF }}" >> $GITHUB_OUTPUT
+          echo "PLUGIN_PATH=${{ env.PLUGIN_PATH }}" >> $GITHUB_OUTPUT
+
+  dependency_test:
+    runs-on: ubuntu-latest
+    needs: [config_version_validation]
+
+    env:
+      PLUGIN_REPO: ${{ needs.config_version_validation.outputs.plugin_repo }}
+      PLUGIN_REF: ${{ needs.config_version_validation.outputs.plugin_ref }}
+      PLUGIN_PATH: ${{ needs.config_version_validation.outputs.plugin_path }}
+
+    steps:
+
+      - name: "set config"
+        run: |
+          echo "PLUGIN_REPO=$GITHUB_REPOSITORY" | tee -a "${GITHUB_ENV}"
+          echo "PLUGIN_REF=$GITHUB_HEAD_REF" | tee -a "${GITHUB_ENV}"
+    
+      - name: "moodle-dev: clone"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: Aprende-com/moodle-dev
+          path: "moodle-dev"
+          
+      - name: "plugin: clone"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: ${{ env.PLUGIN_REPO }}
+          path: moodle-dev/${{ env.PLUGIN_PATH }}
+          ref: ${{ env.PLUGIN_REF }}
+
+      - name: "devops/plugins: get submodule URLs"
+        run: |
+          cd moodle-dev
+          PLUGIN_URLS=$(cat .gitmodules | grep url | grep -v bitbucket | awk '{print $3}'| sed 's,git@github.com:,https://raw.githubusercontent.com/,g' | sed 's,.git,/master/version.php,g' | sed 's,https://raw/master/version.phphubusercontent.com,https://raw.githubusercontent.com,g' | sed 's,https://master/version.phphub.com,https://raw.githubusercontent.com,g' | sed 's,https://raw.githubusercontent.com/jleyva/moodle-block_configurablereports/master/version.php,https://raw.githubusercontent.com/jleyva/moodle-block_configurablereports/MOODLE_36_STABLE/version.php,g')
+          PLUGIN_URLS=$(echo ${PLUGIN_URLS})  # Remove newlines
+          echo "PLUGIN_URLS=${PLUGIN_URLS}" | tee -a "${GITHUB_ENV}"
+          
+      - name: "devops-actions: checkout"
+        uses: actions/checkout@v3
+        with:
+          repository: Aprende-com/devops-actions
+          path: devops-actions
+          token: ${{ env.GITHUB_TOKEN }}
+          
+      - name: "compare plugin versions"
+        uses: ./devops-actions/moodle-dev/version-validator
+        with:
+          path: "moodle-dev/${{ env.PLUGIN_PATH }}"
+          urls: ${{ env.PLUGIN_URLS }}
+          token: "token ${{ env.GITHUB_TOKEN }}"
+          
+
