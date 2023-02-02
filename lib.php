@@ -125,3 +125,14 @@ function tool_objectfs_status_checks() {
 
     return [];
 }
+
+/**
+ * Get performance checks for tool_objectfs.
+ *
+ * @return array
+ */
+function tool_objectfs_performance_checks() {
+    return [
+        new \tool_objectfs\check\presigned_urls(),
+    ];
+}

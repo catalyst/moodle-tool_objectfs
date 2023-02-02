@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\check\result;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/classes/local/manager.php');
@@ -38,10 +40,6 @@ $ADMIN->add('tools', new admin_category('tool_objectfs', get_string('pluginname'
 
 $settings = new admin_settingpage('tool_objectfs_settings', get_string('pluginsettings', 'tool_objectfs'));
 $ADMIN->add('tool_objectfs', $settings);
-
-$ADMIN->add('tool_objectfs', new admin_externalpage('tool_objectfs_presignedurl_testing',
-    get_string('presignedurl_testing:page', 'tool_objectfs'),
-    new moodle_url('/admin/tool/objectfs/presignedurl_tests.php')));
 
 $ADMIN->add('reports', new admin_externalpage('tool_objectfs_object_status',
     get_string('object_status:page', 'tool_objectfs'),
@@ -183,9 +181,27 @@ if ($ADMIN->fulltree) {
                 new lang_string('settings:presignedurl:proxyrangerequests', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:proxyrangerequests_help', 'tool_objectfs') . $warningtext, '1'));
 
+            // Add presigned url check to page to help with setup.
+            $check = new \tool_objectfs\check\presigned_urls();
+            $result = $check->get_result();
+            switch ($result->get_status()) {
+                case result::OK:
+                    $notificationtype = \core\output\notification::NOTIFY_SUCCESS;
+                    break;
+                case result::INFO:
+                    $notificationtype = \core\output\notification::NOTIFY_INFO;
+                    break;
+                case result::WARNING:
+                    $notificationtype = \core\output\notification::NOTIFY_WARNING;
+                    break;
+                default:
+                    $notificationtype = \core\output\notification::NOTIFY_ERROR;
+            }
+            $presignedinfo = $OUTPUT->notification($result->get_summary(), $notificationtype);
+
             $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
                 new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
-                new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs'), ''));
+                new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs') . $presignedinfo, ''));
 
             $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
                 new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
