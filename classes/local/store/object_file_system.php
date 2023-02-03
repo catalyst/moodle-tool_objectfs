@@ -462,10 +462,7 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $contenthash = $file->get_contenthash();
-        if ($this->presigned_url_configured() &&
-                $this->presigned_url_should_redirect_file($file) &&
-                $this->is_file_readable_externally_by_hash($contenthash)) {
-
+        if ($this->should_redirect_to_presigned_url($contenthash, $file)) {
             return $this->redirect_to_presigned_url($contenthash, headers_list());
         }
 
@@ -495,9 +492,7 @@ abstract class object_file_system extends \file_system_filedir {
             return parent::xsendfile($contenthash);
         }
         $headers = headers_list();
-        if ($this->presigned_url_configured() &&
-                $this->is_file_readable_externally_by_hash($contenthash) &&
-                $this->presigned_url_should_redirect($contenthash, $headers)) {
+        if ($this->should_redirect_to_presigned_url($contenthash, null, $headers)) {
 
             return $this->redirect_to_presigned_url($contenthash, $headers);
         }
@@ -855,37 +850,6 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Add the supplied file to the file system and update its location.
-     *
-     * @param string $pathname Path to file currently on disk
-     * @param string $contenthash SHA1 hash of content if known (performance only)
-     * @return array (contenthash, filesize, newfile)
-     */
-    public function add_file_from_path($pathname, $contenthash = null) {
-        $result = parent::add_file_from_path($pathname, $contenthash);
-
-        $location = $this->get_object_location_from_hash($result[0]);
-        manager::update_object_by_hash($result[0], $location, $result[1]);
-
-        return $result;
-    }
-
-    /**
-     * Add a file with the supplied content to the file system and update its location.
-     *
-     * @param string $content file content - binary string
-     * @return array (contenthash, filesize, newfile)
-     */
-    public function add_file_from_string($content) {
-        $result = parent::add_file_from_string($content);
-
-        $location = $this->get_object_location_from_hash($result[0]);
-        manager::update_object_by_hash($result[0], $location, $result[1]);
-
-        return $result;
-    }
-
-    /**
      * Returns the total size of the filedir directory in bytes.
      * @return float|int
      */
@@ -993,6 +957,23 @@ abstract class object_file_system extends \file_system_filedir {
 
         // Looks like all checks have been passed.
         return true;
+    }
+
+    /**
+     * Run some checks whether file should be redirected to use a presigned url.
+     *
+     * @param stored_file $file Moodle file object.
+     * @param string $contenthash File content hash.
+     * @return bool
+     */
+    public function should_redirect_to_presigned_url(string $contenthash, stored_file $file = null, array $headers = []): bool {
+        $validsetup = $this->presigned_url_configured() &&
+                $this->is_file_readable_externally_by_hash($contenthash);
+        if (is_null($file)) {
+            return $validsetup && $this->presigned_url_should_redirect($contenthash, $headers);
+        } else {
+            return $validsetup && $this->presigned_url_should_redirect_file($file);
+        }
     }
 
     /**

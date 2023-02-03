@@ -1,0 +1,24 @@
+
+
+---  # 2022 04 27
+
+name: "Tag 2 Docker"
+on:
+  release:
+    types: [published]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: Aprende-com/devops-workflows
+          event-type: "lms-plugin-docker"
+          client-payload: |
+            {
+              "repository": "${{ github.repository }}",
+              "ref": "${{ github.ref }}"
+            }

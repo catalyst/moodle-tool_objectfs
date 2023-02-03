@@ -23,19 +23,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tool_objectfs\tests;
+namespace tool_objectfs\local\report;
 
-defined('MOODLE_INTERNAL') || die();
-
-use tool_objectfs\local\report\objectfs_report;
-use tool_objectfs\local\report\object_status_history_table;
-use tool_objectfs\local\report\object_location_history_table;
-use tool_objectfs\local\report\log_size_report_builder;
-
-require_once(__DIR__ . '/classes/test_client.php');
-require_once(__DIR__ . '/tool_objectfs_testcase.php');
-
-class object_status_testcase extends tool_objectfs_testcase {
+/**
+ * File status report tests.
+ *
+ * @covers \tool_objectfs\local\report\objectfs_report
+ */
+class object_status_test extends \tool_objectfs\tests\testcase {
 
     /**
      * Clean up after each test.
@@ -173,7 +168,7 @@ class object_status_testcase extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_object_status_add_barchart_method_provider() {
+    public function object_status_add_barchart_method_provider() {
         return [
             [0, 0, '', 0, '0'],
             [0, 100, 'count', 0, '<div class="ofs-bar" style="width:0%">' . number_format(0) . '</div>'],
@@ -198,7 +193,7 @@ class object_status_testcase extends tool_objectfs_testcase {
     /**
      * Test add_barchart() returns correct HTML string.
      *
-     * @dataProvider test_object_status_add_barchart_method_provider
+     * @dataProvider object_status_add_barchart_method_provider
      *
      * @param  int    $value     Table cell value
      * @param  int    $max       Maximum value for a given column
@@ -217,7 +212,7 @@ class object_status_testcase extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_object_status_get_size_range_from_logsize_provider() {
+    public function object_status_get_size_range_from_logsize_provider() {
         return [
             ['1', '< ' . display_size(1024)],
             ['10', display_size(1024) . ' - ' . display_size(2048)],
@@ -232,7 +227,7 @@ class object_status_testcase extends tool_objectfs_testcase {
     /**
      * Test get_size_range_from_logsize() returns correct HTML string.
      *
-     * @dataProvider test_object_status_get_size_range_from_logsize_provider
+     * @dataProvider object_status_get_size_range_from_logsize_provider
      *
      * @param  string $logsize   Log size to be ranged
      * @param  string $expected  Expected result

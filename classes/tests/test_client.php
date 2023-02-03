@@ -19,7 +19,6 @@ namespace tool_objectfs\tests;
 use tool_objectfs\local\store\object_client_base;
 
 class test_client extends object_client_base {
-
     /** @var int $maxupload Maximum allowed file size that can be uploaded. */
     protected $maxupload;
 
@@ -30,7 +29,7 @@ class test_client extends object_client_base {
         $this->maxupload = 5000000000;
         $this->config = $config;
         // Point autoloader to this file to make sure get_client_availability() returns true.
-        $this->autoloader = $CFG->dirroot . '/admin/tool/objectfs/tests/classes/test_client.php';
+        $this->autoloader = $CFG->dirroot . '/admin/tool/objectfs/classes/tests/test_client.php';
         $dataroot = $CFG->phpunit_dataroot;
         if (defined('PHPUNIT_INSTANCE') && PHPUNIT_INSTANCE !== null) {
             $dataroot .= '/' . PHPUNIT_INSTANCE;

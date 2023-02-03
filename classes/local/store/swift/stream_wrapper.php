@@ -98,13 +98,6 @@ class stream_wrapper {
     private $nooverwrite = false;
 
     /**
-     * Openstack auth token
-     *
-     * @var authtoken
-     */
-    private static $authtoken;
-
-    /**
      * Stream context in array form
      *
      * @var array
@@ -314,7 +307,7 @@ class stream_wrapper {
 
             $this->objstream = new Stream(fopen('php://temp', $mode));
 
-        } catch (\Exeption $e) {
+        } catch (\Exception $e) {
             trigger_error('Failed to fetch object: ' . $e->getMessage(), E_USER_WARNING);
 
             return false;
@@ -484,15 +477,15 @@ class stream_wrapper {
         if ($flags & STREAM_URL_STAT_QUIET) {
 
             try {
-                $stream = $object->download();
-                return $this->generate_stat($object, $container, $stream->getSize());
+                $object->retrieve();
+                return $this->generate_stat($object, $container, $object->contentLength);
             } catch (\Exception $e) {
                 return false;
             }
         }
 
-        $stream = $object->download();
-        return $this->generate_stat($object, $container, $stream->getSize());
+        $stream = $object->retrieve();
+        return $this->generate_stat($object, $container, $object->contentLength);
     }
 
 
@@ -621,19 +614,8 @@ class stream_wrapper {
             'scope'   => ['project' => ['id' => $this->context('projectid')]]
         ];
 
-        if (!isset($this->token['expires_at']) || (new \DateTimeImmutable($this->token['expires_at'])) < (new \DateTimeImmutable('now'))) {
-
-            $openstack = new \OpenStack\OpenStack($params);
-            try {
-                $this->token = $openstack->identityV3()->generateToken($params)->export();
-            } catch (\Exception $e) {
-                trigger_error("Openstack auth error", E_USER_WARNING);
-            }
-
-        } else {
-            $params['cachedToken'] = $this->token;
-            $openstack = new \OpenStack\OpenStack($params);
-        }
+        $params['cachedToken'] = $this->context('cachedtoken');
+         $openstack = new \OpenStack\OpenStack($params);
 
         return $openstack->objectStoreV1()->getContainer($containername);
     }

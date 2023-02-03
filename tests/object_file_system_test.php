@@ -14,17 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_objectfs\tests;
-
-defined('MOODLE_INTERNAL') || die();
+namespace tool_objectfs;
 
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\local\manager;
+use tool_objectfs\tests\test_file_system;
 
-require_once(__DIR__ . '/classes/test_client.php');
-require_once(__DIR__ . '/tool_objectfs_testcase.php');
-
-class object_file_system_testcase extends tool_objectfs_testcase {
+/**
+ * Test basic operations of object file system.
+ *
+ * @covers \tool_objectfs\local\store\object_file_system
+ */
+class object_file_system_test extends tests\testcase {
 
     public function set_externalclient_config($key, $value) {
         // Get a reflection of externalclient object as a property.
@@ -323,7 +324,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'test_error_surpressor'));
+        set_error_handler(array($this, 'error_surpressor'));
         $this->filesystem->readfile($fakefile);
         restore_error_handler();
 
@@ -355,7 +356,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'test_error_surpressor'));
+        set_error_handler(array($this, 'error_surpressor'));
         $this->filesystem->get_content($fakefile);
         restore_error_handler();
 
@@ -363,7 +364,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_error_surpressor() {
+    public function error_surpressor() {
         // We do nothing. We cant surpess warnings
         // normally because phpunit will still fail.
     }
@@ -374,7 +375,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'test_error_surpressor'));
+        set_error_handler(array($this, 'error_surpressor'));
         $this->filesystem->xsendfile($fakefile->get_contenthash());
         restore_error_handler();
 
@@ -414,7 +415,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'test_error_surpressor'));
+        set_error_handler(array($this, 'error_surpressor'));
         $filehandle = $this->filesystem->get_content_file_handle($fakefile);
         restore_error_handler();
 
@@ -635,7 +636,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->filesystem->presigned_url_configured());
     }
 
-    public function test_presigned_url_should_redirect_provider() {
+    public function presigned_url_should_redirect_provider() {
         $provider = array();
 
         // Testing defaults.
@@ -674,7 +675,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     }
 
     /**
-     * @dataProvider test_presigned_url_should_redirect_provider
+     * @dataProvider presigned_url_should_redirect_provider
      *
      * @param $enablepresignedurls mixed enable pre-signed URLs.
      * @param $presignedminfilesize mixed minimum file size to be redirected to pre-signed URL.
@@ -713,7 +714,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_get_expiration_time_method_if_supported_provider() {
+    public function get_expiration_time_method_if_supported_provider() {
         $now = time();
 
         // Seconds after the minute from X.
@@ -760,7 +761,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      * Test S3 and DO clients get_expiration_time() method.
      * Available when running integration tests.
      *
-     * @dataProvider test_get_expiration_time_method_if_supported_provider
+     * @dataProvider get_expiration_time_method_if_supported_provider
      *
      * @param int   $expirationsetting Pre-Signed URL expiration time
      * @param int   $now               Now timestamp
@@ -818,7 +819,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_get_valid_http_ranges_provider() {
+    public function get_valid_http_ranges_provider() {
         return [
             ['', 0, false],
             ['bytes=0-', 100, (object)['rangefrom' => 0, 'rangeto' => 99, 'length' => 100]],
@@ -831,7 +832,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     /**
      * Test get_valid_http_ranges() returns range object depending on $_SERVER['HTTP_RANGE'] and file size.
      *
-     * @dataProvider test_get_valid_http_ranges_provider
+     * @dataProvider get_valid_http_ranges_provider
      *
      * @param string $httprangeheader HTTP_RANGE header.
      * @param int    $filesize        File size.
@@ -848,7 +849,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      *
      * @return array
      */
-    public function test_curl_range_request_to_presigned_url_provider() {
+    public function curl_range_request_to_presigned_url_provider() {
         return [
             ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 14, 'length' => 15], '15-bytes string'],
             ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 9, 'length' => 10], '15-bytes s'],
@@ -859,7 +860,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
     /**
      * Test external client curl_range_request_to_presigned_url() returns expected result.
      *
-     * @dataProvider test_curl_range_request_to_presigned_url_provider
+     * @dataProvider curl_range_request_to_presigned_url_provider
      *
      * @param string $content        File content.
      * @param mixed  $ranges         Request ranges object.

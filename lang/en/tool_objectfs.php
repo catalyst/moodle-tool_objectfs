@@ -268,3 +268,13 @@ $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up ht
 
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
+
+$string['checkpresigned_urls'] = 'Presigned urls check';
+$string['check:presigned_urls:success'] = 'Successfully setup to use presigned urls for fetching external files.';
+$string['check:presigned_urls:errorfilesize'] = 'File with name {$a->filename} was not the expected size.';
+$string['check:presigned_urls:errorpresignedfetch'] = 'File with name {$a->filename} was not fetched using presigned url.';
+$string['check:presigned_urls:errorfilename'] = 'File with name {$a->filename} did not have expected filename.';
+$string['check:presigned_urls:errorredirect'] = 'File with name {$a->filename} did not redirect to a presigned url.';
+$string['check:presigned_urls:infopresignedsetup'] = 'Site is not setup to use presigned URLs for external files.';
+$string['check:presigned_urls:infofilesystempresigned'] = 'File system does not support presigned URLs.';
+$string['check:presigned_urls:infofilesystem'] = 'File system is not configured.';

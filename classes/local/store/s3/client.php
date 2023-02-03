@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\store\s3;
 
+use tool_objectfs\check\presigned_urls;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\store\signed_url;
@@ -542,7 +543,13 @@ class client extends object_client_base {
                 $key .= '';
             }
         }
-        $resource = $this->config->cloudfrontresourcedomain . '/' . $key;
+
+        if (!empty($this->bucketkeyprefix)) {
+            $resource = $this->config->cloudfrontresourcedomain . '/' . $this->bucketkeyprefix . $key;
+        } else {
+            $resource = $this->config->cloudfrontresourcedomain . '/' . $key;
+        }
+
         // This is the id of the Cloudfront key pair you generated.
         $keypairid = $this->config->cloudfrontkeypairid;
 
@@ -779,14 +786,12 @@ class client extends object_client_base {
     /**
      * Test proxy range request.
      *
-     * @param  object  $filesystem  Filesystem to be tested.
+     * @param  \file_system $filesystem  Filesystem to be tested.
      * @return object
      * @throws \coding_exception
      */
     public function test_range_request($filesystem) {
-        global $PAGE;
-        $output = $PAGE->get_renderer('tool_objectfs');
-        $testfiles = $output->presignedurl_tests_load_files($filesystem);
+        $testfiles = presigned_urls::load_files($filesystem);
         foreach ($testfiles as $file) {
             if ($file->get_filename() == 'testvideo.mp4') {
                 $ranges = (object)['rangefrom' => 0, 'rangeto' => 999, 'length' => 1000];

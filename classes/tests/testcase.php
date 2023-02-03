@@ -16,8 +16,6 @@
 
 namespace tool_objectfs\tests;
 
-defined('MOODLE_INTERNAL') || die();
-
 use dml_exception;
 use moodle_exception;
 use stdClass;
@@ -27,10 +25,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\local\store\signed_url;
 
-require_once(__DIR__ . '/classes/test_client.php');
-require_once(__DIR__ . '/classes/test_file_system.php');
-
-abstract class tool_objectfs_testcase extends \advanced_testcase {
+abstract class testcase extends \advanced_testcase {
 
     protected function setUp(): void {
         global $CFG;

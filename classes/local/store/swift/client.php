@@ -26,6 +26,7 @@ namespace tool_objectfs\local\store\swift;
 
 use tool_objectfs\local\store\swift\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
+use tool_objectfs\local\manager;
 
 class client extends object_client_base {
 
@@ -45,21 +46,16 @@ class client extends object_client_base {
             require_once($this->autoloader);
             $this->maxupload = 5368709120; // 5GiB.
             $this->containername = $config->openstack_container;
+            $config->openstack_authtoken = unserialize($config->openstack_authtoken);
             $this->config = $config;
         } else {
             parent::__construct($config);
         }
     }
 
-    public function get_container() {
+    private function get_endpoint() {
 
-        static $token;
-
-        if (empty($this->config->openstack_authurl)) {
-            throw new \Exception("Invalid authenticaiton URL");
-        }
-
-        $params = [
+        $endpoint = [
             'authUrl' => $this->config->openstack_authurl,
             'region'  => $this->config->openstack_region,
             'user'    => [
@@ -70,13 +66,41 @@ class client extends object_client_base {
             'scope'   => ['project' => ['id' => $this->config->openstack_projectid]]
         ];
 
-        if (!isset($token['expires_at']) || (new \DateTimeImmutable($token['expires_at'])) < (new \DateTimeImmutable('now'))) {
-            $openstack = new \OpenStack\OpenStack($params);
-            $token = $openstack->identityV3()->generateToken($params)->export();
-        } else {
-            $params['cachedToken'] = $token;
-            $openstack = new \OpenStack\OpenStack($params);
+        if (!isset($this->config->openstack_authtoken['expires_at'])
+            || (new \DateTimeImmutable($this->config->openstack_authtoken['expires_at'])) < ( (new \DateTimeImmutable('now'))->add(new \DateInterval('PT1H')))) {
+
+            $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_swift');
+
+            // Try and get a lock and do the renewal.
+            if ($lock = $lockfactory->get_lock('authtoken', 1)) {
+
+                try {
+                    $openstack = new \OpenStack\OpenStack($endpoint);
+                    $this->config->openstack_authtoken = $openstack->identityV3()->generateToken($endpoint)->export();
+                    manager::set_objectfs_config(['openstack_authtoken' => serialize($this->config->openstack_authtoken)]);
+                    $lock->release();
+                } catch (\Exception $e) {
+                    $lock->release();
+                }
+            }
         }
+
+        // Use the token if it's valid, otherwise clients will need to use username/password auth.
+        if (isset($this->config->openstack_authtoken['expires_at']) && new \DateTimeImmutable($this->config->openstack_authtoken['expires_at']) > new \DateTimeImmutable('now')) {
+            $endpoint['cachedToken'] = $this->config->openstack_authtoken;
+        }
+
+        return $endpoint;
+    }
+
+    public function get_container() {
+
+        if (empty($this->config->openstack_authurl)) {
+            throw new \Exception("Invalid authenticaiton URL");
+        }
+
+        $params = $this->get_endpoint();
+        $openstack = new \OpenStack\OpenStack($params);
 
         return $openstack->objectStoreV1()->getContainer($this->containername);
 
@@ -112,6 +136,8 @@ class client extends object_client_base {
     }
 
     public function get_seekable_stream_context() {
+
+        $this->get_endpoint();
         $context = stream_context_create([
             "swift" => [
                 'username' => $this->config->openstack_username,
@@ -120,6 +146,7 @@ class client extends object_client_base {
                 'tenantname' => $this->config->openstack_tenantname,
                 'endpoint' => $this->config->openstack_authurl,
                 'region' => $this->config->openstack_region,
+                'cachedtoken' => $this->config->openstack_authtoken,
             ]
         ]);
         return $context;
@@ -180,7 +207,7 @@ class client extends object_client_base {
         } catch (\OpenStack\Common\Error\BadResponseError $e) {
             $connection->success = false;
             $connection->details = $this->get_exception_details($e);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $connection->success = false;
         }
 
