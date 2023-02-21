@@ -97,10 +97,22 @@ cat public_key.pem
 4. _Configure CORS_: disabled
 5. _Strict-Transport-Security_: Enabled, origin override enabled
 6. _X-Content-Type-Options_: Enabled, origin override enabled
-7. _X-Frame-Options_: Enabled, SAMEORIGIN, origin override enabled
+7. _X-Frame-Options_: Disabled
 8. _X-XSS-Protection_: Enabled, block, origin override enabled
 9. _Referrer-Policy_: Enabled, strict-origin-when-cross-origin, origin override enabled
 10. _Content-Security-Policy_: disabled
+
+### Create CloudFront Origin request policy
+1. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/policies/origin
+2. Click on _Create origin request policy_
+3. _Name_: IncludeResponseContentDisposition
+4. _Headers_: Include the following headers
+   - Access-Control-Request-Method
+   - Access-Control-Request-Headers
+5. _Query strings_: Include Specified query strings
+   - response-content-disposition
+   - response-content-type
+6. _Cookies_: None
 
 ### Create CloudFront distribution
 1. Navigate to https://console.aws.amazon.com/cloudfront/.
@@ -114,7 +126,7 @@ cat public_key.pem
 9. Add key group created earlier
 10. _Cache key and origin requests_: Choose _Cache policy and origin request policy (recommended)_.
 11. _Cache policy_: Choose CachingOptimized
-12. _Origin request policy_: Choose CORS-S3Origin
+12. _Origin request policy_: Choose IncludeResponseContentDisposition
 13. _Response headers policy_: Choose CORS-with-preflight-and-SecurityHeadersPolicy-ReadOnly
 14. Click _Create distribution_.
 15. Navigate to https://console.aws.amazon.com/cloudfront/v3/home#/distributions.
