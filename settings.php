@@ -182,22 +182,25 @@ if ($ADMIN->fulltree) {
                 new lang_string('settings:presignedurl:proxyrangerequests_help', 'tool_objectfs') . $warningtext, '1'));
 
             // Add presigned url check to page to help with setup.
-            $check = new \tool_objectfs\check\presigned_urls();
-            $result = $check->get_result();
-            switch ($result->get_status()) {
-                case result::OK:
-                    $notificationtype = \core\output\notification::NOTIFY_SUCCESS;
-                    break;
-                case result::INFO:
-                    $notificationtype = \core\output\notification::NOTIFY_INFO;
-                    break;
-                case result::WARNING:
-                    $notificationtype = \core\output\notification::NOTIFY_WARNING;
-                    break;
-                default:
-                    $notificationtype = \core\output\notification::NOTIFY_ERROR;
+            $presignedinfo = '';
+            if ($objectfspage) {
+                $check = new \tool_objectfs\check\presigned_urls();
+                $result = $check->get_result();
+                switch ($result->get_status()) {
+                    case result::OK:
+                        $notificationtype = \core\output\notification::NOTIFY_SUCCESS;
+                        break;
+                    case result::INFO:
+                        $notificationtype = \core\output\notification::NOTIFY_INFO;
+                        break;
+                    case result::WARNING:
+                        $notificationtype = \core\output\notification::NOTIFY_WARNING;
+                        break;
+                    default:
+                        $notificationtype = \core\output\notification::NOTIFY_ERROR;
+                }
+                $presignedinfo = $OUTPUT->notification($result->get_summary(), $notificationtype);
             }
-            $presignedinfo = $OUTPUT->notification($result->get_summary(), $notificationtype);
 
             $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablepresignedurls',
                 new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
