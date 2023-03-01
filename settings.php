@@ -206,6 +206,7 @@ if ($ADMIN->fulltree) {
                 new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs') . $presignedinfo, ''));
 
+
             $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
                 new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), 2 * HOURSECS, HOURSECS));
@@ -231,6 +232,20 @@ if ($ADMIN->fulltree) {
                     ['s3' => 'S3', 'cf' => 'CloudFront']
                 )
             );
+
+            $settings->add(
+                new admin_setting_configselect(
+                    'tool_objectfs/externalvalidation',
+                    new lang_string('settings:presignedurl:externalvalidation', OBJECTFS_PLUGIN_NAME),
+                    new lang_string('settings:presignedurl:externalvalidation_help', OBJECTFS_PLUGIN_NAME),
+                    's3',
+                    ['external' => 'Check external store', 'db' => 'Check object table location'],
+                )
+            );
+
+            $settings->add(new admin_setting_configduration('tool_objectfs/agevalidation',
+                new lang_string('settings:presignedurl:agevalidation', 'tool_objectfs'),
+                new lang_string('settings:presignedurl:agevalidation_help', 'tool_objectfs'), 0, DAYSECS));
 
             if ('cf' === $config->signingmethod) {
                 $settings->add(

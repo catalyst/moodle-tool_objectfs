@@ -103,6 +103,8 @@ class manager {
 
         // SigningMethod - determine whether S3 or Cloudfront etc should be used.
         $config->signingmethod = '';  // This will be the default if not otherwise set. Values ('s3' | 'cf').
+        $config->externalvalidation = 'external';
+        $config->agevalidation = 0;
 
         $storedconfig = get_config('tool_objectfs');
 

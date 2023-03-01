@@ -64,6 +64,8 @@ abstract class object_file_system extends \file_system_filedir {
         $this->filepermissions = $CFG->filepermissions;
         $this->dirpermissions = $CFG->directorypermissions;
         $this->deleteexternally = $config->deleteexternal;
+        $this->agevalidation = $config->agevalidation;
+        $this->externalvalidation = $config->externalvalidation;
 
         if ($config->enablelogging) {
             $this->set_logger(new \tool_objectfs\log\real_time_logger());
@@ -967,12 +969,30 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      */
     public function should_redirect_to_presigned_url(string $contenthash, stored_file $file = null, array $headers = []): bool {
-        $validsetup = $this->presigned_url_configured() &&
-                $this->is_file_readable_externally_by_hash($contenthash);
+        global $DB;
+
+        if(!$this->presigned_url_configured()){
+            return false;
+        }
+
+        $is_readable = false;
+        if(!is_null($file) && $this->agevalidation > 0){
+            $is_readable = time() > $file->timemodified + $this->agevalidation;
+        }
+
+        if(!$is_readable){
+            if(!is_null($file) && $this->externalvalidation == 'db'){
+                $record = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash]);
+                $is_valid = in_array($record->location, [OBJECT_LOCATION_DUPLICATED, OBJECT_LOCATION_EXTERNAL]);
+            }else{ // Default behavior:
+                $is_valid = $this->should_redirect_to_presigned_url($contenthash, $file);
+            }
+        }
+
         if (is_null($file)) {
-            return $validsetup && $this->presigned_url_should_redirect($contenthash, $headers);
+            return $this->presigned_url_should_redirect($contenthash, $headers);
         } else {
-            return $validsetup && $this->presigned_url_should_redirect_file($file);
+            return $this->presigned_url_should_redirect_file($file);
         }
     }
 
