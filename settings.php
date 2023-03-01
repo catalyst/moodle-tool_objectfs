@@ -206,7 +206,6 @@ if ($ADMIN->fulltree) {
                 new lang_string('settings:presignedurl:enablepresignedurls', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:enablepresignedurls_help', 'tool_objectfs') . $presignedinfo, ''));
 
-
             $settings->add(new admin_setting_configduration('tool_objectfs/expirationtime',
                 new lang_string('settings:presignedurl:expirationtime', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:expirationtime_help', 'tool_objectfs'), 2 * HOURSECS, HOURSECS));
