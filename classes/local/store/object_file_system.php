@@ -985,7 +985,7 @@ abstract class object_file_system extends \file_system_filedir {
                 $record = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash]);
                 $is_valid = in_array($record->location, [OBJECT_LOCATION_DUPLICATED, OBJECT_LOCATION_EXTERNAL]);
             }else{ // Default behavior:
-                $is_valid = $this->should_redirect_to_presigned_url($contenthash, $file);
+                $is_valid = $this->is_file_readable_externally_by_hash($contenthash);
             }
         }
 
