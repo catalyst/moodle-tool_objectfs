@@ -977,7 +977,7 @@ abstract class object_file_system extends \file_system_filedir {
 
         $is_readable = false;
         if(!is_null($file) && $this->agevalidation > 0){
-            $is_readable = time() > $file->timemodified + $this->agevalidation;
+            $is_readable = time() > $file->get_timemodified() + $this->agevalidation;
         }
 
         if(!$is_readable){
