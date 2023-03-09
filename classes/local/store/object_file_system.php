@@ -983,16 +983,16 @@ abstract class object_file_system extends \file_system_filedir {
         if(!$is_readable){
             if(!is_null($file) && $this->externalvalidation == 'db'){
                 $record = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash]);
-                $is_valid = in_array($record->location, [OBJECT_LOCATION_DUPLICATED, OBJECT_LOCATION_EXTERNAL]);
+                $is_readable = in_array($record->location, [OBJECT_LOCATION_DUPLICATED, OBJECT_LOCATION_EXTERNAL]);
             }else{ // Default behavior:
-                $is_valid = $this->is_file_readable_externally_by_hash($contenthash);
+                $is_readable = $this->is_file_readable_externally_by_hash($contenthash);
             }
         }
 
         if (is_null($file)) {
-            return $this->presigned_url_should_redirect($contenthash, $headers);
+            return $is_readable && $this->presigned_url_should_redirect($contenthash, $headers);
         } else {
-            return $this->presigned_url_should_redirect_file($file);
+            return $is_readable && $this->presigned_url_should_redirect_file($file);
         }
     }
 
