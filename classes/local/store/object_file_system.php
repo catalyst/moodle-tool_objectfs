@@ -997,7 +997,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Add the supplied file to the file system and update its location.
+     * Add the supplied file to the file system and update its object location.
      *
      * @param string $pathname Path to file currently on disk
      * @param string $contenthash SHA1 hash of content if known (performance only)
