@@ -1009,7 +1009,8 @@ abstract class object_file_system extends \file_system_filedir {
         // Rather than getting its exact location we just set it to local.
         // Almost all file uploads will be unique, and if it is a duplicate
         // then this will be corrected when the file is synced later.
-        manager::update_object_by_hash($result[0], OBJECT_LOCATION_LOCAL, $result[1]);
+        [$contenthash, $filesize] = $result;
+        manager::update_object_by_hash($contenthash, OBJECT_LOCATION_LOCAL, $filesize);
 
         return $result;
     }
