@@ -1016,7 +1016,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Add a file with the supplied content to the file system and update its location.
+     * Add a file with the supplied content to the file system and update its object location.
      *
      * @param string $content file content - binary string
      * @return array (contenthash, filesize, newfile)
