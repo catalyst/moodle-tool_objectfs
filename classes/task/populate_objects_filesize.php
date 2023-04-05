@@ -52,7 +52,7 @@ class populate_objects_filesize extends adhoc_task {
               GROUP BY o.id,
                        o.contenthash,
                        f.filesize";
-        $records = $DB->get_recordset_sql($sql);
+        $records = $DB->get_recordset_sql($sql, null, 0, $maxupdates + 1);
 
         // If more records found than the max number of updates, only process max updates then queue new task.
         $queueadditionaltask = false;
