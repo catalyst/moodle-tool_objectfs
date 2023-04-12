@@ -995,4 +995,40 @@ abstract class object_file_system extends \file_system_filedir {
         debugging('Objectfs does not implement a trashdir.');
         return '';
     }
+
+    /**
+     * Add the supplied file to the file system and update its location.
+     *
+     * @param string $pathname Path to file currently on disk
+     * @param string $contenthash SHA1 hash of content if known (performance only)
+     * @return array (contenthash, filesize, newfile)
+     */
+    public function add_file_from_path($pathname, $contenthash = null) {
+        $result = parent::add_file_from_path($pathname, $contenthash);
+
+        // Rather than getting its exact location we just set it to local.
+        // Almost all file uploads will be unique, and if it is a duplicate
+        // then this will be corrected when the file is synced later.
+        manager::update_object_by_hash($result[0], OBJECT_LOCATION_LOCAL, $result[1]);
+
+        return $result;
+    }
+
+    /**
+     * Add a file with the supplied content to the file system and update its location.
+     *
+     * @param string $content file content - binary string
+     * @return array (contenthash, filesize, newfile)
+     */
+    public function add_file_from_string($content) {
+        $result = parent::add_file_from_string($content);
+
+        // Rather than getting its exact location we just set it to local.
+        // Almost all file uploads will be unique, and if it is a duplicate
+        // then this will be corrected when the file is synced later.
+        manager::update_object_by_hash($result[0], OBJECT_LOCATION_LOCAL, $result[1]);
+
+        return $result;
+    }
+
 }
