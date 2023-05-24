@@ -65,6 +65,9 @@ class stream_wrapper {
     /** @var resource Hash resource that is sent when flushing the file to Azure. */
     private $hash;
 
+    /** @var bool records whether the file was readable when validating the stream_handle */
+    private $readable = true;
+
     /**
      * Register the blob://' stream wrapper
      *
@@ -151,7 +154,8 @@ class stream_wrapper {
     }
 
     public function stream_read($count) {
-        return $this->body->read($count);
+        // If the file isn't readable, we need to return no content. Azure can emit XML here otherwise.
+        return $this->readable ? $this->body->read($count) : '';
     }
 
     public function stream_seek($offset, $whence = SEEK_SET) {
@@ -260,6 +264,17 @@ class stream_wrapper {
             )
         ) {
             $errors[] = "{$path} already exists on Azure Blob Storage";
+        }
+
+        // When using mode 'r' we should validate the file exists before opening a handle on it.
+        if ($mode == 'r' &&
+            !$this->getClient()->getBlobProperties(
+                $this->getOption('Container'),
+                $this->getOption('Key')
+            )
+        ) {
+            $errors[] = "{$path} does not exist on Azure Blob Storage";
+            $this->readable = false;
         }
 
         return $errors;
