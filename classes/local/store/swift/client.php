@@ -203,12 +203,22 @@ class client extends object_client_base {
         }
 
         try {
-            $container->createObject(['name' => 'connection_check_file', 'content' => 'connection_check_file']);
+            $container->getObject('connection_check_file')->download();
         } catch (\OpenStack\Common\Error\BadResponseError $e) {
-            $connection->success = false;
-            $connection->details = $this->get_exception_details($e);
-        } catch (\Exception $e) {
-            $connection->success = false;
+            if ($e->getResponse()->getStatusCode() == 404) {
+                try {
+                    $container->createObject(['name' => 'connection_check_file', 'content' => 'connection_check_file']);
+                } catch (\OpenStack\Common\Error\BadResponseError $e) {
+                    $connection->success = false;
+                    $connection->details = $this->get_exception_details($e);
+                } catch (\Exception $e) {
+                    $connection->success = false;
+                }
+            } else {
+                $details = $this->get_exception_details($e);
+                $connection->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
+                $connection->success = false;
+            }
         }
 
         return $connection;
