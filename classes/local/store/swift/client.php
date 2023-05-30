@@ -216,7 +216,7 @@ class client extends object_client_base {
                 }
             } else {
                 $details = $this->get_exception_details($e);
-                $connection->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
+                $connection->messages[get_string('settings:connectionreadfailure', 'tool_objectfs') . $details] = 'notifyproblem';
                 $connection->success = false;
             }
         }
@@ -243,7 +243,7 @@ class client extends object_client_base {
             $result = $container->getObject('permissions_check_file')->download();
         } catch (\OpenStack\Common\Error\BadResponseError $e) {
             $details = $this->get_exception_details($e);
-            $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
+            $permissions->messages[get_string('settings:permissionreadfailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
 
         }
