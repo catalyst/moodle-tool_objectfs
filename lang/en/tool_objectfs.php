@@ -173,8 +173,8 @@ $string['settings:minimumage'] = 'Minimum age';
 $string['settings:minimumage_help'] = 'Minimum age that a object must exist on the local filedir before it will be considered for transfer.';
 $string['settings:deleteexternal'] = 'Delete external objects';
 $string['settings:deleteexternal_help'] = 'Delete external objects when the file is deleted in Moodle. This is not recommended if you intend to share one object store between multiple environments, however this is a requirement for GDPR compliance.
-<br/>Delete external file on orphan clean-up - This will delete the external file when the delete orphaned metadata task task runs.
-<br/>Delete completely - will tell the external storage to delete the file immediately - (use with caution! - if the same file is being uploaded while being deleted issues could occur.)';
+<br/>Delete external file on orphan clean-up - This will delete the external file when the delete orphaned metadata task runs.
+<br/>Delete completely - will tell the external storage to delete the file immediately - (use with caution! - if the same file is being uploaded while being deleted, issues could occur.)';
 $string['settings:deletelocal'] = 'Delete local objects';
 $string['settings:deletelocal_help'] = 'Delete local objects once they are in external object storage after the consistency delay.';
 $string['settings:consistencydelay'] = 'Consistency delay';
@@ -249,14 +249,15 @@ $string['presignedurl_testing:checkconnectionsettings'] = 'Check connection sett
 $string['presignedurl_testing:checkclientsettings'] = 'Check client settings at ';
 $string['presignedurl_testing:checkfssettings'] = 'Check filesystem settings at ';
 
-$string['settings:connectionsuccess'] = 'Could establish connection to the external object storage.';
-$string['settings:connectionfailure'] = 'Could not establish connection to the external object storage. {$a}';
-$string['settings:writefailure'] = 'Could not write object to the external object storage. ';
-$string['settings:readfailure'] = 'Could not read object from the external object storage. ';
-$string['settings:deletesuccess'] = 'Could delete object from the external object storage - It is not recommended for the user to have delete permissions. ';
-$string['settings:deleteerror'] = 'Could not delete object from the external object storage. ';
+$string['settings:connectionsuccess'] = 'Could establish connection to object storage. ';
+$string['settings:connectionfailure'] = 'Could not establish connection to object storage. {$a}';
+$string['settings:writefailure'] = 'Could not write permissions check file from object storage. ';
+$string['settings:connectionreadfailure'] = 'Could not read connection check file from object storage. ';
+$string['settings:permissionreadfailure'] = 'Could not read permissions check file from object storage. ';
+$string['settings:deletesuccess'] = 'Could delete file from object storage - It is not recommended for the user to have delete permissions. ';
+$string['settings:deleteerror'] = 'Could not delete permissions check file from object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
-$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from the external object storage. Background tasks can still function.';
+$string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from object storage. Background tasks can still function.';
 
 $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
