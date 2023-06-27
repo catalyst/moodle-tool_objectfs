@@ -241,7 +241,7 @@ class client extends object_client_base {
             // Write could have failed.
             if ($errorcode !== 'BlobNotFound') {
                 $details = $this->get_exception_details($e);
-                $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
+                $permissions->messages[get_string('settings:permissionreadfailure', 'tool_objectfs') . $details] = 'notifyproblem';
                 $permissions->success = false;
             }
         }
