@@ -139,8 +139,7 @@ class manager {
         $newobject = new stdClass();
         $newobject->contenthash = $contenthash;
 
-        if (!$DB->get_manager()->table_exists('tool_objectfs_objects')) {
-            debugging('The tool_objectfs plugin tables have not been installed yet. Skipping update_object_by_hash..');
+        if (during_initial_install()) {
             return;
         }
 
