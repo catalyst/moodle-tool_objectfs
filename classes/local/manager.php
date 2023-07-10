@@ -139,6 +139,11 @@ class manager {
         $newobject = new stdClass();
         $newobject->contenthash = $contenthash;
 
+        if (!$DB->get_manager()->table_exists('tool_objectfs_objects')){
+            debugging('The tool_objectfs plugin tables have not been installed yet. Skipping update_object_by_hash..');
+            return;
+        }
+
         $oldobject = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash]);
         if ($oldobject) {
             $newobject->timeduplicated = $oldobject->timeduplicated;
