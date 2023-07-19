@@ -1006,12 +1006,7 @@ abstract class object_file_system extends \file_system_filedir {
     public function add_file_from_path($pathname, $contenthash = null) {
         $result = parent::add_file_from_path($pathname, $contenthash);
 
-        // Rather than getting its exact location we just set it to local.
-        // Almost all file uploads will be unique, and if it is a duplicate
-        // then this will be corrected when the file is synced later.
-        manager::update_object_by_hash($result[0], OBJECT_LOCATION_LOCAL, $result[1]);
-
-        return $result;
+        return $this->update_object($result);
     }
 
     /**
@@ -1023,12 +1018,26 @@ abstract class object_file_system extends \file_system_filedir {
     public function add_file_from_string($content) {
         $result = parent::add_file_from_string($content);
 
+        return $this->update_object($result);
+    }
+
+    /**
+     * Update file remote location.
+     *
+     * @param array (contenthash, filesize, newfile)
+     * @return array (contenthash, filesize, newfile)
+     */
+    private function update_object(array $result): array {
         // Rather than getting its exact location we just set it to local.
         // Almost all file uploads will be unique, and if it is a duplicate
         // then this will be corrected when the file is synced later.
-        manager::update_object_by_hash($result[0], OBJECT_LOCATION_LOCAL, $result[1]);
+        // In the same vein, ignore (hopefully transient) failures.
+        try {
+            manager::update_object_by_hash($result[0], OBJECT_LOCATION_LOCAL, $result[1]);
+        } catch (\Exception $e) {
+            $this->logger->error_log($e->getMessage());
+        }
 
         return $result;
     }
-
 }
