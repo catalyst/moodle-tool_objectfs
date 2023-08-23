@@ -69,22 +69,6 @@ define('TOOL_OBJECTFS_DELETE_EXTERNAL_NO', 0);
 define('TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH', 1);
 define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
 
-// Legacy cron function.
-function tool_objectfs_cron() {
-    mtrace('RUNNING legacy cron objectfs');
-    global $CFG;
-    if ($CFG->branch <= 26) {
-        // Unlike the task system, we do not get fine grained control over
-        // when tasks/manipulators run. Every cron we just run all the manipulators.
-        (new manipulator_builder())->execute_all();
-
-        \tool_objectfs\local\report\objectfs_report::cleanup_reports();
-        \tool_objectfs\local\report\objectfs_report::generate_status_report();
-    }
-
-    return true;
-}
-
 /**
  * Sends a plugin file to the browser.
  * @param $course
