@@ -122,46 +122,6 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
     }
 
     /**
-     * Test that the maxupdates value limits the number of records updated and new adhoc task is scheduled.
-     */
-    public function test_only_max_update_records_are_updated() {
-        global $DB;
-        $filehashes = [
-            $this->create_local_file("Test 1")->get_contenthash(),
-            $this->create_local_file("Test 2")->get_contenthash(),
-            $this->create_local_file("Test 3")->get_contenthash(),
-            $this->create_local_file("Test 4")->get_contenthash(),
-            $this->create_local_file("This is a looong name")->get_contenthash()
-        ];
-
-        // Set all objects to have a filesize of null.
-        [$insql, $params] = $DB->get_in_or_equal($filehashes);
-        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
-                'contenthash ' . $insql, $params);
-        // Call ad-hoc task to populate filesizes.
-        $task = new \tool_objectfs\task\populate_objects_filesize();
-        $task->set_custom_data(['maxupdates' => 2]);
-        $task->execute();
-
-        // Get all objects.
-        $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
-        $updatedobjects = array_filter($objects, function($object) {
-            return isset($object->filesize);
-        });
-
-        // Test only 2 records have updated filesize.
-        $this->assertCount(5, $objects);
-        $this->assertCount(2, $updatedobjects);
-
-        // Test new adhoc task was scheduled.
-        if (!method_exists(\core\task\manager::class, 'get_adhoc_tasks')) {
-            $this->markTestSkipped('\core\task\manager::get_adhoc_tasks() not available before Moodle 3.4');
-        }
-        $adhoctasks = \core\task\manager::get_adhoc_tasks(populate_objects_filesize::class);
-        $this->assertCount(1, $adhoctasks);
-    }
-
-    /**
      * Test that filesizes that are already populated are not pulled again.
      */
     public function test_that_non_null_values_are_not_updated() {
@@ -193,6 +153,10 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
         // Test only 2 records have updated filesize.
         $this->assertCount(5, $objects);
         $this->assertCount(2, $updatedobjects);
+
+        // Test new adhoc task was scheduled.
+        $adhoctasks = \core\task\manager::get_adhoc_tasks(populate_objects_filesize::class);
+        $this->assertCount(1, $adhoctasks);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();

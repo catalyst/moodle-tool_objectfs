@@ -933,4 +933,66 @@ class object_file_system_test extends tests\testcase {
         unset($CFG->alternative_file_system_class);
         $this->assertFalse($this->filesystem->is_configured());
     }
+
+    /**
+     * Test that add_file_from_path() is fine if manager::update_object_by_hash() throws an exception
+     *
+     * @covers ::add_file_from_path
+     */
+    public function test_add_file_from_path_update_object_fail() {
+        global $DB;
+
+        $error = "ERROR!";
+
+        $logger = $this->filesystem->get_logger();
+        $mocklogger = $this->createMock(get_class($logger));
+        $mocklogger->expects($this->once())->method('error_log')->with($error);
+        $this->filesystem->set_logger($mocklogger);
+
+        $db = $DB;
+        $DB = $this->createStub(get_class($DB));
+        $DB->method('get_record')->willReturnCallback(function ($table, $params) use ($db, $error) {
+            throw new \Exception($error);
+        });
+
+        $result = $this->filesystem->add_file_from_path(__FILE__);
+
+        $DB = $db;
+
+        $this->assertGreaterThan(0, strlen($result[0]));
+        $this->assertGreaterThan(0, $result[1]);
+        $this->assertTrue($result[2]);
+    }
+
+    /**
+     * Test that add_file_from_string() is fine if manager::update_object_by_hash() throws an exception
+     *
+     * @covers ::add_file_from_string
+     */
+    public function test_add_file_from_string_update_object_fail() {
+        global $DB;
+
+        $content = "Hi!";
+        $contenthash = \file_storage::hash_from_string($content);
+        $error = "ERROR!";
+
+        $logger = $this->filesystem->get_logger();
+        $mocklogger = $this->createMock(get_class($logger));
+        $mocklogger->expects($this->once())->method('error_log')->with($error);
+        $this->filesystem->set_logger($mocklogger);
+
+        $db = $DB;
+        $DB = $this->createStub(get_class($DB));
+        $DB->method('get_record')->willReturnCallback(function ($table, $params) use ($db, $error) {
+            throw new \Exception($error);
+        });
+
+        $result = $this->filesystem->add_file_from_string($content);
+
+        $DB = $db;
+
+        $this->assertEquals($contenthash, $result[0]);
+        $this->assertEquals(\core_text::strlen($content), $result[1]);
+        $this->assertTrue($result[2]);
+    }
 }
