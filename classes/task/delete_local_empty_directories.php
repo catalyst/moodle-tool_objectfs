@@ -27,10 +27,9 @@ namespace tool_objectfs\task;
 
 use coding_exception;
 use tool_objectfs\local\manager;
+use core\cron;
 
 defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->libdir.'/cronlib.php');
 
 class delete_local_empty_directories  extends task {
 
@@ -51,7 +50,7 @@ class delete_local_empty_directories  extends task {
             return;
         }
         $filesystem = new $this->config->filesystem();
-        cron_trace_time_and_memory();
+        cron::trace_time_and_memory();
         $filesystem->delete_empty_dirs();
     }
 }
