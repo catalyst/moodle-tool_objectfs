@@ -30,8 +30,6 @@ use tool_objectfs\local\manager;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/cronlib.php');
-
 class delete_local_empty_directories  extends task {
 
     /** @var string $stringname  */
@@ -42,6 +40,8 @@ class delete_local_empty_directories  extends task {
      * @throws coding_exception
      */
     public function execute() {
+        global $CFG;
+
         if (!$this->enabled_tasks()) {
             return;
         }
@@ -51,7 +51,13 @@ class delete_local_empty_directories  extends task {
             return;
         }
         $filesystem = new $this->config->filesystem();
-        cron_trace_time_and_memory();
+        if ($CFG->version < 2023042400) {
+            // This function and library was deprecated in Moodle 4.2.
+            require_once($CFG->libdir . '/cronlib.php');
+            cron_trace_time_and_memory();
+        } else {
+            \core\cron::trace_time_and_memory();
+        }
         $filesystem->delete_empty_dirs();
     }
 }
