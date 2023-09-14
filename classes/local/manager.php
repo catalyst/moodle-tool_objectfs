@@ -136,6 +136,11 @@ class manager {
      */
     public static function update_object_by_hash($contenthash, $newlocation, $filesize = null) {
         global $DB;
+
+        if (during_initial_install()) {
+            return;
+        }
+
         $newobject = new stdClass();
         $newobject->contenthash = $contenthash;
 
