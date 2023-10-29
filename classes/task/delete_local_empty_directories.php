@@ -30,8 +30,6 @@ use tool_objectfs\local\manager;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/cronlib.php');
-
 class delete_local_empty_directories  extends task {
 
     /** @var string $stringname  */
@@ -51,7 +49,6 @@ class delete_local_empty_directories  extends task {
             return;
         }
         $filesystem = new $this->config->filesystem();
-        cron_trace_time_and_memory();
         $filesystem->delete_empty_dirs();
     }
 }
