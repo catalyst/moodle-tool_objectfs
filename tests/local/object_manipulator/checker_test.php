@@ -28,6 +28,9 @@ class checker_test extends \tool_objectfs\tests\testcase {
     /** @var string $manipulator */
     protected $manipulator = checker::class;
 
+    /** @var checker Checker */
+    protected $checker;
+
     protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();
