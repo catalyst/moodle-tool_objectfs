@@ -31,6 +31,12 @@ use tool_objectfs\local\store\signed_url;
  */
 abstract class testcase extends \advanced_testcase {
 
+    /** @var test_file_system Filesystem */
+    public $filesystem;
+
+    /** @var \tool_objectfs\log\objectfs_logger Logger */
+    public $logger;
+
     /**
      * setUp
      * @return void

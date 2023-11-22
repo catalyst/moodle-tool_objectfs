@@ -27,6 +27,12 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  */
 class recoverer_test extends \tool_objectfs\tests\testcase {
 
+    /** @var candidates_finder Candidates finder object */
+    protected $candidatesfinder;
+
+    /** @var recoverer Recoverer object */
+    protected $recoverer;
+
     protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();
