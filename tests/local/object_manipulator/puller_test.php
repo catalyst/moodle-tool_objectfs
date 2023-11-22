@@ -28,6 +28,9 @@ class puller_test extends \tool_objectfs\tests\testcase {
     /** @var string $manipulator */
     protected $manipulator = puller::class;
 
+    /** @var puller Puller object */
+    protected $puller;
+
     protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();

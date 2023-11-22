@@ -28,6 +28,9 @@ class deleter_test extends \tool_objectfs\tests\testcase {
     /** @var string $manipulator */
     protected $manipulator = deleter::class;
 
+    /** @var deleter Deleter object */
+    protected $deleter;
+
     protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();

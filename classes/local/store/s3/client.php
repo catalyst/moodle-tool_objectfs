@@ -48,6 +48,9 @@ class client extends object_client_base {
     protected $bucket;
     private $signingmethod;
 
+    /** @var string Prefix for bucket keys */
+    protected $bucketkeyprefix;
+
     public function __construct($config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
