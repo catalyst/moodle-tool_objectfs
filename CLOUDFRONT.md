@@ -1,3 +1,37 @@
+## Implementing CloudFront CDN in-front of ObjectFS S3 Bucket
+The following steps outline how to create an S3 bucket for ObjectFS, configure moodle to use this, 
+and then how to implement the CloudFront CDN (Content Delivery Network) to securely sit infront of the 
+S3 Bucket, so that content delivery maybe off-loaded from the moodle servers to the CDN.  This will 
+typically result in faster access for users to content due do caching by the CDN, and less load on the
+moodle servers.
+
+The following steps implement the following high level objectives:
+1. Grant the Cloudfront Distribution access to the S3 bucket for ObjectFS
+ 
+  - existing steps in document are for "Legacy access identies"
+		"Use a CloufFront origin access identity (OAI) to access the S3 Bucket"
+
+  - use "Origin access control settings (recommended)" 
+    "Bucket can restrict acess to only CloudFront."
+    This configuration has been tested, and also works. This blog post outlines the advantages of the newer option:
+    https://aws.amazon.com/blogs/networking-and-content-delivery/amazon-cloudfront-introduces-origin-access-control-oac/
+
+  - Update S3 Bucket Policy (this step is required for either legacy OAI or Origin access control.
+	"Policy must allow access to CloudFront IAM service principle role". (policy auto generated)
+
+
+2. Restrict viewer access (CloudFront Distribution) to signed requests (Trusted Key Groups)
+
+	- Generate key pair
+	- (Cloudfront) configure Trusted Key Groups (public key)
+	- (Cloudfront) Restrict view access
+	- (Moodle) Configure to generate signed URLs (private key)
+
+3. Setup CORS security (response header policy) for the Cloudfront distribution
+
+
+## Detailed Instructions
+
 ### Create AWS bucket
 1. Login to AWS console https://aws.amazon.com/console/
 2. Navigate to _Services -> S3_.
