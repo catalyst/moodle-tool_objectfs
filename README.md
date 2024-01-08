@@ -14,6 +14,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
 * [Currently supported object stores](#currently-supported-object-stores)
   * [Roadmap](#roadmap)
   * [Amazon S3](#amazon-s3)
+  * [Min.io S3](#minio-s3)
   * [Google gcs](#google-gcs)
   * [Azure Blob Storage](#azure-blob-storage)
   * [DigitalOcean Spaces](#digitalocean-spaces)
@@ -285,6 +286,15 @@ S3 specific settings
 - **Bucket**: S3 bucket name to store files in.
 - **AWS region**: AWS API endpoint region to use.
 - **Base URL**: useful for s3-compatible providers *eg* set to `https://storage.googleapis.com` for gcs
+- **Key Prefix**: useful for adding a prefix for all data stored in bucket. Can be used to reuse the same CloudFront distribution for both Moodle itself and the pre-signed URLs files.
+
+### Min.io S3 settings
+Use the AWS plugin for the objectfs addon.
+- **Key**: Min.io Key
+- **Secret**: Min.io Secret
+- **Bucket**: S3 Bucket name
+- **AWS region**: Doesn't matter
+- **Base URL***: Your ip address of Min.io server or url. (If it's internal, see issue page [here](https://github.com/catalyst/moodle-tool_objectfs/issues/579).
 - **Key Prefix**: useful for adding a prefix for all data stored in bucket. Can be used to reuse the same CloudFront distribution for both Moodle itself and the pre-signed URLs files.
 
 ### Azure Blob Storage settings
