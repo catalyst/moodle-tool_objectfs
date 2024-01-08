@@ -25,9 +25,9 @@ The following steps implement the following high level objectives:
    This is access control is independant of the access granted in step 1.  The HTTP headers associated with this are 
    not required, and should not be forwarded from Cloudfront to S3.
 
-	- [Generate key pair & configure Trusted Key Groups in Cloudfront using public key](generate-cloudfront-keys)
-	- [Restrict view access in Cloudfront](create-cloudfront-distribution) (step 8.)
-	- [Configure Moodle to generate signed URLs using private key)](configure-cloudfront-signing-method-in-objectfs)
+	- [Generate key pair & configure Trusted Key Groups in Cloudfront using public key](#generate-cloudfront-keys)
+	- [Restrict view access in Cloudfront](#create-cloudfront-distribution) (step 8.)
+	- [Configure Moodle to generate signed URLs using private key)](#configure-cloudfront-signing-method-in-objectfs)
 
 3. Setup CORS security (response header policy) for the Cloudfront distribution
 
