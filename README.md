@@ -24,6 +24,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   * [File Transfer settings](#file-transfer-settings)
   * [Pre-Signed URLs Settings](#pre-signed-urls-settings)
   * [Amazon S3 settings](#amazon-s3-settings)
+  * [Min.io S3 settings](#minio-s3-settings)
   * [Azure Blob Storage settings](#azure-blob-storage-settings)
   * [DigitalOcean Spaces settings](#digitalocean-spaces-settings)
 * [Integration testing](#integration-testing)
@@ -136,6 +137,10 @@ There is support for more object stores planed.
   ]
 }
 ```
+### Minio S3
+
+Setup for Min.io bucket can be found on there website [here](https://min.io)
+
 
 ### Google GCS
 
