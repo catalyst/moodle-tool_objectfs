@@ -89,25 +89,29 @@ class client extends object_client_base {
      * @return bool
      */
     protected function is_functional() {
-        return isset($this->client);
+        return !empty($this->client);
     }
 
-    public function get_configuration_check_status() {
+    /**
+     * Tests that the configuration is ok.
+     * @return object with 'success' and 'details' values.
+     */
+    public function test_configuration() {
         $ok = $this->is_configuration_valid($this->config);
 
         $configcheck = $this->check_configuration($this->config);
         $details = '';
 
-        $lookup = [ // TODO lang strings
-            true => 'GOOD',
-            false => "Missing",
-            null => "N/A",
+        $lookup = [
+            true => get_string('settings:config:exists', 'tool_objectfs'),
+            false => get_string('settings:config:missing', 'tool_objectfs'),
+            null => get_string('settings:config:na', 'tool_objectfs'),
         ];
 
         foreach ($configcheck as $check => $result) {
             $details .= $check . ":" . $lookup[$result] . "\n";
         }
-        return ['ok' => $ok, 'details' => $details];
+        return (object) ['success' => $ok, 'details' => $details];
     }
 
     /**
@@ -129,7 +133,7 @@ class client extends object_client_base {
      * @return bool
      */
     protected function is_configuration_valid($config) {
-        return !in_array(false, $this->check_configuration($config));
+        return !in_array(false, $this->check_configuration($config), true);
     }
 
     /**
@@ -304,7 +308,7 @@ class client extends object_client_base {
         $permissions->success = true;
         $permissions->messages = array();
 
-        if ($this->is_functional()) {
+        if (!$this->is_functional()) {
             $permissions->success = false;
             $permissions->messages = array();
             return $permissions;

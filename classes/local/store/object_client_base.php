@@ -81,10 +81,6 @@ abstract class object_client_base implements object_client {
         throw new \coding_exception("Pre-signed URLs not supported");
     }
 
-    public function get_configuration_check_status() {
-        return ['ok' => false, 'details' => ''];
-    }
-
     /**
      * Moodle admin settings form to display connection details for the client service.
      *
@@ -142,7 +138,7 @@ abstract class object_client_base implements object_client {
      * @return object
      */
     public function test_range_request($filesystem) {
-        return (object)['result' => false, 'error' => ''];
+        return (object)['result' => false, 'details' => ''];
     }
 
     /**
@@ -163,6 +159,16 @@ abstract class object_client_base implements object_client {
      * @return object
      */
     public function test_permissions($testdelete) {
+        return (object)['success' => false, 'details' => ''];
+    }
+
+    /**
+     * Tests configuration is OK.
+     * Override this method in client class.
+     *
+     * @return object
+     */
+    public function test_configuration() {
         return (object)['success' => false, 'details' => ''];
     }
 }

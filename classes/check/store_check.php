@@ -34,7 +34,7 @@ class store_check extends check {
         try {
             // Check if configured first, and report NA if not configured.
             if (!\tool_objectfs\local\manager::check_file_storage_filesystem()) {
-                return new result(result::NA, "todo lang Not configured.");
+                return new result(result::NA, get_string('check:notenabled', 'tool_objectfs'));
             }
 
             // Load objectfs and run a test.
@@ -42,15 +42,20 @@ class store_check extends check {
             $client = \tool_objectfs\local\manager::get_client($config);
 
             if (empty($client)) {
-                return new result(result::UNKNOWN, "TODO lang client not configured");
+                return new result(result::UNKNOWN, get_string('check:configuration:empty', 'tool_objectfs'));
             }
 
-            $results = [];
+            if (!$client->test_configuration()->success) {
+                // Not confingured yet, don't bother testing connection or permissions.
+                return new result(result::NA, get_string('check:storecheck:notconfiguredskip', 'tool_objectfs'));
+            }
+
+            $results = (object) [];
 
             // TODO test delete.
             switch($this->type) {
                 case self::TYPE_CONNECTION:
-                    $results = $client->test_permissions(false);
+                    $results = $client->test_connection(false);
                     break;
 
                 case self::TYPE_RANGEREQUEST:
@@ -63,13 +68,16 @@ class store_check extends check {
             }
 
             if (empty($results)) {
-                return new result(result::UNKNOWN, "TODO lang Test type " . $this->type . " was configured, but no test was executed.");
+                return new result(result::UNKNOWN, get_string('check:storecheck:nothingexecuted', 'tool_objectfs'));
             }
 
-            $status = $results['success'] ? result::OK : result::ERROR;
-            return new result($status, $results['details']);
+            $status = $results->success ? result::OK : result::ERROR;
+            return new result($status, $results->details ?? '');
         } catch (Throwable $e) {
-            return new result(result::CRITICAL, "TODO lang Error while executing store check type " . $this->type . ': ' . $e->getMessage());
+            return new result(result::CRITICAL, get_string('check:storecheck:error', 'tool_objectfs')
+                . $this->type . ': ' . $e->getMessage(), $e->getTraceAsString());
         }
     }
+
+    // TODO action link
 }

@@ -269,3 +269,22 @@ $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up ht
 
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
+
+$string['settings:config:missing'] = 'Missing';
+$string['settings:config:na'] = 'N/A';
+$string['settings:config:exists'] = 'Exists';
+
+$string['check:notenabled'] = 'Object storage not enabled';
+
+$string['checkconfiguration'] = 'Object storage configuration';
+$string['check:configuration:ok'] = 'Configuration exists';
+$string['check:configuration:error'] = 'Configuration error';
+$string['check:configuration:empty'] = 'Client created from config was empty';
+
+$string['checkstore_check_connection'] = 'Object storage connection';
+$string['checkstore_check_permissions'] = 'Object storage permissions';
+$string['checkstore_check_rangerequest'] = 'Object storage range requests';
+$string['check:storecheck:error'] = 'Error while trying to run check: ';
+$string['check:storecheck:notconfiguredskip'] = 'Object storage not configured - skipping';
+$string['check:storecheck:nothingexecuted'] = 'No results were returned from the tests';
+
