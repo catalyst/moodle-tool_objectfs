@@ -81,6 +81,10 @@ abstract class object_client_base implements object_client {
         throw new \coding_exception("Pre-signed URLs not supported");
     }
 
+    public function get_configuration_check_status() {
+        return ['ok' => false, 'details' => ''];
+    }
+
     /**
      * Moodle admin settings form to display connection details for the client service.
      *

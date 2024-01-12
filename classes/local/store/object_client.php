@@ -41,6 +41,7 @@ interface object_client {
     public function test_permissions($testdelete);
     public function proxy_range_request(\stored_file $file, $ranges);
     public function test_range_request($filesystem);
+    public function get_configuration_check_status();
 }
 
 

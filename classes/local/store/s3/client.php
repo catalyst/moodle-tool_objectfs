@@ -92,26 +92,44 @@ class client extends object_client_base {
         return isset($this->client);
     }
 
+    public function get_configuration_check_status() {
+        $ok = $this->is_configuration_valid($this->config);
+
+        $configcheck = $this->check_configuration($this->config);
+        $details = '';
+
+        $lookup = [ // TODO lang strings
+            true => 'GOOD',
+            false => "Missing",
+            null => "N/A",
+        ];
+
+        foreach ($configcheck as $check => $result) {
+            $details .= $check . ":" . $lookup[$result] . "\n";
+        }
+        return ['ok' => $ok, 'details' => $details];
+    }
+
+    /**
+     * Checks the configuration is valid.
+     * @return array key => value where the value is true if ok, false if bad, or null if n/a
+     */
+    protected function check_configuration($config) {
+        return [
+            's3_bucket' => !empty($config->s3_bucket),
+            's3_region' => !empty($config->s3_region),
+            's3_usesdkcreds' => empty($config->s3_usesdkcreds) ? null : (!empty($config->s3_key) && !empty($config->s3_secret)),
+        ];
+    }
+
     /**
      * Check if the client configured properly.
      *
      * @param \stdClass $config Client config.
      * @return bool
      */
-    protected function is_configured($config) {
-        if (empty($config->s3_bucket)) {
-            return false;
-        }
-
-        if (empty($config->s3_region)) {
-            return false;
-        }
-
-        if (empty($config->s3_usesdkcreds) && (empty($config->s3_key) || empty($config->s3_secret))) {
-            return false;
-        }
-
-        return true;
+    protected function is_configuration_valid($config) {
+        return !in_array(false, $this->check_configuration($config));
     }
 
     /**
@@ -120,7 +138,7 @@ class client extends object_client_base {
      * @param \stdClass $config Client config.
      */
     public function set_client($config) {
-        if (!$this->is_configured($config)) {
+        if (!$this->is_configuration_valid($config)) {
             $this->client = null;
             return;
         }

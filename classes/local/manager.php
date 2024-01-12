@@ -26,6 +26,7 @@
 namespace tool_objectfs\local;
 
 use stdClass;
+use tool_objectfs\local\store\object_client;
 use tool_objectfs\local\store\object_file_system;
 
 defined('MOODLE_INTERNAL') || die();
@@ -115,7 +116,7 @@ class manager {
 
     /**
      * @param $config
-     * @return bool
+     * @return bool|object_client
      */
     public static function get_client($config) {
         $clientclass = self::get_client_classname_from_fs($config->filesystem);
