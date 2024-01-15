@@ -299,7 +299,7 @@ class client extends object_client_base {
             $details = $this->get_exception_details($e);
         }
 
-        $summarystr = result::OK ? 'check:passed' : 'check:failed';
+        $summarystr = $status == result::OK ? 'check:passed' : 'check:failed';
         $summary = get_string($summarystr, 'tool_objectfs');
         return new result($status, $summary, $details);
     }
@@ -368,7 +368,7 @@ class client extends object_client_base {
             }
         }
 
-        $summarystr = result::OK ? 'settings:permissioncheckpassed' : 'settings:permissioncheckfailed';
+        $summarystr = $status == result::OK ? 'settings:permissioncheckpassed' : 'settings:permissioncheckfailed';
         $summary = get_string($summarystr, 'tool_objectfs');
         return new result($status, $summary, $details);
     }
