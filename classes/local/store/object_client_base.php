@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\local\store;
 
+use core\check\result;
+
 abstract class object_client_base implements object_client {
 
     protected $autoloader;
@@ -89,25 +91,40 @@ abstract class object_client_base implements object_client {
      */
     public function define_client_check() {
         global $OUTPUT;
+
+        // TODO use MDL check api admin setting if available ???
+
+        $checks = tool_objectfs_status_checks();
+
         $output = '';
-        $connection = $this->test_connection();
-        if ($connection->success) {
-            $output .= $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_objectfs'), 'notifysuccess');
-            // Check permissions if we can connect.
-            $permissions = $this->test_permissions($this->testdelete);
-            if ($permissions->success) {
-                $output .= $OUTPUT->notification(key($permissions->messages), 'notifysuccess');
-            } else {
-                foreach ($permissions->messages as $message => $type) {
-                    $output .= $OUTPUT->notification($message, $type);
-                }
+
+        foreach ($checks as $check) {
+            // This is fixed in 4.4 by MDL-67898.
+            // But until that is more common, the component must be set manually,
+            // as the default is incorrect when viewed in the admin tree.
+            $check->set_component('tool_objectfs');
+
+            $result = $check->get_result();
+
+            $status = $result->get_status();
+
+            // If status was N/A - ignore it.
+            if ($status == result::NA) {
+                continue;
             }
-        } else {
-            $output .= $OUTPUT->notification(
-                get_string('settings:connectionfailure', 'tool_objectfs', $connection->details),
-                'notifyproblem'
-            );
+
+            $str = $check->get_name() . ": " . $result->get_summary();
+
+            // Only include details if failure.
+            if ($status != result::OK) {
+                $str .= "\n" . $result->get_details();
+            }
+
+            $type = $status == result::OK ? 'notifysuccess' : 'notifyerror';
+
+            $output .= $OUTPUT->notification(nl2br($str), $type);
         }
+
         return $output;
     }
 
@@ -135,20 +152,20 @@ abstract class object_client_base implements object_client {
      * Test proxy range request.
      *
      * @param  object  $filesystem  Filesystem to be tested.
-     * @return object
+     * @return result
      */
-    public function test_range_request($filesystem) {
-        return (object)['result' => false, 'details' => ''];
+    public function test_range_request($filesystem): result {
+        return new result(result::UNKNOWN, '');
     }
 
     /**
      * Tests connection to external storage.
      * Override this method in client class.
      *
-     * @return object
+     * @return result
      */
-    public function test_connection() {
-        return (object)['success' => false, 'details' => ''];
+    public function test_connection(): result {
+        return new result(result::UNKNOWN, '');
     }
 
     /**
@@ -158,17 +175,17 @@ abstract class object_client_base implements object_client {
      * @param bool $testdelete Test delete permission and fail the test if could delete object from the storage.
      * @return object
      */
-    public function test_permissions($testdelete) {
-        return (object)['success' => false, 'details' => ''];
+    public function test_permissions($testdelete): result {
+        return new result(result::UNKNOWN, '');
     }
 
     /**
      * Tests configuration is OK.
      * Override this method in client class.
      *
-     * @return object
+     * @return result
      */
-    public function test_configuration() {
-        return (object)['success' => false, 'details' => ''];
+    public function test_configuration(): result {
+        return new result(result::UNKNOWN, '');
     }
 }

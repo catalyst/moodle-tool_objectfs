@@ -257,6 +257,7 @@ $string['settings:permissionreadfailure'] = 'Could not read permissions check fi
 $string['settings:deletesuccess'] = 'Could delete file from object storage - It is not recommended for the user to have delete permissions. ';
 $string['settings:deleteerror'] = 'Could not delete permissions check file from object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
+$string['settings:permissioncheckfailed'] = 'Permissions check failed.';
 $string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from object storage. Background tasks can still function.';
 
 $string['settings:testingheader'] = 'Test Settings';
@@ -275,6 +276,9 @@ $string['settings:config:na'] = 'N/A';
 $string['settings:config:exists'] = 'Exists';
 
 $string['check:notenabled'] = 'Object storage not enabled';
+$string['check:settings'] = 'Objectfs settings';
+$string['check:passed'] = 'Check passed';
+$string['check:failed'] = 'Check failed';
 
 $string['checkconfiguration'] = 'Object storage configuration';
 $string['check:configuration:ok'] = 'Configuration exists';

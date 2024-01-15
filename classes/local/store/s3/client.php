@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\store\s3;
 
+use core\check\result;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\store\signed_url;
@@ -47,6 +48,9 @@ class client extends object_client_base {
     protected $client;
     protected $bucket;
     private $signingmethod;
+
+    /** @var string key prefix for the bucket **/
+    private $bucketkeyprefix;
 
     public function __construct($config) {
         global $CFG;
@@ -94,11 +98,9 @@ class client extends object_client_base {
 
     /**
      * Tests that the configuration is ok.
-     * @return object with 'success' and 'details' values.
+     * @return result
      */
-    public function test_configuration() {
-        $ok = $this->is_configuration_valid($this->config);
-
+    public function test_configuration(): result {
         $configcheck = $this->check_configuration($this->config);
         $details = '';
 
@@ -111,7 +113,14 @@ class client extends object_client_base {
         foreach ($configcheck as $check => $result) {
             $details .= $check . ":" . $lookup[$result] . "\n";
         }
-        return (object) ['success' => $ok, 'details' => $details];
+
+        $valid = $this->is_configuration_valid($this->config);
+        $status = $valid ? result::OK : result::ERROR;
+        $summary = $valid ? get_string('check:configuration:ok', 'tool_objectfs')
+            : get_string('check:configuration:error', 'tool_objectfs');
+        $details = nl2br($details);
+
+        return new result($status, $summary, $details);
     }
 
     /**
@@ -266,33 +275,33 @@ class client extends object_client_base {
      * There is no check connection in the AWS API.
      * We use list buckets instead and check the bucket is in the list.
      *
-     * @return object
+     * @return result
      * @throws \coding_exception
      */
-    public function test_connection() {
-        $connection = new \stdClass();
-        $connection->success = true;
-        $connection->details = '';
+    public function test_connection(): result {
+        $status = result::OK;
+        $details = '';
 
         try {
             if (!$this->is_functional()) {
-                $connection->success = false;
-                $connection->details = get_string('settings:notconfigured', 'tool_objectfs');
+                return new result(result::NA, get_string('settings:notconfigured', 'tool_objectfs'));
             } else {
                 $this->client->headBucket(array('Bucket' => $this->bucket));
             }
         } catch (\Aws\S3\Exception\S3Exception $e) {
-            $connection->success = false;
-            $connection->details = $this->get_exception_details($e);
+            $status = result::ERROR;
+            $details = $this->get_exception_details($e);
         } catch (\GuzzleHttp\Exception\InvalidArgumentException $e) {
-            $connection->success = false;
-            $connection->details = $this->get_exception_details($e);
+            $status = result::ERROR;
+            $details = $this->get_exception_details($e);
         } catch (\Aws\Exception\CredentialsException $e) {
-            $connection->success = false;
-            $connection->details = $this->get_exception_details($e);
+            $status = result::ERROR;
+            $details = $this->get_exception_details($e);
         }
 
-        return $connection;
+        $summarystr = result::OK ? 'check:passed' : 'check:failed';
+        $summary = get_string($summarystr, 'tool_objectfs');
+        return new result($status, $summary, $details);
     }
 
     /**
@@ -300,66 +309,68 @@ class client extends object_client_base {
      * There is no check connection in the AWS API.
      * We use list buckets instead and check the bucket is in the list.
      *
-     * @return object
+     * @return result
      * @throws \coding_exception
      */
-    public function test_permissions($testdelete) {
-        $permissions = new \stdClass();
-        $permissions->success = true;
-        $permissions->messages = array();
-
+    public function test_permissions($testdelete): result {
         if (!$this->is_functional()) {
-            $permissions->success = false;
-            $permissions->messages = array();
-            return $permissions;
+            return new result(result::NA, '');
         }
 
+        $status = result::OK;
+        $details = '';
+
+        // Try to put an object.
         try {
-            $result = $this->client->putObject(array(
+            $this->client->putObject([
                 'Bucket' => $this->bucket,
                 'Key' => $this->bucketkeyprefix . 'permissions_check_file',
-                'Body' => 'test content'));
+                'Body' => 'test content',
+            ]);
         } catch (\Aws\S3\Exception\S3Exception $e) {
-            $details = $this->get_exception_details($e);
-            $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
-            $permissions->success = false;
+            $exdetails = $this->get_exception_details($e);
+            $details .= get_string('settings:writefailure', 'tool_objectfs') . $exdetails;
+            $status = result::ERROR;
         }
 
+        // Try to get an object.
         try {
-            $result = $this->client->getObject(array(
+            $this->client->getObject([
                 'Bucket' => $this->bucket,
-                'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file',
+            ]);
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $errorcode = $e->getAwsErrorCode();
             // Write could have failed.
             if ($errorcode !== 'NoSuchKey') {
-                $details = $this->get_exception_details($e);
-                $permissions->messages[get_string('settings:permissionreadfailure', 'tool_objectfs') . $details] = 'notifyproblem';
-                $permissions->success = false;
+                $exdetails = $this->get_exception_details($e);
+                $details .= get_string('settings:permissionreadfailure', 'tool_objectfs') . $exdetails;
+                $status = result::ERROR;
             }
         }
 
+        // Try to delete an object.
         if ($testdelete) {
             try {
-                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
-                $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
-                $permissions->success = false;
+                $this->client->deleteObject([
+                    'Bucket' => $this->bucket,
+                    'Key' => $this->bucketkeyprefix . 'permissions_check_file',
+                ]);
+                $details .= get_string('settings:deletesuccess', 'tool_objectfs');
             } catch (\Aws\S3\Exception\S3Exception $e) {
                 $errorcode = $e->getAwsErrorCode();
                 // Something else went wrong.
                 if ($errorcode !== 'AccessDenied') {
                     $details = $this->get_exception_details($e);
-                    $permissions->messages[get_string('settings:deleteerror', 'tool_objectfs') . $details] = 'notifyproblem';
-                    $permissions->success = false;
+                    $details .= get_string('settings:deleteerror', 'tool_objectfs') . $details;
+                    $status = result::ERROR;
                 }
             }
         }
 
-        if ($permissions->success) {
-            $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
-        }
-
-        return $permissions;
+        $summarystr = result::OK ? 'settings:permissioncheckpassed' : 'settings:permissioncheckfailed';
+        $summary = get_string($summarystr, 'tool_objectfs');
+        return new result($status, $summary, $details);
     }
 
     protected function get_exception_details($exception) {
@@ -802,11 +813,12 @@ class client extends object_client_base {
      * Test proxy range request.
      *
      * @param  object  $filesystem  Filesystem to be tested.
-     * @return object
+     * @return result
      * @throws \coding_exception
      */
-    public function test_range_request($filesystem) {
+    public function test_range_request($filesystem): result {
         global $PAGE;
+
         $output = $PAGE->get_renderer('tool_objectfs');
         $testfiles = $output->presignedurl_tests_load_files($filesystem);
         foreach ($testfiles as $file) {
@@ -816,13 +828,17 @@ class client extends object_client_base {
                     $ranges, ['Expires' => time() + HOURSECS]);
                 $httpcode = manager::get_header($response['responseheaders'], 'HTTP/1.1');
                 if ($response['content'] != '' && $httpcode == '206 Partial Content') {
-                    return (object)['result' => true];
+                    // Range request OK.
+                    return new result(result::OK, get_string('check:passed', 'tool_objectfs'));
                 } else {
+                    // Range request failed.
                     $a = (object)['url' => $response['url'], 'httpcode' => $httpcode, 'details' => $response['content']];
-                    return (object)['result' => false, 'error' => get_string('rangerequestfailed', 'tool_objectfs', $a)];
+                    return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), get_string('rangerequestfailed', 'tool_objectfs', $a));
                 }
             }
         }
-        return (object)['result' => false, 'error' => get_string('fixturefilemissing', 'tool_objectfs')];
+
+        // Unknown - fixture missing cannot test it.
+        return new result(result::UNKNOWN, get_string('fixturefilemissing', 'tool_objectfs'));
     }
 }

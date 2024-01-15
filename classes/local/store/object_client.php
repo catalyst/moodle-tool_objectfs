@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\local\store;
 
+use core\check\result;
+
 interface object_client {
     public function __construct($config);
     public function register_stream_wrapper();
@@ -37,11 +39,11 @@ interface object_client {
     public function verify_object($contenthash, $localpath);
     public function generate_presigned_url($contenthash, $headers = array());
     public function support_presigned_urls();
-    public function test_connection();
-    public function test_permissions($testdelete);
+    public function test_connection(): result;
+    public function test_permissions($testdelete): result;
     public function proxy_range_request(\stored_file $file, $ranges);
-    public function test_range_request($filesystem);
-    public function test_configuration();
+    public function test_range_request($filesystem): result;
+    public function test_configuration(): result;
 }
 
 
