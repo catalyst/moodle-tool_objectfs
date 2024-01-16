@@ -98,6 +98,11 @@ class store extends check {
                     return $client->test_connection(false);
 
                 case self::TYPE_RANGEREQUEST:
+                    // Range requests require presigned url support. If not supported, return N/A.
+                    if (!$client->support_presigned_urls()) {
+                        return new result(result::NA, get_string('check:storecheck:unsupportedrangerequest', 'tool_objectfs'));
+                    }
+
                     return $client->test_range_request(new $config->filesystem());
 
                 case self::TYPE_PERMISSIONS:
@@ -105,7 +110,7 @@ class store extends check {
             }
         } catch (Throwable $e) {
             // Usually the SDKs will throw exceptions if something doesn't work, so we want to catch these.
-            return new result(result::CRITICAL, get_string('check:storecheck:error', 'tool_objectfs')
+            return new result(result::ERROR, get_string('check:storecheck:error', 'tool_objectfs')
                 . $this->type . ': ' . $e->getMessage(), $e->getTraceAsString());
         }
     }

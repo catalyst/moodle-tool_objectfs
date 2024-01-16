@@ -155,7 +155,7 @@ abstract class object_client_base implements object_client {
      * @return result
      */
     public function test_range_request($filesystem): result {
-        return new result(result::UNKNOWN, '');
+        return new result(result::INFO, get_string('check:notimplemented', 'tool_objectfs'));
     }
 
     /**
@@ -165,7 +165,7 @@ abstract class object_client_base implements object_client {
      * @return result
      */
     public function test_connection(): result {
-        return new result(result::UNKNOWN, '');
+        return new result(result::INFO, get_string('check:notimplemented', 'tool_objectfs'));
     }
 
     /**
@@ -176,7 +176,7 @@ abstract class object_client_base implements object_client {
      * @return object
      */
     public function test_permissions($testdelete): result {
-        return new result(result::UNKNOWN, '');
+        return new result(result::INFO, get_string('check:notimplemented', 'tool_objectfs'));
     }
 
     /**
@@ -186,6 +186,6 @@ abstract class object_client_base implements object_client {
      * @return result
      */
     public function test_configuration(): result {
-        return new result(result::UNKNOWN, '');
+        return new result(result::INFO, get_string('check:notimplemented', 'tool_objectfs'));
     }
 }

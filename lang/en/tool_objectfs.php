@@ -279,6 +279,7 @@ $string['check:notenabled'] = 'Object storage not enabled';
 $string['check:settings'] = 'Objectfs settings';
 $string['check:passed'] = 'Check passed';
 $string['check:failed'] = 'Check failed';
+$string['check:notimplemented'] = 'Check not implemented by storage client';
 
 $string['checkconfiguration'] = 'Object storage configuration';
 $string['check:configuration:ok'] = 'Configuration exists';
@@ -291,4 +292,5 @@ $string['checkstore_check_rangerequest'] = 'Object storage range requests';
 $string['check:storecheck:error'] = 'Error while trying to run check: ';
 $string['check:storecheck:notconfiguredskip'] = 'Object storage not configured - skipping';
 $string['check:storecheck:nothingexecuted'] = 'No results were returned from the tests';
+$string['check:storecheck:unsupportedrangerequest'] = 'File storage does not support presigned urls, so cannot test range requests.';
 

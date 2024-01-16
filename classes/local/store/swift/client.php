@@ -216,9 +216,14 @@ class client extends object_client_base {
             }
         }
 
-        return new result(result::OK, get_string('check:success', 'tool_objectfs'));
+        return new result(result::OK, get_string('check:passed', 'tool_objectfs'));
     }
 
+    /**
+     * Tests permission and returns the result
+     * @param bool $testdelete If deletion should be tested
+     * @return result
+     */
     public function test_permissions($testdelete): result {
         $permissions = new \stdClass();
         $permissions->success = true;

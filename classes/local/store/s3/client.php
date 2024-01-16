@@ -111,7 +111,7 @@ class client extends object_client_base {
         ];
 
         foreach ($configcheck as $check => $result) {
-            $details .= $check . ":" . $lookup[$result] . "\n";
+            $details .= $check . ": " . $lookup[$result] . "\n";
         }
 
         $valid = $this->is_configuration_valid($this->config);
@@ -128,11 +128,14 @@ class client extends object_client_base {
      * @return array key => value where the value is true if ok, false if bad, or null if n/a
      */
     protected function check_configuration($config) {
-        return [
+        $configcheck = [
             's3_bucket' => !empty($config->s3_bucket),
             's3_region' => !empty($config->s3_region),
-            's3_usesdkcreds' => empty($config->s3_usesdkcreds) ? null : (!empty($config->s3_key) && !empty($config->s3_secret)),
+            's3_key' => !empty($config->s3_key),
+            's3_secret' => !empty($config->s3_secret),
         ];
+
+        return $configcheck;
     }
 
     /**
@@ -279,9 +282,6 @@ class client extends object_client_base {
      * @throws \coding_exception
      */
     public function test_connection(): result {
-        $status = result::OK;
-        $details = '';
-
         try {
             if (!$this->is_functional()) {
                 return new result(result::NA, get_string('settings:notconfigured', 'tool_objectfs'));
@@ -289,19 +289,14 @@ class client extends object_client_base {
                 $this->client->headBucket(array('Bucket' => $this->bucket));
             }
         } catch (\Aws\S3\Exception\S3Exception $e) {
-            $status = result::ERROR;
-            $details = $this->get_exception_details($e);
+            return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $this->get_exception_details($e));
         } catch (\GuzzleHttp\Exception\InvalidArgumentException $e) {
-            $status = result::ERROR;
-            $details = $this->get_exception_details($e);
+            return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $this->get_exception_details($e));
         } catch (\Aws\Exception\CredentialsException $e) {
-            $status = result::ERROR;
-            $details = $this->get_exception_details($e);
+            return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $this->get_exception_details($e));
         }
 
-        $summarystr = $status == result::OK ? 'check:passed' : 'check:failed';
-        $summary = get_string($summarystr, 'tool_objectfs');
-        return new result($status, $summary, $details);
+        return new result(result::OK, get_string('check:passed', 'tool_objectfs'));
     }
 
     /**
@@ -328,9 +323,8 @@ class client extends object_client_base {
                 'Body' => 'test content',
             ]);
         } catch (\Aws\S3\Exception\S3Exception $e) {
-            $exdetails = $this->get_exception_details($e);
-            $details .= get_string('settings:writefailure', 'tool_objectfs') . $exdetails;
-            $status = result::ERROR;
+            $details = $this->get_exception_details($e);
+            return new result(result::ERROR, get_string('settings:writefailure', 'tool_objectfs'), $details);
         }
 
         // Try to get an object.
@@ -343,9 +337,8 @@ class client extends object_client_base {
             $errorcode = $e->getAwsErrorCode();
             // Write could have failed.
             if ($errorcode !== 'NoSuchKey') {
-                $exdetails = $this->get_exception_details($e);
-                $details .= get_string('settings:permissionreadfailure', 'tool_objectfs') . $exdetails;
-                $status = result::ERROR;
+                $details = $this->get_exception_details($e);
+                return new result(result::ERROR, get_string('settings:permissionreadfailure', 'tool_objectfs'), $details);
             }
         }
 
@@ -362,15 +355,12 @@ class client extends object_client_base {
                 // Something else went wrong.
                 if ($errorcode !== 'AccessDenied') {
                     $details = $this->get_exception_details($e);
-                    $details .= get_string('settings:deleteerror', 'tool_objectfs') . $details;
-                    $status = result::ERROR;
+                    return new result(result::ERROR, get_string('settings:deleteerror', 'tool_objectfs'), $details);
                 }
             }
         }
 
-        $summarystr = $status == result::OK ? 'settings:permissioncheckpassed' : 'settings:permissioncheckfailed';
-        $summary = get_string($summarystr, 'tool_objectfs');
-        return new result($status, $summary, $details);
+        return new result(result::OK , get_string('settings:permissioncheckpassed', 'tool_objectfs'));
     }
 
     protected function get_exception_details($exception) {
