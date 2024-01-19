@@ -70,6 +70,9 @@ define('TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH', 1);
 define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
 
 // Legacy cron function.
+/**
+ * @return bool
+ */
 function tool_objectfs_cron() {
     mtrace('RUNNING legacy cron objectfs');
     global $CFG;
