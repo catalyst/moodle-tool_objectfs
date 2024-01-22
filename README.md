@@ -102,11 +102,8 @@ $CFG->alternative_file_system_class = '\tool_objectfs\digitalocean_file_system';
 $CFG->alternative_file_system_class = '\tool_objectfs\swift_file_system';
 ```
 
-## Currently supported object stores
-
-### Roadmap
-
-There is support for more object stores planed.
+## Compatible object stores
+Note: Not all object stores listed below are tested/in-use directly by Catalyst and some rely on community contributions. If you require commercial support/help please contact us privaately for details on our rates.
 
 ### Amazon S3
 
