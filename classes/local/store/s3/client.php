@@ -670,7 +670,13 @@ class client extends object_client_base {
 
             if (!empty($originalfilename)) {
                 $result['Content-Disposition'] = $contentdisposition;
-                $result['filename'] = 'filename="' . utf8_encode($originalfilename) . '"';
+                // The filename parameter must be in ISO-8859-1, however it works in browsers if
+                // you treat the original UTF-8 string as ISO-8859-1 characters. To achieve that
+                // here, we encode the UTF-8 as if it were ISO-8859-1. This behaviour is hideous
+                // so it would be nice to use the optional filename* field (RFC 5987) but S3 still
+                // complains if we do that.
+                $jankyfilename = \core_text::convert($originalfilename, 'ISO-8859-1');
+                $result['filename'] = 'filename="' . $jankyfilename . '"';
                 $result['Content-Type'] = $originalcontenttype;
             }
         }
