@@ -59,11 +59,12 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 
 ## Branches
 
-| Moodle version   | Totara version           | Branch                                                                                       | PHP  |
-|------------------|--------------------------|----------------------------------------------------------------------------------------------|------|
-| Moodle 3.10 +    |                          | [MOODLE_310_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_310_STABLE) | 7.2+ |
-| Moodle 3.3 - 3.9 | Totara 12                | [MOODLE_33_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_33_STABLE)   | 7.1+ |
-| Moodle 2.7 - 3.2 | Totara 2.7 - 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE)           | 5.5+ |
+| Moodle version    | Totara version           | Branch                                                                                       | PHP  | MySQL   | PostgreSQL  |
+|-------------------|--------------------------|----------------------------------------------------------------------------------------------|------|---------|-------------|
+| Moodle 4.2+       |                          | [MOODLE_402_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_402_STABLE) | 8.0+ | 8.0+    | 13+         |
+| Moodle 3.10 - 4.1 |                          | [MOODLE_310_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_310_STABLE) | 7.2+ | 5.7+    | 12+         |
+| Moodle 3.3 - 3.9  | Totara 12                | [MOODLE_33_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_33_STABLE)   | 7.1+ | 5.6+    | 9.5+        |
+| Moodle 2.7 - 3.2  | Totara 2.7 - 2.9, 9 - 11 | [27-32-STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/27-32-STABLE)           | 5.5+ | 5.5.31+ | 9.1+        |
 
 
 ## Installation
