@@ -74,7 +74,7 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 2. Setup your remote object storage. See [Remote object storage setup](#amazon-s3)
 3. Clone this repository into admin/tool/objectfs
 4. Install one of the required SDK libraries for the storage file system that you will be using
-    1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws for S3 or DigitalOcean Spaces, or
+    1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws for S3 or DigitalOcean Spaces or Google Cloud, or
     2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure_storage for Azure Blob Storage, or
     3. Clone [moodle-local_openstack](https://github.com/matt-catalyst/moodle-local_openstack.git) into local/openstack for openstack(swift) storage
 5. Install the plugins through the moodle GUI.
