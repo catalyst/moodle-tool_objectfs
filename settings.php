@@ -158,27 +158,6 @@ if ($ADMIN->fulltree) {
             new lang_string('settings:presignedurl:header', 'tool_objectfs'), $warningtext));
 
         if ($classexists) {
-            $connstatus = false;
-            if ($objectfspage) {
-                $testconn = $client->test_connection();
-                $connstatus = $testconn->success;
-            }
-
-            $warningtext = '';
-            $methodexists = method_exists('file_system', 'xsendfile_file');
-            if (!$methodexists) {
-                $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:xsendfilefile', 'tool_objectfs'));
-            } else if ($connstatus) {
-                // Range request tests can only work if there is a valid connection.
-                $range = $client->test_range_request(new $config->filesystem());
-                if ($range->result) {
-                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeok', 'tool_objectfs'),
-                        'notifysuccess');
-                } else {
-                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeerror', 'tool_objectfs'));
-                    $warningtext .= $OUTPUT->notification($range->error);
-                }
-            }
             $settings->add(new admin_setting_configcheckbox('tool_objectfs/proxyrangerequests',
                 new lang_string('settings:presignedurl:proxyrangerequests', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:proxyrangerequests_help', 'tool_objectfs') . $warningtext, '1'));

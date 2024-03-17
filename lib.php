@@ -117,11 +117,15 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
  * @return array
  */
 function tool_objectfs_status_checks() {
+    $checks = [
+        new tool_objectfs\check\configuration(),
+        new tool_objectfs\check\store(\tool_objectfs\check\store::TYPE_PERMISSIONS),
+        new tool_objectfs\check\store(\tool_objectfs\check\store::TYPE_CONNECTION),
+    ];
+
     if (get_config('tool_objectfs', 'proxyrangerequests')) {
-        return [
-            new tool_objectfs\check\proxy_range_request()
-        ];
+        new tool_objectfs\check\store(\tool_objectfs\check\store::TYPE_RANGEREQUEST);
     }
 
-    return [];
+    return $checks;
 }

@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\store\azure;
 
+use core\check\result;
 use SimpleXMLElement;
 use stdClass;
 use tool_objectfs\local\store\azure\stream_wrapper;
@@ -202,25 +203,27 @@ class client extends object_client_base {
         return "$l1/$l2/$contenthash";
     }
 
-    public function test_connection() {
-        $connection = new \stdClass();
-        $connection->success = true;
-        $connection->details = '';
-
+    /**
+     * Tests the connection
+     * @return result
+     */
+    public function test_connection(): result {
         try {
             $this->client->createBlockBlob($this->container, 'connection_check_file', 'connection_check_file');
         } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
-            $connection->success = false;
-            $connection->details = $this->get_exception_details($e);
+            return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $this->get_exception_details($e));
         } catch (\GuzzleHttp\Exception\ConnectException $e) {
-            $connection->success = false;
-            $connection->details = $e->getMessage();
+            return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $e->getMessage());
         }
 
-        return $connection;
+        return new result(result::OK, get_string('check:passed', 'tool_objectfs'));
     }
 
-    public function test_permissions($testdelete) {
+    /**
+     * Tests permission and returns result
+     * @return result
+     */
+    public function test_permissions($testdelete): result {
         $permissions = new \stdClass();
         $permissions->success = true;
         $permissions->messages = array();
@@ -261,11 +264,12 @@ class client extends object_client_base {
             }
         }
 
-        if ($permissions->success) {
-            $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
-        }
+        $status = $permissions->success ? result::OK : result::ERROR;
+        $summarystr = result::OK ? 'check:passed' : 'check:failed';
+        $summary = get_string($summarystr, 'tool_objectfs');
+        $details = implode("\n", $permissions->messages);
 
-        return $permissions;
+        return new result($status, $summary, $details);
     }
 
     protected function get_exception_details(\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $exception) {

@@ -24,6 +24,7 @@
 
 namespace tool_objectfs\local\store\swift;
 
+use core\check\result;
 use tool_objectfs\local\store\swift\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\manager;
@@ -187,19 +188,15 @@ class client extends object_client_base {
         return "$l1/$l2/$contenthash";
     }
 
-
-    public function test_connection() {
-
-        $connection = new \stdClass();
-        $connection->success = true;
-        $connection->details = '';
-
+    /**
+     * Tests connection and returns result.
+     * @return result
+     */
+    public function test_connection(): result {
         try {
             $container = $this->get_container();
         } catch (\Exception $e) {
-            $connection->success = false;
-            $connection->details = $e->getMessage();
-            return $connection;
+            return new result(result::ERROR, $e->getMessage());
         }
 
         try {
@@ -209,22 +206,25 @@ class client extends object_client_base {
                 try {
                     $container->createObject(['name' => 'connection_check_file', 'content' => 'connection_check_file']);
                 } catch (\OpenStack\Common\Error\BadResponseError $e) {
-                    $connection->success = false;
-                    $connection->details = $this->get_exception_details($e);
+                    return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $this->get_exception_details($e));
                 } catch (\Exception $e) {
-                    $connection->success = false;
+                    return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $e->getMessage());
                 }
             } else {
-                $details = $this->get_exception_details($e);
-                $connection->messages[get_string('settings:connectionreadfailure', 'tool_objectfs') . $details] = 'notifyproblem';
-                $connection->success = false;
+                $details = get_string('settings:connectionreadfailure', 'tool_objectfs') . $this->get_exception_details($e);
+                return new result(result::ERROR, get_string('check:failed', 'tool_objectfs'), $details);
             }
         }
 
-        return $connection;
+        return new result(result::OK, get_string('check:passed', 'tool_objectfs'));
     }
 
-    public function test_permissions($testdelete) {
+    /**
+     * Tests permission and returns the result
+     * @param bool $testdelete If deletion should be tested
+     * @return result
+     */
+    public function test_permissions($testdelete): result {
         $permissions = new \stdClass();
         $permissions->success = true;
         $permissions->messages = array();
@@ -267,7 +267,12 @@ class client extends object_client_base {
             $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
         }
 
-        return $permissions;
+        $status = $permissions->success ? result::OK : result::ERROR;
+        $summarystr = result::OK ? 'check:passed' : 'check:failed';
+        $summary = get_string($summarystr, 'tool_objectfs');
+        $details = implode("\n", $permissions->messages);
+
+        return new result($status, $summary, $details);
     }
 
     protected function get_exception_details(\OpenStack\Common\Error\BadResponseError $e) {

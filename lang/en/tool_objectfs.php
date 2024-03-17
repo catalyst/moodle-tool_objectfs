@@ -257,6 +257,7 @@ $string['settings:permissionreadfailure'] = 'Could not read permissions check fi
 $string['settings:deletesuccess'] = 'Could delete file from object storage - It is not recommended for the user to have delete permissions. ';
 $string['settings:deleteerror'] = 'Could not delete permissions check file from object storage. ';
 $string['settings:permissioncheckpassed'] = 'Permissions check passed.';
+$string['settings:permissioncheckfailed'] = 'Permissions check failed.';
 $string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not set, the file system will not be able to read from object storage. Background tasks can still function.';
 
 $string['settings:testingheader'] = 'Test Settings';
@@ -269,3 +270,27 @@ $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up ht
 
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
+
+$string['settings:config:missing'] = 'Missing';
+$string['settings:config:na'] = 'N/A';
+$string['settings:config:exists'] = 'Exists';
+
+$string['check:notenabled'] = 'Object storage not enabled';
+$string['check:settings'] = 'Objectfs settings';
+$string['check:passed'] = 'Check passed';
+$string['check:failed'] = 'Check failed';
+$string['check:notimplemented'] = 'Check not implemented by storage client';
+
+$string['checkconfiguration'] = 'Object storage configuration';
+$string['check:configuration:ok'] = 'Configuration exists';
+$string['check:configuration:error'] = 'Configuration error';
+$string['check:configuration:empty'] = 'Client created from config was empty';
+
+$string['checkstore_check_connection'] = 'Object storage connection';
+$string['checkstore_check_permissions'] = 'Object storage permissions';
+$string['checkstore_check_rangerequest'] = 'Object storage range requests';
+$string['check:storecheck:error'] = 'Error while trying to run check: ';
+$string['check:storecheck:notconfiguredskip'] = 'Object storage not configured - skipping';
+$string['check:storecheck:nothingexecuted'] = 'No results were returned from the tests';
+$string['check:storecheck:unsupportedrangerequest'] = 'File storage does not support presigned urls, so cannot test range requests.';
+
