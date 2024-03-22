@@ -69,8 +69,8 @@ define('TOOL_OBJECTFS_DELETE_EXTERNAL_NO', 0);
 define('TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH', 1);
 define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
 
-// Legacy cron function.
 /**
+ * Legacy cron function.
  * @return bool
  */
 function tool_objectfs_cron() {
@@ -90,8 +90,8 @@ function tool_objectfs_cron() {
 
 /**
  * Sends a plugin file to the browser.
- * @param $course
- * @param $cm
+ * @param mixed $course
+ * @param mixed $cm
  * @param \context $context
  * @param string $filearea
  * @param array $args

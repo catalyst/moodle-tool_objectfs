@@ -17,6 +17,8 @@
 namespace tool_objectfs\local\store;
 
 /**
+ * A signed URL for direct downloads
+ * 
  * A signed URL which can be used by a user to directly download a file from object store, rather
  * than from the Moodle server.
  *
@@ -36,6 +38,7 @@ class signed_url {
     public $expiresat;
 
     /**
+     * construct
      * @param \moodle_url $url URL to redirect to
      * @param int $expiresat Expiry timestamp (Unix epoch) after which this URL will stop working
      */

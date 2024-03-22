@@ -31,12 +31,14 @@ interface object_manipulator {
 
 
     /**
+     * execute
      * @param array $objects
      * @return mixed
      */
     public function execute(array $objects);
 
     /**
+     * manipulate_object
      * @param stdClass $objectrecord
      * @return int
      */

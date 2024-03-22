@@ -230,10 +230,18 @@ class stream_wrapper {
         return $item->name;
     }
 
+    /**
+     * stream_close
+     * @return bool
+     */
     public function stream_close() {
         return $this->push_object();
     }
 
+    /**
+     * stream_eof
+     * @return bool
+     */
     public function stream_eof() {
         return $this->objstream->eof();
     }
@@ -427,10 +435,10 @@ class stream_wrapper {
     /**
      * Rename object
      *
-     * @param string $path
+     * @param string $currentpath
+     * @param string $destinationpath
      * @return boolean
      */
-
     public function rename($currentpath, $destinationpath) {
         $currenturl = $this->parse_url($currentpath);
         $destinationurl = $this->parse_url($destinationpath);

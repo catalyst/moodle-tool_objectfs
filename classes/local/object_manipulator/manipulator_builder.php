@@ -36,6 +36,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../../lib.php');
 
+/**
+ * manipulator_builder
+ */
 class manipulator_builder {
 
     /** @var array $manipulators */
@@ -64,6 +67,7 @@ class manipulator_builder {
     private $candidates = [];
 
     /**
+     * execute
      * @param string $manipulator
      * @throws coding_exception
      * @throws moodle_exception
@@ -83,6 +87,7 @@ class manipulator_builder {
     }
 
     /**
+     * execute_all
      * @throws coding_exception
      * @throws moodle_exception
      */
@@ -95,6 +100,7 @@ class manipulator_builder {
     }
 
     /**
+     * build
      * @param string $manipulator
      * @throws moodle_exception
      */

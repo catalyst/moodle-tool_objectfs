@@ -24,9 +24,17 @@ use tool_objectfs\tests\test_file_system;
  * Test basic operations of object file system.
  *
  * @covers \tool_objectfs\local\store\object_file_system
+ * @package tool_objectfs
  */
 class object_file_system_test extends tests\testcase {
 
+    /**
+     * set_externalclient_config
+     * @param mixed $key
+     * @param mixed $value
+     * 
+     * @return void
+     */
     public function set_externalclient_config($key, $value) {
         // Get a reflection of externalclient object as a property.
         $reflection = new \ReflectionClass($this->filesystem);
@@ -223,6 +231,7 @@ class object_file_system_test extends tests\testcase {
     }
 
     /**
+     * delete_empty_folders_provider
      * @return array
      */
     public function delete_empty_folders_provider() {
@@ -268,7 +277,7 @@ class object_file_system_test extends tests\testcase {
     }
 
     /**
-     * @dataProvider delete_empty_folders_provider
+     * test_delete_empty_folders_provider
      * @param array $dirs Dirs to be created.
      * @param array $files Files to be created.
      * @param array $expectedparentreadable Indicates whether a dir will remain after calling 'delete_empty_folders'.
@@ -364,6 +373,10 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
+    /**
+     * error_surpressor
+     * @return void
+     */
     public function error_surpressor() {
         // We do nothing. We cant surpess warnings
         // normally because phpunit will still fail.
@@ -636,6 +649,10 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue($this->filesystem->presigned_url_configured());
     }
 
+    /**
+     * presigned_url_should_redirect_provider
+     * @return array
+     */
     public function presigned_url_should_redirect_provider() {
         $provider = array();
 
@@ -675,11 +692,11 @@ class object_file_system_test extends tests\testcase {
     }
 
     /**
-     * @dataProvider presigned_url_should_redirect_provider
+     * test_presigned_url_should_redirect_provider
      *
-     * @param $enablepresignedurls mixed enable pre-signed URLs.
-     * @param $presignedminfilesize mixed minimum file size to be redirected to pre-signed URL.
-     * @param $result boolean expected result.
+     * @param mixed $enablepresignedurls enable pre-signed URLs.
+     * @param mixed $presignedminfilesize minimum file size to be redirected to pre-signed URL.
+     * @param bool $result expected result.
      * @throws \dml_exception
      */
     public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls,

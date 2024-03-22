@@ -27,6 +27,9 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 use dml_exception;
 use stdClass;
 
+/**
+ * manipulator_candidates_base
+ */
 abstract class manipulator_candidates_base implements manipulator_candidates {
 
     /** @var stdClass $config */
@@ -41,7 +44,7 @@ abstract class manipulator_candidates_base implements manipulator_candidates {
     }
 
     /**
-     * @inheritDoc
+     * get_query_name
      * @return string
      */
     public function get_query_name() {
@@ -49,6 +52,7 @@ abstract class manipulator_candidates_base implements manipulator_candidates {
     }
 
     /**
+     * get
      * @return array
      * @throws dml_exception
      */

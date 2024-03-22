@@ -50,6 +50,7 @@ interface manipulator_candidates {
     public function get_candidates_sql_params();
 
     /**
+     * get
      * @return array
      * @throws dml_exception
      */

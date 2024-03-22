@@ -26,21 +26,117 @@
 namespace tool_objectfs\local\store;
 
 interface object_client {
+
+    /**
+     * construct
+     * @param \stdClass $config
+     */
     public function __construct($config);
+
+    /**
+     * register_stream_wrapper
+     * @return mixed
+     */
     public function register_stream_wrapper();
+
+    /**
+     * get_fullpath_from_hash
+     * @param string $contenthash
+     * 
+     * @return string
+     */
     public function get_fullpath_from_hash($contenthash);
+
+    /**
+     * delete_file
+     * @param string $fullpath
+     * 
+     * @return mixed
+     */
     public function delete_file($fullpath);
+
+    /**
+     * rename_file
+     * @param string $currentpath
+     * @param string $destinationpath
+     * 
+     * @return mixed
+     */
     public function rename_file($currentpath, $destinationpath);
+
+    /**
+     * get_seekable_stream_context
+     * @return mixed
+     */
     public function get_seekable_stream_context();
+
+    /**
+     * get_availability
+     * @return mixed
+     */
     public function get_availability();
+
+    /**
+     * get_maximum_upload_size
+     * @return mixed
+     */
     public function get_maximum_upload_size();
+    
+    /**
+     * verify_object
+     * @param string $contenthash
+     * @param string $localpath
+     * 
+     * @return mixed
+     */
     public function verify_object($contenthash, $localpath);
+
+    /**
+     * generate_presigned_url
+     * @param string $contenthash
+     * @param array $headers
+     * 
+     * @return mixed
+     */
     public function generate_presigned_url($contenthash, $headers = array());
+
+    /**
+     * support_presigned_urls
+     * @return mixed
+     */
     public function support_presigned_urls();
+
+    /**
+     * test_connection
+     * @return mixed
+     */
     public function test_connection();
+
+    /**
+     * test_permissions
+     * @param mixed $testdelete
+     * 
+     * @return mixed
+     */
     public function test_permissions($testdelete);
+
+    /**
+     * proxy_range_request
+     * @param \stored_file $file
+     * @param mixed $ranges
+     * 
+     * @return mixed
+     */
     public function proxy_range_request(\stored_file $file, $ranges);
+
+    /**
+     * test_range_request
+     * @param mixed $filesystem
+     * 
+     * @return mixed
+     */
     public function test_range_request($filesystem);
+
 }
 
 

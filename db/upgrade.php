@@ -23,6 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * xmldb_tool_objectfs_upgrade
+ * @param int $oldversion
+ * 
+ * @return bool
+ */
 function xmldb_tool_objectfs_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();

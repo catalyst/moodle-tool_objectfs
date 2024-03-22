@@ -27,6 +27,9 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\recoverer;
 
+/**
+ * [Description recover_error_objects]
+ */
 class recover_error_objects extends task {
 
     /** @var string $manipulator */

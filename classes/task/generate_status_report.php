@@ -31,6 +31,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../lib.php');
 
+/**
+ * [Description generate_status_report]
+ */
 class generate_status_report extends task {
 
     /** @var string $stringname */
@@ -38,6 +41,7 @@ class generate_status_report extends task {
 
     /**
      * Execute task
+     * @return void
      */
     public function execute() {
         objectfs_report::cleanup_reports();
