@@ -214,6 +214,7 @@ abstract class object_file_system extends \file_system_filedir {
         $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_object');
         $this->logger->start_timing();
         $lock = $lockfactory->get_lock($resource, $timeout);
+        $lock->release();
         $this->logger->end_timing();
         $this->logger->log_lock_timing($lock);
 
