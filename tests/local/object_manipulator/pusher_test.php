@@ -23,6 +23,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * Tests for object pusher.
  *
  * @covers \tool_objectfs\local\object_manipulator\pusher
+ * @package tool_objectfs
  */
 class pusher_test extends \tool_objectfs\tests\testcase {
 
@@ -44,6 +45,13 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         ob_end_clean();
     }
 
+    /**
+     * set_pusher_config
+     * @param mixed $key
+     * @param mixed $value
+     * 
+     * @return void
+     */
     protected function set_pusher_config($key, $value) {
         $config = manager::get_objectfs_config();
         $config->$key = $value;

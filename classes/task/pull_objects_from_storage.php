@@ -27,6 +27,9 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\puller;
 
+/**
+ * [Description pull_objects_from_storage]
+ */
 class pull_objects_from_storage extends task {
 
     /** @var string $manipulator */

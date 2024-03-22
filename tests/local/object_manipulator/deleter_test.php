@@ -22,6 +22,7 @@ use tool_objectfs\local\manager;
  * Tests for object deleter.
  *
  * @covers \tool_objectfs\local\object_manipulator\deleter
+ * @package tool_objectfs
  */
 class deleter_test extends \tool_objectfs\tests\testcase {
 
@@ -44,6 +45,13 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         ob_end_clean();
     }
 
+    /**
+     * set_deleter_config
+     * @param mixed $key
+     * @param mixed $value
+     * 
+     * @return void
+     */
     protected function set_deleter_config($key, $value) {
         $config = manager::get_objectfs_config();
         $config->$key = $value;

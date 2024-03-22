@@ -27,6 +27,9 @@ namespace tool_objectfs\task;
 
 use tool_objectfs\local\object_manipulator\checker;
 
+/**
+ * [Description check_objects_location]
+ */
 class check_objects_location extends task {
 
     /** @var string $manipulator */

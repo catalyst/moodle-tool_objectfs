@@ -30,6 +30,9 @@ use tool_objectfs\local\manager;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * [Description delete_local_empty_directories]
+ */
 class delete_local_empty_directories  extends task {
 
     /** @var string $stringname  */

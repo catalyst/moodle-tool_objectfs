@@ -29,6 +29,9 @@ use stdClass;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
+/**
+ * deleter
+ */
 class deleter extends manipulator {
 
     /**
@@ -61,6 +64,7 @@ class deleter extends manipulator {
     }
 
     /**
+     * manipulate_object
      * @param stdClass $objectrecord
      * @return int
      */
@@ -70,6 +74,7 @@ class deleter extends manipulator {
     }
 
     /**
+     * manipulator_can_execute
      * @return bool
      */
     protected function manipulator_can_execute() {

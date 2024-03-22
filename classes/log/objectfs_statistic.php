@@ -29,35 +29,78 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+/**
+ * [Description objectfs_statistic]
+ */
 class objectfs_statistic {
 
+    /**
+     * @var string
+     */
     private $key;
+
+    /**
+     * @var int
+     */
     private $objectcount;
+
+    /**
+     * @var int
+     */
     private $objectsum;
 
+    /**
+     * construct
+     * @param string $key
+     */
     public function __construct($key) {
         $this->key = $key;
         $this->objectcount = 0;
         $this->objectsum = 0;
     }
 
+    /**
+     * get_objectcount
+     * @return int
+     */
     public function get_objectcount() {
         return $this->objectcount;
     }
 
+    /**
+     * get_objectsum
+     * @return int
+     */
     public function get_objectsum() {
         return $this->objectsum;
     }
 
+    /**
+     * get_key
+     * @return string
+     */
     public function get_key() {
         return $this->key;
     }
 
+    /**
+     * add_statistic
+     * @param objectfs_statistic $statistic
+     * 
+     * @return void
+     */
     public function add_statistic(objectfs_statistic $statistic) {
         $this->objectcount += $statistic->get_objectcount();
         $this->objectsum += $statistic->get_objectsum();
     }
 
+    /**
+     * add_object_data
+     * @param int $objectcount
+     * @param int $objectsum
+     * 
+     * @return void
+     */
     public function add_object_data($objectcount, $objectsum) {
         $this->objectcount += $objectcount;
         $this->objectsum += $objectsum;

@@ -27,6 +27,9 @@ use tool_objectfs\local\manager;
 use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\store\object_file_system;
 
+/**
+ * [Description tool_objectfs_renderer]
+ */
 class tool_objectfs_renderer extends plugin_renderer_base {
 
     /**
@@ -50,6 +53,12 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         }
     }
 
+    /**
+     * presignedurl_tests_load_files
+     * @param mixed $fs
+     * 
+     * @return array
+     */
     public function presignedurl_tests_load_files($fs) {
         global $CFG;
         $filestorage = get_file_storage();
@@ -95,6 +104,13 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $testfiles;
     }
 
+    /**
+     * presignedurl_tests_content
+     * @param mixed $fs
+     * @param mixed $testfiles
+     * 
+     * @return string
+     */
     public function presignedurl_tests_content($fs, $testfiles) {
         global $CFG;
         $CFG->enablepresignedurls = true;

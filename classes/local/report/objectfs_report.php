@@ -25,19 +25,33 @@
 
 namespace tool_objectfs\local\report;
 
+/**
+ * objectfs_report
+ */
 class objectfs_report implements \renderable {
 
-    /** @var string $reporttype */
+    /**
+     * reporttype
+     * @var string
+     */
     protected $reporttype = '';
 
-    /** @var int $reportid */
+    /**
+     * reportid
+     * @var int
+     */
     protected $reportid = 0;
 
-    /** @var array $rows */
+    /**
+     * rows
+     * @var array
+     */
     protected $rows = [];
 
     /**
+     * construct
      * @param string $reporttype
+     * @param int $reportid
      */
     public function __construct($reporttype, $reportid) {
         $this->reporttype = $reporttype;
@@ -45,6 +59,7 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * add_row
      * @param string $datakey
      * @param int $objectcount
      * @param int $objectsum
@@ -58,6 +73,7 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * add_rows
      * @param array $rows
      */
     public function add_rows(array $rows) {
@@ -67,6 +83,7 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * get_rows
      * @return array
      */
     public function get_rows() {
@@ -74,6 +91,7 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * get_report_type
      * @return string
      */
     public function get_report_type() {
@@ -81,6 +99,7 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * get_report_id
      * @return int
      */
     public function get_report_id() {
@@ -105,6 +124,10 @@ class objectfs_report implements \renderable {
         }
     }
 
+    /**
+     * generate_status_report
+     * @return void
+     */
     public static function generate_status_report() {
         global $DB;
         $reportid = $DB->insert_record('tool_objectfs_reports', (object)['reportdate' => time()]);
@@ -135,6 +158,7 @@ class objectfs_report implements \renderable {
     }
 
     /**
+     * get_report_types
      * @return array
      */
     public static function get_report_types() {

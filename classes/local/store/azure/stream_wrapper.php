@@ -42,6 +42,9 @@ use MicrosoftAzure\Storage\Blob\Models\SetBlobPropertiesOptions;
 use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * stream_wrapper
+ */
 class stream_wrapper {
 
     /** @var resource|null Stream context (this is set by PHP) */
@@ -85,15 +88,34 @@ class stream_wrapper {
         stream_context_set_default($default);
     }
 
+    /**
+     * stream_cast
+     * @param mixed $cast_as
+     * 
+     * @return boolean
+     */
     public function stream_cast($cast_as) {
         return false;
     }
 
+    /**
+     * stream_close
+     * @return void
+     */
     public function stream_close() {
         $this->body = null;
         $this->hash = null;
     }
 
+    /**
+     * stream_open
+     * @param mixed $path
+     * @param mixed $mode
+     * @param mixed $options
+     * @param mixed $opened_path
+     * 
+     * @return bool
+     */
     public function stream_open($path, $mode, $options, &$opened_path) {
         $this->initProtocol($path);
         $this->params = $this->getContainerKey($path);
@@ -114,10 +136,18 @@ class stream_wrapper {
         });
     }
 
+    /**
+     * stream_eof
+     * @return bool
+     */
     public function stream_eof() {
         return $this->body->eof();
     }
 
+    /**
+     * stream_flush
+     * @return bool
+     */
     public function stream_flush() {
         if ($this->mode == 'r') {
             return false;
@@ -153,11 +183,24 @@ class stream_wrapper {
         });
     }
 
+    /**
+     * stream_read
+     * @param int $count
+     * 
+     * @return string
+     */
     public function stream_read($count) {
         // If the file isn't readable, we need to return no content. Azure can emit XML here otherwise.
         return $this->readable ? $this->body->read($count) : '';
     }
 
+    /**
+     * stream_seek
+     * @param int $offset
+     * @param int $whence
+     * 
+     * @return bool
+     */
     public function stream_seek($offset, $whence = SEEK_SET) {
         return !$this->body->isSeekable()
             ? false
@@ -167,15 +210,29 @@ class stream_wrapper {
             });
     }
 
+    /**
+     * stream_tell
+     * @return bool
+     */
     public function stream_tell() {
         return $this->boolCall(function() { return $this->body->tell(); });
     }
 
+    /**
+     * stream_write
+     * @param string $data
+     * 
+     * @return int
+     */
     public function stream_write($data) {
         hash_update($this->hash, $data);
         return $this->body->write($data);
     }
 
+    /**
+     * stream_stat
+     * @return array
+     */
     public function stream_stat() {
         $stat = $this->getStatTemplate();
         $stat[7] = $stat['size'] = $this->getSize();
@@ -185,9 +242,16 @@ class stream_wrapper {
     }
 
     /**
+     * url_stat
+     * 
      * Provides information for is_dir, is_file, filesize, etc. Works on
      * buckets, keys, and prefixes.
      * @link http://www.php.net/manual/en/streamwrapper.url-stat.php
+     * 
+     * @param string $path
+     * @param mixed $flags
+     * 
+     * @return mixed
      */
     public function url_stat($path, $flags) {
         $stat = $this->getStatTemplate();
@@ -219,13 +283,19 @@ class stream_wrapper {
     /**
      * Parse the protocol out of the given path.
      *
-     * @param $path
+     * @param string $path
      */
     private function initProtocol($path) {
         $parts = explode('://', $path, 2);
         $this->protocol = $parts[0] ?: 'blob';
     }
 
+    /**
+     * getContainerKey
+     * @param string $path
+     * 
+     * @return array
+     */
     private function getContainerKey($path) {
         // Remove the protocol
         $parts = explode('://', $path);
@@ -241,6 +311,14 @@ class stream_wrapper {
     /**
      * Validates the provided stream arguments for fopen and returns an array
      * of errors.
+     */
+    /**
+     * Validates the provided stream arguments for fopen and returns an array
+     * of errors.
+     * @param string $path
+     * @param string $mode
+     * 
+     * @return [type]
      */
     private function validate($path, $mode) {
         $errors = [];
@@ -352,6 +430,10 @@ class stream_wrapper {
         return $this->getContainerKey($path) + $params;
     }
 
+    /**
+     * openReadStream
+     * @return bool
+     */
     private function openReadStream() {
         $client = $this->getClient();
         $params = $this->getOptions(true);
@@ -373,11 +455,19 @@ class stream_wrapper {
         return true;
     }
 
+    /**
+     * openWriteStream
+     * @return bool
+     */
     private function openWriteStream() {
         $this->body = new Stream(fopen('php://temp', 'r+'));
         return true;
     }
 
+    /**
+     * openAppendStream
+     * @return mixed
+     */
     private function openAppendStream() {
         try {
             // Get the body of the object and seek to the end of the stream

@@ -29,16 +29,45 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+/**
+ * [Description null_logger]
+ */
 class null_logger extends objectfs_logger {
 
+    /**
+     * log_object_read
+     * @param mixed $readname
+     * @param mixed $objectpath
+     * @param int $objectsize
+     * 
+     * @return void
+     */
     public function log_object_read($readname, $objectpath, $objectsize = 0) {
         return;
     }
 
+    /**
+     * log_object_move
+     * @param mixed $movename
+     * @param mixed $initallocation
+     * @param mixed $finallocation
+     * @param mixed $objecthash
+     * @param int $objectsize
+     * 
+     * @return void
+     */
     public function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0) {
         return;
     }
 
+    /**
+     * log_object_query
+     * @param mixed $queryname
+     * @param mixed $objectcount
+     * @param int $objectsum
+     * 
+     * @return void
+     */
     public function log_object_query($queryname, $objectcount, $objectsum = 0) {
         return;
     }

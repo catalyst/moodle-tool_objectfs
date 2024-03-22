@@ -25,8 +25,17 @@
 
 namespace tool_objectfs\local\report;
 
+/**
+ * mime_type_report_builder
+ */
 class mime_type_report_builder extends objectfs_report_builder {
 
+    /**
+     * build_report
+     * @param int $reportid
+     * 
+     * @return objectfs_report
+     */
     public function build_report($reportid) {
         global $DB;
 

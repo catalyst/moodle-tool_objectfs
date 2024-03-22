@@ -31,13 +31,37 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+/**
+ * [Description aggregate_logger]
+ */
 class aggregate_logger extends objectfs_logger {
 
-    private $readstatistics; // 1d array of objectfs_statistics.
-    private $movestatistics; // 2d array of objecfs_statistics that is lazily setup.
+    /**
+     * 1d array of objectfs_statistics.
+     * @var array
+     */
+    private $readstatistics;
+
+    /**
+     * 2d array of objecfs_statistics that is lazily setup.
+     * @var array
+     */
+    private $movestatistics;
+
+    /**
+     * @var mixed
+     */
     private $movement;
+
+    /**
+     * @var array
+     */
     private $querystatistics;
 
+    /**
+     * construct
+     * @return void
+     */
     public function __construct() {
         parent::__construct();
         $this->movestatistics = array(
@@ -50,6 +74,14 @@ class aggregate_logger extends objectfs_logger {
         $this->querystatistics = array();
     }
 
+    /**
+     * log_object_read
+     * @param string $readname
+     * @param string $objectpath
+     * @param int $objectsize
+     * 
+     * @return void
+     */
     public function log_object_read($readname, $objectpath, $objectsize = 0) {
         if (array_key_exists($readname, $this->readstatistics)) {
             $readstat = $this->readstatistics[$readname];
@@ -61,6 +93,16 @@ class aggregate_logger extends objectfs_logger {
         $this->readstatistics[$readname] = $readstat;
     }
 
+    /**
+     * log_object_move
+     * @param mixed $movename
+     * @param mixed $initallocation
+     * @param mixed $finallocation
+     * @param mixed $objecthash
+     * @param int $objectsize
+     * 
+     * @return void
+     */
     public function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0) {
         if (!$this->movement) {
             $this->movement = $movename;
@@ -76,6 +118,10 @@ class aggregate_logger extends objectfs_logger {
         $this->movestatistics[$initallocation][$finallocation] = $movestat;
     }
 
+    /**
+     * output_move_statistics
+     * @return void
+     */
     public function output_move_statistics() {
         $totaltime = $this->get_timing();
         mtrace("$this->movement. Total time taken: $totaltime seconds. Location change summary:");
@@ -86,6 +132,14 @@ class aggregate_logger extends objectfs_logger {
         }
     }
 
+    /**
+     * output_move_statistic
+     * @param mixed $movestatistic
+     * @param string $initiallocation
+     * @param string $finallocation
+     * 
+     * @return void
+     */
     protected function output_move_statistic($movestatistic, $initiallocation, $finallocation) {
         $key = $movestatistic->get_key();
         $objectcount = $movestatistic->get_objectcount();
@@ -96,6 +150,12 @@ class aggregate_logger extends objectfs_logger {
         mtrace("$initiallocation -> $finallocation. Objects moved: $objectcount. Total size: $objectsum. ");
     }
 
+    /**
+     * location_to_string
+     * @param int $location
+     * 
+     * @return string
+     */
     public function location_to_string($location) {
         switch ($location) {
             case OBJECT_LOCATION_ERROR:
@@ -113,6 +173,14 @@ class aggregate_logger extends objectfs_logger {
         }
     }
 
+    /**
+     * log_object_query
+     * @param mixed $queryname
+     * @param int $objectcount
+     * @param int $objectsum
+     * 
+     * @return [type]
+     */
     public function log_object_query($queryname, $objectcount, $objectsum = 0) {
         if (array_key_exists($queryname, $this->querystatistics)) {
             $querystat = $this->querystatistics[$queryname];

@@ -23,6 +23,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * Tests for object recoverer.
  *
  * @covers \tool_objectfs\local\object_manipulator\recoverer
+ * @package tool_objectfs
  */
 class recoverer_test extends \tool_objectfs\tests\testcase {
 

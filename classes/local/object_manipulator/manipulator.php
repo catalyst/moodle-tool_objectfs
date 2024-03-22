@@ -35,6 +35,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+/**
+ * manipulator
+ */
 abstract class manipulator implements object_manipulator {
 
     /**
@@ -82,6 +85,7 @@ abstract class manipulator implements object_manipulator {
     }
 
     /**
+     * execute
      * @param array $objectrecords
      * @return mixed|void
      * @throws dml_exception

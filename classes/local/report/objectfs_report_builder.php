@@ -25,7 +25,16 @@
 
 namespace tool_objectfs\local\report;
 
+/**
+ * objectfs_report_builder
+ */
 abstract class objectfs_report_builder {
 
+    /**
+     * build_report
+     * @param int $reportid
+     * 
+     * @return objectfs_report
+     */
     abstract public function build_report($reportid);
 }
