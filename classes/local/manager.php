@@ -60,6 +60,7 @@ class manager {
         $config->batchsize = 10000;
         $config->useproxy = 0;
         $config->deleteexternal = 0;
+        $config->delaydeleteexternalobject = 0;
 
         $config->filesystem = '';
         $config->enablepresignedurls = 0;
@@ -183,6 +184,12 @@ class manager {
         // If location change is 'duplicated' we update timeduplicated.
         if ($newlocation === OBJECT_LOCATION_DUPLICATED) {
             $object->timeduplicated = time();
+        }
+
+        // If location change is 'orphaned' we update timeorphaned.
+        // Set time orphaned clock is ticking now for delay deletion comparison...
+        if ($newlocation === OBJECT_LOCATION_ORPHANED) {
+            $object->timeorphaned = time();
         }
 
         $object->location = $newlocation;

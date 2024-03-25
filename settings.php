@@ -97,6 +97,10 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:maxorphanedage', 'tool_objectfs'),
         new lang_string('settings:maxorphanedage_help', 'tool_objectfs'), 0, DAYSECS));
 
+    $settings->add(new admin_setting_configduration('tool_objectfs/delaydeleteexternalobject',
+        new lang_string('settings:delaydeleteexternalobject', 'tool_objectfs'),
+        new lang_string('settings:delaydeleteexternalobject_help', 'tool_objectfs'), 0, DAYSECS));
+
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/enablelogging',
         new lang_string('settings:enablelogging', 'tool_objectfs'), '', ''));
 

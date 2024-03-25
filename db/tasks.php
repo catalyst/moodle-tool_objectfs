@@ -108,4 +108,3 @@ $tasks = array(
         'month'     => '*'
     ),
 );
-
