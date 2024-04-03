@@ -86,7 +86,7 @@ class objectfs_statistic {
     /**
      * add_statistic
      * @param objectfs_statistic $statistic
-     * 
+     *
      * @return void
      */
     public function add_statistic(objectfs_statistic $statistic) {
@@ -98,7 +98,7 @@ class objectfs_statistic {
      * add_object_data
      * @param int $objectcount
      * @param int $objectsum
-     * 
+     *
      * @return void
      */
     public function add_object_data($objectcount, $objectsum) {

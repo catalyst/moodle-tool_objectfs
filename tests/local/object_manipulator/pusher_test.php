@@ -49,7 +49,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
      * set_pusher_config
      * @param mixed $key
      * @param mixed $value
-     * 
+     *
      * @return void
      */
     protected function set_pusher_config($key, $value) {

@@ -56,7 +56,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
     /**
      * presignedurl_tests_load_files
      * @param mixed $fs
-     * 
+     *
      * @return array
      */
     public function presignedurl_tests_load_files($fs) {
@@ -108,7 +108,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      * presignedurl_tests_content
      * @param mixed $fs
      * @param mixed $testfiles
-     * 
+     *
      * @return string
      */
     public function presignedurl_tests_content($fs, $testfiles) {

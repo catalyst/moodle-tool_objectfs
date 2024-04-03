@@ -16,7 +16,7 @@
 
 /**
  * Task that checks for old orphaned objects
- * 
+ *
  * And removes their metadata (record)
  * and external file (if delete external enabled) as it is no longer useful/relevant.
  *

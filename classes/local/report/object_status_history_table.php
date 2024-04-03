@@ -54,7 +54,7 @@ class object_status_history_table extends \table_sql {
 
     /**
      * Constructor for the file status history table.
-     * 
+     *
      * @param string $reporttype
      * @param int $reportid
      */

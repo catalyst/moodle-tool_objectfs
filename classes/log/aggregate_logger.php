@@ -79,7 +79,7 @@ class aggregate_logger extends objectfs_logger {
      * @param string $readname
      * @param string $objectpath
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     public function log_object_read($readname, $objectpath, $objectsize = 0) {
@@ -100,7 +100,7 @@ class aggregate_logger extends objectfs_logger {
      * @param mixed $finallocation
      * @param mixed $objecthash
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     public function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0) {
@@ -137,7 +137,7 @@ class aggregate_logger extends objectfs_logger {
      * @param mixed $movestatistic
      * @param string $initiallocation
      * @param string $finallocation
-     * 
+     *
      * @return void
      */
     protected function output_move_statistic($movestatistic, $initiallocation, $finallocation) {
@@ -153,7 +153,7 @@ class aggregate_logger extends objectfs_logger {
     /**
      * location_to_string
      * @param int $location
-     * 
+     *
      * @return string
      */
     public function location_to_string($location) {
@@ -178,7 +178,7 @@ class aggregate_logger extends objectfs_logger {
      * @param mixed $queryname
      * @param int $objectcount
      * @param int $objectsum
-     * 
+     *
      * @return [type]
      */
     public function log_object_query($queryname, $objectcount, $objectsum = 0) {

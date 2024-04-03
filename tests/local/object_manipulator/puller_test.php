@@ -47,7 +47,7 @@ class puller_test extends \tool_objectfs\tests\testcase {
      * set_puller_config
      * @param mixed $key
      * @param mixed $value
-     * 
+     *
      * @return void
      */
     protected function set_puller_config($key, $value) {

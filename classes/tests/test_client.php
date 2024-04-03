@@ -25,7 +25,7 @@ use tool_objectfs\local\store\object_client_base;
 class test_client extends object_client_base {
     /**
      * Maximum allowed file size that can be uploaded
-     * @var int 
+     * @var int
      */
     protected $maxupload;
 
@@ -66,7 +66,7 @@ class test_client extends object_client_base {
     /**
      * get_fullpath_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return string
      */
     public function get_fullpath_from_hash($contenthash) {
@@ -77,7 +77,7 @@ class test_client extends object_client_base {
     /**
      * delete_file
      * @param string $fullpath
-     * 
+     *
      * @return bool
      */
     public function delete_file($fullpath) {
@@ -88,7 +88,7 @@ class test_client extends object_client_base {
      * rename_file
      * @param string $currentpath
      * @param string $destinationpath
-     * 
+     *
      * @return bool
      */
     public function rename_file($currentpath, $destinationpath) {
@@ -106,7 +106,7 @@ class test_client extends object_client_base {
     /**
      * get_md5_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return string
      */
     private function get_md5_from_hash($contenthash) {
@@ -118,7 +118,7 @@ class test_client extends object_client_base {
      * verify_object
      * @param string $contenthash
      * @param string $localpath
-     * 
+     *
      * @return bool
      */
     public function verify_object($contenthash, $localpath) {
@@ -143,7 +143,7 @@ class test_client extends object_client_base {
     /**
      * test_permissions
      * @param mixed $testdelete
-     * 
+     *
      * @return \stdClass
      */
     public function test_permissions($testdelete) {

@@ -168,9 +168,7 @@ class stream_wrapper {
     private static $defaultcontext;
 
 
-    //
-    // Stream API functions
-    //
+    // Stream API functions.
 
     /**
      * Close directory
@@ -496,10 +494,7 @@ class stream_wrapper {
         return $this->generate_stat($object, $container, $object->contentLength);
     }
 
-
-    //
-    // Non-stream API functions
-    //
+    // Non-stream API functions.
 
     /**
      * Set context for functions that don't accept a context. e.g. stat()
@@ -641,7 +636,7 @@ class stream_wrapper {
         $this->isbinary = strpos($mode, 'b') !== false;
         $this->istext = strpos($mode, 't') !== false;
 
-        // rewrite mode to remove b or t:
+        // Rewrite mode to remove b or t:.
         $mode = preg_replace('/[bt]?/', '', $mode);
 
         switch ($mode) {

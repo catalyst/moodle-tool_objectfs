@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * pusher_candidates
  */

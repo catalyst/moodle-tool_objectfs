@@ -42,7 +42,7 @@ class file_system extends s3_file_system {
     /**
      * initialise_external_client
      * @param \stdClass $config
-     * 
+     *
      * @return client
      */
     protected function initialise_external_client($config) {

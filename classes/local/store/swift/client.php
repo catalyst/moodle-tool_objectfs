@@ -74,7 +74,12 @@ class client extends object_client_base {
         ];
 
         if (!isset($this->config->openstack_authtoken['expires_at'])
-            || (new \DateTimeImmutable($this->config->openstack_authtoken['expires_at'])) < ( (new \DateTimeImmutable('now'))->add(new \DateInterval('PT1H')))) {
+            || (
+                new \DateTimeImmutable($this->config->openstack_authtoken['expires_at']))
+                <
+                ( (new \DateTimeImmutable('now'))->add(new \DateInterval('PT1H'))
+            )
+        ) {
 
             $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_swift');
 
@@ -93,7 +98,13 @@ class client extends object_client_base {
         }
 
         // Use the token if it's valid, otherwise clients will need to use username/password auth.
-        if (isset($this->config->openstack_authtoken['expires_at']) && new \DateTimeImmutable($this->config->openstack_authtoken['expires_at']) > new \DateTimeImmutable('now')) {
+        if (
+            isset($this->config->openstack_authtoken['expires_at'])
+            &&
+            new \DateTimeImmutable($this->config->openstack_authtoken['expires_at'])
+            >
+            new \DateTimeImmutable('now')
+           ) {
             $endpoint['cachedToken'] = $this->config->openstack_authtoken;
         }
 
@@ -129,7 +140,7 @@ class client extends object_client_base {
                 return;
             }
 
-            stream_wrapper_register('swift', "tool_objectfs\local\store\swift\stream_wrapper") or die("cant create wrapper");
+            stream_wrapper_register('swift', "tool_objectfs\local\store\swift\stream_wrapper") || die("cant create wrapper");
             \tool_objectfs\local\store\swift\stream_wrapper::set_default_context($this->get_seekable_stream_context());
 
             $bootstraped = true;
@@ -143,7 +154,7 @@ class client extends object_client_base {
     /**
      * get_fullpath_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return string
      */
     public function get_fullpath_from_hash($contenthash) {
@@ -177,7 +188,7 @@ class client extends object_client_base {
     /**
      * get_md5_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return mixed
      */
     private function get_md5_from_hash($contenthash) {
@@ -200,7 +211,7 @@ class client extends object_client_base {
      * verify_object
      * @param string $contenthash
      * @param string $localpath
-     * 
+     *
      * @return bool
      */
     public function verify_object($contenthash, $localpath) {
@@ -217,7 +228,7 @@ class client extends object_client_base {
     /**
      * get_filepath_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return string
      */
     protected function get_filepath_from_hash($contenthash) {
@@ -271,7 +282,7 @@ class client extends object_client_base {
     /**
      * test_permissions
      * @param mixed $testdelete
-     * 
+     *
      * @return \stdClass
      */
     public function test_permissions($testdelete) {
@@ -323,7 +334,7 @@ class client extends object_client_base {
     /**
      * get_exception_details
      * @param \OpenStack\Common\Error\BadResponseError $e
-     * 
+     *
      * @return string
      */
     protected function get_exception_details(\OpenStack\Common\Error\BadResponseError $e) {

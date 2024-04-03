@@ -49,7 +49,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
      * set_deleter_config
      * @param mixed $key
      * @param mixed $value
-     * 
+     *
      * @return void
      */
     protected function set_deleter_config($key, $value) {

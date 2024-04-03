@@ -43,7 +43,7 @@ class test_digitalocean_integration_client extends client {
     /**
      * get_filepath_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return string
      */
     protected function get_filepath_from_hash($contenthash) {

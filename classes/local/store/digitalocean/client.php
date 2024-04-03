@@ -68,7 +68,7 @@ class client extends s3_client {
     /**
      * set_client
      * @param \stdClass $config
-     * 
+     *
      * @return void
      */
     public function set_client($config) {

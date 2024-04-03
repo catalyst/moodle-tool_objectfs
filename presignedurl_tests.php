@@ -58,7 +58,7 @@ if ($support) {
     $deletelinktext = get_string('settings:presignedurl:deletefiles', OBJECTFS_PLUGIN_NAME);
     echo $output->heading(html_writer::link($deleteurl, $deletelinktext) . $deletedsuccess, 6);
     $client = manager::get_client($config);
-    if ($client and $client->get_availability()) {
+    if ($client && $client->get_availability()) {
         $connection = $client->test_connection();
         if ($connection->success) {
             $testfiles = $output->presignedurl_tests_load_files($fs);

@@ -186,7 +186,7 @@ class client extends object_client_base {
     /**
      * get_md5_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return string|bool
      */
     private function get_md5_from_hash($contenthash) {
@@ -212,7 +212,7 @@ class client extends object_client_base {
      * verify_object
      * @param string $contenthash
      * @param string $localpath
-     * 
+     *
      * @return bool
      */
     public function verify_object($contenthash, $localpath) {
@@ -276,7 +276,7 @@ class client extends object_client_base {
     /**
      * get_filepath_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return string
      */
     protected function get_filepath_from_hash($contenthash) {
@@ -366,7 +366,10 @@ class client extends object_client_base {
 
         if ($testdelete) {
             try {
-                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+                $result = $this->client->deleteObject([
+                    'Bucket' => $this->bucket,
+                    'Key' => $this->bucketkeyprefix . 'permissions_check_file'
+                ]);
                 $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
                 $permissions->success = false;
             } catch (\Aws\S3\Exception\S3Exception $e) {
@@ -390,7 +393,7 @@ class client extends object_client_base {
     /**
      * get_exception_details
      * @param \Exception $exception
-     * 
+     *
      * @return string
      */
     protected function get_exception_details($exception) {
@@ -499,7 +502,11 @@ class client extends object_client_base {
 
         try {
             $externalpath = $this->get_filepath_from_hash($contenthash);
-            $uploader = new \Aws\S3\ObjectUploader($this->client, $this->bucket, $this->bucketkeyprefix . $externalpath, $filehandle);
+            $uploader = new \Aws\S3\ObjectUploader(
+                $this->client, $this->bucket,
+                $this->bucketkeyprefix . $externalpath,
+                $filehandle
+            );
             $uploader->upload();
             fclose($filehandle);
         } catch (\Aws\Exception\MultipartUploadException $e) {

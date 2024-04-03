@@ -33,7 +33,7 @@ class log_size_report_builder extends objectfs_report_builder {
     /**
      * build_report
      * @param int $reportid
-     * 
+     *
      * @return objectfs_report
      */
     public function build_report($reportid) {
@@ -61,7 +61,7 @@ class log_size_report_builder extends objectfs_report_builder {
     /**
      * compress_small_log_sizes
      * @param mixed $stats
-     * 
+     *
      * @return void
      */
     public function compress_small_log_sizes(&$stats) {

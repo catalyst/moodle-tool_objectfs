@@ -174,7 +174,7 @@ class client extends object_client_base {
     /**
      * get_md5_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return string
      */
     private function get_md5_from_hash($contenthash) {
@@ -202,7 +202,7 @@ class client extends object_client_base {
      * verify_objectverify_object
      * @param string $contenthash
      * @param string $localpath
-     * 
+     *
      * @return bool
      */
     public function verify_object($contenthash, $localpath) {
@@ -219,7 +219,7 @@ class client extends object_client_base {
     /**
      * get_filepath_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return string
      */
     protected function get_filepath_from_hash($contenthash) {
@@ -253,7 +253,7 @@ class client extends object_client_base {
     /**
      * test_permissions
      * @param mixed $testdelete
-     * 
+     *
      * @return stdClass
      */
     public function test_permissions($testdelete) {
@@ -307,7 +307,7 @@ class client extends object_client_base {
     /**
      * get_exception_details
      * @param \MicrosoftAzure\Storage\Common\Exceptions\ServiceException $exception
-     * 
+     *
      * @return string
      */
     protected function get_exception_details(\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $exception) {

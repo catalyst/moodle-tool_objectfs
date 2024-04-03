@@ -68,7 +68,7 @@ class files_table extends \table_sql {
     /**
      * col_id
      * @param \stdClass $row
-     * 
+     *
      * @return int
      */
     public function col_id(\stdClass $row) {
@@ -78,7 +78,7 @@ class files_table extends \table_sql {
     /**
      * col_contextid
      * @param \stdClass $row
-     * 
+     *
      * @return int
      */
     public function col_contextid(\stdClass $row) {
@@ -88,7 +88,7 @@ class files_table extends \table_sql {
     /**
      * col_contenthash
      * @param \stdClass $row
-     * 
+     *
      * @return string
      */
     public function col_contenthash(\stdClass $row) {
@@ -98,7 +98,7 @@ class files_table extends \table_sql {
     /**
      * col_localpath
      * @param \stdClass $row
-     * 
+     *
      * @return string
      */
     public function col_localpath(\stdClass $row) {
@@ -111,7 +111,7 @@ class files_table extends \table_sql {
     /**
      * col_component
      * @param \stdClass $row
-     * 
+     *
      * @return mixed
      */
     public function col_component(\stdClass $row) {
@@ -121,7 +121,7 @@ class files_table extends \table_sql {
     /**
      * col_filearea
      * @param \stdClass $row
-     * 
+     *
      * @return mixed
      */
     public function col_filearea(\stdClass $row) {
@@ -131,7 +131,7 @@ class files_table extends \table_sql {
     /**
      * col_filename
      * @param \stdClass $row
-     * 
+     *
      * @return mixed
      */
     public function col_filename(\stdClass $row) {
@@ -141,7 +141,7 @@ class files_table extends \table_sql {
     /**
      * col_filepath
      * @param \stdClass $row
-     * 
+     *
      * @return string
      */
     public function col_filepath(\stdClass $row) {
@@ -151,7 +151,7 @@ class files_table extends \table_sql {
     /**
      * col_mimetype
      * @param \stdClass $row
-     * 
+     *
      * @return string
      */
     public function col_mimetype(\stdClass $row) {
@@ -161,7 +161,7 @@ class files_table extends \table_sql {
     /**
      * col_filesize
      * @param \stdClass $row
-     * 
+     *
      * @return mixed
      */
     public function col_filesize(\stdClass $row) {
@@ -171,7 +171,7 @@ class files_table extends \table_sql {
     /**
      * col_timecreated
      * @param \stdClass $row
-     * 
+     *
      * @return int
      */
     public function col_timecreated(\stdClass $row) {
@@ -181,7 +181,7 @@ class files_table extends \table_sql {
     /**
      * col_link
      * @param \stdClass $row
-     * 
+     *
      * @return string
      */
     public function col_link(\stdClass $row) {

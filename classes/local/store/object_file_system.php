@@ -94,7 +94,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * set_logger
      * @param \tool_objectfs\log\objectfs_logger $logger
-     * 
+     *
      * @return void
      */
     public function set_logger(\tool_objectfs\log\objectfs_logger $logger) {
@@ -122,7 +122,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * initialise_external_client
      * @param mixed $config
-     * 
+     *
      * @return mixed
      */
     abstract protected function initialise_external_client($config);
@@ -167,7 +167,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * get_remote_path_from_storedfile
      * @param \stored_file $file
-     * 
+     *
      * @return string
      */
     public function get_remote_path_from_storedfile(\stored_file $file) {
@@ -177,7 +177,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * get_remote_path_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return string
      */
     protected function get_remote_path_from_hash($contenthash) {
@@ -201,7 +201,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * get_external_path_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return string
      */
     protected function get_external_path_from_hash($contenthash) {
@@ -211,7 +211,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * get_external_path_from_storedfile
      * @param \stored_file $file
-     * 
+     *
      * @return string
      */
     protected function get_external_path_from_storedfile(\stored_file $file) {
@@ -221,7 +221,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * is_file_readable_externally_by_storedfile
      * @param stored_file $file
-     * 
+     *
      * @return bool
      */
     public function is_file_readable_externally_by_storedfile(stored_file $file) {
@@ -242,7 +242,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * is_file_readable_externally_by_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return bool
      */
     public function is_file_readable_externally_by_hash($contenthash) {
@@ -261,7 +261,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * get_object_location_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return int
      */
     public function get_object_location_from_hash($contenthash) {
@@ -285,7 +285,7 @@ abstract class object_file_system extends \file_system_filedir {
      * Acquire the object lock any time you are moving an object between locations.
      * @param mixed $contenthash
      * @param int $timeout
-     * 
+     *
      * @return \core\lock\lock|boolean
      */
     public function acquire_object_lock($contenthash, $timeout = 0) {
@@ -303,7 +303,7 @@ abstract class object_file_system extends \file_system_filedir {
      * copy_object_from_external_to_local_by_hash
      * @param mixed $contenthash
      * @param int $objectsize
-     * 
+     *
      * @return int
      */
     public function copy_object_from_external_to_local_by_hash($contenthash, $objectsize = 0) {
@@ -343,7 +343,7 @@ abstract class object_file_system extends \file_system_filedir {
      * copy_object_from_local_to_external_by_hash
      * @param mixed $contenthash
      * @param int $objectsize
-     * 
+     *
      * @return int
      */
     public function copy_object_from_local_to_external_by_hash($contenthash, $objectsize = 0) {
@@ -371,7 +371,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * verify_external_object_from_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return mixed
      */
     public function verify_external_object_from_hash($contenthash) {
@@ -384,7 +384,7 @@ abstract class object_file_system extends \file_system_filedir {
      * delete_object_from_local_by_hash
      * @param mixed $contenthash
      * @param int $objectsize
-     * 
+     *
      * @return int
      */
     public function delete_object_from_local_by_hash($contenthash, $objectsize = 0) {
@@ -729,7 +729,7 @@ abstract class object_file_system extends \file_system_filedir {
      *
      * @param string $contenthash file to be moved
      * @param bool $force
-     * 
+     *
      * @return void
      */
     public function delete_external_file_from_hash($contenthash, $force = false) {

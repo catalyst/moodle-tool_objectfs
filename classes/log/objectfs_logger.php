@@ -79,7 +79,7 @@ abstract class objectfs_logger {
     /**
      * error_log
      * @param mixed $error
-     * 
+     *
      * @return void
      */
     public function error_log($error) {
@@ -91,7 +91,7 @@ abstract class objectfs_logger {
     /**
      * log_lock_timing
      * @param mixed $lock
-     * 
+     *
      * @return void
      */
     public function log_lock_timing($lock) {
@@ -103,11 +103,11 @@ abstract class objectfs_logger {
      * @param string $readname
      * @param string $objectpath
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     abstract public function log_object_read($readname, $objectpath, $objectsize = 0);
-    
+
     /**
      * log_object_move
      * @param mixed $movename
@@ -115,7 +115,7 @@ abstract class objectfs_logger {
      * @param string $finallocation
      * @param string $objecthash
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     abstract public function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0);
@@ -125,7 +125,7 @@ abstract class objectfs_logger {
      * @param string $queryname
      * @param int $objectcount
      * @param int $objectsum
-     * 
+     *
      * @return void
      */
     abstract public function log_object_query($queryname, $objectcount, $objectsum = 0);

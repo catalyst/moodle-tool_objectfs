@@ -26,7 +26,7 @@
 /**
  * xmldb_tool_objectfs_upgrade
  * @param int $oldversion
- * 
+ *
  * @return bool
  */
 function xmldb_tool_objectfs_upgrade($oldversion) {

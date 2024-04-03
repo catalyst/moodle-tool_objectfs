@@ -55,7 +55,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_local_file_from_path
      * @param string $pathname
-     * 
+     *
      * @return stored_file
      */
     protected function create_local_file_from_path($pathname) {
@@ -85,7 +85,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_local_file
      * @param string $content
-     * 
+     *
      * @return stored_file
      */
     protected function create_local_file($content = 'test content') {
@@ -115,7 +115,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_duplicated_file
      * @param string $content
-     * 
+     *
      * @return stored_file
      */
     protected function create_duplicated_file($content = 'test content') {
@@ -129,7 +129,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_remote_file
      * @param string $content
-     * 
+     *
      * @return stored_file
      */
     protected function create_remote_file($content = 'test content') {
@@ -155,7 +155,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * get_external_path_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return mixed
      */
     protected function get_external_path_from_hash($contenthash) {
@@ -167,7 +167,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * get_external_path_from_storedfile
      * @param mixed $file
-     * 
+     *
      * @return mixed
      */
     protected function get_external_path_from_storedfile($file) {
@@ -175,16 +175,15 @@ abstract class testcase extends \advanced_testcase {
         return $this->get_external_path_from_hash($contenthash);
     }
 
-    // 
-    /**
-     * get_local_path_from_hash
-     * 
-     * We want acces to local path for testing so we use a reflection
-     * method as opposed to rewriting here.
-     * @param string $contenthash
-     * 
-     * @return mixed
-     */
+        /**
+         * get_local_path_from_hash
+         *
+         * We want acces to local path for testing so we use a reflection
+         * method as opposed to rewriting here.
+         * @param string $contenthash
+         *
+         * @return mixed
+         */
     protected function get_local_path_from_hash($contenthash) {
         $reflection = new \ReflectionMethod(object_file_system::class, 'get_local_path_from_hash');
         $reflection->setAccessible(true);
@@ -194,7 +193,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * delete_file
      * @param string $contenthash
-     * 
+     *
      * @return mixed
      */
     protected function delete_file($contenthash) {
@@ -207,7 +206,7 @@ abstract class testcase extends \advanced_testcase {
      * rename_file
      * @param mixed $currentpath
      * @param mixed $destinationpath
-     * 
+     *
      * @return mixed
      */
     protected function rename_file($currentpath, $destinationpath) {
@@ -219,7 +218,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * get_local_path_from_storedfile
      * @param mixed $file
-     * 
+     *
      * @return mixed
      */
     protected function get_local_path_from_storedfile($file) {
@@ -230,7 +229,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * recover_file
      * @param mixed $file
-     * 
+     *
      * @return mixed
      */
     protected function recover_file($file) {
@@ -242,7 +241,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_local_object
      * @param mixed $content
-     * 
+     *
      * @return mixed
      */
     protected function create_local_object($content = 'local object content') {
@@ -253,7 +252,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_duplicated_object
      * @param mixed $content
-     * 
+     *
      * @return mixed
      */
     protected function create_duplicated_object($content = 'duplicated object content') {
@@ -264,7 +263,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_remote_object
      * @param mixed $content
-     * 
+     *
      * @return mixed
      */
     protected function create_remote_object($content = 'remote object content') {
@@ -275,7 +274,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * create_error_object
      * @param mixed $content
-     * 
+     *
      * @return mixed
      */
     protected function create_error_object($content = 'error object content') {
@@ -286,7 +285,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * is_locally_readable_by_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return mixed
      */
     protected function is_locally_readable_by_hash($contenthash) {
@@ -297,7 +296,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * is_externally_readable_by_hash
      * @param mixed $contenthash
-     * 
+     *
      * @return mixed
      */
     protected function is_externally_readable_by_hash($contenthash) {
@@ -309,7 +308,7 @@ abstract class testcase extends \advanced_testcase {
      * acquire_object_lock
      * @param mixed $filehash
      * @param int $timeout
-     * 
+     *
      * @return mixed
      */
     protected function acquire_object_lock($filehash, $timeout = 0) {
@@ -321,7 +320,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * delete_draft_files
      * @param mixed $contenthash
-     * 
+     *
      * @return mixed
      */
     protected function delete_draft_files($contenthash) {
@@ -332,7 +331,7 @@ abstract class testcase extends \advanced_testcase {
     /**
      * is_externally_readable_by_url
      * @param signed_url $signedurl
-     * 
+     *
      * @return mixed
      */
     protected function is_externally_readable_by_url(signed_url $signedurl) {

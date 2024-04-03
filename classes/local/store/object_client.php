@@ -42,7 +42,7 @@ interface object_client {
     /**
      * get_fullpath_from_hash
      * @param string $contenthash
-     * 
+     *
      * @return string
      */
     public function get_fullpath_from_hash($contenthash);
@@ -50,7 +50,7 @@ interface object_client {
     /**
      * delete_file
      * @param string $fullpath
-     * 
+     *
      * @return mixed
      */
     public function delete_file($fullpath);
@@ -59,7 +59,7 @@ interface object_client {
      * rename_file
      * @param string $currentpath
      * @param string $destinationpath
-     * 
+     *
      * @return mixed
      */
     public function rename_file($currentpath, $destinationpath);
@@ -81,12 +81,12 @@ interface object_client {
      * @return mixed
      */
     public function get_maximum_upload_size();
-    
+
     /**
      * verify_object
      * @param string $contenthash
      * @param string $localpath
-     * 
+     *
      * @return mixed
      */
     public function verify_object($contenthash, $localpath);
@@ -95,7 +95,7 @@ interface object_client {
      * generate_presigned_url
      * @param string $contenthash
      * @param array $headers
-     * 
+     *
      * @return mixed
      */
     public function generate_presigned_url($contenthash, $headers = array());
@@ -115,7 +115,7 @@ interface object_client {
     /**
      * test_permissions
      * @param mixed $testdelete
-     * 
+     *
      * @return mixed
      */
     public function test_permissions($testdelete);
@@ -124,7 +124,7 @@ interface object_client {
      * proxy_range_request
      * @param \stored_file $file
      * @param mixed $ranges
-     * 
+     *
      * @return mixed
      */
     public function proxy_range_request(\stored_file $file, $ranges);
@@ -132,7 +132,7 @@ interface object_client {
     /**
      * test_range_request
      * @param mixed $filesystem
-     * 
+     *
      * @return mixed
      */
     public function test_range_request($filesystem);

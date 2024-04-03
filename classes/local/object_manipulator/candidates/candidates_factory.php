@@ -52,7 +52,7 @@ class candidates_factory {
      * Finder
      * @param mixed $manipulator
      * @param stdClass $config
-     * 
+     *
      * @return mixed
      * @throws moodle_exception
      */

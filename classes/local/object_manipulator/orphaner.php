@@ -16,7 +16,7 @@
 
 /**
  * Orphans records for files deleted
- * 
+ *
  * Orphans {tool_objectfs_objects} records for files that have been
  * deleted from the core {files} table.
  *

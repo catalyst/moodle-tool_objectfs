@@ -91,10 +91,10 @@ class stream_wrapper {
     /**
      * stream_cast
      * @param mixed $cast_as
-     * 
+     *
      * @return boolean
      */
-    public function stream_cast($cast_as) {
+    public function stream_cast($castas) {
         return false;
     }
 
@@ -113,10 +113,10 @@ class stream_wrapper {
      * @param mixed $mode
      * @param mixed $options
      * @param mixed $opened_path
-     * 
+     *
      * @return bool
      */
-    public function stream_open($path, $mode, $options, &$opened_path) {
+    public function stream_open($path, $mode, $options, &$openedpath) {
         $this->initProtocol($path);
         $this->params = $this->getContainerKey($path);
         $this->mode = rtrim($mode, 'bt');
@@ -129,9 +129,12 @@ class stream_wrapper {
 
         return $this->boolCall(function() use ($path) {
             switch ($this->mode) {
-                case 'r': return $this->openReadStream();
-                case 'a': return $this->openAppendStream();
-                default: return $this->openWriteStream();
+                case 'r':
+return $this->openReadStream();
+                case 'a':
+return $this->openAppendStream();
+                default:
+return $this->openWriteStream();
             }
         });
     }
@@ -186,7 +189,7 @@ class stream_wrapper {
     /**
      * stream_read
      * @param int $count
-     * 
+     *
      * @return string
      */
     public function stream_read($count) {
@@ -198,7 +201,7 @@ class stream_wrapper {
      * stream_seek
      * @param int $offset
      * @param int $whence
-     * 
+     *
      * @return bool
      */
     public function stream_seek($offset, $whence = SEEK_SET) {
@@ -215,13 +218,14 @@ class stream_wrapper {
      * @return bool
      */
     public function stream_tell() {
-        return $this->boolCall(function() { return $this->body->tell(); });
+        return $this->boolCall(function() { return $this->body->tell();
+        });
     }
 
     /**
      * stream_write
      * @param string $data
-     * 
+     *
      * @return int
      */
     public function stream_write($data) {
@@ -243,14 +247,14 @@ class stream_wrapper {
 
     /**
      * url_stat
-     * 
+     *
      * Provides information for is_dir, is_file, filesize, etc. Works on
      * buckets, keys, and prefixes.
      * @link http://www.php.net/manual/en/streamwrapper.url-stat.php
-     * 
+     *
      * @param string $path
      * @param mixed $flags
-     * 
+     *
      * @return mixed
      */
     public function url_stat($path, $flags) {
@@ -285,7 +289,7 @@ class stream_wrapper {
      *
      * @param string $path
      */
-    private function initProtocol($path) {
+    private function initprotocol($path) {
         $parts = explode('://', $path, 2);
         $this->protocol = $parts[0] ?: 'blob';
     }
@@ -293,13 +297,13 @@ class stream_wrapper {
     /**
      * getContainerKey
      * @param string $path
-     * 
+     *
      * @return array
      */
-    private function getContainerKey($path) {
-        // Remove the protocol
+    private function getcontainerkey($path) {
+        // Remove the protocol.
         $parts = explode('://', $path);
-        // Get the container, key
+        // Get the container, key.
         $parts = explode('/', $parts[1], 2);
 
         return [
@@ -317,7 +321,7 @@ class stream_wrapper {
      * of errors.
      * @param string $path
      * @param string $mode
-     * 
+     *
      * @return [type]
      */
     private function validate($path, $mode) {
@@ -333,8 +337,7 @@ class stream_wrapper {
                 . "Use one 'r', 'w', 'a', or 'x'.";
         }
 
-        // When using mode "x" validate if the file exists before attempting
-        // to read
+        // When using mode "x" validate if the file exists before attempting to read.
         if ($mode == 'x' &&
             $this->getClient()->getBlobProperties(
                 $this->getOption('Container'),
@@ -366,8 +369,8 @@ class stream_wrapper {
      *
      * @return array
      */
-    private function getOptions($removeContextData = false) {
-        // Context is not set when doing things like stat
+    private function getoptions($removecontextdata = false) {
+        // Context is not set when doing things like stat.
         if ($this->context === null) {
             $options = [];
         } else {
@@ -383,7 +386,7 @@ class stream_wrapper {
             : [];
         $result = $this->params + $options + $default;
 
-        if ($removeContextData) {
+        if ($removecontextdata) {
             unset($result['client'], $result['seekable']);
         }
 
@@ -397,7 +400,7 @@ class stream_wrapper {
      *
      * @return mixed|null
      */
-    private function getOption($name) {
+    private function getoption($name) {
         $options = $this->getOptions();
 
         return isset($options[$name]) ? $options[$name] : null;
@@ -409,7 +412,7 @@ class stream_wrapper {
      * @return BlobRestProxy
      * @throws \RuntimeException if no client has been configured
      */
-    private function getClient() {
+    private function getclient() {
         if (!$client = $this->getOption('client')) {
             throw new \RuntimeException('No client in stream context');
         }
@@ -424,7 +427,7 @@ class stream_wrapper {
      *
      * @return array Hash of 'Container', 'Key', and custom params from the context
      */
-    private function withPath($path) {
+    private function withpath($path) {
         $params = $this->getOptions(true);
 
         return $this->getContainerKey($path) + $params;
@@ -434,7 +437,7 @@ class stream_wrapper {
      * openReadStream
      * @return bool
      */
-    private function openReadStream() {
+    private function openreadstream() {
         $client = $this->getClient();
         $params = $this->getOptions(true);
 
@@ -447,7 +450,7 @@ class stream_wrapper {
             $this->body = $response->getBody();
         }
 
-        // Wrap the body in a caching entity body if seeking is allowed
+        // Wrap the body in a caching entity body if seeking is allowed.
         if ($this->getOption('seekable') && !$this->body->isSeekable()) {
             $this->body = new CachingStream($this->body);
         }
@@ -459,7 +462,7 @@ class stream_wrapper {
      * openWriteStream
      * @return bool
      */
-    private function openWriteStream() {
+    private function openwritestream() {
         $this->body = new Stream(fopen('php://temp', 'r+'));
         return true;
     }
@@ -468,16 +471,16 @@ class stream_wrapper {
      * openAppendStream
      * @return mixed
      */
-    private function openAppendStream() {
+    private function openappendstream() {
         try {
-            // Get the body of the object and seek to the end of the stream
+            // Get the body of the object and seek to the end of the stream.
             $client = $this->getClient();
             $params = $this->getOptions(true);
             $this->body = $client->getBlob($params['Container'], $params['Key']);
             $this->body->seek(0, SEEK_END);
             return true;
         } catch (ServiceException $e) {
-            // The object does not exist, so use a simple write stream
+            // The object does not exist, so use a simple write stream.
             return $this->openWriteStream();
         }
     }
@@ -487,7 +490,7 @@ class stream_wrapper {
      *
      * @return array
      */
-    private function getStatTemplate() {
+    private function getstattemplate() {
         return [
             0  => 0,  'dev'     => 0,
             1  => 0,  'ino'     => 0,
@@ -514,7 +517,7 @@ class stream_wrapper {
      *
      * @return bool
      */
-    private function boolCall(callable $fn, $flags = null) {
+    private function boolcall(callable $fn, $flags = null) {
         try {
             return $fn();
         } catch (\Exception $e) {
@@ -532,16 +535,16 @@ class stream_wrapper {
      * @return bool Returns false
      * @throws \RuntimeException if throw_errors is true
      */
-    private function triggerError($errors, $flags = null) {
-        // This is triggered with things like file_exists()
+    private function triggererror($errors, $flags = null) {
+        // This is triggered with things like file_exists().
         if ($flags & STREAM_URL_STAT_QUIET) {
             return $flags & STREAM_URL_STAT_LINK
-                // This is triggered for things like is_link()
+                // This is triggered for things like is_link().
                 ? $this->getStatTemplate()
                 : false;
         }
 
-        // This is triggered when doing things like lstat() or stat()
+        // This is triggered when doing things like lstat() or stat().
         trigger_error(implode("\n", (array) $errors), E_USER_WARNING);
 
         return false;
@@ -552,7 +555,7 @@ class stream_wrapper {
      *
      * @return int|null
      */
-    private function getSize() {
+    private function getsize() {
         $size = $this->body->getSize();
 
         return $size !== null ? $size : $this->size;

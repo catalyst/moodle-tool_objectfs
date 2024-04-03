@@ -44,7 +44,7 @@ class test_file_system extends object_file_system {
     /**
      * initialise_external_client
      * @param \stdClass $config
-     * 
+     *
      * @return mixed
      */
     protected function initialise_external_client($config) {

@@ -39,7 +39,7 @@ class null_logger extends objectfs_logger {
      * @param mixed $readname
      * @param mixed $objectpath
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     public function log_object_read($readname, $objectpath, $objectsize = 0) {
@@ -53,7 +53,7 @@ class null_logger extends objectfs_logger {
      * @param mixed $finallocation
      * @param mixed $objecthash
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     public function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0) {
@@ -65,7 +65,7 @@ class null_logger extends objectfs_logger {
      * @param mixed $queryname
      * @param mixed $objectcount
      * @param int $objectsum
-     * 
+     *
      * @return void
      */
     public function log_object_query($queryname, $objectcount, $objectsum = 0) {

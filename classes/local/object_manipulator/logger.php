@@ -81,7 +81,7 @@ class logger {
     /**
      * set_action
      * @param mixed $action
-     * 
+     *
      * @return void
      */
     public function set_action($action) {
@@ -91,7 +91,7 @@ class logger {
     /**
      * add_object_manipulation
      * @param int $filesize
-     * 
+     *
      * @return void
      */
     public function add_object_manipulation($filesize) {
@@ -115,7 +115,7 @@ class logger {
     /**
      * log_object_manipulation_query
      * @param mixed $totalobjectsfound
-     * 
+     *
      * @return void
      */
     public function log_object_manipulation_query($totalobjectsfound) {

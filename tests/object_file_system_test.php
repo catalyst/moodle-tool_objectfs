@@ -32,7 +32,7 @@ class object_file_system_test extends tests\testcase {
      * set_externalclient_config
      * @param mixed $key
      * @param mixed $value
-     * 
+     *
      * @return void
      */
     public function set_externalclient_config($key, $value) {
@@ -754,7 +754,8 @@ class object_file_system_test extends tests\testcase {
             [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
             [7200, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
             [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
-            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
+            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'),
+            $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Custom Pre-Signed URL expiration time and int-like 'Expires' header.
             [0, $now, 0, $now + (2 * MINSECS) - $secondsafternow],
@@ -770,7 +771,8 @@ class object_file_system_test extends tests\testcase {
             [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
             [600, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
             [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
-            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
+            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'),
+            $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
         ];
     }
 

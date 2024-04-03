@@ -38,7 +38,7 @@ class real_time_logger extends objectfs_logger {
      * log_object_read_action
      * @param string $actionname
      * @param string $objectpath
-     * 
+     *
      * @return mixed
      */
     public function log_object_read_action($actionname, $objectpath) {
@@ -51,7 +51,7 @@ class real_time_logger extends objectfs_logger {
      * @param string $objecthash
      * @param string $initallocation
      * @param string $finallocation
-     * 
+     *
      * @return mixed
      */
     public function log_object_move_action($actionname, $objecthash, $initallocation, $finallocation) {
@@ -61,7 +61,7 @@ class real_time_logger extends objectfs_logger {
     /**
      * append_timing_string
      * @param mixed $logstring
-     * 
+     *
      * @return void
      */
     protected function append_timing_string(&$logstring) {
@@ -76,7 +76,7 @@ class real_time_logger extends objectfs_logger {
      * append_size_string
      * @param string $logstring
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     protected function append_size_string(&$logstring, $objectsize) {
@@ -91,7 +91,7 @@ class real_time_logger extends objectfs_logger {
      * @param string $logstring
      * @param string $initiallocation
      * @param string $finallocation
-     * 
+     *
      * @return void
      */
     protected function append_location_change_string(&$logstring, $initiallocation, $finallocation) {
@@ -107,7 +107,7 @@ class real_time_logger extends objectfs_logger {
      * @param string $readname
      * @param string $objectpath
      * @param int $objectsize
-     * 
+     *
      * @return [type]
      */
     public function log_object_read($readname, $objectpath, $objectsize = 0) {
@@ -128,7 +128,7 @@ class real_time_logger extends objectfs_logger {
      * @param string $finallocation
      * @param string $objecthash
      * @param int $objectsize
-     * 
+     *
      * @return void
      */
     public function log_object_move($movename, $initallocation, $finallocation, $objecthash, $objectsize = 0) {
@@ -146,7 +146,7 @@ class real_time_logger extends objectfs_logger {
      * @param string $queryname
      * @param int $objectcount
      * @param int $objectsum
-     * 
+     *
      * @return void
      */
     public function log_object_query($queryname, $objectcount, $objectsum = 0) {
@@ -160,7 +160,7 @@ class real_time_logger extends objectfs_logger {
     /**
      * log_lock_timing
      * @param mixed $lock
-     * 
+     *
      * @return void
      */
     public function log_lock_timing($lock) {
