@@ -59,7 +59,7 @@ class file_system extends object_file_system {
         $this->get_logger()->end_timing();
         $this->get_logger()->log_object_read('readfile', $path, $file->get_filesize());
 
-        if (!$success) {
+        if ($success === false) {
             manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
             throw new \file_exception('storedfilecannotreadfile', $file->get_filename());
         }
