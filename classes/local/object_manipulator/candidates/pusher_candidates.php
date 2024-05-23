@@ -42,7 +42,8 @@ class pusher_candidates extends manipulator_candidates_base {
                  WHERE filesize > :threshold
                    AND filesize < :maximum_file_size
                    AND timeduplicated <= :maxcreatedtimestamp
-                   AND location = :object_location';
+                        AND location = :object_location' . (
+        empty($this->config->extraconfig->sqlfilterstring) ? "" : " AND " . $this->config->extraconfig->sqlfilterstring);
     }
 
     /**

@@ -39,7 +39,8 @@ class deleter_candidates extends manipulator_candidates_base {
                   FROM {tool_objectfs_objects}
                  WHERE timeduplicated <= :consistancythreshold
                    AND location = :location
-                   AND filesize > :sizethreshold';
+                   AND filesize > :sizethreshold' . (
+        empty($this->config->extraconfig->sqlfilterstring) ? "" : " AND " . $this->config->extraconfig->sqlfilterstring);
     }
 
     /**

@@ -68,8 +68,8 @@ class manipulator_builder {
      * @throws coding_exception
      * @throws moodle_exception
      */
-    public function execute($manipulator) {
-        $this->build($manipulator);
+    public function execute($manipulator, $extraconfig = null) {
+        $this->build($manipulator, $extraconfig);
         if (empty($this->candidates)) {
             return;
         }
@@ -86,10 +86,10 @@ class manipulator_builder {
      * @throws coding_exception
      * @throws moodle_exception
      */
-    public function execute_all() {
+    public function execute_all($extraconfig = null) {
         foreach ($this->manipulators as $manipulator) {
             mtrace("Executing objectfs $manipulator");
-            $this->execute($manipulator);
+            $this->execute($manipulator, $extraconfig);
             mtrace("Objectfs $manipulator successfully executed");
         }
     }
@@ -98,8 +98,9 @@ class manipulator_builder {
      * @param string $manipulator
      * @throws moodle_exception
      */
-    private function build($manipulator) {
+    private function build($manipulator, $extraconfig = null) {
         $this->config = manager::get_objectfs_config();
+        $this->config->extraconfig = $extraconfig;
         $this->manipulatorclass = $manipulator;
         $this->logger = new aggregate_logger();
         $this->finder = new candidates_finder($manipulator, $this->config);

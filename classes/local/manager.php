@@ -27,6 +27,9 @@ namespace tool_objectfs\local;
 
 use stdClass;
 use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\local\object_manipulator\manipulator_builder;
+use tool_objectfs\local\object_manipulator\pusher;
+use tool_objectfs\local\object_manipulator\deleter;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -167,6 +170,12 @@ class manager {
             $newobject->timeduplicated = time();
         }
         $DB->insert_record('tool_objectfs_objects', $newobject);
+
+        $manipulator_builder = new manipulator_builder();
+        $extraconfig = new stdClass();
+        $extraconfig->sqlfilterstring = "contenthash = '{$contenthash}'";
+        $manipulator_builder->execute(pusher::class, $extraconfig);
+        $manipulator_builder->execute(deleter::class, $extraconfig);
 
         return $newobject;
     }
