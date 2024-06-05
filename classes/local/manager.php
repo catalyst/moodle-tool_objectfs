@@ -72,6 +72,7 @@ class manager {
         $config->s3_key = '';
         $config->s3_secret = '';
         $config->s3_bucket = '';
+        $config->s3_bucket_acl = 'private';
         $config->s3_region = 'us-east-1';
         $config->s3_base_url = '';
         $config->key_prefix = '';
