@@ -33,6 +33,9 @@ use tool_objectfs\local\object_manipulator\pusher;
 use tool_objectfs\local\object_manipulator\recoverer;
 use tool_objectfs\local\object_manipulator\orphaner;
 
+/**
+ * Candidates Factory
+ */
 class candidates_factory {
 
     /** @var array $manipulatormap */
@@ -46,8 +49,10 @@ class candidates_factory {
     ];
 
     /**
-     * @param $manipulator
+     * Finder
+     * @param mixed $manipulator
      * @param stdClass $config
+     *
      * @return mixed
      * @throws moodle_exception
      */

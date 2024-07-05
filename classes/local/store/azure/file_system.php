@@ -31,8 +31,17 @@ use tool_objectfs\local\store\object_file_system;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+/**
+ * file_system
+ */
 class file_system extends object_file_system {
 
+    /**
+     * initialise_external_client
+     * @param mixed $config
+     *
+     * @return client
+     */
     protected function initialise_external_client($config) {
         $asclient = new client($config);
         return $asclient;

@@ -22,6 +22,7 @@ use tool_objectfs\local\manager;
  * Tests for object checker.
  *
  * @covers \tool_objectfs\local\object_manipulator\checker
+ * @package tool_objectfs
  */
 class checker_test extends \tool_objectfs\tests\testcase {
 

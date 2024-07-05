@@ -26,7 +26,7 @@ use core_privacy\local\metadata\null_provider;
 use core_privacy\local\legacy_polyfill;
 /**
  * Class provider
- * @package tool_objectfs\privacy
+ * @package tool_objectfs
  */
 class provider implements null_provider {
     use legacy_polyfill;
@@ -36,7 +36,7 @@ class provider implements null_provider {
      *
      * @return  string
      */
-    public static function _get_reason() {
+    public static function get_reason(): string {
         return 'privacy:metadata';
     }
 }

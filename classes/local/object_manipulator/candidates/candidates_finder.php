@@ -27,6 +27,9 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 use moodle_exception;
 use stdClass;
 
+/**
+ * Candidates Finder
+ */
 class candidates_finder {
 
     /** @var string $finder */
@@ -43,6 +46,7 @@ class candidates_finder {
     }
 
     /**
+     * get
      * @return array
      */
     public function get() {
@@ -50,6 +54,7 @@ class candidates_finder {
     }
 
     /**
+     * get_query_name
      * @return string
      */
     public function get_query_name() {

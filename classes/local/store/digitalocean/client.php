@@ -19,6 +19,7 @@
  *
  * @package   tool_objectfs
  * @author    Brian Yanosik <kisonay@gmail.com>
+ * @copyright Brian Yanosik
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,8 +27,16 @@ namespace tool_objectfs\local\store\digitalocean;
 
 use tool_objectfs\local\store\s3\client as s3_client;
 
+/**
+ * client
+ */
 class client extends s3_client {
 
+    /**
+     * construct
+     * @param \stdClass $config
+     * @return void
+     */
     public function __construct($config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
@@ -56,6 +65,12 @@ class client extends s3_client {
         return true;
     }
 
+    /**
+     * set_client
+     * @param \stdClass $config
+     *
+     * @return void
+     */
     public function set_client($config) {
         if (!$this->is_configured($config)) {
             $this->client = null;
@@ -71,8 +86,9 @@ class client extends s3_client {
     }
 
     /**
+     * define_client_section
      * @param admin_settingpage $settings
-     * @param $config
+     * @param \stdClass $config
      * @return admin_settingpage
      */
     public function define_client_section($settings, $config) {

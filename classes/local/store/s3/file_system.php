@@ -35,8 +35,17 @@ use tool_objectfs\local\store\object_file_system;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+/**
+ * [Description file_system]
+ */
 class file_system extends object_file_system {
 
+    /**
+     * initialise_external_client
+     * @param \stdClass $config
+     *
+     * @return client
+     */
     protected function initialise_external_client($config) {
         $s3client = new client($config);
 
@@ -44,7 +53,10 @@ class file_system extends object_file_system {
     }
 
     /**
-     * @inheritdoc
+     * readfile
+     * @param \stored_file $file
+     * @return void
+     * @throws \file_exception
      */
     public function readfile(\stored_file $file) {
         $path = $this->get_remote_path_from_storedfile($file);
@@ -66,7 +78,10 @@ class file_system extends object_file_system {
     }
 
     /**
-     * @inheritdoc
+     * copy_from_local_to_external
+     * @param mixed $contenthash
+     *
+     * @return bool
      */
     public function copy_from_local_to_external($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
@@ -83,7 +98,8 @@ class file_system extends object_file_system {
     }
 
     /**
-     * @inheritdoc
+     * supports_presigned_urls
+     * @return bool
      */
     public function supports_presigned_urls() {
         return true;

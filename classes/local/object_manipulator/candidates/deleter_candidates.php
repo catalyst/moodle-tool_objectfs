@@ -24,13 +24,19 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+/**
+ * deleter_candidates
+ */
 class deleter_candidates extends manipulator_candidates_base {
 
-    /** @var string $queryname */
+    /**
+     * queryname
+     * @var string
+     */
     protected $queryname = 'get_delete_candidates';
 
     /**
-     * @inheritDoc
+     * get_candiates_sql
      * @return string
      */
     public function get_candidates_sql() {
@@ -43,7 +49,7 @@ class deleter_candidates extends manipulator_candidates_base {
     }
 
     /**
-     * @inheritDoc
+     * get_candiates_sql_params
      * @return array
      */
     public function get_candidates_sql_params() {

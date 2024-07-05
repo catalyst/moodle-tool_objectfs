@@ -31,10 +31,22 @@ namespace tool_objectfs\tests;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 
+/**
+ * [Description test_file_system]
+ */
 class test_file_system extends object_file_system {
 
+    /**
+     * @var int
+     */
     private $maxupload;
 
+    /**
+     * initialise_external_client
+     * @param \stdClass $config
+     *
+     * @return mixed
+     */
     protected function initialise_external_client($config) {
         global $CFG;
         if (isset($CFG->phpunit_objectfs_s3_integration_test_credentials)) {
@@ -71,6 +83,7 @@ class test_file_system extends object_file_system {
     }
 
     /**
+     * get_maximum_upload_size
      * @return float|int
      */
     public function get_maximum_upload_size() {

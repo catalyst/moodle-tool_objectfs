@@ -28,6 +28,9 @@ namespace tool_objectfs\task;
 use tool_objectfs\local\object_manipulator\deleter;
 
 
+/**
+ * [Description delete_local_objects]
+ */
 class delete_local_objects extends task {
 
     /** @var string $manipulator */

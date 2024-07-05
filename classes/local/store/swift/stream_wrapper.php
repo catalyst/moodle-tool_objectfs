@@ -168,9 +168,7 @@ class stream_wrapper {
     private static $defaultcontext;
 
 
-    //
-    // Stream API functions
-    //
+    // Stream API functions.
 
     /**
      * Close directory
@@ -230,10 +228,18 @@ class stream_wrapper {
         return $item->name;
     }
 
+    /**
+     * stream_close
+     * @return bool
+     */
     public function stream_close() {
         return $this->push_object();
     }
 
+    /**
+     * stream_eof
+     * @return bool
+     */
     public function stream_eof() {
         return $this->objstream->eof();
     }
@@ -427,10 +433,10 @@ class stream_wrapper {
     /**
      * Rename object
      *
-     * @param string $path
+     * @param string $currentpath
+     * @param string $destinationpath
      * @return boolean
      */
-
     public function rename($currentpath, $destinationpath) {
         $currenturl = $this->parse_url($currentpath);
         $destinationurl = $this->parse_url($destinationpath);
@@ -488,10 +494,7 @@ class stream_wrapper {
         return $this->generate_stat($object, $container, $object->contentLength);
     }
 
-
-    //
-    // Non-stream API functions
-    //
+    // Non-stream API functions.
 
     /**
      * Set context for functions that don't accept a context. e.g. stat()
@@ -633,7 +636,7 @@ class stream_wrapper {
         $this->isbinary = strpos($mode, 'b') !== false;
         $this->istext = strpos($mode, 't') !== false;
 
-        // rewrite mode to remove b or t:
+        // Rewrite mode to remove b or t:.
         $mode = preg_replace('/[bt]?/', '', $mode);
 
         switch ($mode) {

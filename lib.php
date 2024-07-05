@@ -71,8 +71,8 @@ define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
 
 /**
  * Sends a plugin file to the browser.
- * @param $course
- * @param $cm
+ * @param mixed $course
+ * @param mixed $cm
  * @param \context $context
  * @param string $filearea
  * @param array $args
