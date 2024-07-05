@@ -22,6 +22,7 @@ use tool_objectfs\local\manager;
  * Tests for object puller.
  *
  * @covers \tool_objectfs\local\object_manipulator\puller
+ * @package tool_objectfs
  */
 class puller_test extends \tool_objectfs\tests\testcase {
 
@@ -42,6 +43,13 @@ class puller_test extends \tool_objectfs\tests\testcase {
         ob_end_clean();
     }
 
+    /**
+     * set_puller_config
+     * @param mixed $key
+     * @param mixed $value
+     *
+     * @return void
+     */
     protected function set_puller_config($key, $value) {
         $config = manager::get_objectfs_config();
         $config->$key = $value;

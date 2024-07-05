@@ -25,8 +25,17 @@
 
 namespace tool_objectfs\local\report;
 
+/**
+ * log_size_report_builder
+ */
 class log_size_report_builder extends objectfs_report_builder {
 
+    /**
+     * build_report
+     * @param int $reportid
+     *
+     * @return objectfs_report
+     */
     public function build_report($reportid) {
         global $DB;
 
@@ -49,6 +58,12 @@ class log_size_report_builder extends objectfs_report_builder {
         return $report;
     }
 
+    /**
+     * compress_small_log_sizes
+     * @param mixed $stats
+     *
+     * @return void
+     */
     public function compress_small_log_sizes(&$stats) {
         $smallstats = new \stdClass();
         $smallstats->datakey = 1;

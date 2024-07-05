@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that orphans {tool_objectfs_object} records for deleted
- * {files} records.
+ * Task that orphans {tool_objectfs_object} records for deleted {files} records.
  *
  * @package   tool_objectfs
  * @author    Nathan Mares <ngmares@gmail.com>
@@ -29,6 +28,9 @@ namespace tool_objectfs\task;
 use tool_objectfs\local\object_manipulator\orphaner;
 
 
+/**
+ * [Description orphan_objects]
+ */
 class orphan_objects extends task {
 
     /** @var string $manipulator */

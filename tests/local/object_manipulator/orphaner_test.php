@@ -23,6 +23,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * Tests for object orphaner.
  *
  * @covers \tool_objectfs\local\object_manipulator\orphaner
+ * @package tool_objectfs
  */
 class orphaner_test extends \tool_objectfs\tests\testcase {
 
@@ -44,6 +45,13 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
         ob_end_clean();
     }
 
+    /**
+     * set_orphaner_config
+     * @param mixed $key
+     * @param mixed $value
+     *
+     * @return void
+     */
     protected function set_orphaner_config($key, $value) {
         $config = manager::get_objectfs_config();
         $config->$key = $value;

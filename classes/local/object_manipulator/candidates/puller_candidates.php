@@ -24,13 +24,19 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+/**
+ * puller_candidates
+ */
 class puller_candidates extends manipulator_candidates_base {
 
-    /** @var string $queryname */
+    /**
+     * queryname
+     * @var string
+     */
     protected $queryname = 'get_pull_candidates';
 
     /**
-     * @inheritDoc
+     * get_candidates_sql
      * @return string
      */
     public function get_candidates_sql() {
@@ -42,7 +48,7 @@ class puller_candidates extends manipulator_candidates_base {
     }
 
     /**
-     * @inheritDoc
+     * get_candidates_sql_params
      * @return array
      */
     public function get_candidates_sql_params() {

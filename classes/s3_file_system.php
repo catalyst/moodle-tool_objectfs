@@ -30,6 +30,9 @@ namespace tool_objectfs;
 
 use tool_objectfs\local\store\s3\file_system;
 
+/**
+ * [Description s3_file_system]
+ */
 class s3_file_system extends file_system {
 
 }

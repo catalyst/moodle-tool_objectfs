@@ -19,6 +19,7 @@
  *
  * @package   tool_objectfs
  * @author    Brian Yanosik <kisonay@gmail.com>
+ * @copyright  Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,6 +27,9 @@ namespace tool_objectfs;
 
 use tool_objectfs\local\store\digitalocean\file_system;
 
+/**
+ * Unknown?
+ */
 class digitalocean_file_system extends file_system {
 
 }
