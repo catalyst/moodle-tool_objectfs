@@ -278,6 +278,7 @@ class object_file_system_test extends tests\testcase {
 
     /**
      * test_delete_empty_folders_provider
+     * @dataProvider delete_empty_folders_provider
      * @param array $dirs Dirs to be created.
      * @param array $files Files to be created.
      * @param array $expectedparentreadable Indicates whether a dir will remain after calling 'delete_empty_folders'.
@@ -694,6 +695,7 @@ class object_file_system_test extends tests\testcase {
     /**
      * test_presigned_url_should_redirect_provider
      *
+     * @dataProvider presigned_url_should_redirect_provider
      * @param mixed $enablepresignedurls enable pre-signed URLs.
      * @param mixed $presignedminfilesize minimum file size to be redirected to pre-signed URL.
      * @param bool $result expected result.
