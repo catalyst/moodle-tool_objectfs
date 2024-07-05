@@ -69,6 +69,13 @@ class manager {
 
         // S3 file system.
         $config->s3_usesdkcreds = 0;
+        
+        //New
+        $config->s3_bucket_endpoint = 0;
+        $config->s3_use_path_style_endpoint = 0;
+        $config->s3_disable_multiregion_access_points = 0;
+        //New
+
         $config->s3_key = '';
         $config->s3_secret = '';
         $config->s3_bucket = '';

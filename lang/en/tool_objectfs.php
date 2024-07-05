@@ -114,6 +114,18 @@ $string['settings:aws:key'] = 'Key';
 $string['settings:aws:key_help'] = 'Amazon S3 key credential.';
 $string['settings:aws:secret'] = 'Secret';
 $string['settings:aws:secret_help'] = 'Amazon S3 secret credential.';
+
+//New
+$string['settings:aws:bucket_endpoint'] = 'Set to true to send requests to a hardcoded bucket endpoint rather than create an endpoint as a result of injecting the bucket into the URL.';
+$string['settings:aws:bucket_endpoint_help'] = 'Default Off';
+
+$string['settings:aws:use_path_style_endpoint'] = 'Set to true to send requests to an S3 path style endpoint by default. Must be On if bucket_endpoint is On.';
+$string['settings:aws:use_path_style_endpoint_help'] = 'Default Off';
+
+$string['settings:aws:disable_multiregion_access_points'] = 'Set to true to disable the usage of multi region access points. These are enabled by default.';
+$string['settings:aws:disable_multiregion_access_points_help'] = 'Default Off';
+//New
+
 $string['settings:aws:bucket'] = 'Bucket';
 $string['settings:aws:bucket_help'] = 'Amazon S3 bucket to store files in.';
 $string['settings:aws:region'] = 'region';
