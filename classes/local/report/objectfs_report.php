@@ -166,6 +166,7 @@ class objectfs_report implements \renderable {
             'location',
             'log_size',
             'mime_type',
+            'tag_count',
         ];
     }
 

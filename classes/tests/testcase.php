@@ -33,7 +33,6 @@ use tool_objectfs\local\store\signed_url;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class testcase extends \advanced_testcase {
-
     /** @var test_file_system Filesystem */
     public $filesystem;
 
@@ -48,8 +47,10 @@ abstract class testcase extends \advanced_testcase {
         global $CFG;
         $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
+        $CFG->objectfs_environment_name = 'test';
         $this->filesystem = new test_file_system();
         $this->logger = new \tool_objectfs\log\null_logger();
+
         $this->resetAfterTest(true);
     }
 

@@ -36,7 +36,10 @@ use SplFileInfo;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
+use coding_exception;
+use Throwable;
 use tool_objectfs\local\manager;
+use tool_objectfs\local\tag\tag_manager;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -358,6 +361,12 @@ abstract class object_file_system extends \file_system_filedir {
             if ($success) {
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
             }
+        }
+
+        // If tagging is enabled, ensure tags are synced regardless of if object is local or duplicated, etc...
+        // The file may exist in external store because it was uploaded by another site, but we may want to put our tags onto it.
+        if (tag_manager::is_tagging_enabled_and_supported()) {
+            $this->push_object_tags($contenthash);
         }
 
         $this->logger->log_object_move('copy_object_from_local_to_external',
@@ -1153,5 +1162,52 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         return $result;
+    }
+
+    /**
+     * Pushes tags to the external store (post upload) for a given hash.
+     * External client must support tagging.
+     *
+     * @param string $contenthash file to sync tags for
+     */
+    public function push_object_tags(string $contenthash) {
+        if (!$this->get_external_client()->supports_object_tagging()) {
+            throw new coding_exception("Cannot sync tags, external client does not support tagging.");
+        }
+
+        // Get a lock before syncing, to ensure other parts of objectfs are not moving/interacting with this object.
+        $lock = $this->acquire_object_lock($contenthash, 10);
+
+        // No lock - just skip it.
+        if (!$lock) {
+            throw new coding_exception("Could not get object lock");
+        }
+
+        try {
+            $objectexists = $this->is_file_readable_externally_by_hash($contenthash);
+
+            // Object must exist, and we can overwrite (and not care about existing tags)
+            // or cannot overwrite, and the tags are empty.
+            // Avoid unnecessarily checking tags, since this is an extra API call.
+            $canset = $objectexists && (tag_manager::can_overwrite_object_tags() ||
+                empty($this->get_external_client()->get_object_tags($contenthash)));
+
+            if ($canset) {
+                $tags = tag_manager::gather_object_tags_for_upload($contenthash);
+                $this->get_external_client()->set_object_tags($contenthash, $tags);
+                tag_manager::store_tags_locally($contenthash, $tags);
+            }
+
+            // Regardless, it has synced.
+            tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED);
+        } catch (Throwable $e) {
+            $lock->release();
+
+            // Mark object as tag sync error, this should stop it re-trying until fixed manually.
+            tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_ERROR);
+
+            throw $e;
+        }
+        $lock->release();
     }
 }
