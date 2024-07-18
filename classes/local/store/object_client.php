@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\local\store;
 
+use stdClass;
+
 interface object_client {
     public function __construct($config);
     public function register_stream_wrapper();
@@ -41,6 +43,32 @@ interface object_client {
     public function test_permissions($testdelete);
     public function proxy_range_request(\stored_file $file, $ranges);
     public function test_range_request($filesystem);
+
+    /*
+     * Tests setting an objects tag.
+     * @return stdClass containing 'success' and 'details' properties
+     */
+    public function test_set_object_tag(): stdClass;
+
+    /**
+     * Set the given objects tags in the external store.
+     * @param string $contenthash file content hash
+     * @param array $tags array of key=>value pairs to set as tags.
+     */
+    public function set_object_tags(string $contenthash, array $tags);
+
+    /**
+     * Returns given objects tags queried from the external store. External object must exist.
+     * @param string $contenthash file content has
+     * @return array array of key=>value tag pairs
+     */
+    public function get_object_tags(string $contenthash): array;
+
+    /**
+     * If the client supports object tagging feature.
+     * @return bool true if supports, else false
+     */
+    public function supports_object_tagging(): bool;
 }
 
 

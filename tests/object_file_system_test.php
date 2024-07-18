@@ -18,8 +18,11 @@ namespace tool_objectfs\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use coding_exception;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\local\manager;
+use tool_objectfs\local\tag\tag_manager;
+use tool_objectfs\tests\test_file_system;
 
 require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/tool_objectfs_testcase.php');
@@ -931,5 +934,107 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->assertTrue($this->filesystem->is_configured());
         unset($CFG->alternative_file_system_class);
         $this->assertFalse($this->filesystem->is_configured());
+    }
+
+    /**
+     * Test syncing tags throws exception when client does not support tagging.
+     */
+    public function test_push_object_tags_not_supported() {
+        global $CFG;
+        $CFG->phpunit_objectfs_supports_object_tagging = false;
+        $this->expectException(coding_exception::class);
+        $this->expectExceptionMessage('Cannot sync tags, external client does not support tagging');
+        $this->filesystem->push_object_tags('123');
+    }
+
+    /**
+     * Tests syncing object tags where the file is not replicated.
+     */
+    public function test_push_object_tags_object_not_replicated() {
+        global $CFG, $DB;
+        $CFG->phpunit_objectfs_supports_object_tagging = true;
+
+        // Create object - not replicated to 'external' store yet.
+        $object = $this->create_local_object('test syncing local');
+
+        // Sync, this should do nothing but change sync status - cannot sync object tags
+        // where the object is not replicated.
+        $this->filesystem->push_object_tags($object->contenthash);
+        $object = $DB->get_record('tool_objectfs_objects', ['contenthash' => $object->contenthash]);
+        $this->assertEquals($object->tagsyncstatus, tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED);
+    }
+
+    /**
+     * Provides values to push_object_tags_replicated
+     * @return array
+     */
+    public static function push_object_tags_replicated_provider(): array {
+        return [
+            'can override' => [
+                'can override' => true,
+            ],
+            'cannot override' => [
+                'cannot override' => false,
+            ],
+        ];
+    }
+
+    /**
+     * Tests push_object_tags when the object is replicated.
+     * @param bool $canoverride if filesystem should be able to overwrite existing objects
+     * @dataProvider push_object_tags_replicated_provider
+     */
+    public function test_push_object_tags_replicated(bool $canoverride) {
+        global $CFG, $DB;
+        $CFG->phpunit_objectfs_supports_object_tagging = true;
+
+        set_config('overwriteobjecttags', $canoverride, 'tool_objectfs');
+        $this->assertEquals($canoverride, tag_manager::can_overwrite_object_tags());
+
+        $object = $this->create_duplicated_object('test syncing replicated');
+
+        $testtags = [
+            'test' => 123,
+            'test2' => 123,
+            'test3' => 123,
+            'test4' => 123,
+        ];
+
+        // Fake set the tags in the external store.
+        $this->filesystem->get_external_client()->tags[$object->contenthash] = $testtags;
+
+        // Ensure tags are set 'externally'.
+        $tags = $this->filesystem->get_external_client()->get_object_tags($object->contenthash);
+        $this->assertCount(count($testtags), $tags);
+
+        // But tags will not be stored locally (yet).
+        $localtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $object->contenthash]);
+        $this->assertCount(0, $localtags);
+
+        // Sync the file.
+        $this->filesystem->push_object_tags($object->contenthash);
+
+        // Tags should now be replicated locally.
+        $localtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $object->contenthash]);
+        $externaltags = $this->filesystem->get_external_client()->get_object_tags($object->contenthash);
+
+        if ($canoverride) {
+            // If can override, we expect it to be overwritten by the tags defined in the sources.
+            $expectednum = count(tag_manager::get_defined_tag_sources());
+            $this->assertCount($expectednum, $localtags);
+
+            // Also expect the external store to be updated.
+            $this->assertCount($expectednum, $externaltags);
+        } else {
+            // If cannot overwrite, no tags should be synced.
+            $this->assertCount(0, $localtags);
+
+            // External store should not be changed.
+            $this->assertCount(count($testtags), $externaltags);
+        }
+
+        // Ensure status changed to not needing sync.
+        $object = $DB->get_record('tool_objectfs_objects', ['contenthash' => $object->contenthash]);
+        $this->assertEquals($object->tagsyncstatus, tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED);
     }
 }

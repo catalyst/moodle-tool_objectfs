@@ -16,6 +16,7 @@
 
 namespace tool_objectfs\tests;
 
+use coding_exception;
 use tool_objectfs\local\store\object_client_base;
 
 class test_client extends object_client_base {
@@ -24,6 +25,11 @@ class test_client extends object_client_base {
     protected $maxupload;
 
     private $bucketpath;
+
+    /**
+     * @var array in-memory tags used for unit tests
+     */
+    public $tags;
 
     public function __construct($config) {
         global $CFG;
@@ -89,6 +95,37 @@ class test_client extends object_client_base {
 
     public function get_maximum_upload_size() {
         return $this->maxupload;
+    }
+
+    /*
+     * Sets object tags - uses in-memory store for unit tests
+     * @param string $contenthash
+     * @param array $tags
+     */
+    public function set_object_tags(string $contenthash, array $tags) {
+        global $CFG;
+        if (!empty($CFG->phpunit_objectfs_simulate_tag_set_error)) {
+            throw new coding_exception("Simulated tag set error");
+        }
+        $this->tags[$contenthash] = $tags;
+    }
+
+    /**
+     * Gets object tags - uses in-memory store for unit tests
+     * @param string $contenthash
+     * @return array
+     */
+    public function get_object_tags(string $contenthash): array {
+        return $this->tags[$contenthash] ?? [];
+    }
+
+    /**
+     * Object tagging support, for unit testing
+     * @return bool
+     */
+    public function supports_object_tagging(): bool {
+        global $CFG;
+        return $CFG->phpunit_objectfs_supports_object_tagging;
     }
 }
 
