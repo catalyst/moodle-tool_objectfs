@@ -14,20 +14,35 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_objectfs\task;
+
+use core\task\manager;
+use core\task\scheduled_task;
+
 /**
- * Version information.
+ * Queues update_object_tags adhoc task periodically, or manually from the frontend.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version   = 2023051702;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2023051702;      // Same as version.
-$plugin->requires  = 2020110900;      // Requires Filesystem API.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->supported = [310, 402];
+class trigger_update_object_tags extends scheduled_task {
+    /**
+     * Task name
+     */
+    public function get_name() {
+        return get_string('task:triggerupdateobjecttags', 'tool_objectfs');
+    }
+    /**
+     * Execute task
+     */
+    public function execute() {
+        // Queue adhoc task, nothing else.
+        $task = new update_object_tags();
+        $task->set_custom_data([
+            'iteration' => 1,
+        ]);
+        manager::queue_adhoc_task($task, true);
+    }
+}

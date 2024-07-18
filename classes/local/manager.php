@@ -64,6 +64,7 @@ class manager {
         $config->batchsize = 10000;
         $config->useproxy = 0;
         $config->deleteexternal = 0;
+        $config->enabletagging = false;
 
         $config->filesystem = '';
         $config->enablepresignedurls = 0;
@@ -329,6 +330,10 @@ class manager {
      * @return string
      */
     public static function get_client_classname_from_fs($filesystem) {
+        // Unit tests need to return the test client.
+        if ($filesystem == '\tool_objectfs\tests\test_file_system') {
+            return '\tool_objectfs\tests\test_client';
+        }
         $clientclass = str_replace('_file_system', '', $filesystem);
         return str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $clientclass.'\\client');
     }

@@ -179,6 +179,7 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
      */
     public function test_orphaned_objects_are_not_updated() {
         global $DB;
+        $objects = $DB->get_records('tool_objectfs_objects');
         $file1 = $this->create_local_file("Test 1");
         $this->create_local_file("Test 2");
         $this->create_local_file("Test 3");

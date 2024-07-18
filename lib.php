@@ -24,6 +24,7 @@
  */
 
 use tool_objectfs\local\object_manipulator\manipulator_builder;
+use tool_objectfs\local\tag\tag_manager;
 
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
 
@@ -120,11 +121,13 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
  * @return array
  */
 function tool_objectfs_status_checks() {
+    $checks = [
+        new tool_objectfs\check\tagging_status(),
+    ];
+
     if (get_config('tool_objectfs', 'proxyrangerequests')) {
-        return [
-            new tool_objectfs\check\proxy_range_request(),
-        ];
+        $checks[] = new tool_objectfs\check\proxy_range_request();
     }
 
-    return [];
+    return $checks;
 }

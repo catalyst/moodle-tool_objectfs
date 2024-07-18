@@ -269,3 +269,22 @@ $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up ht
 
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
+
+$string['settings:taggingheader'] = 'Tagging settings';
+$string['settings:taggingenabled'] = 'Tagging enabled';
+$string['checktagging_status'] = 'Object tagging';
+$string['check:tagging:ok'] = 'Object tagging ok';
+$string['check:tagging:na'] = 'Tagging not enabled or is not supported by file system';
+$string['check:tagging:error'] = 'Error trying to tag object';
+$string['settings:maxtaggingperrun'] = 'Object tagging adhoc sync maximum objects per run';
+$string['settings:maxtaggingperrun:desc'] = 'The maximum number of objects to sync tags for per tagging sync adhoc task iteration.';
+$string['settings:maxtaggingiterations'] = 'Object tagging adhoc sync maximum number of iterations ';
+$string['settings:maxtaggingiterations:desc'] = 'The maximum number of times the tagging sync adhoc task will requeue itself. To avoid accidental infinite runaway.';
+$string['settings:overrideobjecttags'] = 'Allow object tag override';
+$string['settings:overrideobjecttags:desc'] = 'Allows ObjectFS to overwrite tags on objects that already exist in the external store.';
+$string['tagsource:environment'] = 'Environment defined by $CFG->objectfs_environment_name, currently: "{$a}".';
+$string['tagsource:mimetype'] = 'File mimetype as stored in {files} table';
+$string['settings:tagsources'] = 'Tag sources';
+$string['task:triggerupdateobjecttags'] = 'Queue adhoc task to update object tags';
+$string['settings:tagging:help'] = 'Object tagging allows extra metadata to be attached to objects in the external store. Please read TAGGING.md in the plugin Github repository for detailed setup and considerations. This is currently only supported by the S3 external client.';
+$string['object_status:tag_count'] = 'Object tags';
