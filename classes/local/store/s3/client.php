@@ -25,10 +25,13 @@
 
 namespace tool_objectfs\local\store\s3;
 
+use coding_exception;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\store\signed_url;
 use local_aws\admin_settings_aws_region;
+use stdClass;
+use Throwable;
 
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
@@ -874,5 +877,114 @@ class client extends object_client_base {
             }
         }
         return (object)['result' => false, 'error' => get_string('fixturefilemissing', 'tool_objectfs')];
+    }
+
+    /**
+     * Tests setting an objects tag.
+     * @return stdClass containing 'success' and 'details' properties
+     */
+    public function test_set_object_tag(): stdClass {
+        try {
+            // First ensure a test object exists to put tags on.
+            // Note this will override the existing object if exists.
+            $key = $this->bucketkeyprefix . 'tagging_check_file';
+            $this->client->putObject([
+                'Bucket' => $this->bucket,
+                'Key' => $key,
+                'Body' => 'test content',
+            ]);
+
+            // Next try to tag it - this will throw an exception if cannot set
+            // (for example, because it does not have permissions to).
+            $this->client->putObjectTagging([
+                'Bucket' => $this->bucket,
+                'Key' => $key,
+                'Tagging' => [
+                    'TagSet' => [
+                        [
+                            'Key' => 'test',
+                            'Value' => 'test',
+                        ],
+                    ],
+                ],
+            ]);
+        } catch (Throwable $e) {
+            return (object) [
+                'success' => false,
+                'details' => $e->getMessage(),
+            ];
+        }
+
+        // Success - no exceptions thrown.
+        return (object) ['success' => true, 'details' => ''];
+    }
+
+    /**
+     * Convert key=>value to s3 tag format
+     * @param array $tags
+     * @return array tags in s3 format.
+     */
+    private function convert_tags_to_s3_format(array $tags): array {
+        foreach ($tags as $key => $value) {
+            $s3tags[] = [
+                'Key' => $key,
+                'Value' => $value,
+            ];
+        }
+        return $s3tags;
+    }
+
+    /**
+     * Set the given objects tags in the external store.
+     * @param string $contenthash file content hash
+     * @param array $tags array of key=>value pairs to set as tags.
+     */
+    public function set_object_tags(string $contenthash, array $tags) {
+        $objectkey = $this->bucketkeyprefix . $this->get_filepath_from_hash($contenthash);
+
+        // Then put onto object.
+        $this->client->putObjectTagging([
+            'Bucket' => $this->bucket,
+            'Key' => $objectkey,
+            'Tagging' => [
+                'TagSet' => $this->convert_tags_to_s3_format($tags),
+            ],
+        ]);
+    }
+
+    /**
+     * Returns given objects tags queried from the external store. Object must exist.
+     * @param string $contenthash file content has
+     * @return array array of key=>value tag pairs
+     */
+    public function get_object_tags(string $contenthash): array {
+        $key = $this->bucketkeyprefix . $this->get_filepath_from_hash($contenthash);
+
+        // Query from S3.
+        $result = $this->client->getObjectTagging([
+            'Bucket' => $this->bucket,
+            'Key' => $key,
+        ]);
+
+        // Ensure tags are what we expect, and AWS have not changed the format.
+        if (!array_key_exists('TagSet', $result->toArray())) {
+            throw new coding_exception("Unexpected tag format received. Result did not contain a TagSet");
+        }
+
+        // Convert from S3 format to key=>value format.
+        $tagkv = [];
+        foreach ($result->toArray()['TagSet'] as $tag) {
+            $tagkv[$tag['Key']] = $tag['Value'];
+        }
+
+        return $tagkv;
+    }
+
+    /**
+     * If the client supports object tagging feature.
+     * @return bool true if supports, else false
+     */
+    public function supports_object_tagging(): bool {
+        return true;
     }
 }

@@ -23,6 +23,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\local\tag\tag_manager;
+use tool_objectfs\task\update_object_tags;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/classes/local/manager.php');
@@ -128,7 +131,6 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configduration('tool_objectfs/consistencydelay',
         new lang_string('settings:consistencydelay', 'tool_objectfs'), '', 10 * MINSECS, MINSECS));
-
 
     $settings->add(new admin_setting_heading('tool_objectfs/storagefilesystemselection',
         new lang_string('settings:clientselection:header', 'tool_objectfs'), ''));
@@ -253,4 +255,42 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/preferexternal',
         new lang_string('settings:preferexternal', 'tool_objectfs'), '', ''));
+
+    // Tagging settings.
+    $settings->add(new admin_setting_heading('tool_objectfs/taggingsettings',
+        new lang_string('settings:taggingheader', 'tool_objectfs'), ''));
+
+    $settings->add(new admin_setting_description('tool_objectfs/tagginghelp',
+        '',
+        get_string('settings:tagging:help', 'tool_objectfs')
+    ));
+
+    $settings->add(new admin_setting_configcheckbox('tool_objectfs/taggingenabled',
+        new lang_string('settings:taggingenabled', 'tool_objectfs'), '', 0));
+
+    $settings->add(new admin_setting_description('tool_objectfs/tagsources',
+        new lang_string('settings:tagsources', 'tool_objectfs'),
+        tag_manager::get_tag_summary_html()
+    ));
+
+    $settings->add(new admin_setting_configtext('tool_objectfs/maxtaggingperrun',
+        new lang_string('settings:maxtaggingperrun', 'tool_objectfs'),
+        get_string('settings:maxtaggingperrun:desc', 'tool_objectfs'),
+        10000,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configtext('tool_objectfs/maxtaggingiterations',
+        new lang_string('settings:maxtaggingiterations', 'tool_objectfs'),
+        get_string('settings:maxtaggingiterations:desc', 'tool_objectfs'),
+        1000,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configcheckbox('tool_objectfs/overwriteobjecttags',
+        new lang_string('settings:overrideobjecttags', 'tool_objectfs'),
+        get_string('settings:overrideobjecttags:desc', 'tool_objectfs'),
+        1
+    ));
+
 }
