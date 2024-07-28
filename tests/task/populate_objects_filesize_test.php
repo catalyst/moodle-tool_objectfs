@@ -28,13 +28,6 @@ namespace tool_objectfs\task;
 class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
 
     /**
-     * This method runs before every test.
-     */
-    public function setUp(): void {
-        $this->resetAfterTest();
-    }
-
-    /**
      * Test multiple objects have their filesize updated.
      */
     public function test_empty_filesizes_updated() {
@@ -179,7 +172,8 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
      */
     public function test_orphaned_objects_are_not_updated() {
         global $DB;
-        $objects = $DB->get_records('tool_objectfs_objects');
+        $numstart = $DB->count_records('tool_objectfs_objects');
+
         $file1 = $this->create_local_file("Test 1");
         $this->create_local_file("Test 2");
         $this->create_local_file("Test 3");
@@ -203,8 +197,8 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
         });
 
         // Test that 4 records have now been updated.
-        $this->assertCount(5, $objects);
-        $this->assertCount(4, $updatedobjects);
+        $this->assertEquals(5, count($objects) - $numstart);
+        $this->assertEquals(4, count($updatedobjects) - $numstart);
     }
 
     /**
@@ -212,6 +206,8 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
      */
     public function test_objects_with_error_are_not_updated() {
         global $DB;
+        $numstart = $DB->count_records('tool_objectfs_objects');
+
         $file1 = $this->create_local_file("Test 1");
         $this->create_local_file("Test 2");
         $this->create_local_file("Test 3");
@@ -235,7 +231,7 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
         });
 
         // Test that 4 records have now been updated.
-        $this->assertCount(5, $objects);
-        $this->assertCount(4, $updatedobjects);
+        $this->assertEquals(5, count($objects) - $numstart);
+        $this->assertEquals(4, count($updatedobjects) - $numstart);
     }
 }
