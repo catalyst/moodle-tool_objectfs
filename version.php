@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2023051701;      // The current plugin version (Date: YYYYMMDDXX).
 $plugin->release   = 2023051701;      // Same as version.
-$plugin->requires  = 2020110900;      // Requires Filesystem API.
+$plugin->requires  = 2023042400;      // Requires 4.2
 $plugin->component = "tool_objectfs";
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->supported = [310, 402];
+$plugin->supported = [402, 405];
