@@ -29,6 +29,9 @@ class pusher_test extends \tool_objectfs\tests\testcase {
     /** @var string $manipulator */
     protected $manipulator = pusher::class;
 
+    /** @var pusher Pusher object */
+    protected $pusher;
+
     protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();

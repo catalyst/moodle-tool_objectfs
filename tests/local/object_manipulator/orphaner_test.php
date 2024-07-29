@@ -29,6 +29,9 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
     /** @var string $manipulator */
     protected $manipulator = orphaner::class;
 
+    /** @var orphaner Orphaner object */
+    protected $orphaner;
+
     protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();
