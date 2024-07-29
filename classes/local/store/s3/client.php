@@ -60,6 +60,9 @@ class client extends object_client_base {
      */
     private $signingmethod;
 
+    /** @var string Prefix for bucket keys */
+    protected $bucketkeyprefix;
+
     /**
      * construct
      * @param mixed $config
