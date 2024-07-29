@@ -70,7 +70,7 @@ class client extends object_client_base {
                 'password' => $this->config->openstack_password,
                 'domain' => ['id' => 'default'],
             ],
-            'scope'   => ['project' => ['id' => $this->config->openstack_projectid]]
+            'scope'   => ['project' => ['id' => $this->config->openstack_projectid]],
         ];
 
         if (!isset($this->config->openstack_authtoken['expires_at'])
@@ -179,7 +179,7 @@ class client extends object_client_base {
                 'endpoint' => $this->config->openstack_authurl,
                 'region' => $this->config->openstack_region,
                 'cachedtoken' => $this->config->openstack_authtoken,
-            ]
+            ],
         ]);
         return $context;
     }
@@ -288,7 +288,7 @@ class client extends object_client_base {
     public function test_permissions($testdelete) {
         $permissions = new \stdClass();
         $permissions->success = true;
-        $permissions->messages = array();
+        $permissions->messages = [];
 
         $container = $this->get_container();
 

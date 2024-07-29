@@ -150,7 +150,7 @@ class objectfs_report implements \renderable {
     public static function cleanup_reports() {
         global $DB;
         $reportdate = time() - YEARSECS;
-        $params = array('reportdate' => $reportdate);
+        $params = ['reportdate' => $reportdate];
         $reports = $DB->get_records_select('tool_objectfs_reports', 'reportdate < :reportdate', $params, 'id', 'id');
         $reportids = array_keys($reports);
         $DB->delete_records_list('tool_objectfs_reports', 'id', $reportids);
@@ -177,7 +177,7 @@ class objectfs_report implements \renderable {
      */
     public static function get_report_ids() {
         global $DB;
-        $reports = array();
+        $reports = [];
         $records = $DB->get_records('tool_objectfs_reports', null, 'id DESC', 'id, reportdate');
         foreach ($records as $record) {
             $reports[$record->id] = $record->reportdate;

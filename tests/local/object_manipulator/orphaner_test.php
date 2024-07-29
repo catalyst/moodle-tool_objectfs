@@ -96,7 +96,7 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
 
         // Update that object to have a different hash, to mock a non-existent
         // mdl_file with an objectfs record (orphaned).
-        $DB->set_field('files', 'contenthash', 'different', array('contenthash' => $object->contenthash));
+        $DB->set_field('files', 'contenthash', 'different', ['contenthash' => $object->contenthash]);
 
         // Expect one candidate - no matching contenthash in {files}.
         $objects = $finder->get();

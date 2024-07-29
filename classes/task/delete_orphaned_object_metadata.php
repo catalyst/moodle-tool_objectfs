@@ -54,7 +54,7 @@ class delete_orphaned_object_metadata extends task {
 
         $params = [
             'location' => OBJECT_LOCATION_ORPHANED,
-            'ageforremoval' => time() - $ageforremoval
+            'ageforremoval' => time() - $ageforremoval,
         ];
 
         if (!empty($this->config->deleteexternal) && $this->config->deleteexternal == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {
