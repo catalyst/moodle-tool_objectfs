@@ -44,7 +44,7 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
             $this->create_local_file("Test 2")->get_contenthash(),
             $this->create_local_file("Test 3")->get_contenthash(),
             $this->create_local_file("Test 4")->get_contenthash(),
-            $this->create_local_file("This is a looong name")->get_contenthash()
+            $this->create_local_file("This is a looong name")->get_contenthash(),
         ];
 
         // Set all objects to have a filesize of null.
@@ -131,7 +131,7 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
             $this->create_local_file("Test 2")->get_contenthash(),
             $this->create_local_file("Test 3")->get_contenthash(),
             $this->create_local_file("Test 4")->get_contenthash(),
-            $this->create_local_file("This is a looong name")->get_contenthash()
+            $this->create_local_file("This is a looong name")->get_contenthash(),
         ];
 
         // Set all objects to have a filesize of null.

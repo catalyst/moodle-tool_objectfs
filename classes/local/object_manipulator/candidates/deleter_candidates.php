@@ -57,7 +57,7 @@ class deleter_candidates extends manipulator_candidates_base {
         return [
             'consistancythreshold' => $consistancythreshold,
             'location' => OBJECT_LOCATION_DUPLICATED,
-            'sizethreshold' => $this->config->sizethreshold
+            'sizethreshold' => $this->config->sizethreshold,
         ];
     }
 }

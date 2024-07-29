@@ -25,7 +25,7 @@
 
 namespace tool_objectfs\log;
 
-use \tool_objectfs\log\objectfs_statistic;
+use tool_objectfs\log\objectfs_statistic;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -64,14 +64,14 @@ class aggregate_logger extends objectfs_logger {
      */
     public function __construct() {
         parent::__construct();
-        $this->movestatistics = array(
-            OBJECT_LOCATION_ERROR => array(),
-            OBJECT_LOCATION_LOCAL => array(),
-            OBJECT_LOCATION_DUPLICATED => array(),
-            OBJECT_LOCATION_EXTERNAL => array()
-        );
-        $this->readstatistics = array();
-        $this->querystatistics = array();
+        $this->movestatistics = [
+            OBJECT_LOCATION_ERROR => [],
+            OBJECT_LOCATION_LOCAL => [],
+            OBJECT_LOCATION_DUPLICATED => [],
+            OBJECT_LOCATION_EXTERNAL => [],
+        ];
+        $this->readstatistics = [];
+        $this->querystatistics = [];
     }
 
     /**

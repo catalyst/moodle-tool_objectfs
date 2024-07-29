@@ -102,7 +102,7 @@ class object_status_history_table extends \table_sql {
             default:
                 $sort = 'heading ASC';
         }
-        $params = array('reporttype' => $this->reporttype, 'reportid' => $this->reportid);
+        $params = ['reporttype' => $this->reporttype, 'reportid' => $this->reportid];
         $fields = 'datakey AS heading, objectcount AS count, objectsum AS size';
         $rows = $DB->get_records('tool_objectfs_report_data', $params, $sort, $fields);
         $this->rawdata = $rows;
@@ -196,7 +196,7 @@ class object_status_history_table extends \table_sql {
         if ($max > 0) {
             $share = round(100 * $value / $max, $precision);
         }
-        $htmlparams = array('class' => 'ofs-bar', 'style' => 'width:'.$share.'%');
+        $htmlparams = ['class' => 'ofs-bar', 'style' => 'width:'.$share.'%'];
 
         switch ($type) {
             case 'count':

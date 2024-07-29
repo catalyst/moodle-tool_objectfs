@@ -234,7 +234,7 @@ class object_file_system_test extends tests\testcase {
      * delete_empty_folders_provider
      * @return array
      */
-    public function delete_empty_folders_provider() {
+    public static function delete_empty_folders_provider(): array {
         return [
             [
                 /*
@@ -334,11 +334,11 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $this->filesystem->readfile($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
@@ -366,11 +366,11 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $this->filesystem->get_content($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
@@ -389,11 +389,11 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $this->filesystem->xsendfile($fakefile->get_contenthash());
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
@@ -429,11 +429,11 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $filehandle = $this->filesystem->get_content_file_handle($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
@@ -443,7 +443,7 @@ class object_file_system_test extends tests\testcase {
         $filehash = $file->get_contenthash();
 
         // Delete file record so remove file will remove.
-        $DB->delete_records('files', array('contenthash' => $filehash));
+        $DB->delete_records('files', ['contenthash' => $filehash]);
         $this->filesystem->remove_file($filehash);
 
         $islocalreadable = $this->filesystem->is_file_readable_locally_by_hash($filehash);
@@ -456,7 +456,7 @@ class object_file_system_test extends tests\testcase {
         $filehash = $file->get_contenthash();
 
         // Delete file record so remove file will remove.
-        $DB->delete_records('files', array('contenthash' => $filehash));
+        $DB->delete_records('files', ['contenthash' => $filehash]);
         $this->filesystem->remove_file($filehash);
 
         $isremotereadable = $this->is_externally_readable_by_hash($filehash);
@@ -654,40 +654,40 @@ class object_file_system_test extends tests\testcase {
      * presigned_url_should_redirect_provider
      * @return array
      */
-    public function presigned_url_should_redirect_provider() {
-        $provider = array();
+    public static function presigned_url_should_redirect_provider(): array {
+        $provider = [];
 
         // Testing defaults.
-        $provider[] = array('Default', 'Default', false);
+        $provider[] = ['Default', 'Default', false];
 
         // Testing $enablepresignedurls.
-        $provider[] = array(1, 'Default', true);
-        $provider[] = array('1', 'Default', true);
-        $provider[] = array(0, 'Default', false);
-        $provider[] = array('0', 'Default', false);
-        $provider[] = array('', 'Default', false);
-        $provider[] = array(null, 'Default', false);
+        $provider[] = [1, 'Default', true];
+        $provider[] = ['1', 'Default', true];
+        $provider[] = [0, 'Default', false];
+        $provider[] = ['0', 'Default', false];
+        $provider[] = ['', 'Default', false];
+        $provider[] = [null, 'Default', false];
 
         // Testing $presignedminfilesize.
-        $provider[] = array(1, 0, true);
-        $provider[] = array(1, '0', true);
-        $provider[] = array(1, '', true);
+        $provider[] = [1, 0, true];
+        $provider[] = [1, '0', true];
+        $provider[] = [1, '', true];
 
         // Testing minimum file size to be greater than file size.
         // 12 is a size of the file with 'test content' content.
-        $provider[] = array(1, 13, false);
-        $provider[] = array(1, '13', false);
+        $provider[] = [1, 13, false];
+        $provider[] = [1, '13', false];
 
         // Testing minimum file size to be less than file size.
         // 12 is a size of the file with 'test content' content.
-        $provider[] = array(1, 11, true);
-        $provider[] = array(1, '11', true);
+        $provider[] = [1, 11, true];
+        $provider[] = [1, '11', true];
 
         // Testing nulls and empty strings.
-        $provider[] = array(null, null, false);
-        $provider[] = array(null, '', false);
-        $provider[] = array('', null, false);
-        $provider[] = array('', '', false);
+        $provider[] = [null, null, false];
+        $provider[] = [null, '', false];
+        $provider[] = ['', null, false];
+        $provider[] = ['', '', false];
 
         return $provider;
     }
@@ -733,7 +733,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @return array
      */
-    public function get_expiration_time_method_if_supported_provider() {
+    public static function get_expiration_time_method_if_supported_provider(): array {
         $now = time();
 
         // Seconds after the minute from X.
@@ -840,7 +840,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @return array
      */
-    public function get_valid_http_ranges_provider() {
+    public static function get_valid_http_ranges_provider(): array {
         return [
             ['', 0, false],
             ['bytes=0-', 100, (object)['rangefrom' => 0, 'rangeto' => 99, 'length' => 100]],
@@ -870,7 +870,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @return array
      */
-    public function curl_range_request_to_presigned_url_provider() {
+    public static function curl_range_request_to_presigned_url_provider(): array {
         return [
             ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 14, 'length' => 15], '15-bytes string'],
             ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 9, 'length' => 10], '15-bytes s'],

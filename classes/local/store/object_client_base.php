@@ -103,7 +103,7 @@ abstract class object_client_base implements object_client {
      *
      * @throws \coding_exception
      */
-    public function generate_presigned_url($contenthash, $headers = array()) {
+    public function generate_presigned_url($contenthash, $headers = []) {
         throw new \coding_exception("Pre-signed URLs not supported");
     }
 

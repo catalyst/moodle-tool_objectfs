@@ -53,7 +53,7 @@ class orphaner_candidates extends manipulator_candidates_base {
      */
     public function get_candidates_sql_params() {
         return [
-          'location' => OBJECT_LOCATION_ORPHANED
+          'location' => OBJECT_LOCATION_ORPHANED,
         ];
     }
 }
