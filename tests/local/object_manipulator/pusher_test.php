@@ -23,6 +23,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * Tests for object pusher.
  *
  * @covers \tool_objectfs\local\object_manipulator\pusher
+ * @package tool_objectfs
  */
 class pusher_test extends \tool_objectfs\tests\testcase {
 
@@ -47,6 +48,13 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         ob_end_clean();
     }
 
+    /**
+     * set_pusher_config
+     * @param mixed $key
+     * @param mixed $value
+     *
+     * @return void
+     */
     protected function set_pusher_config($key, $value) {
         $config = manager::get_objectfs_config();
         $config->$key = $value;
@@ -72,7 +80,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $object = $this->create_local_object();
         $maximumfilesize = $this->filesystem->get_maximum_upload_filesize() + 1;
-        $DB->set_field('tool_objectfs_objects', 'filesize', $maximumfilesize, array('contenthash' => $object->contenthash));
+        $DB->set_field('tool_objectfs_objects', 'filesize', $maximumfilesize, ['contenthash' => $object->contenthash]);
 
         self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
@@ -81,7 +89,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $this->set_pusher_config('sizethreshold', 100);
         $object = $this->create_local_object();
-        $DB->set_field('tool_objectfs_objects', 'filesize', 10, array('contenthash' => $object->contenthash));
+        $DB->set_field('tool_objectfs_objects', 'filesize', 10, ['contenthash' => $object->contenthash]);
 
         self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
@@ -97,9 +105,9 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $object = $this->create_local_object();
 
-        $this->pusher->execute(array($object));
+        $this->pusher->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -109,9 +117,9 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $object = $this->create_duplicated_object();
 
-        $this->pusher->execute(array($object));
+        $this->pusher->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -121,9 +129,9 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $object = $this->create_remote_object();
 
-        $this->pusher->execute(array($object));
+        $this->pusher->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -131,7 +139,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
 
     public function test_pusher_can_push_multiple_objects() {
         global $DB;
-        $objects = array();
+        $objects = [];
         for ($i = 0; $i < 5; $i++) {
             $objects[] = $this->create_local_object("Object $i");
         }
@@ -139,7 +147,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         $this->pusher->execute($objects);
 
         foreach ($objects as $object) {
-            $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+            $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
             $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
             $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
             $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -156,7 +164,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         $this->pusher->execute($objects);
 
         $object = $this->create_local_object();
-        $file = $DB->get_record('files', array('contenthash' => $object->contenthash));
+        $file = $DB->get_record('files', ['contenthash' => $object->contenthash]);
 
         // Update mimetype to something different and insert as new file.
         $file->mimetype = "differentMimeType";

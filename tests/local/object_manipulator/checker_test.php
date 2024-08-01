@@ -22,6 +22,7 @@ use tool_objectfs\local\manager;
  * Tests for object checker.
  *
  * @covers \tool_objectfs\local\object_manipulator\checker
+ * @package tool_objectfs
  */
 class checker_test extends \tool_objectfs\tests\testcase {
 
@@ -47,7 +48,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
     public function test_checker_get_location_local_if_object_is_local() {
         global $DB;
         $file = $this->create_local_object();
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
         $this->assertEquals('string', gettype($location));
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
@@ -55,7 +56,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
     public function test_checker_get_location_duplicated_if_object_is_duplicated() {
         global $DB;
         $file = $this->create_duplicated_object();
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
         $this->assertEquals('string', gettype($location));
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
@@ -63,7 +64,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
     public function test_checker_get_location_external_if_object_is_external() {
         global $DB;
         $file = $this->create_remote_object();
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $file->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
         $this->assertEquals('string', gettype($location));
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
@@ -81,7 +82,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
     public function test_checker_get_candidate_objects_will_get_object() {
         global $DB;
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_get_object');
-        $DB->delete_records('tool_objectfs_objects', array('contenthash' => $localobject->contenthash));
+        $DB->delete_records('tool_objectfs_objects', ['contenthash' => $localobject->contenthash]);
 
         self::assertTrue($this->objects_contain_hash($localobject->contenthash));
     }
@@ -103,27 +104,27 @@ class checker_test extends \tool_objectfs\tests\testcase {
         $file = $this->create_local_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
-        $this->assertEquals(OBJECT_LOCATION_LOCAL, $reflection->invokeArgs($this->checker, array($file)));
+        $this->assertEquals(OBJECT_LOCATION_LOCAL, $reflection->invokeArgs($this->checker, [$file]));
     }
 
     public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_duplicated() {
         $file = $this->create_duplicated_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
-        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $reflection->invokeArgs($this->checker, array($file)));
+        $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $reflection->invokeArgs($this->checker, [$file]));
     }
 
     public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_external() {
         $file = $this->create_remote_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
-        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $reflection->invokeArgs($this->checker, array($file)));
+        $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $reflection->invokeArgs($this->checker, [$file]));
     }
 
     public function test_checker_manipulate_object_method_will_get_error_location_on_error_file() {
         $file = $this->create_error_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $reflection->invokeArgs($this->checker, array($file)));
+        $this->assertEquals(OBJECT_LOCATION_ERROR, $reflection->invokeArgs($this->checker, [$file]));
     }
 }

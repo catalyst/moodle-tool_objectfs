@@ -168,7 +168,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
      *
      * @return array
      */
-    public function object_status_add_barchart_method_provider() {
+    public static function object_status_add_barchart_method_provider(): array {
         return [
             [0, 0, '', 0, '0'],
             [0, 100, 'count', 0, '<div class="ofs-bar" style="width:0%">' . number_format(0) . '</div>'],
@@ -212,7 +212,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
      *
      * @return array
      */
-    public function object_status_get_size_range_from_logsize_provider() {
+    public static function object_status_get_size_range_from_logsize_provider(): array {
         return [
             ['1', '< ' . display_size(1024)],
             ['10', display_size(1024) . ' - ' . display_size(2048)],

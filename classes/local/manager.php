@@ -28,12 +28,15 @@ namespace tool_objectfs\local;
 use stdClass;
 use tool_objectfs\local\store\object_file_system;
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * [Description manager]
+ */
 class manager {
 
     /**
-     * @param $config
+     * set_objectfs_config
+     * @param stdClass $config
+     * @return void
      */
     public static function set_objectfs_config($config) {
         foreach ($config as $key => $value) {
@@ -42,6 +45,7 @@ class manager {
     }
 
     /**
+     * get_objectfs_config
      * @return stdClass
      * @throws \dml_exception
      */
@@ -114,8 +118,9 @@ class manager {
     }
 
     /**
-     * @param $config
-     * @return bool
+     * get_client
+     * @param stdClass $config
+     * @return mixed|bool
      */
     public static function get_client($config) {
         $clientclass = self::get_client_classname_from_fs($config->filesystem);
@@ -128,8 +133,9 @@ class manager {
     }
 
     /**
-     * @param $contenthash
-     * @param $newlocation
+     * update_object_by_hash
+     * @param string $contenthash
+     * @param string $newlocation
      * @param int|null $filesize Size of the file in bytes. Falls back to stored value if not provided.
      * @return mixed|stdClass
      * @throws \dml_exception
@@ -172,8 +178,9 @@ class manager {
     }
 
     /**
+     * update_object
      * @param stdClass $object
-     * @param $newlocation
+     * @param string $newlocation
      * @return stdClass
      * @throws \dml_exception
      */
@@ -192,6 +199,7 @@ class manager {
     }
 
     /**
+     * cloudfront_pem_exists
      * @return string
      * @throws \coding_exception
      * @throws \dml_exception

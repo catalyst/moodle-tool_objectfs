@@ -29,6 +29,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/tablelib.php');
 
+/**
+ * [Description files_table]
+ */
 class files_table extends \table_sql {
 
     /**
@@ -62,18 +65,42 @@ class files_table extends \table_sql {
         $this->downloadable = true;
     }
 
+    /**
+     * col_id
+     * @param \stdClass $row
+     *
+     * @return int
+     */
     public function col_id(\stdClass $row) {
         return $row->id;
     }
 
+    /**
+     * col_contextid
+     * @param \stdClass $row
+     *
+     * @return int
+     */
     public function col_contextid(\stdClass $row) {
         return $row->contextid;
     }
 
+    /**
+     * col_contenthash
+     * @param \stdClass $row
+     *
+     * @return string
+     */
     public function col_contenthash(\stdClass $row) {
         return $row->contenthash;
     }
 
+    /**
+     * col_localpath
+     * @param \stdClass $row
+     *
+     * @return string
+     */
     public function col_localpath(\stdClass $row) {
         $l1 = $row->contenthash[0] . $row->contenthash[1];
         $l2 = $row->contenthash[2] . $row->contenthash[3];
@@ -81,34 +108,82 @@ class files_table extends \table_sql {
         return "$l1/$l2";
     }
 
+    /**
+     * col_component
+     * @param \stdClass $row
+     *
+     * @return mixed
+     */
     public function col_component(\stdClass $row) {
         return $row->component;
     }
 
+    /**
+     * col_filearea
+     * @param \stdClass $row
+     *
+     * @return mixed
+     */
     public function col_filearea(\stdClass $row) {
         return $row->filearea;
     }
 
+    /**
+     * col_filename
+     * @param \stdClass $row
+     *
+     * @return mixed
+     */
     public function col_filename(\stdClass $row) {
         return $row->filename;
     }
 
+    /**
+     * col_filepath
+     * @param \stdClass $row
+     *
+     * @return string
+     */
     public function col_filepath(\stdClass $row) {
         return $row->filepath;
     }
 
+    /**
+     * col_mimetype
+     * @param \stdClass $row
+     *
+     * @return string
+     */
     public function col_mimetype(\stdClass $row) {
         return $row->mimetype;
     }
 
+    /**
+     * col_filesize
+     * @param \stdClass $row
+     *
+     * @return mixed
+     */
     public function col_filesize(\stdClass $row) {
         return display_size($row->filesize);
     }
 
+    /**
+     * col_timecreated
+     * @param \stdClass $row
+     *
+     * @return int
+     */
     public function col_timecreated(\stdClass $row) {
         return userdate($row->timecreated);
     }
 
+    /**
+     * col_link
+     * @param \stdClass $row
+     *
+     * @return string
+     */
     public function col_link(\stdClass $row) {
         global $DB;
 

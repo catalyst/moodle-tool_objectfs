@@ -25,12 +25,30 @@
 
 namespace tool_objectfs\local\store;
 
+/**
+ * [Description object_client_base]
+ */
 abstract class object_client_base implements object_client {
 
+    /**
+     * @var string
+     */
     protected $autoloader;
+    /**
+     * @var mixed
+     */
     protected $expirationtime;
+    /**
+     * @var bool
+     */
     protected $testdelete = true;
+    /**
+     * @var int
+     */
     public $presignedminfilesize;
+    /**
+     * @var mixed
+     */
     public $enablepresignedurls;
 
     /** @var int $maxupload Maximum allowed file size that can be uploaded. */
@@ -39,6 +57,10 @@ abstract class object_client_base implements object_client {
     /** @var object $config Client config. */
     protected $config;
 
+    /**
+     * construct
+     * @param \stdClass $config
+     */
     public function __construct($config) {
 
     }
@@ -56,6 +78,10 @@ abstract class object_client_base implements object_client {
         }
     }
 
+    /**
+     * register_stream_wrapper
+     * @return void
+     */
     public function register_stream_wrapper() {
 
     }
@@ -77,7 +103,7 @@ abstract class object_client_base implements object_client {
      *
      * @throws \coding_exception
      */
-    public function generate_presigned_url($contenthash, $headers = array()) {
+    public function generate_presigned_url($contenthash, $headers = []) {
         throw new \coding_exception("Pre-signed URLs not supported");
     }
 

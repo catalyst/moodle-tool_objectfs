@@ -35,6 +35,9 @@ define('AWS_CAN_READ_OBJECT', 0);
 define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
+/**
+ * [Description client]
+ */
 class client extends object_client_base {
 
     /**
@@ -44,13 +47,26 @@ class client extends object_client_base {
      */
     const MAX_TEMP_LIMIT = 2097152;
 
+    /**
+     * @var mixed
+     */
     protected $client;
+    /**
+     * @var mixed
+     */
     protected $bucket;
+    /**
+     * @var mixed
+     */
     private $signingmethod;
 
     /** @var string Prefix for bucket keys */
     protected $bucketkeyprefix;
 
+    /**
+     * construct
+     * @param mixed $config
+     */
     public function __construct($config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
@@ -73,10 +89,18 @@ class client extends object_client_base {
         }
     }
 
+    /**
+     * sleep
+     * @return array
+     */
     public function __sleep() {
-        return array('bucket');
+        return ['bucket'];
     }
 
+    /**
+     * wakeup
+     * @return void
+     */
     public function __wakeup() {
         // We dont want to store credentials in the client itself as
         // it will be serialised, so re-retrive them now.
@@ -121,6 +145,7 @@ class client extends object_client_base {
      * Set the client.
      *
      * @param \stdClass $config Client config.
+     * @return void
      */
     public function set_client($config) {
         if (!$this->is_configured($config)) {
@@ -128,17 +153,17 @@ class client extends object_client_base {
             return;
         }
 
-        $options = array(
+        $options = [
             'region' => $config->s3_region,
-            'version' => AWS_API_VERSION
-        );
+            'version' => AWS_API_VERSION,
+        ];
 
         if (empty($config->s3_usesdkcreds)) {
-            $options['credentials'] = array('key' => $config->s3_key, 'secret' => $config->s3_secret);
+            $options['credentials'] = ['key' => $config->s3_key, 'secret' => $config->s3_secret];
         }
 
         if ($config->useproxy) {
-            $options['http'] = array('proxy' => $this->get_proxy_string());
+            $options['http'] = ['proxy' => $this->get_proxy_string()];
         }
 
         // Support base_url config for aws api compatible endpoints.
@@ -151,7 +176,7 @@ class client extends object_client_base {
 
     /**
      * Registers 's3://bucket' as a prefix for file actions.
-     *
+     * @return void
      */
     public function register_stream_wrapper() {
         if ($this->get_availability() && $this->is_functional()) {
@@ -161,6 +186,12 @@ class client extends object_client_base {
         }
     }
 
+    /**
+     * get_md5_from_hash
+     * @param string $contenthash
+     *
+     * @return string|bool
+     */
     private function get_md5_from_hash($contenthash) {
         if (!$this->is_functional()) {
             return false;
@@ -168,9 +199,9 @@ class client extends object_client_base {
 
         try {
             $key = $this->get_filepath_from_hash($contenthash);
-            $result = $this->client->headObject(array(
+            $result = $this->client->headObject([
                             'Bucket' => $this->bucket,
-                            'Key' => $this->bucketkeyprefix . $key));
+                            'Key' => $this->bucketkeyprefix . $key]);
         } catch (\Aws\S3\Exception\S3Exception $e) {
             return false;
         }
@@ -180,6 +211,13 @@ class client extends object_client_base {
         return $md5;
     }
 
+    /**
+     * verify_object
+     * @param string $contenthash
+     * @param string $localpath
+     *
+     * @return bool
+     */
     public function verify_object($contenthash, $localpath) {
         // For objects uploaded to S3 storage using the multipart upload, the etag will not be the objects MD5.
         // So we can't compare here to verify the object.
@@ -205,7 +243,8 @@ class client extends object_client_base {
     /**
      * Deletes a file in S3 storage.
      *
-     * @path   string full path to S3 file.
+     * @param string $fullpath full path to S3 file.
+     * @return void
      */
     public function delete_file($fullpath) {
         unlink($fullpath);
@@ -216,6 +255,7 @@ class client extends object_client_base {
      *
      * @param string $currentpath     current full path to S3 file.
      * @param string $destinationpath destination path.
+     * @return void
      */
     public function rename_file($currentpath, $destinationpath) {
         rename($currentpath, $destinationpath);
@@ -225,17 +265,23 @@ class client extends object_client_base {
      * S3 file streams require a seekable context to be supplied
      * if they are to be seekable.
      *
-     * @return void
+     * @return mixed
      */
     public function get_seekable_stream_context() {
-        $context = stream_context_create(array(
-            's3' => array(
-                'seekable' => true
-            )
-        ));
+        $context = stream_context_create([
+            's3' => [
+                'seekable' => true,
+            ],
+        ]);
         return $context;
     }
 
+    /**
+     * get_filepath_from_hash
+     * @param string $contenthash
+     *
+     * @return string
+     */
     protected function get_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
@@ -260,7 +306,7 @@ class client extends object_client_base {
                 $connection->success = false;
                 $connection->details = get_string('settings:notconfigured', 'tool_objectfs');
             } else {
-                $this->client->headBucket(array('Bucket' => $this->bucket));
+                $this->client->headBucket(['Bucket' => $this->bucket]);
             }
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $connection->success = false;
@@ -281,25 +327,26 @@ class client extends object_client_base {
      * There is no check connection in the AWS API.
      * We use list buckets instead and check the bucket is in the list.
      *
+     * @param bool $testdelete
      * @return object
      * @throws \coding_exception
      */
     public function test_permissions($testdelete) {
         $permissions = new \stdClass();
         $permissions->success = true;
-        $permissions->messages = array();
+        $permissions->messages = [];
 
         if ($this->is_functional()) {
             $permissions->success = false;
-            $permissions->messages = array();
+            $permissions->messages = [];
             return $permissions;
         }
 
         try {
-            $result = $this->client->putObject(array(
+            $result = $this->client->putObject([
                 'Bucket' => $this->bucket,
                 'Key' => $this->bucketkeyprefix . 'permissions_check_file',
-                'Body' => 'test content'));
+                'Body' => 'test content']);
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
@@ -307,9 +354,9 @@ class client extends object_client_base {
         }
 
         try {
-            $result = $this->client->getObject(array(
+            $result = $this->client->getObject([
                 'Bucket' => $this->bucket,
-                'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+                'Key' => $this->bucketkeyprefix . 'permissions_check_file']);
         } catch (\Aws\S3\Exception\S3Exception $e) {
             $errorcode = $e->getAwsErrorCode();
             // Write could have failed.
@@ -322,7 +369,10 @@ class client extends object_client_base {
 
         if ($testdelete) {
             try {
-                $result = $this->client->deleteObject(array('Bucket' => $this->bucket, 'Key' => $this->bucketkeyprefix . 'permissions_check_file'));
+                $result = $this->client->deleteObject([
+                    'Bucket' => $this->bucket,
+                    'Key' => $this->bucketkeyprefix . 'permissions_check_file',
+                ]);
                 $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
                 $permissions->success = false;
             } catch (\Aws\S3\Exception\S3Exception $e) {
@@ -343,6 +393,12 @@ class client extends object_client_base {
         return $permissions;
     }
 
+    /**
+     * get_exception_details
+     * @param \Exception $exception
+     *
+     * @return string
+     */
     protected function get_exception_details($exception) {
         $message = $exception->getMessage();
 
@@ -449,7 +505,11 @@ class client extends object_client_base {
 
         try {
             $externalpath = $this->get_filepath_from_hash($contenthash);
-            $uploader = new \Aws\S3\ObjectUploader($this->client, $this->bucket, $this->bucketkeyprefix . $externalpath, $filehandle);
+            $uploader = new \Aws\S3\ObjectUploader(
+                $this->client, $this->bucket,
+                $this->bucketkeyprefix . $externalpath,
+                $filehandle
+            );
             $uploader->upload();
             fclose($filehandle);
         } catch (\Aws\Exception\MultipartUploadException $e) {
@@ -479,7 +539,7 @@ class client extends object_client_base {
      * @return signed_url
      * @throws \Exception
      */
-    public function generate_presigned_url($contenthash, $headers = array()) {
+    public function generate_presigned_url($contenthash, $headers = []) {
         if ('cf' === $this->signingmethod) {
             return  $this->generate_presigned_url_cloudfront($contenthash, $headers);
         }
@@ -487,6 +547,7 @@ class client extends object_client_base {
     }
 
     /**
+     * generate_presigned_url_s3
      * @param string $contenthash
      * @param array $headers
      * @param bool $nicefilename
@@ -524,6 +585,7 @@ class client extends object_client_base {
     }
 
     /**
+     * generate_presigned_url_cloudfront
      * @param string $contenthash
      * @param array $headers
      * @param bool $nicefilename
@@ -580,7 +642,8 @@ class client extends object_client_base {
     }
 
     /**
-     * @param $headers
+     * get_nice_filename
+     * @param array $headers
      * @return array
      */
     private function get_nice_filename($headers) {
@@ -607,7 +670,13 @@ class client extends object_client_base {
 
             if (!empty($originalfilename)) {
                 $result['Content-Disposition'] = $contentdisposition;
-                $result['filename'] = 'filename="' . utf8_encode($originalfilename) . '"';
+                // The filename parameter must be in ISO-8859-1, however it works in browsers if
+                // you treat the original UTF-8 string as ISO-8859-1 characters. To achieve that
+                // here, we encode the UTF-8 as if it were ISO-8859-1. This behaviour is hideous
+                // so it would be nice to use the optional filename* field (RFC 5987) but S3 still
+                // complains if we do that.
+                $jankyfilename = \core_text::convert($originalfilename, 'ISO-8859-1');
+                $result['filename'] = 'filename="' . $jankyfilename . '"';
                 $result['Content-Type'] = $originalcontenttype;
             }
         }
@@ -765,18 +834,18 @@ class client extends object_client_base {
         } catch (\Exception $e) {
             throw new \coding_exception('Failed to generate pre-signed url: ' . $e->getMessage());
         }
-        $headers = array(
+        $headers = [
             'Range: bytes=' . $ranges->rangefrom . '-' . $ranges->rangeto,
-        );
+        ];
         $curl = new \curl();
-        $curl->setopt(array('CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1));
-        $curl->setopt(array('CURLOPT_RETURNTRANSFER' => true));
-        $curl->setopt(array('CURLOPT_SSL_VERIFYPEER' => false));
-        $curl->setopt(array('CURLOPT_CONNECTTIMEOUT' => 15));
-        $curl->setopt(array('CURLOPT_TIMEOUT' => 15));
+        $curl->setopt(['CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1]);
+        $curl->setopt(['CURLOPT_RETURNTRANSFER' => true]);
+        $curl->setopt(['CURLOPT_SSL_VERIFYPEER' => false]);
+        $curl->setopt(['CURLOPT_CONNECTTIMEOUT' => 15]);
+        $curl->setopt(['CURLOPT_TIMEOUT' => 15]);
         $curl->setHeader($headers);
         $content = $curl->get($url);
-        return array('responseheaders' => $curl->getResponse(), 'content' => $content, 'url' => $url);
+        return ['responseheaders' => $curl->getResponse(), 'content' => $content, 'url' => $url];
     }
 
     /**

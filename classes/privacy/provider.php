@@ -23,20 +23,18 @@
  */
 namespace tool_objectfs\privacy;
 use core_privacy\local\metadata\null_provider;
-use core_privacy\local\legacy_polyfill;
 /**
  * Class provider
- * @package tool_objectfs\privacy
+ * @package tool_objectfs
  */
 class provider implements null_provider {
-    use legacy_polyfill;
     /**
      * Get the language string identifier with the component's language
      * file to explain why this plugin stores no data.
      *
      * @return  string
      */
-    public static function _get_reason() {
+    public static function get_reason(): string {
         return 'privacy:metadata';
     }
 }

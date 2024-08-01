@@ -45,13 +45,32 @@ require_once($CFG->libdir . '/filestorage/file_system.php');
 require_once($CFG->libdir . '/filestorage/file_system_filedir.php');
 require_once($CFG->libdir . '/filestorage/file_storage.php');
 
+/**
+ * [Description object_file_system]
+ */
 abstract class object_file_system extends \file_system_filedir {
 
+    /**
+     * @var mixed
+     */
     public $externalclient;
+    /**
+     * @var mixed
+     */
     private $preferexternal;
+    /**
+     * @var mixed
+     */
     private $deleteexternally;
+    /**
+     * @var mixed
+     */
     private $logger;
 
+    /**
+     * construct
+     * @return void
+     */
     public function __construct() {
         global $CFG;
         parent::__construct(); // Setup filedir.
@@ -72,6 +91,12 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
+    /**
+     * set_logger
+     * @param \tool_objectfs\log\objectfs_logger $logger
+     *
+     * @return void
+     */
     public function set_logger(\tool_objectfs\log\objectfs_logger $logger) {
         $this->logger = $logger;
     }
@@ -94,6 +119,12 @@ abstract class object_file_system extends \file_system_filedir {
         return $this->externalclient;
     }
 
+    /**
+     * initialise_external_client
+     * @param mixed $config
+     *
+     * @return mixed
+     */
     abstract protected function initialise_external_client($config);
 
     /**
@@ -133,10 +164,22 @@ abstract class object_file_system extends \file_system_filedir {
         return $path;
     }
 
+    /**
+     * get_remote_path_from_storedfile
+     * @param \stored_file $file
+     *
+     * @return string
+     */
     public function get_remote_path_from_storedfile(\stored_file $file) {
         return $this->get_remote_path_from_hash($file->get_contenthash());
     }
 
+    /**
+     * get_remote_path_from_hash
+     * @param mixed $contenthash
+     *
+     * @return string
+     */
     protected function get_remote_path_from_hash($contenthash) {
         if ($this->preferexternal) {
             $location = $this->get_object_location_from_hash($contenthash);
@@ -155,14 +198,32 @@ abstract class object_file_system extends \file_system_filedir {
         return $path;
     }
 
+    /**
+     * get_external_path_from_hash
+     * @param mixed $contenthash
+     *
+     * @return string
+     */
     protected function get_external_path_from_hash($contenthash) {
         return $this->externalclient->get_fullpath_from_hash($contenthash);
     }
 
+    /**
+     * get_external_path_from_storedfile
+     * @param \stored_file $file
+     *
+     * @return string
+     */
     protected function get_external_path_from_storedfile(\stored_file $file) {
         return $this->get_external_path_from_hash($file->get_contenthash());
     }
 
+    /**
+     * is_file_readable_externally_by_storedfile
+     * @param stored_file $file
+     *
+     * @return bool
+     */
     public function is_file_readable_externally_by_storedfile(stored_file $file) {
         if (!$file->get_filesize()) {
             // Files with empty size are either directories or empty.
@@ -178,6 +239,12 @@ abstract class object_file_system extends \file_system_filedir {
         return false;
     }
 
+    /**
+     * is_file_readable_externally_by_hash
+     * @param mixed $contenthash
+     *
+     * @return bool
+     */
     public function is_file_readable_externally_by_hash($contenthash) {
         if ($contenthash === sha1('')) {
             // Files with empty size are either directories or empty.
@@ -191,6 +258,12 @@ abstract class object_file_system extends \file_system_filedir {
         return is_readable($path);
     }
 
+    /**
+     * get_object_location_from_hash
+     * @param mixed $contenthash
+     *
+     * @return int
+     */
     public function get_object_location_from_hash($contenthash) {
         $localreadable = $this->is_file_readable_locally_by_hash($contenthash);
         $externalreadable = $this->is_file_readable_externally_by_hash($contenthash);
@@ -208,7 +281,13 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
-    // Acquire the object lock any time you are moving an object between locations.
+    /**
+     * Acquire the object lock any time you are moving an object between locations.
+     * @param mixed $contenthash
+     * @param int $timeout
+     *
+     * @return \core\lock\lock|boolean
+     */
     public function acquire_object_lock($contenthash, $timeout = 0) {
         $resource = "tool_objectfs: $contenthash";
         $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_object');
@@ -220,6 +299,13 @@ abstract class object_file_system extends \file_system_filedir {
         return $lock;
     }
 
+    /**
+     * copy_object_from_external_to_local_by_hash
+     * @param mixed $contenthash
+     * @param int $objectsize
+     *
+     * @return int
+     */
     public function copy_object_from_external_to_local_by_hash($contenthash, $objectsize = 0) {
         $initiallocation = $this->get_object_location_from_hash($contenthash);
         $finallocation = $initiallocation;
@@ -253,6 +339,13 @@ abstract class object_file_system extends \file_system_filedir {
         return $finallocation;
     }
 
+    /**
+     * copy_object_from_local_to_external_by_hash
+     * @param mixed $contenthash
+     * @param int $objectsize
+     *
+     * @return int
+     */
     public function copy_object_from_local_to_external_by_hash($contenthash, $objectsize = 0) {
         $initiallocation = $this->get_object_location_from_hash($contenthash);
 
@@ -275,12 +368,25 @@ abstract class object_file_system extends \file_system_filedir {
         return $finallocation;
     }
 
+    /**
+     * verify_external_object_from_hash
+     * @param mixed $contenthash
+     *
+     * @return mixed
+     */
     public function verify_external_object_from_hash($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
         $objectisvalid = $this->externalclient->verify_object($contenthash, $localpath);
         return $objectisvalid;
     }
 
+    /**
+     * delete_object_from_local_by_hash
+     * @param mixed $contenthash
+     * @param int $objectsize
+     *
+     * @return int
+     */
     public function delete_object_from_local_by_hash($contenthash, $objectsize = 0) {
         $initiallocation = $this->get_object_location_from_hash($contenthash);
         $finallocation = $initiallocation;
@@ -364,7 +470,7 @@ abstract class object_file_system extends \file_system_filedir {
                             $pathinfo['filename'],
                             $pathinfo['basename'],
                             $pathinfo['filename'],
-                            $pathinfo['basename']
+                            $pathinfo['basename'],
                         ]);
 
                         if (!$exists) {
@@ -622,6 +728,9 @@ abstract class object_file_system extends \file_system_filedir {
      * Deletes external file depending on deleteexternal settings.
      *
      * @param string $contenthash file to be moved
+     * @param bool $force
+     *
+     * @return void
      */
     public function delete_external_file_from_hash($contenthash, $force = false) {
         if ($force || (!empty($this->deleteexternally) && $this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_FULL)) {
@@ -692,7 +801,7 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * Delete file with external client.
      *
-     * @path   path to file to be deleted.
+     * @param string $path   path to file to be deleted.
      * @return bool.
      */
     public function delete_client_file($path) {
@@ -735,7 +844,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      * @throws \dml_exception
      */
-    public function redirect_to_presigned_url($contenthash, $headers = array()) {
+    public function redirect_to_presigned_url($contenthash, $headers = []) {
         global $FULLME;
         try {
             $signedurl = $this->externalclient->generate_presigned_url($contenthash, $headers);
@@ -784,6 +893,10 @@ abstract class object_file_system extends \file_system_filedir {
         return false;
     }
 
+    /**
+     * presigned_url_configured
+     * @return mixed
+     */
     public function presigned_url_configured() {
         return $this->externalclient->support_presigned_urls()
             && $this->externalclient->enablepresignedurls;
@@ -813,7 +926,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      * @throws \dml_exception
      */
-    public function presigned_url_should_redirect($contenthash, $headers = array()) {
+    public function presigned_url_should_redirect($contenthash, $headers = []) {
         // Redirect regardless.
         if ($this->externalclient->presignedminfilesize == 0 &&
                 manager::all_extensions_whitelisted()) {
@@ -877,6 +990,7 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
+     * exec_command
      * @param string $command
      * @return int
      */
@@ -1024,8 +1138,8 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * Update file remote location.
      *
-     * @param array (contenthash, filesize, newfile)
-     * @return array (contenthash, filesize, newfile)
+     * @param array $result [contenthash, filesize, newfile]
+     * @return array [contenthash, filesize, newfile]
      */
     private function update_object(array $result): array {
         // Rather than getting its exact location we just set it to local.

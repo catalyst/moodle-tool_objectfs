@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Orphans records for files deleted
+ *
  * Orphans {tool_objectfs_objects} records for files that have been
  * deleted from the core {files} table.
  *
@@ -29,6 +31,9 @@ namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
 
+/**
+ * orphaner
+ */
 class orphaner extends manipulator {
 
     /**

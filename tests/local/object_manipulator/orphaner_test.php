@@ -23,6 +23,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * Tests for object orphaner.
  *
  * @covers \tool_objectfs\local\object_manipulator\orphaner
+ * @package tool_objectfs
  */
 class orphaner_test extends \tool_objectfs\tests\testcase {
 
@@ -47,6 +48,13 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
         ob_end_clean();
     }
 
+    /**
+     * set_orphaner_config
+     * @param mixed $key
+     * @param mixed $value
+     *
+     * @return void
+     */
     protected function set_orphaner_config($key, $value) {
         $config = manager::get_objectfs_config();
         $config->$key = $value;
@@ -88,7 +96,7 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
 
         // Update that object to have a different hash, to mock a non-existent
         // mdl_file with an objectfs record (orphaned).
-        $DB->set_field('files', 'contenthash', 'different', array('contenthash' => $object->contenthash));
+        $DB->set_field('files', 'contenthash', 'different', ['contenthash' => $object->contenthash]);
 
         // Expect one candidate - no matching contenthash in {files}.
         $objects = $finder->get();

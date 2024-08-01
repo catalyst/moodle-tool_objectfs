@@ -15,7 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task that checks for old orphaned objects, and removes their metadata (record)
+ * Task that checks for old orphaned objects
+ *
+ * And removes their metadata (record)
  * and external file (if delete external enabled) as it is no longer useful/relevant.
  *
  * @package   tool_objectfs
@@ -30,6 +32,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../lib.php');
 
+/**
+ * [Description delete_orphaned_object_metadata]
+ */
 class delete_orphaned_object_metadata extends task {
 
     /** @var string $stringname */
@@ -49,7 +54,7 @@ class delete_orphaned_object_metadata extends task {
 
         $params = [
             'location' => OBJECT_LOCATION_ORPHANED,
-            'ageforremoval' => time() - $ageforremoval
+            'ageforremoval' => time() - $ageforremoval,
         ];
 
         if (!empty($this->config->deleteexternal) && $this->config->deleteexternal == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {

@@ -28,9 +28,14 @@ namespace tool_objectfs\local\report;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 
+/**
+ * location_report_builder
+ */
 class location_report_builder extends objectfs_report_builder {
 
     /**
+     * build_report
+     * @param int $reportid
      * @return objectfs_report
      * @throws \dml_exception
      */
@@ -42,7 +47,7 @@ class location_report_builder extends objectfs_report_builder {
             OBJECT_LOCATION_DUPLICATED,
             OBJECT_LOCATION_EXTERNAL,
             OBJECT_LOCATION_ORPHANED,
-            OBJECT_LOCATION_ERROR
+            OBJECT_LOCATION_ERROR,
         ];
 
         $totalcount = 0;
@@ -85,7 +90,7 @@ class location_report_builder extends objectfs_report_builder {
 
             if ($location !== OBJECT_LOCATION_ORPHANED) {
                 // Process the query normally.
-                $result = $DB->get_record_sql($sql, array($location));
+                $result = $DB->get_record_sql($sql, [$location]);
             } else if ($location === OBJECT_LOCATION_ORPHANED) {
                 // Start the query from objectfs, for ORPHANED objects, they are not located in the files table.
                 $sql =
@@ -96,7 +101,7 @@ class location_report_builder extends objectfs_report_builder {
                         WHERE o.location = ?)
                    SELECT COALESCE(COUNT(co.contenthash),0) AS objectcount
                      FROM cte_objects co';
-                $result = $DB->get_record_sql($sql, array($location));
+                $result = $DB->get_record_sql($sql, [$location]);
                 $result->objectsum = 0;
             }
 

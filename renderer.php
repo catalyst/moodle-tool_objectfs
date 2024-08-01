@@ -27,6 +27,9 @@ use tool_objectfs\local\manager;
 use tool_objectfs\local\report\objectfs_report;
 use tool_objectfs\local\store\object_file_system;
 
+/**
+ * [Description tool_objectfs_renderer]
+ */
 class tool_objectfs_renderer extends plugin_renderer_base {
 
     /**
@@ -50,6 +53,12 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         }
     }
 
+    /**
+     * presignedurl_tests_load_files
+     * @param mixed $fs
+     *
+     * @return array
+     */
     public function presignedurl_tests_load_files($fs) {
         global $CFG;
         $filestorage = get_file_storage();
@@ -70,14 +79,14 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $itemid = 0;
             $filepath = '/';
 
-            $filerecord = array(
+            $filerecord = [
                 'contextid' => $contextid,
                 'component' => $component,
                 'filearea'  => $filearea,
                 'itemid'    => $itemid,
                 'filepath'  => $filepath,
-                'filename'  => $testfilename
-            );
+                'filename'  => $testfilename,
+            ];
 
             $testfile = $filestorage->get_file($contextid, $component, $filearea, $itemid, $filepath, $testfilename);
             if (!$testfile) {
@@ -95,6 +104,13 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         return $testfiles;
     }
 
+    /**
+     * presignedurl_tests_content
+     * @param mixed $fs
+     * @param mixed $testfiles
+     *
+     * @return string
+     */
     public function presignedurl_tests_content($fs, $testfiles) {
         global $CFG;
         $CFG->enablepresignedurls = true;
@@ -220,15 +236,15 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         $baseurl = '/admin/tool/objectfs/object_status.php';
 
-        $previd = array();
-        $nextid = array();
-        $prevdisabled = array('disabled' => true);
-        $nextdisabled = array('disabled' => true);
+        $previd = [];
+        $nextid = [];
+        $prevdisabled = ['disabled' => true];
+        $nextdisabled = ['disabled' => true];
 
         end($reports);
-        $oldestid = array('reportid' => key($reports));
+        $oldestid = ['reportid' => key($reports)];
         reset($reports);
-        $latestid = array('reportid' => key($reports));
+        $latestid = ['reportid' => key($reports)];
 
         while ($reportid != key($reports)) {
             next($reports);
@@ -236,7 +252,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         if (next($reports)) {
             $previd = ['reportid' => key($reports)];
-            $prevdisabled = array();
+            $prevdisabled = [];
             prev($reports);
         } else {
             end($reports);
@@ -244,7 +260,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
 
         if (prev($reports)) {
             $nextid = ['reportid' => key($reports)];
-            $nextdisabled = array();
+            $nextdisabled = [];
             next($reports);
         } else {
             reset($reports);

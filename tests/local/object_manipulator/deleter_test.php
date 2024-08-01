@@ -22,6 +22,7 @@ use tool_objectfs\local\manager;
  * Tests for object deleter.
  *
  * @covers \tool_objectfs\local\object_manipulator\deleter
+ * @package tool_objectfs
  */
 class deleter_test extends \tool_objectfs\tests\testcase {
 
@@ -47,6 +48,13 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         ob_end_clean();
     }
 
+    /**
+     * set_deleter_config
+     * @param mixed $key
+     * @param mixed $value
+     *
+     * @return void
+     */
     protected function set_deleter_config($key, $value) {
         $config = manager::get_objectfs_config();
         $config->$key = $value;
@@ -79,9 +87,9 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $object = $this->create_duplicated_object();
 
-        $this->deleter->execute(array($object));
+        $this->deleter->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -91,9 +99,9 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $object = $this->create_local_object();
 
-        $this->deleter->execute(array($object));
+        $this->deleter->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertFalse($this->is_externally_readable_by_hash($object->contenthash));
@@ -103,9 +111,9 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         global $DB;
         $object = $this->create_remote_object();
 
-        $this->deleter->execute(array($object));
+        $this->deleter->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
         $this->assertFalse($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -116,9 +124,9 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         $object = $this->create_duplicated_object();
         $this->set_deleter_config('deletelocal', 0);
 
-        $this->deleter->execute(array($object));
+        $this->deleter->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -126,7 +134,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
 
     public function test_deleter_can_delete_multiple_objects() {
         global $DB;
-        $objects = array();
+        $objects = [];
         for ($i = 0; $i < 5; $i++) {
             $objects[] = $this->create_duplicated_object("Object $i");
         }
@@ -134,7 +142,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         $this->deleter->execute($objects);
 
         foreach ($objects as $object) {
-            $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $object->contenthash));
+            $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
             $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
             $this->assertFalse($this->is_locally_readable_by_hash($object->contenthash));
             $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));

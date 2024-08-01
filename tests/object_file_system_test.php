@@ -24,9 +24,17 @@ use tool_objectfs\tests\test_file_system;
  * Test basic operations of object file system.
  *
  * @covers \tool_objectfs\local\store\object_file_system
+ * @package tool_objectfs
  */
 class object_file_system_test extends tests\testcase {
 
+    /**
+     * set_externalclient_config
+     * @param mixed $key
+     * @param mixed $value
+     *
+     * @return void
+     */
     public function set_externalclient_config($key, $value) {
         // Get a reflection of externalclient object as a property.
         $reflection = new \ReflectionClass($this->filesystem);
@@ -223,9 +231,10 @@ class object_file_system_test extends tests\testcase {
     }
 
     /**
+     * delete_empty_folders_provider
      * @return array
      */
-    public function delete_empty_folders_provider() {
+    public static function delete_empty_folders_provider(): array {
         return [
             [
                 /*
@@ -268,6 +277,7 @@ class object_file_system_test extends tests\testcase {
     }
 
     /**
+     * test_delete_empty_folders_provider
      * @dataProvider delete_empty_folders_provider
      * @param array $dirs Dirs to be created.
      * @param array $files Files to be created.
@@ -324,11 +334,11 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $this->filesystem->readfile($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
@@ -356,14 +366,18 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $this->filesystem->get_content($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
+    /**
+     * error_surpressor
+     * @return void
+     */
     public function error_surpressor() {
         // We do nothing. We cant surpess warnings
         // normally because phpunit will still fail.
@@ -375,11 +389,11 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $this->filesystem->xsendfile($fakefile->get_contenthash());
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
@@ -415,11 +429,11 @@ class object_file_system_test extends tests\testcase {
 
         // Phpunit will fail if PHP warning is thrown (which we want)
         // so we surpress here.
-        set_error_handler(array($this, 'error_surpressor'));
+        set_error_handler([$this, 'error_surpressor']);
         $filehandle = $this->filesystem->get_content_file_handle($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', array('contenthash' => $fakefile->get_contenthash()));
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
@@ -429,7 +443,7 @@ class object_file_system_test extends tests\testcase {
         $filehash = $file->get_contenthash();
 
         // Delete file record so remove file will remove.
-        $DB->delete_records('files', array('contenthash' => $filehash));
+        $DB->delete_records('files', ['contenthash' => $filehash]);
         $this->filesystem->remove_file($filehash);
 
         $islocalreadable = $this->filesystem->is_file_readable_locally_by_hash($filehash);
@@ -442,7 +456,7 @@ class object_file_system_test extends tests\testcase {
         $filehash = $file->get_contenthash();
 
         // Delete file record so remove file will remove.
-        $DB->delete_records('files', array('contenthash' => $filehash));
+        $DB->delete_records('files', ['contenthash' => $filehash]);
         $this->filesystem->remove_file($filehash);
 
         $isremotereadable = $this->is_externally_readable_by_hash($filehash);
@@ -636,50 +650,55 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue($this->filesystem->presigned_url_configured());
     }
 
-    public function presigned_url_should_redirect_provider() {
-        $provider = array();
+    /**
+     * presigned_url_should_redirect_provider
+     * @return array
+     */
+    public static function presigned_url_should_redirect_provider(): array {
+        $provider = [];
 
         // Testing defaults.
-        $provider[] = array('Default', 'Default', false);
+        $provider[] = ['Default', 'Default', false];
 
         // Testing $enablepresignedurls.
-        $provider[] = array(1, 'Default', true);
-        $provider[] = array('1', 'Default', true);
-        $provider[] = array(0, 'Default', false);
-        $provider[] = array('0', 'Default', false);
-        $provider[] = array('', 'Default', false);
-        $provider[] = array(null, 'Default', false);
+        $provider[] = [1, 'Default', true];
+        $provider[] = ['1', 'Default', true];
+        $provider[] = [0, 'Default', false];
+        $provider[] = ['0', 'Default', false];
+        $provider[] = ['', 'Default', false];
+        $provider[] = [null, 'Default', false];
 
         // Testing $presignedminfilesize.
-        $provider[] = array(1, 0, true);
-        $provider[] = array(1, '0', true);
-        $provider[] = array(1, '', true);
+        $provider[] = [1, 0, true];
+        $provider[] = [1, '0', true];
+        $provider[] = [1, '', true];
 
         // Testing minimum file size to be greater than file size.
         // 12 is a size of the file with 'test content' content.
-        $provider[] = array(1, 13, false);
-        $provider[] = array(1, '13', false);
+        $provider[] = [1, 13, false];
+        $provider[] = [1, '13', false];
 
         // Testing minimum file size to be less than file size.
         // 12 is a size of the file with 'test content' content.
-        $provider[] = array(1, 11, true);
-        $provider[] = array(1, '11', true);
+        $provider[] = [1, 11, true];
+        $provider[] = [1, '11', true];
 
         // Testing nulls and empty strings.
-        $provider[] = array(null, null, false);
-        $provider[] = array(null, '', false);
-        $provider[] = array('', null, false);
-        $provider[] = array('', '', false);
+        $provider[] = [null, null, false];
+        $provider[] = [null, '', false];
+        $provider[] = ['', null, false];
+        $provider[] = ['', '', false];
 
         return $provider;
     }
 
     /**
-     * @dataProvider presigned_url_should_redirect_provider
+     * test_presigned_url_should_redirect_provider
      *
-     * @param $enablepresignedurls mixed enable pre-signed URLs.
-     * @param $presignedminfilesize mixed minimum file size to be redirected to pre-signed URL.
-     * @param $result boolean expected result.
+     * @dataProvider presigned_url_should_redirect_provider
+     * @param mixed $enablepresignedurls enable pre-signed URLs.
+     * @param mixed $presignedminfilesize minimum file size to be redirected to pre-signed URL.
+     * @param bool $result expected result.
      * @throws \dml_exception
      */
     public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls,
@@ -714,7 +733,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @return array
      */
-    public function get_expiration_time_method_if_supported_provider() {
+    public static function get_expiration_time_method_if_supported_provider(): array {
         $now = time();
 
         // Seconds after the minute from X.
@@ -737,7 +756,8 @@ class object_file_system_test extends tests\testcase {
             [7200, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
             [7200, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
             [7200, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
-            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
+            [7200, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'),
+            $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
 
             // Custom Pre-Signed URL expiration time and int-like 'Expires' header.
             [0, $now, 0, $now + (2 * MINSECS) - $secondsafternow],
@@ -753,7 +773,8 @@ class object_file_system_test extends tests\testcase {
             [600, $now, userdate($now - 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowsub100],
             [600, $now, userdate($now + 30, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd30],
             [600, $now, userdate($now + 100, '%a, %d %b %Y %H:%M:%S'), $now + (2 * MINSECS) - $secondsafternowadd100],
-            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'), $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
+            [600, $now, userdate($now + WEEKSECS + HOURSECS, '%a, %d %b %Y %H:%M:%S'),
+            $now + WEEKSECS - MINSECS - $secondsafternowaddweek],
         ];
     }
 
@@ -819,7 +840,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @return array
      */
-    public function get_valid_http_ranges_provider() {
+    public static function get_valid_http_ranges_provider(): array {
         return [
             ['', 0, false],
             ['bytes=0-', 100, (object)['rangefrom' => 0, 'rangeto' => 99, 'length' => 100]],
@@ -849,7 +870,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @return array
      */
-    public function curl_range_request_to_presigned_url_provider() {
+    public static function curl_range_request_to_presigned_url_provider(): array {
         return [
             ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 14, 'length' => 15], '15-bytes string'],
             ['15-bytes string', (object)['rangefrom' => 0, 'rangeto' => 9, 'length' => 10], '15-bytes s'],

@@ -23,6 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * xmldb_tool_objectfs_upgrade
+ * @param int $oldversion
+ *
+ * @return bool
+ */
 function xmldb_tool_objectfs_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
@@ -45,7 +51,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
 
     if ($oldversion < 2017031000) {
         $table = new xmldb_table('tool_objectfs_objects');
-        $key = new xmldb_key('contenthash', XMLDB_KEY_UNIQUE, array('contenthash'));
+        $key = new xmldb_key('contenthash', XMLDB_KEY_UNIQUE, ['contenthash']);
         $dbman->add_key($table, $key);
 
         upgrade_plugin_savepoint(true, 2017031000, 'tool', 'objectfs');
@@ -105,7 +111,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         $table = new xmldb_table('tool_objectfs_reports');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
         $table->add_field('reportdate', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL);
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $table->add_index('reportdate_idx', XMLDB_INDEX_NOTUNIQUE, ['reportdate']);
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
@@ -118,7 +124,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         $table->add_field('datakey', XMLDB_TYPE_CHAR, 15, null, XMLDB_NOTNULL);
         $table->add_field('objectcount', XMLDB_TYPE_INTEGER, 15, null, XMLDB_NOTNULL);
         $table->add_field('objectsum', XMLDB_TYPE_INTEGER, 20, null, XMLDB_NOTNULL);
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $table->add_index('reporttype_idx', XMLDB_INDEX_NOTUNIQUE, ['reporttype']);
         $table->add_index('reportid_idx', XMLDB_INDEX_NOTUNIQUE, ['reportid']);
         if (!$dbman->table_exists($table)) {

@@ -19,6 +19,7 @@
  *
  * @package   tool_objectfs
  * @author    Brian Yanosik <kisonay@gmail.com>
+ * @copyright Brian Yanosik
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,8 +27,16 @@ namespace tool_objectfs\local\store\digitalocean;
 
 use tool_objectfs\local\store\s3\client as s3_client;
 
+/**
+ * client
+ */
 class client extends s3_client {
 
+    /**
+     * construct
+     * @param \stdClass $config
+     * @return void
+     */
     public function __construct($config) {
         global $CFG;
         $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
@@ -56,34 +65,41 @@ class client extends s3_client {
         return true;
     }
 
+    /**
+     * set_client
+     * @param \stdClass $config
+     *
+     * @return void
+     */
     public function set_client($config) {
         if (!$this->is_configured($config)) {
             $this->client = null;
             return;
         }
 
-        $this->client = \Aws\S3\S3Client::factory(array(
-            'credentials' => array('key' => $config->do_key, 'secret' => $config->do_secret),
+        $this->client = \Aws\S3\S3Client::factory([
+            'credentials' => ['key' => $config->do_key, 'secret' => $config->do_secret],
             'region' => $config->do_region,
             'endpoint' => 'https://' . $config->do_region . '.digitaloceanspaces.com',
-            'version' => AWS_API_VERSION
-        ));
+            'version' => AWS_API_VERSION,
+        ]);
     }
 
     /**
+     * define_client_section
      * @param admin_settingpage $settings
-     * @param $config
+     * @param \stdClass $config
      * @return admin_settingpage
      */
     public function define_client_section($settings, $config) {
 
-        $regionoptions = array(
+        $regionoptions = [
             'sfo2'      => 'sfo2 (San Fransisco)',
             'nyc3'      => 'nyc3 (New York City)',
             'ams3'      => 'ams3 (Amsterdam)',
             'sgp1'      => 'spg1 (Singapore)',
             'fra1'      => 'fra1 (Frankfurt)',
-        );
+        ];
 
         $settings->add(new \admin_setting_heading('tool_objectfs/do',
             new \lang_string('settings:do:header', 'tool_objectfs'), ''));

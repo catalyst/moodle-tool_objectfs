@@ -71,8 +71,8 @@ define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
 
 /**
  * Sends a plugin file to the browser.
- * @param $course
- * @param $cm
+ * @param mixed $course
+ * @param mixed $cm
  * @param \context $context
  * @param string $filearea
  * @param array $args
@@ -103,7 +103,7 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
 function tool_objectfs_status_checks() {
     if (get_config('tool_objectfs', 'proxyrangerequests')) {
         return [
-            new tool_objectfs\check\proxy_range_request()
+            new tool_objectfs\check\proxy_range_request(),
         ];
     }
 

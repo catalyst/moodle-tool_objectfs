@@ -28,6 +28,9 @@ use tool_objectfs\local\store\swift\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\manager;
 
+/**
+ * [Description client]
+ */
 class client extends object_client_base {
 
     /** @var string $containername The current container. */
@@ -36,7 +39,7 @@ class client extends object_client_base {
     /**
      * The swift client constructor.
      *
-     * @param $config
+     * @param \stdClass $config
      */
     public function __construct($config) {
         global $CFG;
@@ -53,6 +56,10 @@ class client extends object_client_base {
         }
     }
 
+    /**
+     * get_endpoint
+     * @return array
+     */
     private function get_endpoint() {
 
         $endpoint = [
@@ -63,11 +70,16 @@ class client extends object_client_base {
                 'password' => $this->config->openstack_password,
                 'domain' => ['id' => 'default'],
             ],
-            'scope'   => ['project' => ['id' => $this->config->openstack_projectid]]
+            'scope'   => ['project' => ['id' => $this->config->openstack_projectid]],
         ];
 
         if (!isset($this->config->openstack_authtoken['expires_at'])
-            || (new \DateTimeImmutable($this->config->openstack_authtoken['expires_at'])) < ( (new \DateTimeImmutable('now'))->add(new \DateInterval('PT1H')))) {
+            || (
+                new \DateTimeImmutable($this->config->openstack_authtoken['expires_at']))
+                <
+                ( (new \DateTimeImmutable('now'))->add(new \DateInterval('PT1H'))
+            )
+        ) {
 
             $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_swift');
 
@@ -86,13 +98,23 @@ class client extends object_client_base {
         }
 
         // Use the token if it's valid, otherwise clients will need to use username/password auth.
-        if (isset($this->config->openstack_authtoken['expires_at']) && new \DateTimeImmutable($this->config->openstack_authtoken['expires_at']) > new \DateTimeImmutable('now')) {
+        if (
+            isset($this->config->openstack_authtoken['expires_at'])
+            &&
+            new \DateTimeImmutable($this->config->openstack_authtoken['expires_at'])
+            >
+            new \DateTimeImmutable('now')
+           ) {
             $endpoint['cachedToken'] = $this->config->openstack_authtoken;
         }
 
         return $endpoint;
     }
 
+    /**
+     * get_container
+     * @return mixed
+     */
     public function get_container() {
 
         if (empty($this->config->openstack_authurl)) {
@@ -118,7 +140,7 @@ class client extends object_client_base {
                 return;
             }
 
-            stream_wrapper_register('swift', "tool_objectfs\local\store\swift\stream_wrapper") or die("cant create wrapper");
+            stream_wrapper_register('swift', "tool_objectfs\local\store\swift\stream_wrapper") || die("cant create wrapper");
             \tool_objectfs\local\store\swift\stream_wrapper::set_default_context($this->get_seekable_stream_context());
 
             $bootstraped = true;
@@ -129,12 +151,22 @@ class client extends object_client_base {
 
     }
 
+    /**
+     * get_fullpath_from_hash
+     * @param mixed $contenthash
+     *
+     * @return string
+     */
     public function get_fullpath_from_hash($contenthash) {
         $filepath = $this->get_filepath_from_hash($contenthash);
 
         return "swift://$this->containername/$filepath";
     }
 
+    /**
+     * get_seekable_stream_context
+     * @return resource
+     */
     public function get_seekable_stream_context() {
 
         $this->get_endpoint();
@@ -147,12 +179,18 @@ class client extends object_client_base {
                 'endpoint' => $this->config->openstack_authurl,
                 'region' => $this->config->openstack_region,
                 'cachedtoken' => $this->config->openstack_authtoken,
-            ]
+            ],
         ]);
         return $context;
     }
 
 
+    /**
+     * get_md5_from_hash
+     * @param mixed $contenthash
+     *
+     * @return mixed
+     */
     private function get_md5_from_hash($contenthash) {
         try {
 
@@ -169,6 +207,13 @@ class client extends object_client_base {
         return $obj->hash;
     }
 
+    /**
+     * verify_object
+     * @param string $contenthash
+     * @param string $localpath
+     *
+     * @return bool
+     */
     public function verify_object($contenthash, $localpath) {
         // For objects uploaded to S3 storage using the multipart upload, the etag will not be the objects MD5.
         // So we can't compare here to verify the object.
@@ -180,6 +225,12 @@ class client extends object_client_base {
         return false;
     }
 
+    /**
+     * get_filepath_from_hash
+     * @param string $contenthash
+     *
+     * @return string
+     */
     protected function get_filepath_from_hash($contenthash) {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
@@ -188,6 +239,10 @@ class client extends object_client_base {
     }
 
 
+    /**
+     * test_connection
+     * @return \stdClass
+     */
     public function test_connection() {
 
         $connection = new \stdClass();
@@ -224,10 +279,16 @@ class client extends object_client_base {
         return $connection;
     }
 
+    /**
+     * test_permissions
+     * @param mixed $testdelete
+     *
+     * @return \stdClass
+     */
     public function test_permissions($testdelete) {
         $permissions = new \stdClass();
         $permissions->success = true;
-        $permissions->messages = array();
+        $permissions->messages = [];
 
         $container = $this->get_container();
 
@@ -270,6 +331,12 @@ class client extends object_client_base {
         return $permissions;
     }
 
+    /**
+     * get_exception_details
+     * @param \OpenStack\Common\Error\BadResponseError $e
+     *
+     * @return string
+     */
     protected function get_exception_details(\OpenStack\Common\Error\BadResponseError $e) {
 
         $message = $e->getResponse()->getReasonPhrase();
@@ -285,9 +352,9 @@ class client extends object_client_base {
     /**
      * swift settings form with the following elements:
      *
-     * @param admin_settingpage $settings
-     * @param $config
-     * @return admin_settingpage
+     * @param \admin_settingpage $settings
+     * @param \stdClass $config
+     * @return \admin_settingpage
      */
     public function define_client_section($settings, $config) {
 
@@ -329,7 +396,7 @@ class client extends object_client_base {
     /**
      * Return the error code
      *
-     * @param $e The exception that contains the XML body.
+     * @param \Exception $e The exception that contains the XML body.
      * @return int The error code.
      */
     private function get_error_code($e) {

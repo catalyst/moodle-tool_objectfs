@@ -82,7 +82,7 @@ class object_location_history_table extends \table_sql {
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
         $fields = 'CONCAT(reportid, datakey) AS uid, datakey AS location, objectcount AS count, objectsum AS size';
-        $conditions = array('reporttype' => 'location');
+        $conditions = ['reporttype' => 'location'];
         $rawrecords = $DB->get_records('tool_objectfs_report_data', $conditions, 'reportid', $fields);
         $reports = objectfs_report::get_report_ids();
 
@@ -90,7 +90,7 @@ class object_location_history_table extends \table_sql {
         // NOTE: This avoids the need to null coalesce on a non-existing count/size.
         $emptyrecord = (object)[
             'count' => 0,
-            'size' => 0
+            'size' => 0,
         ];
         foreach ($reports as $id => $timecreated) {
             // Initialises the records to be used, and fallback to an empty one if not found.

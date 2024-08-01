@@ -35,6 +35,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
+/**
+ * [Description task]
+ */
 abstract class task extends \core\task\scheduled_task implements objectfs_task {
 
     /** @var stdClass $config */
@@ -68,6 +71,7 @@ abstract class task extends \core\task\scheduled_task implements objectfs_task {
     }
 
     /**
+     * enabled_tasks
      * @return bool
      * @throws coding_exception
      */
