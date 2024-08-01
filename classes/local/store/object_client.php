@@ -98,7 +98,7 @@ interface object_client {
      *
      * @return mixed
      */
-    public function generate_presigned_url($contenthash, $headers = array());
+    public function generate_presigned_url($contenthash, $headers = []);
 
     /**
      * support_presigned_urls

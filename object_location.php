@@ -31,7 +31,7 @@ require_once($CFG->libdir.'/tablelib.php');
 admin_externalpage_setup('tool_objectfs_object_location_history');
 
 $logformat   = optional_param('download', '', PARAM_ALPHA);
-$params = array();
+$params = [];
 if ($logformat) {
     $params['download'] = $logformat;
 }

@@ -38,7 +38,7 @@ class manager_test extends \tool_objectfs\tests\testcase {
      *
      * @return array
      */
-    public function all_extensions_whitelisted_provider() {
+    public static function all_extensions_whitelisted_provider(): array {
         return [
             [null, false],
             ['', false],
@@ -69,7 +69,7 @@ class manager_test extends \tool_objectfs\tests\testcase {
      *
      * @return array
      */
-    public function is_extension_whitelisted_provider() {
+    public static function is_extension_whitelisted_provider(): array {
         return [
             [null, 'file.tar', false],
             ['', 'file.tar', false],
@@ -103,7 +103,7 @@ class manager_test extends \tool_objectfs\tests\testcase {
      *
      * @return array
      */
-    public function get_header_provider() {
+    public static function get_header_provider(): array {
         return [
             [[], '', ''],
             [[], 'Missing header', ''],

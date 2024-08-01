@@ -47,7 +47,7 @@ class location_report_builder extends objectfs_report_builder {
             OBJECT_LOCATION_DUPLICATED,
             OBJECT_LOCATION_EXTERNAL,
             OBJECT_LOCATION_ORPHANED,
-            OBJECT_LOCATION_ERROR
+            OBJECT_LOCATION_ERROR,
         ];
 
         $totalcount = 0;
@@ -71,7 +71,7 @@ class location_report_builder extends objectfs_report_builder {
 
             if ($location !== OBJECT_LOCATION_ORPHANED) {
                 // Process the query normally.
-                $result = $DB->get_record_sql($sql, array($location));
+                $result = $DB->get_record_sql($sql, [$location]);
             } else if ($location === OBJECT_LOCATION_ORPHANED) {
                 // Start the query from objectfs, for ORPHANED objects, they are not located in the files table.
                 $sql = 'SELECT COALESCE(count(sub.contenthash) ,0) AS objectcount
@@ -80,7 +80,7 @@ class location_report_builder extends objectfs_report_builder {
                                   LEFT JOIN {files} f on f.contenthash = o.contenthash
                                   GROUP BY o.contenthash, f.filesize, o.location
                                   HAVING o.location = ?' . $localsql .') AS sub';
-                $result = $DB->get_record_sql($sql, array($location));
+                $result = $DB->get_record_sql($sql, [$location]);
                 $result->objectsum = 0;
             }
 

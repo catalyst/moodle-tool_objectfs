@@ -470,7 +470,7 @@ abstract class object_file_system extends \file_system_filedir {
                             $pathinfo['filename'],
                             $pathinfo['basename'],
                             $pathinfo['filename'],
-                            $pathinfo['basename']
+                            $pathinfo['basename'],
                         ]);
 
                         if (!$exists) {
@@ -844,7 +844,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      * @throws \dml_exception
      */
-    public function redirect_to_presigned_url($contenthash, $headers = array()) {
+    public function redirect_to_presigned_url($contenthash, $headers = []) {
         global $FULLME;
         try {
             $signedurl = $this->externalclient->generate_presigned_url($contenthash, $headers);
@@ -926,7 +926,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      * @throws \dml_exception
      */
-    public function presigned_url_should_redirect($contenthash, $headers = array()) {
+    public function presigned_url_should_redirect($contenthash, $headers = []) {
         // Redirect regardless.
         if ($this->externalclient->presignedminfilesize == 0 &&
                 manager::all_extensions_whitelisted()) {

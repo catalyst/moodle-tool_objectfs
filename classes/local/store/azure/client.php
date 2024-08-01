@@ -149,11 +149,11 @@ class client extends object_client_base {
      * @return resource
      */
     public function get_seekable_stream_context() {
-        $context = stream_context_create(array(
-            'blob' => array(
-                'seekable' => true
-            )
-        ));
+        $context = stream_context_create([
+            'blob' => [
+                'seekable' => true,
+            ],
+        ]);
         return $context;
     }
 
@@ -259,7 +259,7 @@ class client extends object_client_base {
     public function test_permissions($testdelete) {
         $permissions = new \stdClass();
         $permissions->success = true;
-        $permissions->messages = array();
+        $permissions->messages = [];
 
         try {
             $result = $this->client->createBlockBlob($this->container, 'permissions_check_file', 'permissions_check_file');

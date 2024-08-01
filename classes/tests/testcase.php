@@ -72,7 +72,7 @@ abstract class testcase extends \advanced_testcase {
         $itemid    = 0;
         $filepath  = '/';
         $sourcefield = 'Copyright stuff';
-        $filerecord = array(
+        $filerecord = [
             'contextid' => $syscontext->id,
             'component' => $component,
             'filearea'  => $filearea,
@@ -81,7 +81,7 @@ abstract class testcase extends \advanced_testcase {
             'filename'  => $pathname,
             'source'    => $sourcefield,
             'mimetype'  => 'text',
-        );
+        ];
         $file = $fs->create_file_from_pathname($filerecord, $pathname);
 
         manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
@@ -102,7 +102,7 @@ abstract class testcase extends \advanced_testcase {
         $itemid    = 0;
         $filepath  = '/';
         $sourcefield = 'Copyright stuff';
-        $filerecord = array(
+        $filerecord = [
             'contextid' => $syscontext->id,
             'component' => $component,
             'filearea'  => $filearea,
@@ -111,7 +111,7 @@ abstract class testcase extends \advanced_testcase {
             'filename'  => md5($content), // Unqiue content should guarentee unique path.
             'source'    => $sourcefield,
             'mimetype'  => 'text',
-        );
+        ];
         $file = $fs->create_file_from_string($filerecord, $content);
 
         manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
@@ -331,7 +331,7 @@ abstract class testcase extends \advanced_testcase {
      */
     protected function delete_draft_files($contenthash) {
         global $DB;
-        $DB->delete_records('files', array('contenthash' => $contenthash));
+        $DB->delete_records('files', ['contenthash' => $contenthash]);
     }
 
     /**

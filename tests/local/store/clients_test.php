@@ -16,8 +16,8 @@
 
 namespace tool_objectfs\local\store;
 
-use \tool_objectfs\tests\test_digitalocean_integration_client as digitaloceanclient;
-use \tool_objectfs\tests\test_s3_integration_client as s3client;
+use tool_objectfs\tests\test_digitalocean_integration_client as digitaloceanclient;
+use tool_objectfs\tests\test_s3_integration_client as s3client;
 
 /**
  * Client tests.
@@ -32,7 +32,7 @@ class clients_test extends \advanced_testcase {
      *
      * @return \array[][]
      */
-    public function s3_client_test_connection_if_not_configured_properly_data_provider() {
+    public static function s3_client_test_connection_if_not_configured_properly_data_provider(): array {
         return [
             [[]],
             [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test', 's3_secret' => 'test']],
@@ -72,7 +72,7 @@ class clients_test extends \advanced_testcase {
      *
      * @return \array[][]
      */
-    public function digitalocean_client_test_connection_if_not_configured_properly_data_provider() {
+    public static function digitalocean_client_test_connection_if_not_configured_properly_data_provider(): array {
         return [
             [[]],
             [['do_key' => '', 'do_secret' => '', 'do_region' => '']],
