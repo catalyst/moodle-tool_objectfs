@@ -1052,7 +1052,8 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         // Get a lock before syncing, to ensure other parts of objectfs are not moving/interacting with this object.
-        $lock = $this->acquire_object_lock($contenthash, 10);
+        // Don't wait for it, we want to fail fast.
+        $lock = $this->acquire_object_lock($contenthash, 0);
 
         // No lock - just skip it.
         if (!$lock) {
