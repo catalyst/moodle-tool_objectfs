@@ -258,10 +258,7 @@ if ($ADMIN->fulltree) {
 
     // Tagging settings.
     $settings->add(new admin_setting_heading('tool_objectfs/taggingsettings',
-        new lang_string('settings:taggingheader', 'tool_objectfs'), ''));
-
-    $settings->add(new admin_setting_description('tool_objectfs/tagginghelp',
-        '',
+        new lang_string('settings:taggingheader', 'tool_objectfs'),
         get_string('settings:tagging:help', 'tool_objectfs')
     ));
 
@@ -270,7 +267,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_description('tool_objectfs/tagsources',
         new lang_string('settings:tagsources', 'tool_objectfs'),
-        tag_manager::get_tag_summary_html()
+        tag_manager::get_tag_source_summary_html()
     ));
 
     $settings->add(new admin_setting_configtext('tool_objectfs/maxtaggingperrun',
@@ -293,4 +290,19 @@ if ($ADMIN->fulltree) {
         1
     ));
 
+    // Tagging status.
+    $settings->add(new admin_setting_heading('tool_objectfs/taggingstatus',
+        new lang_string('settings:taggingstatus', 'tool_objectfs'), ''));
+
+    // Build overview of tag statuses.
+    $settings->add(new admin_setting_description('tool_objectfs/taggingstatuscounts',
+        new lang_string('settings:taggingstatuscounts', 'tool_objectfs'),
+        tag_manager::get_tag_sync_status_summary_html()
+    ));
+
+    // Overview of tagging migration.
+    $settings->add(new admin_setting_description('tool_objectfs/taggingmigrationstatus',
+        new lang_string('settings:taggingmigrationstatus', 'tool_objectfs'),
+        update_object_tags::get_summary_html(),
+    ));
 }

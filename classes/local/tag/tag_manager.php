@@ -17,6 +17,8 @@
 namespace tool_objectfs\local\tag;
 
 use coding_exception;
+use html_table;
+use html_writer;
 use tool_objectfs\local\manager;
 
 defined('MOODLE_INTERNAL') || die();
@@ -40,7 +42,7 @@ class tag_manager {
     /**
      * @var int Object does not need sync. Will be essentially ignored in tagging process.
      */
-    public const SYNC_STATUS_SYNC_NOT_REQUIRED = 1;
+    public const SYNC_STATUS_COMPLETE = 1;
 
     /**
      * @var int Object tried to sync but there was an error. Will make it ignored and must be corrected manually.
@@ -52,7 +54,7 @@ class tag_manager {
      */
     public const SYNC_STATUSES = [
         self::SYNC_STATUS_NEEDS_SYNC,
-        self::SYNC_STATUS_SYNC_NOT_REQUIRED,
+        self::SYNC_STATUS_COMPLETE,
         self::SYNC_STATUS_ERROR,
     ];
 
@@ -113,9 +115,6 @@ class tag_manager {
         // Purge any existing tags for this object.
         $DB->delete_records('tool_objectfs_object_tags', ['contenthash' => $contenthash]);
 
-        // Record time in var, so that they all have the same time.
-        $timemodified = time();
-
         // Store new records.
         $recordstostore = [];
         foreach ($tags as $key => $value) {
@@ -123,7 +122,6 @@ class tag_manager {
                 'contenthash' => $contenthash,
                 'tagkey' => $key,
                 'tagvalue' => $value,
-                'timemodified' => $timemodified,
             ];
         }
         $DB->insert_records('tool_objectfs_object_tags', $recordstostore);
@@ -160,17 +158,32 @@ class tag_manager {
     }
 
     /**
+     * Updates the tagslastpushed time for a given object.
+     * This should only be done once successfully pushed to the external store.
+     * @param string $contenthash
+     * @param int $time time to set
+     */
+    public static function record_tag_pushed_time(string $contenthash, int $time) {
+        global $DB;
+        $DB->set_field('tool_objectfs_objects', 'tagslastpushed', $time, ['contenthash' => $contenthash]);
+    }
+
+    /**
      * Returns a simple list of all the sources and their descriptions.
      * @return string html string
      */
-    public static function get_tag_summary_html(): string {
+    public static function get_tag_source_summary_html(): string {
         $sources = self::get_defined_tag_sources();
-        $html = '';
+        $table = new html_table();
+        $table->head = [
+            get_string('table:tagsource', 'tool_objectfs'),
+            get_string('table:tagsourcemeaning', 'tool_objectfs'),
+        ];
 
         foreach ($sources as $source) {
-            $html .= $source->get_identifier() . ': ' . $source->get_description() . '<br />';
+            $table->data[$source->get_identifier()] = [$source->get_identifier(), $source->get_description()];
         }
-        return $html;
+        return html_writer::table($table);
     }
 
     /**
@@ -179,5 +192,49 @@ class tag_manager {
      */
     public static function can_overwrite_object_tags(): bool {
         return (bool) get_config('tool_objectfs', 'overwriteobjecttags');
+    }
+
+    /**
+     * Get the string for a given tag sync status
+     * @param int $tagsyncstatus one of SYNC_STATUS_*
+     * @return string
+     */
+    private static function get_sync_status_string(int $tagsyncstatus): string {
+        $strmap = [
+            self::SYNC_STATUS_ERROR => 'error',
+            self::SYNC_STATUS_NEEDS_SYNC => 'needssync',
+            self::SYNC_STATUS_COMPLETE => 'notrequired',
+        ];
+
+        if (!array_key_exists($tagsyncstatus, $strmap)) {
+            throw new coding_exception('No status string is mapped for status: ' . $tagsyncstatus);
+        }
+
+        return get_string('tagsyncstatus:' . $strmap[$tagsyncstatus], 'tool_objectfs');
+    }
+
+    /**
+     * Returns a html table with summaries of the sync statuses and the object count for each.
+     * @return string
+     */
+    public static function get_tag_sync_status_summary_html(): string {
+        global $DB;
+        $statuses = $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus)
+                                            FROM {tool_objectfs_objects}
+                                        GROUP BY tagsyncstatus");
+
+        $table = new html_table();
+        $table->head = [
+            get_string('table:status', 'tool_objectfs'),
+            get_string('table:objectcount', 'tool_objectfs'),
+        ];
+
+        foreach (self::SYNC_STATUSES as $status) {
+            // If no objects have a status, they won't appear in the SQL above.
+            // In this case, just show zero (so the use knows it exists, but is zero).
+            $count = isset($statuses[$status]) ? $statuses[$status]->count : 0;
+            $table->data[$status] = [self::get_sync_status_string($status), $count];
+        }
+        return html_writer::table($table);
     }
 }

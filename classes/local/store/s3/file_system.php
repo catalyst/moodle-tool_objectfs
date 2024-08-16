@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
-use tool_objectfs\local\tag\tag_manager;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 

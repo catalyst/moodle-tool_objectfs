@@ -17,6 +17,7 @@
 namespace tool_objectfs\task;
 
 use core\task\manager;
+use moodle_exception;
 use tool_objectfs\local\tag\tag_manager;
 use tool_objectfs\tests\testcase;
 
@@ -27,6 +28,7 @@ use tool_objectfs\tests\testcase;
  * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers    \tool_objectfs\task\update_object_tags
  */
 class update_object_tags_test extends testcase {
     /**
@@ -63,7 +65,8 @@ class update_object_tags_test extends testcase {
         // By default filesystem does not support and tagging not enabled, so should error.
         $task = new update_object_tags();
 
-        $this->expectOutputString("Tagging feature not enabled or supported by filesystem, exiting.\n");
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage(get_string('tagging:migration:notsupported', 'tool_objectfs'));
         $task->execute();
     }
 
@@ -81,7 +84,8 @@ class update_object_tags_test extends testcase {
         $task = new update_object_tags();
         $task->set_custom_data(['iteration' => 5]);
 
-        $this->expectOutputString("Invalid number of iterations, exiting.\n");
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage(get_string('tagging:migration:invaliditerations', 'tool_objectfs'));
         $task->execute();
     }
 
@@ -96,8 +100,10 @@ class update_object_tags_test extends testcase {
         set_config('maxtaggingiterations', 5, 'tool_objectfs');
 
         // But don't set the iteration number on the customdata at all.
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage(get_string('tagging:migration:invaliditerations', 'tool_objectfs'));
+
         $task = new update_object_tags();
-        $this->expectOutputString("Invalid number of iterations, exiting.\n");
         $task->execute();
     }
 
@@ -111,6 +117,7 @@ class update_object_tags_test extends testcase {
         $task = new update_object_tags();
         $task->set_custom_data(['iteration' => 1]);
 
+        // This should not error, only output a string since it is successfully completed.
         $this->expectOutputString("No more objects found that need tagging, exiting.\n");
         $task->execute();
     }
@@ -131,7 +138,8 @@ class update_object_tags_test extends testcase {
         // Give it an iteration number higher.
         $task->set_custom_data(['iteration' => 5]);
 
-        $this->expectOutputString("Maximum number of iterations reached: 5, exiting.\n");
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage(get_string('tagging:migration:limitreached', 'tool_objectfs', 5));
         $task->execute();
     }
 
@@ -166,5 +174,55 @@ class update_object_tags_test extends testcase {
         $task = current($tasks);
         $this->assertNotEmpty($task->get_custom_data());
         $this->assertEquals(2, $task->get_custom_data()->iteration);
+    }
+
+    /**
+     * Tests get_iteration
+     * @covers \tool_objectfs\task\update_object_tags::get_iteration
+     */
+    public function test_get_iteration() {
+        $task = new update_object_tags();
+
+        // No custom data, should return zero.
+        $this->assertEquals(0, $task->get_iteration());
+
+        // Set iteration, it should return that.
+        $task->set_custom_data([
+            'iteration' => 5,
+        ]);
+        $this->assertEquals(5, $task->get_iteration());
+    }
+
+    /**
+     * Tests getting status badge and summary html
+     * @covers \tool_objectfs\task\update_object_tags::get_status_badge
+     * @covers \tool_objectfs\task\update_object_tags::get_summary_html
+     */
+    public function test_get_summary_html_and_status_badge() {
+        // Spawn three tasks and break each one in a different way.
+        // Test their badge output.
+        $task1 = new update_object_tags();
+        $this->assertStringContainsString(get_string('status:waiting', 'tool_objectfs'),
+            $task1->get_status_badge());
+
+        $task2 = new update_object_tags();
+        $task2->set_fail_delay(1000);
+        $this->assertStringContainsString(get_string('status:failing', 'tool_objectfs', 1000),
+            $task2->get_status_badge());
+
+        $task3 = new update_object_tags();
+        $task3->set_timestarted(1000);
+        $this->assertStringContainsString(get_string('status:running', 'tool_objectfs'),
+            $task3->get_status_badge());
+
+        // Now queue them so we can test report generation.
+        manager::queue_adhoc_task($task1);
+        manager::queue_adhoc_task($task2);
+        manager::queue_adhoc_task($task3);
+
+        // Ensure row count is expected (excluding header row).
+        $report = update_object_tags::get_summary_html();
+        $rowcount = substr_count($report, '<tr') - 1;
+        $this->assertEquals(3, $rowcount);
     }
 }
