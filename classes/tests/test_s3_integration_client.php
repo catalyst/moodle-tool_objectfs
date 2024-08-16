@@ -21,6 +21,8 @@ use tool_objectfs\local\store\s3\client;
 /**
  * [Description test_s3_integration_client]
  * @package tool_objectfs
+ * @copyright Catalyst IT
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class test_s3_integration_client extends client {
 

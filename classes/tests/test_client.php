@@ -22,6 +22,8 @@ use tool_objectfs\local\store\object_client_base;
 /**
  * [Description test_client]
  * @package tool_objectfs
+ * @copyright Catalyst IT
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class test_client extends object_client_base {
     /**

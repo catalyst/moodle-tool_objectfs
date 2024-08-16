@@ -28,6 +28,8 @@ use tool_objectfs\local\store\signed_url;
 /**
  * [Description testcase]
  * @package tool_objectfs
+ * @copyright Catalyst IT
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class testcase extends \advanced_testcase {
     /** @var test_file_system Filesystem */

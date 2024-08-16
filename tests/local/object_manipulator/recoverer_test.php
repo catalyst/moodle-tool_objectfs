@@ -24,6 +24,8 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  *
  * @covers \tool_objectfs\local\object_manipulator\recoverer
  * @package tool_objectfs
+ * @copyright Catalyst IT
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class recoverer_test extends \tool_objectfs\tests\testcase {
 

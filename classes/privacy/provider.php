@@ -13,6 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+namespace tool_objectfs\privacy;
+
+use core_privacy\local\metadata\null_provider;
 /**
  * Privacy provider.
  *
@@ -20,12 +24,6 @@
  * @author    Ilya Tregubov (ilyatregubov@catalyst-au.net)
  * @copyright 2018 Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-namespace tool_objectfs\privacy;
-use core_privacy\local\metadata\null_provider;
-/**
- * Class provider
- * @package tool_objectfs
  */
 class provider implements null_provider {
     /**
