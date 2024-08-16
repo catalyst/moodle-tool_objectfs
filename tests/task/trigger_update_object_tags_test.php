@@ -30,6 +30,7 @@ use core\task\manager;
 class trigger_update_object_tags_test extends advanced_testcase {
     /**
      * Tests executing scheduled task.
+     * @covers \tool_objectfs\task\trigger_update_object_tags::execute
      */
     public function test_execute() {
         $this->resetAfterTest();
