@@ -886,12 +886,12 @@ class client extends object_client_base {
      * @return array array of key=>value tag pairs
      */
     public function get_object_tags(string $contenthash): array {
-        $key = $this->bucketkeyprefix . $this->get_filepath_from_hash($contenthash);
+        $objectkey = $this->bucketkeyprefix . $this->get_filepath_from_hash($contenthash);
 
         // Query from S3.
         $result = $this->client->getObjectTagging([
             'Bucket' => $this->bucket,
-            'Key' => $key,
+            'Key' => $objectkey,
         ]);
 
         // Ensure tags are what we expect, and AWS have not changed the format.

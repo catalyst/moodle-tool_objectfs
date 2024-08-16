@@ -1073,10 +1073,11 @@ abstract class object_file_system extends \file_system_filedir {
                 $tags = tag_manager::gather_object_tags_for_upload($contenthash);
                 $this->get_external_client()->set_object_tags($contenthash, $tags);
                 tag_manager::store_tags_locally($contenthash, $tags);
+                tag_manager::record_tag_pushed_time($contenthash, time());
             }
 
             // Regardless, it has synced.
-            tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED);
+            tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_COMPLETE);
         } catch (Throwable $e) {
             $lock->release();
 

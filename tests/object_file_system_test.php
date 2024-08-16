@@ -961,7 +961,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         // where the object is not replicated.
         $this->filesystem->push_object_tags($object->contenthash);
         $object = $DB->get_record('tool_objectfs_objects', ['contenthash' => $object->contenthash]);
-        $this->assertEquals($object->tagsyncstatus, tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED);
+        $this->assertEquals($object->tagsyncstatus, tag_manager::SYNC_STATUS_COMPLETE);
     }
 
     /**
@@ -1035,6 +1035,6 @@ class object_file_system_testcase extends tool_objectfs_testcase {
 
         // Ensure status changed to not needing sync.
         $object = $DB->get_record('tool_objectfs_objects', ['contenthash' => $object->contenthash]);
-        $this->assertEquals($object->tagsyncstatus, tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED);
+        $this->assertEquals($object->tagsyncstatus, tag_manager::SYNC_STATUS_COMPLETE);
     }
 }

@@ -113,7 +113,7 @@ class tagging_test extends testcase {
                 'supportedbyfs' => false,
                 'expected' => false,
             ],
-            'enabled in config and fs does  support' => [
+            'enabled in config and fs does support' => [
                 'enabledinconfig' => true,
                 'supportedbyfs' => true,
                 'expected' => true,
@@ -181,15 +181,6 @@ class tagging_test extends testcase {
         // Confirm they are stored.
         $queriedtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $hash]);
         $this->assertCount(2, $queriedtags);
-        $tagtimebefore = current($queriedtags)->timemodified;
-
-        // Re-store, confirm times changed.
-        $this->waitForSecond();
-        tag_manager::store_tags_locally($hash, $tags);
-        $queriedtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $hash]);
-        $tagtimeafter = current($queriedtags)->timemodified;
-
-        $this->assertNotSame($tagtimebefore, $tagtimeafter);
     }
 
     /**
@@ -215,12 +206,12 @@ class tagging_test extends testcase {
             ],
             'duplicated, does not need sync' => [
                 'location' => OBJECT_LOCATION_DUPLICATED,
-                'status' => tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED,
+                'status' => tag_manager::SYNC_STATUS_COMPLETE,
                 'expectedneedssync' => false,
             ],
             'local, does not need sync' => [
                 'location' => OBJECT_LOCATION_LOCAL,
-                'status' => tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED,
+                'status' => tag_manager::SYNC_STATUS_COMPLETE,
                 'expectedneedssync' => false,
             ],
             'duplicated, sync error' => [
@@ -294,17 +285,18 @@ class tagging_test extends testcase {
     }
 
     /**
-     * Test get_tag_summary_html
-     * @covers \tool_objectfs\local\tag_manager::get_tag_summary_html
+     * Test get_tag_source_summary_html
+     * @covers \tool_objectfs\local\tag_manager::get_tag_source_summary_html
      */
-    public function test_get_tag_summary_html() {
+    public function test_get_tag_source_summary_html() {
         // Quick test just to ensure it generates and nothing explodes.
-        $html = tag_manager::get_tag_summary_html();
+        $html = tag_manager::get_tag_source_summary_html();
         $this->assertIsString($html);
     }
 
     /**
      * Tests when fails to sync object tags, that the sync status is updated to SYNC_STATUS_ERROR.
+     * @covers \tool_objectfs\local\tag_manager
      */
     public function test_object_tag_sync_error() {
         global $CFG, $DB;
@@ -321,7 +313,7 @@ class tagging_test extends testcase {
         // Create a good duplicated object.
         $object = $this->create_duplicated_object('sync limit test duplicated');
         $status = $DB->get_field('tool_objectfs_objects', 'tagsyncstatus', ['id' => $object->id]);
-        $this->assertEquals(tag_manager::SYNC_STATUS_SYNC_NOT_REQUIRED, $status);
+        $this->assertEquals(tag_manager::SYNC_STATUS_COMPLETE, $status);
 
         // Now try push tags, but trigger a simulated tag set error.
         $CFG->phpunit_objectfs_simulate_tag_set_error = true;
@@ -336,5 +328,41 @@ class tagging_test extends testcase {
         // Ensure tag sync status set to error.
         $status = $DB->get_field('tool_objectfs_objects', 'tagsyncstatus', ['id' => $object->id]);
         $this->assertEquals(tag_manager::SYNC_STATUS_ERROR, $status);
+    }
+
+    /**
+     * Tests tag_manager::record_tag_pushed_time
+     * @covers \tool_objectfs\local\tag_manager::record_tag_pushed_time
+     */
+    public function test_record_tag_pushed_time() {
+        global $DB;
+        $object = $this->create_remote_object();
+        $initialtime = $DB->get_field('tool_objectfs_objects', 'tagslastpushed', ['contenthash' => $object->contenthash]);
+        $this->assertEquals(0, $initialtime);
+
+        tag_manager::record_tag_pushed_time($object->contenthash, 100);
+        $newtime = $DB->get_field('tool_objectfs_objects', 'tagslastpushed', ['contenthash' => $object->contenthash]);
+        $this->assertEquals(100, $newtime);
+    }
+
+    /**
+     * Tests getting sync status summary html.
+     * @covers \tool_objectfs\local\tag_manager::get_tag_sync_status_summary_html.
+     */
+    public function test_get_tag_sync_status_summary_html() {
+        // Make two objects each with a different status.
+        $object1 = $this->create_remote_object('o1');
+        $object2 = $this->create_remote_object('o2');
+
+        tag_manager::mark_object_tag_sync_status($object1->contenthash, tag_manager::SYNC_STATUS_COMPLETE);
+        tag_manager::mark_object_tag_sync_status($object2->contenthash, tag_manager::SYNC_STATUS_ERROR);
+
+        // Generate report.
+        $reporthtml = tag_manager::get_tag_sync_status_summary_html();
+
+        // Ensure report contains a column for every status (even thought there are none of some status in the db).
+        // (-1 to remove the header row).
+        $rowcount = substr_count($reporthtml, '<tr') - 1;
+        $this->assertEquals(count(tag_manager::SYNC_STATUSES), $rowcount);
     }
 }
