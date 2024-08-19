@@ -148,24 +148,28 @@ class tag_manager {
      * Marks a given object as the given status.
      * @param string $contenthash
      * @param int $status one of SYNC_STATUS_* constants
+     * @param int $tagpushedtime if tags were actually sent to the external store,
+     * this should be the time that happened, or zero if not.
      */
-    public static function mark_object_tag_sync_status(string $contenthash, int $status) {
+    public static function mark_object_tag_sync_status(string $contenthash, int $status, int $tagpushedtime = 0) {
         global $DB;
         if (!in_array($status, self::SYNC_STATUSES)) {
             throw new coding_exception("Invalid object tag sync status " . $status);
         }
-        $DB->set_field('tool_objectfs_objects', 'tagsyncstatus', $status, ['contenthash' => $contenthash]);
-    }
 
-    /**
-     * Updates the tagslastpushed time for a given object.
-     * This should only be done once successfully pushed to the external store.
-     * @param string $contenthash
-     * @param int $time time to set
-     */
-    public static function record_tag_pushed_time(string $contenthash, int $time) {
-        global $DB;
-        $DB->set_field('tool_objectfs_objects', 'tagslastpushed', $time, ['contenthash' => $contenthash]);
+        $timeupdate = !empty($tagpushedtime) ? ',tagslastpushed = :time' : '';
+        $params = [
+            'status' => $status,
+            'contenthash' => $contenthash,
+            'time' => $tagpushedtime,
+        ];
+
+        // Need raw execute since update_records requires an id column, but we use contenthash instead.
+        $DB->execute("UPDATE {tool_objectfs_objects}
+                         SET tagsyncstatus = :status
+                         {$timeupdate}
+                       WHERE contenthash = :contenthash",
+                       $params);
     }
 
     /**

@@ -331,21 +331,6 @@ class tagging_test extends testcase {
     }
 
     /**
-     * Tests tag_manager::record_tag_pushed_time
-     * @covers \tool_objectfs\local\tag_manager::record_tag_pushed_time
-     */
-    public function test_record_tag_pushed_time() {
-        global $DB;
-        $object = $this->create_remote_object();
-        $initialtime = $DB->get_field('tool_objectfs_objects', 'tagslastpushed', ['contenthash' => $object->contenthash]);
-        $this->assertEquals(0, $initialtime);
-
-        tag_manager::record_tag_pushed_time($object->contenthash, 100);
-        $newtime = $DB->get_field('tool_objectfs_objects', 'tagslastpushed', ['contenthash' => $object->contenthash]);
-        $this->assertEquals(100, $newtime);
-    }
-
-    /**
      * Tests tag_manger::get_tag_sync_status_summary
      * @covers \tool_objectfs\local\tag_manager::get_tag_sync_status_summary
      */
