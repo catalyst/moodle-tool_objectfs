@@ -294,15 +294,13 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('tool_objectfs/taggingstatus',
         new lang_string('settings:taggingstatus', 'tool_objectfs'), ''));
 
-    // Build overview of tag statuses.
-    $settings->add(new admin_setting_description('tool_objectfs/taggingstatuscounts',
-        new lang_string('settings:taggingstatuscounts', 'tool_objectfs'),
-        tag_manager::get_tag_sync_status_summary_html()
-    ));
-
-    // Overview of tagging migration.
-    $settings->add(new admin_setting_description('tool_objectfs/taggingmigrationstatus',
-        new lang_string('settings:taggingmigrationstatus', 'tool_objectfs'),
-        update_object_tags::get_summary_html(),
-    ));
+    // TODO when this branch supports 4.4+, use admin_setting_check https://tracker.moodle.org/browse/MDL-67898.
+    $settings->add(new admin_setting_description('taggingstatuslink', '', html_writer::link(
+        new moodle_url('/report/status/index.php', ['detail' => 'tool_objectfs_tagging_sync_status']),
+        get_string('settings:taggingstatus', 'tool_objectfs')
+    )));
+    $settings->add(new admin_setting_description('taggingmigrationstatuslink', '', html_writer::link(
+        new moodle_url('/report/status/index.php', ['detail' => 'tool_objectfs_tagging_migration_status']),
+        get_string('settings:taggingmigrationstatus', 'tool_objectfs')
+    )));
 }

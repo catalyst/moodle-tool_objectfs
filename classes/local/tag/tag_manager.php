@@ -199,7 +199,7 @@ class tag_manager {
      * @param int $tagsyncstatus one of SYNC_STATUS_*
      * @return string
      */
-    private static function get_sync_status_string(int $tagsyncstatus): string {
+    public static function get_sync_status_string(int $tagsyncstatus): string {
         $strmap = [
             self::SYNC_STATUS_ERROR => 'error',
             self::SYNC_STATUS_NEEDS_SYNC => 'needssync',
@@ -214,27 +214,13 @@ class tag_manager {
     }
 
     /**
-     * Returns a html table with summaries of the sync statuses and the object count for each.
-     * @return string
+     * Returns a summary of the object tag sync statuses.
+     * @return array
      */
-    public static function get_tag_sync_status_summary_html(): string {
+    public static function get_tag_sync_status_summary(): array {
         global $DB;
-        $statuses = $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus)
-                                            FROM {tool_objectfs_objects}
-                                        GROUP BY tagsyncstatus");
-
-        $table = new html_table();
-        $table->head = [
-            get_string('table:status', 'tool_objectfs'),
-            get_string('table:objectcount', 'tool_objectfs'),
-        ];
-
-        foreach (self::SYNC_STATUSES as $status) {
-            // If no objects have a status, they won't appear in the SQL above.
-            // In this case, just show zero (so the use knows it exists, but is zero).
-            $count = isset($statuses[$status]) ? $statuses[$status]->count : 0;
-            $table->data[$status] = [self::get_sync_status_string($status), $count];
-        }
-        return html_writer::table($table);
+        return $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus)
+                                       FROM {tool_objectfs_objects}
+                                   GROUP BY tagsyncstatus");
     }
 }

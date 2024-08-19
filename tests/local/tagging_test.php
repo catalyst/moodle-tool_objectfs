@@ -346,23 +346,63 @@ class tagging_test extends testcase {
     }
 
     /**
-     * Tests getting sync status summary html.
-     * @covers \tool_objectfs\local\tag_manager::get_tag_sync_status_summary_html.
+     * Tests tag_manger::get_tag_sync_status_summary
+     * @covers \tool_objectfs\local\tag_manager::get_tag_sync_status_summary
      */
-    public function test_get_tag_sync_status_summary_html() {
-        // Make two objects each with a different status.
-        $object1 = $this->create_remote_object('o1');
-        $object2 = $this->create_remote_object('o2');
+    public function test_get_tag_sync_status_summary() {
+        // Ensure clean slate before test starts.
+        global $DB;
+        $DB->delete_records('tool_objectfs_objects');
+
+        // Create an object with each status.
+        $object1 = $this->create_remote_object('test1');
+        $object2 = $this->create_remote_object('test2');
+        $object3 = $this->create_remote_object('test3');
 
         tag_manager::mark_object_tag_sync_status($object1->contenthash, tag_manager::SYNC_STATUS_COMPLETE);
         tag_manager::mark_object_tag_sync_status($object2->contenthash, tag_manager::SYNC_STATUS_ERROR);
+        tag_manager::mark_object_tag_sync_status($object3->contenthash, tag_manager::SYNC_STATUS_NEEDS_SYNC);
 
-        // Generate report.
-        $reporthtml = tag_manager::get_tag_sync_status_summary_html();
+        // Ensure correctly counted.
+        $statuses = tag_manager::get_tag_sync_status_summary();
+        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_COMPLETE]->count);
+        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_ERROR]->count);
+        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_NEEDS_SYNC]->count);
+    }
 
-        // Ensure report contains a column for every status (even thought there are none of some status in the db).
-        // (-1 to remove the header row).
-        $rowcount = substr_count($reporthtml, '<tr') - 1;
-        $this->assertEquals(count(tag_manager::SYNC_STATUSES), $rowcount);
+    /**
+     * Provides sync statuses to tests
+     * @return array
+     */
+    public static function sync_status_provider(): array {
+        $tests = [];
+        foreach (tag_manager::SYNC_STATUSES as $status) {
+            $tests[$status] = [
+                'status' => $status,
+            ];
+        }
+        return $tests;
+    }
+
+    /**
+     * Tests get_sync_status_string
+     * @param int $status
+     * @dataProvider sync_status_provider
+     * @covers \tool_objectfs\local\tag_manager::get_sync_status_string
+     */
+    public function test_get_sync_status_string(int $status) {
+        $string = tag_manager::get_sync_status_string($status);
+        // Cheap check to ensure placeholder string not returned.
+        $this->assertStringNotContainsString('[', $string);
+    }
+
+    /**
+     * Tests get_sync_status_string when an invalid status is provided
+     * @covers \tool_objectfs\local\tag_manager::get_sync_status_string
+     */
+    public function test_get_sync_status_string_does_not_exist() {
+        $this->expectException(coding_exception::class);
+        $this->expectExceptionMessage('No status string is mapped for status: 5');
+        tag_manager::get_sync_status_string(5);
     }
 }
