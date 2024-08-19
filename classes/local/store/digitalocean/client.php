@@ -39,7 +39,7 @@ class client extends s3_client {
      */
     public function __construct($config) {
         global $CFG;
-        $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+        $this->autoloader = $CFG->libdir . '/aws-sdk/src/functions.php';
         $this->testdelete = false;
 
         if ($this->get_availability() && !empty($config)) {

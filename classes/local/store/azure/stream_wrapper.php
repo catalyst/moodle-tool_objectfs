@@ -18,7 +18,7 @@
  * Azure Blob Storage stream wrapper to use "blob://<container>/<key>" files with PHP.
  *
  * Implementation references,
- * https://github.com/aws/aws-sdk-php/blob/master/src/S3/StreamWrapper.php
+ * @see \Aws\S3\StreamWrapper
  * https://phpazure.codeplex.com/SourceControl/latest#trunk/library/Microsoft/WindowsAzure/Storage/Blob/Stream.php
  *
  * @package    tool_objectfs

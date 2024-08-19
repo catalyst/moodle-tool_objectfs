@@ -28,7 +28,7 @@ namespace tool_objectfs\local\store\s3;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\store\signed_url;
-use local_aws\admin_settings_aws_region;
+use core\aws\admin_settings_aws_region;
 
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
@@ -43,7 +43,7 @@ class client extends object_client_base {
     /**
      * @var int A predefined limit of data stored.
      * When hit, php://temp will use a temporary file.
-     * Reference: https://github.com/catalyst/moodle-local_aws/blob/master/sdk/Aws/S3/StreamWrapper.php#L19-L25
+     * Reference: line 19-25 of @see \Aws\S3\StreamWrapper
      */
     const MAX_TEMP_LIMIT = 2097152;
 
@@ -69,7 +69,7 @@ class client extends object_client_base {
      */
     public function __construct($config) {
         global $CFG;
-        $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+        $this->autoloader = $CFG->libdir . '/aws-sdk/src/functions.php';
         $this->config = $config;
 
         if ($this->get_availability() && !empty($config)) {
@@ -431,27 +431,6 @@ class client extends object_client_base {
      * @throws \coding_exception
      */
     public function define_client_section($settings, $config) {
-        global $OUTPUT;
-        $plugins = \core_component::get_plugin_list('local');
-
-        if (!array_key_exists('aws', $plugins)) {
-            $text  = $OUTPUT->notification(new \lang_string('settings:aws:installneeded', OBJECTFS_PLUGIN_NAME));
-            $settings->add(new \admin_setting_heading('tool_objectfs/aws',
-                new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
-            return $settings;
-        }
-
-        $plugin = (object)['version' => null];
-        if (file_exists($plugins['aws'].'/version.php')) {
-            include($plugins['aws'].'/version.php');
-        }
-        if (empty($plugin->version) || $plugin->version < 2020051200) {
-            $text  = $OUTPUT->notification(new \lang_string('settings:aws:upgradeneeded', OBJECTFS_PLUGIN_NAME));
-            $settings->add(new \admin_setting_heading('tool_objectfs/aws',
-                new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
-            return $settings;
-        }
-
         $settings->add(new \admin_setting_heading('tool_objectfs/aws',
             new \lang_string('settings:aws:header', 'tool_objectfs'), $this->define_client_check()));
 
