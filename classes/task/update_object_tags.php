@@ -33,32 +33,6 @@ use tool_objectfs\local\tag\tag_manager;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class update_object_tags extends adhoc_task {
-
-    /**
-     * Generates a html table summarising the update object tag tasks that exist
-     * @return string
-     */
-    public static function get_summary_html(): string {
-        $tasks = manager::get_adhoc_tasks(self::class);
-
-        if (empty($tasks)) {
-            return get_string('tagging:migration:nothingrunning');
-        }
-
-        $table = new html_table();
-        $table->head = [
-            get_string('table:taskid', 'tool_objectfs'),
-            get_string('table:iteration', 'tool_objectfs'),
-            get_string('table:status', 'tool_objectfs'),
-        ];
-
-        foreach ($tasks as $task) {
-            $table->data[$task->get_id()] = [$task->get_id(), $task->get_iteration(), $task->get_status_badge()];
-        }
-
-        return html_writer::table($table);
-    }
-
     /**
      * Returns a status badge depending on the health of the task
      * @return string

@@ -32,19 +32,6 @@ use tool_objectfs\tests\testcase;
  */
 class update_object_tags_test extends testcase {
     /**
-     * Enables tagging in config and sets up the filesystem to allow tagging
-     */
-    private function set_tagging_enabled() {
-        global $CFG;
-        $config = \tool_objectfs\local\manager::get_objectfs_config();
-        $config->taggingenabled = true;
-        $config->enabletasks = true;
-        $config->filesystem = '\\tool_objectfs\\tests\\test_file_system';
-        \tool_objectfs\local\manager::set_objectfs_config($config);
-        $CFG->phpunit_objectfs_supports_object_tagging = true;
-    }
-
-    /**
      * Creates object with tags needing to be synced
      * @param string $contents contents of object to create.
      * @return stdClass object record
@@ -75,7 +62,7 @@ class update_object_tags_test extends testcase {
      */
     public function test_invalid_iteration_limit() {
         $this->resetAfterTest();
-        $this->set_tagging_enabled();
+        $this->enable_filesystem_and_set_tagging(true);
 
         // This should be greater than 1, if zero should error.
         set_config('maxtaggingiterations', 0, 'tool_objectfs');
@@ -94,7 +81,7 @@ class update_object_tags_test extends testcase {
      */
     public function test_invalid_iteration_number() {
         $this->resetAfterTest();
-        $this->set_tagging_enabled();
+        $this->enable_filesystem_and_set_tagging(true);
 
         // Give it a valid max iteration number.
         set_config('maxtaggingiterations', 5, 'tool_objectfs');
@@ -112,7 +99,7 @@ class update_object_tags_test extends testcase {
      */
     public function test_no_more_objects_to_sync() {
         $this->resetAfterTest();
-        $this->set_tagging_enabled();
+        $this->enable_filesystem_and_set_tagging(true);
         set_config('maxtaggingiterations', 5, 'tool_objectfs');
         $task = new update_object_tags();
         $task->set_custom_data(['iteration' => 1]);
@@ -127,7 +114,7 @@ class update_object_tags_test extends testcase {
      */
     public function test_max_iterations() {
         $this->resetAfterTest();
-        $this->set_tagging_enabled();
+        $this->enable_filesystem_and_set_tagging(true);
 
         // Set max 1 iteration.
         set_config('maxtaggingiterations', 1, 'tool_objectfs');
@@ -148,7 +135,7 @@ class update_object_tags_test extends testcase {
      */
     public function test_tagging_run_with_requeue() {
         $this->resetAfterTest();
-        $this->set_tagging_enabled();
+        $this->enable_filesystem_and_set_tagging(true);
 
         // Set max 1 object per run.
         set_config('maxtaggingperrun', 1, 'tool_objectfs');
@@ -194,11 +181,10 @@ class update_object_tags_test extends testcase {
     }
 
     /**
-     * Tests getting status badge and summary html
+     * Tests getting status badge
      * @covers \tool_objectfs\task\update_object_tags::get_status_badge
-     * @covers \tool_objectfs\task\update_object_tags::get_summary_html
      */
-    public function test_get_summary_html_and_status_badge() {
+    public function test_get_status_badge() {
         // Spawn three tasks and break each one in a different way.
         // Test their badge output.
         $task1 = new update_object_tags();
@@ -214,15 +200,5 @@ class update_object_tags_test extends testcase {
         $task3->set_timestarted(1000);
         $this->assertStringContainsString(get_string('status:running', 'tool_objectfs'),
             $task3->get_status_badge());
-
-        // Now queue them so we can test report generation.
-        manager::queue_adhoc_task($task1);
-        manager::queue_adhoc_task($task2);
-        manager::queue_adhoc_task($task3);
-
-        // Ensure row count is expected (excluding header row).
-        $report = update_object_tags::get_summary_html();
-        $rowcount = substr_count($report, '<tr') - 1;
-        $this->assertEquals(3, $rowcount);
     }
 }
