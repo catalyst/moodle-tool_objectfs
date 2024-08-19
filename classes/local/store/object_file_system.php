@@ -1192,16 +1192,20 @@ abstract class object_file_system extends \file_system_filedir {
             // Avoid unnecessarily checking tags, since this is an extra API call.
             $canset = $objectexists && (tag_manager::can_overwrite_object_tags() ||
                 empty($this->get_external_client()->get_object_tags($contenthash)));
+            $timepushed = 0;
 
             if ($canset) {
                 $tags = tag_manager::gather_object_tags_for_upload($contenthash);
                 $this->get_external_client()->set_object_tags($contenthash, $tags);
                 tag_manager::store_tags_locally($contenthash, $tags);
-                tag_manager::record_tag_pushed_time($contenthash, time());
+
+                // Record the time it was actually pushed to the external store
+                // (i.e. not when it existed already and we pulled the tags down).
+                $timepushed = time();
             }
 
             // Regardless, it has synced.
-            tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_COMPLETE);
+            tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_COMPLETE, $timepushed);
         } catch (Throwable $e) {
             $lock->release();
 
