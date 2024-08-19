@@ -1102,6 +1102,7 @@ class object_file_system_test extends tests\testcase {
         // Tags should now be replicated locally.
         $localtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $object->contenthash]);
         $externaltags = $this->filesystem->get_external_client()->get_object_tags($object->contenthash);
+        $time = $DB->get_field('tool_objectfs_objects', 'tagslastpushed', ['id' => $object->id]);
 
         if ($canoverride) {
             // If can override, we expect it to be overwritten by the tags defined in the sources.
@@ -1110,12 +1111,18 @@ class object_file_system_test extends tests\testcase {
 
             // Also expect the external store to be updated.
             $this->assertCount($expectednum, $externaltags);
+
+            // Tag push time should be set, since it actually pushed the tags.
+            $this->assertNotEquals(0, $time);
         } else {
             // If cannot overwrite, no tags should be synced.
             $this->assertCount(0, $localtags);
 
             // External store should not be changed.
             $this->assertCount(count($testtags), $externaltags);
+
+            // The tag last push time should remain unchanged, since it didn't actually push any tags.
+            $this->assertEquals(0, $time);
         }
 
         // Ensure status changed to not needing sync.
