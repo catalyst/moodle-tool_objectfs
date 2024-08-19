@@ -54,6 +54,23 @@ abstract class testcase extends \advanced_testcase {
     }
 
     /**
+     * Enables the test object filesystem and sets the tagging value.
+     * @param bool $tagging if tagging should be enabled or not.
+     */
+    protected function enable_filesystem_and_set_tagging(bool $tagging) {
+        global $CFG;
+        set_config('taggingenabled', $tagging, 'tool_objectfs');
+
+        // Set supported by fs.
+        $config = manager::get_objectfs_config();
+        $config->taggingenabled = $tagging;
+        $config->enabletasks = true;
+        $config->filesystem = '\\tool_objectfs\\tests\\test_file_system';
+        manager::set_objectfs_config($config);
+        $CFG->phpunit_objectfs_supports_object_tagging = $tagging;
+    }
+
+    /**
      * reset_file_system
      * @return void
      */
