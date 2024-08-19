@@ -273,6 +273,10 @@ $string['settings:taggingheader'] = 'Tagging settings';
 $string['settings:taggingenabled'] = 'Tagging enabled';
 $string['checktagging_status'] = 'Object tagging';
 $string['check:tagging:ok'] = 'Object tagging ok';
+$string['check:tagging:syncerror'] = 'Objects have tag sync errors';
+$string['check:tagging:syncok'] = 'No objects reporting sync errors';
+$string['check:tagging:migrationerror'] = 'Object tagging migration task(s) have faildelay > 0';
+$string['check:tagging:migrationok'] = 'Object tagging migration tasks OK';
 $string['check:tagging:na'] = 'Tagging not enabled or is not supported by file system';
 $string['check:tagging:error'] = 'Error trying to tag object';
 $string['settings:maxtaggingperrun'] = 'Object tagging adhoc sync maximum objects per run';
@@ -307,3 +311,6 @@ $string['table:tagsourcemeaning'] = 'Description';
 $string['status:waiting'] = 'Waiting';
 $string['status:running'] = 'Running';
 $string['status:failing'] = 'Faildelay {$a}';
+$string['checktagging_sync_status'] = 'Object tagging sync status';
+$string['checktagging_migration_status'] = 'Object tagging migration status';
+

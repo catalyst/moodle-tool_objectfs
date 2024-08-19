@@ -120,6 +120,8 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
 function tool_objectfs_status_checks() {
     $checks = [
         new tool_objectfs\check\tagging_status(),
+        new tool_objectfs\check\tagging_sync_status(),
+        new tool_objectfs\check\tagging_migration_status(),
     ];
 
     if (get_config('tool_objectfs', 'proxyrangerequests')) {
