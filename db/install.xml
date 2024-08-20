@@ -54,7 +54,7 @@
     <TABLE NAME="tool_objectfs_object_tags" COMMENT="Object tag key value pairs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="objectid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="tagkey" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="tagvalue" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
@@ -62,7 +62,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="objecttagkey_idx" UNIQUE="true" FIELDS="contenthash, tagkey"/>
+        <INDEX NAME="objecttagkey_idx" UNIQUE="true" FIELDS="objectid, tagkey"/>
       </INDEXES>
     </TABLE>
   </TABLES>

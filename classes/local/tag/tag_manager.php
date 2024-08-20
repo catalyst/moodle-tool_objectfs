@@ -112,14 +112,17 @@ class tag_manager {
     public static function store_tags_locally(string $contenthash, array $tags) {
         global $DB;
 
+        // Lookup object id.
+        $objectid = $DB->get_field('tool_objectfs_objects', 'id', ['contenthash' => $contenthash], MUST_EXIST);
+
         // Purge any existing tags for this object.
-        $DB->delete_records('tool_objectfs_object_tags', ['contenthash' => $contenthash]);
+        $DB->delete_records('tool_objectfs_object_tags', ['objectid' => $objectid]);
 
         // Store new records.
         $recordstostore = [];
         foreach ($tags as $key => $value) {
             $recordstostore[] = [
-                'contenthash' => $contenthash,
+                'objectid' => $objectid,
                 'tagkey' => $key,
                 'tagvalue' => $value,
             ];

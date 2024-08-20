@@ -178,7 +178,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
 
         // Adding fields to table tool_objectfs_object_tags.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('contenthash', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('objectid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('tagkey', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, null);
         $table->add_field('tagvalue', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);
 
@@ -186,7 +186,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
         // Adding indexes to table tool_objectfs_object_tags.
-        $table->add_index('objecttagkey_idx', XMLDB_INDEX_UNIQUE, ['contenthash', 'tagkey']);
+        $table->add_index('objecttagkey_idx', XMLDB_INDEX_UNIQUE, ['objectid', 'tagkey']);
 
         // Conditionally launch create table for tool_objectfs_object_tags.
         if (!$dbman->table_exists($table)) {
