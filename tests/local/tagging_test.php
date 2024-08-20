@@ -170,16 +170,16 @@ class tagging_test extends testcase {
             'test1' => 'abc',
             'test2' => 'xyz',
         ];
-        $hash = 'thisisatest';
+        $object = $this->create_remote_object();
 
         // Ensure no tags for hash intially.
-        $this->assertEmpty($DB->get_records('tool_objectfs_object_tags', ['contenthash' => $hash]));
+        $this->assertEmpty($DB->get_records('tool_objectfs_object_tags', ['objectid' => $object->id]));
 
         // Store.
-        tag_manager::store_tags_locally($hash, $tags);
+        tag_manager::store_tags_locally($object->contenthash, $tags);
 
         // Confirm they are stored.
-        $queriedtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $hash]);
+        $queriedtags = $DB->get_records('tool_objectfs_object_tags', ['objectid' => $object->id]);
         $this->assertCount(2, $queriedtags);
     }
 

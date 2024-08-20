@@ -1093,14 +1093,14 @@ class object_file_system_test extends tests\testcase {
         $this->assertCount(count($testtags), $tags);
 
         // But tags will not be stored locally (yet).
-        $localtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $object->contenthash]);
+        $localtags = $DB->get_records('tool_objectfs_object_tags', ['objectid' => $object->id]);
         $this->assertCount(0, $localtags);
 
         // Sync the file.
         $this->filesystem->push_object_tags($object->contenthash);
 
         // Tags should now be replicated locally.
-        $localtags = $DB->get_records('tool_objectfs_object_tags', ['contenthash' => $object->contenthash]);
+        $localtags = $DB->get_records('tool_objectfs_object_tags', ['objectid' => $object->id]);
         $externaltags = $this->filesystem->get_external_client()->get_object_tags($object->contenthash);
         $time = $DB->get_field('tool_objectfs_objects', 'tagslastpushed', ['id' => $object->id]);
 
