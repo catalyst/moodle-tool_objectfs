@@ -60,7 +60,7 @@ class tagging_sync_status extends check {
         foreach (tag_manager::SYNC_STATUSES as $status) {
             // If no objects have a status, they won't appear in the SQL above.
             // In this case, just show zero (so the use knows it exists, but is zero).
-            $count = isset($statuses[$status]) ? $statuses[$status]->count : 0;
+            $count = isset($statuses[$status]->statuscount) ? $statuses[$status]->statuscount : 0;
             $table->data[$status] = [tag_manager::get_sync_status_string($status), $count];
         }
         $table = html_writer::table($table);

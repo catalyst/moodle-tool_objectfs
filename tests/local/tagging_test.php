@@ -340,9 +340,12 @@ class tagging_test extends testcase {
         $DB->delete_records('tool_objectfs_objects');
 
         // Create an object with each status.
-        $object1 = $this->create_remote_object('test1');
-        $object2 = $this->create_remote_object('test2');
-        $object3 = $this->create_remote_object('test3');
+        $object1 = $this->create_local_object('test1');
+        $object2 = $this->create_local_object('test2');
+        $object3 = $this->create_local_object('test3');
+
+        // Delete the unit test object that is automatically created, it has a filesize of zero.
+        $DB->delete_records('tool_objectfs_objects', ['filesize' => 0]);
 
         tag_manager::mark_object_tag_sync_status($object1->contenthash, tag_manager::SYNC_STATUS_COMPLETE);
         tag_manager::mark_object_tag_sync_status($object2->contenthash, tag_manager::SYNC_STATUS_ERROR);
@@ -350,9 +353,9 @@ class tagging_test extends testcase {
 
         // Ensure correctly counted.
         $statuses = tag_manager::get_tag_sync_status_summary();
-        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_COMPLETE]->count);
-        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_ERROR]->count);
-        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_NEEDS_SYNC]->count);
+        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_COMPLETE]->statuscount);
+        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_ERROR]->statuscount);
+        $this->assertEquals(1, $statuses[tag_manager::SYNC_STATUS_NEEDS_SYNC]->statuscount);
     }
 
     /**
