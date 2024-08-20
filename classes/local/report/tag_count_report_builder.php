@@ -41,7 +41,7 @@ class tag_count_report_builder extends objectfs_report_builder {
                    SUM(objects.filesize) as objectsum
               FROM {tool_objectfs_objects} objects
          LEFT JOIN {tool_objectfs_object_tags} object_tags
-                ON objects.contenthash = object_tags.contenthash
+                ON objects.id = object_tags.objectid
           GROUP BY object_tags.tagkey, object_tags.tagvalue
         ";
         $result = $DB->get_records_sql($sql);
