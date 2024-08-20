@@ -270,9 +270,25 @@ $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up ht
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
 
+// Tagging.
 $string['settings:taggingheader'] = 'Tagging settings';
 $string['settings:taggingenabled'] = 'Tagging enabled';
+$string['settings:maxtaggingperrun'] = 'Object tagging adhoc sync maximum objects per run';
+$string['settings:maxtaggingperrun:desc'] = 'The maximum number of objects to sync tags for per tagging sync adhoc task iteration.';
+$string['settings:maxtaggingiterations'] = 'Object tagging adhoc sync maximum number of iterations ';
+$string['settings:maxtaggingiterations:desc'] = 'The maximum number of times the tagging sync adhoc task will requeue itself. To avoid accidental infinite runaway.';
+$string['settings:overrideobjecttags'] = 'Allow object tag override';
+$string['settings:overrideobjecttags:desc'] = 'Allows ObjectFS to overwrite tags on objects that already exist in the external store.';
+$string['settings:tagsources'] = 'Tag sources';
+$string['settings:taggingstatus'] = 'Tagging status';
+$string['settings:taggingstatuscounts'] = 'Tag sync status overview';
+$string['settings:taggingmigrationstatus'] = 'Tagging adhoc migration progress';
+$string['settings:tagging:help'] = 'Object tagging allows extra metadata to be attached to objects in the external store. Please read TAGGING.md in the plugin Github repository for detailed setup and considerations. This is currently only supported by the S3 external client.';
+
 $string['checktagging_status'] = 'Object tagging';
+$string['checktagging_sync_status'] = 'Object tagging sync status';
+$string['checktagging_migration_status'] = 'Object tagging migration status';
+
 $string['check:tagging:ok'] = 'Object tagging ok';
 $string['check:tagging:syncerror'] = 'Objects have tag sync errors';
 $string['check:tagging:syncok'] = 'No objects reporting sync errors';
@@ -280,38 +296,31 @@ $string['check:tagging:migrationerror'] = 'Object tagging migration task(s) have
 $string['check:tagging:migrationok'] = 'Object tagging migration tasks OK';
 $string['check:tagging:na'] = 'Tagging not enabled or is not supported by file system';
 $string['check:tagging:error'] = 'Error trying to tag object';
-$string['settings:maxtaggingperrun'] = 'Object tagging adhoc sync maximum objects per run';
-$string['settings:maxtaggingperrun:desc'] = 'The maximum number of objects to sync tags for per tagging sync adhoc task iteration.';
-$string['settings:maxtaggingiterations'] = 'Object tagging adhoc sync maximum number of iterations ';
-$string['settings:maxtaggingiterations:desc'] = 'The maximum number of times the tagging sync adhoc task will requeue itself. To avoid accidental infinite runaway.';
-$string['settings:overrideobjecttags'] = 'Allow object tag override';
-$string['settings:overrideobjecttags:desc'] = 'Allows ObjectFS to overwrite tags on objects that already exist in the external store.';
+
 $string['tagsource:environment'] = 'Environment defined by $CFG->objectfs_environment_name, currently: "{$a}".';
 $string['tagsource:mimetype'] = 'File mimetype as stored in {files} table';
-$string['settings:tagsources'] = 'Tag sources';
-$string['settings:taggingstatus'] = 'Tagging status';
+
 $string['task:triggerupdateobjecttags'] = 'Queue adhoc task to update object tags';
-$string['settings:tagging:help'] = 'Object tagging allows extra metadata to be attached to objects in the external store. Please read TAGGING.md in the plugin Github repository for detailed setup and considerations. This is currently only supported by the S3 external client.';
-$string['object_status:tag_count'] = 'Object tags';
+
 $string['tagsyncstatus:error'] = 'Errored';
 $string['tagsyncstatus:notrequired'] = 'Not required / synced';
 $string['tagsyncstatus:needssync'] = 'Waiting for sync';
-$string['settings:taggingstatuscounts'] = 'Tag sync status overview';
+
 $string['tagging:migration:notsupported'] = 'Tagging not enabled or supported by filesystem. Cannot execute tag migration task';
 $string['tagging:migration:invaliditerations'] = 'Invalid iteration number or iteration count';
 $string['tagging:migration:limitreached'] = 'Current iteration {$a} is >= the maximum number of iterations. Please investigate if this is expected and you need to increase the limit, or if there is a problem syncing the tags causing an infinite loop';
-$string['settings:taggingmigrationstatus'] = 'Tagging adhoc migration progress';
 $string['tagging:migration:nothingrunning'] = 'No tagging migration adhoc tasks are currently running';
 $string['tagging:migration:help'] = 'Run the <code>trigger_update_object_tags</code> scheduled task from the frontend or CLI to start a migration task.';
+
 $string['table:taskid'] = 'Task ID';
 $string['table:iteration'] = 'Iteration number';
 $string['table:status'] = 'Status';
 $string['table:objectcount'] = 'Object count';
 $string['table:tagsource'] = 'Tag source';
 $string['table:tagsourcemeaning'] = 'Description';
+
 $string['status:waiting'] = 'Waiting';
 $string['status:running'] = 'Running';
 $string['status:failing'] = 'Faildelay {$a}';
-$string['checktagging_sync_status'] = 'Object tagging sync status';
-$string['checktagging_migration_status'] = 'Object tagging migration status';
 
+$string['object_status:tag_count'] = 'Object tags';
