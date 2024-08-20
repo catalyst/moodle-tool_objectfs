@@ -226,7 +226,7 @@ class tag_manager {
      */
     public static function get_tag_sync_status_summary(): array {
         global $DB;
-        return $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus)
+        return $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus) as statuscount
                                        FROM {tool_objectfs_objects}
                                    GROUP BY tagsyncstatus");
     }
