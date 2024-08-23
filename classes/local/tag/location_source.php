@@ -17,20 +17,20 @@
 namespace tool_objectfs\local\tag;
 
 /**
- * Provides mime type of file.
+ * Provides location status for a file.
  *
  * @package   tool_objectfs
  * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mime_type_source implements tag_source {
+class location_source implements tag_source {
     /**
      * Identifier used in tagging file. Is the 'key' of the tag.
      * @return string
      */
     public static function get_identifier(): string {
-        return 'mimetype';
+        return 'location';
     }
 
     /**
@@ -38,7 +38,7 @@ class mime_type_source implements tag_source {
      * @return string
      */
     public static function get_description(): string {
-        return get_string('tagsource:mimetype', 'tool_objectfs');
+        return get_string('tagsource:location', 'tool_objectfs');
     }
 
     /**
@@ -48,18 +48,13 @@ class mime_type_source implements tag_source {
      */
     public function get_value_for_contenthash(string $contenthash): ?string {
         global $DB;
-        // Sometimes multiple with same hash are uploaded (e.g. real vs draft),
-        // in this case, just take the first (mimetype is the same regardless).
-        $mime = $DB->get_field_sql('SELECT mimetype
-                                      FROM {files}
-                                     WHERE contenthash = :hash
-                                     LIMIT 1',
-                                    ['hash' => $contenthash]);
 
-        if (empty($mime)) {
-            return null;
-        }
+        // DEBUG DEBUG DEBUG
+        return 'test2';
 
-        return $mime;
+        $isorphaned = $DB->record_exists('tool_objectfs_objects', ['contenthash' => $contenthash,
+            'location' => OBJECT_LOCATION_ORPHANED]);
+
+        return $isorphaned ? 'orphan' : 'active';
     }
 }

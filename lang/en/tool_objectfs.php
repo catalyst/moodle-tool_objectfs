@@ -278,7 +278,7 @@ $string['settings:maxtaggingperrun:desc'] = 'The maximum number of objects to sy
 $string['settings:maxtaggingiterations'] = 'Object tagging adhoc sync maximum number of iterations ';
 $string['settings:maxtaggingiterations:desc'] = 'The maximum number of times the tagging sync adhoc task will requeue itself. To avoid accidental infinite runaway.';
 $string['settings:overrideobjecttags'] = 'Allow object tag override';
-$string['settings:overrideobjecttags:desc'] = 'Allows ObjectFS to overwrite tags on objects that already exist in the external store.';
+$string['settings:overrideobjecttags:desc'] = 'Allows ObjectFS to overwrite tags on objects that already exist in the external store. If not checked, objectfs will only set tags when the objects "environment" value is empty or is the same as currently defined.';
 $string['settings:tagsources'] = 'Tag sources';
 $string['settings:taggingstatus'] = 'Tagging status';
 $string['settings:taggingstatuscounts'] = 'Tag sync status overview';
@@ -298,7 +298,7 @@ $string['check:tagging:na'] = 'Tagging not enabled or is not supported by file s
 $string['check:tagging:error'] = 'Error trying to tag object';
 
 $string['tagsource:environment'] = 'Environment defined by $CFG->objectfs_environment_name, currently: "{$a}".';
-$string['tagsource:mimetype'] = 'File mimetype as stored in {files} table';
+$string['tagsource:location'] = 'Location of file, either "orphan" or "active".';
 
 $string['task:triggerupdateobjecttags'] = 'Queue adhoc task to update object tags';
 

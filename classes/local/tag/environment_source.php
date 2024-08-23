@@ -53,7 +53,7 @@ class environment_source implements tag_source {
     /**
      * Returns the tag value for the given file contenthash
      * @param string $contenthash
-     * @return string|null mime type for file.
+     * @return string|null environment value.
      */
     public function get_value_for_contenthash(string $contenthash): ?string {
         return self::get_env();
