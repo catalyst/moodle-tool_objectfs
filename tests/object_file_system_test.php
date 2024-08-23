@@ -970,35 +970,68 @@ class object_file_system_testcase extends tool_objectfs_testcase {
      */
     public static function push_object_tags_replicated_provider(): array {
         return [
-            'can override' => [
+            // Can override, doesn't matter if envs are different.
+            'can override - different env' => [
+                'object env' => 'prod',
+                'push env' => 'staging',
                 'can override' => true,
+                'expected override' => true,
             ],
-            'cannot override' => [
-                'cannot override' => false,
+            'can override - same env' => [
+                'object env' => 'prod',
+                'push env' => 'prod',
+                'can override' => true,
+                'expected override' => true,
+            ],
+            'can override - empty env' => [
+                'object env' => '',
+                'push env' => 'prod',
+                'can override' => true,
+                'expected override' => true,
+            ],
+            // Cannot override, env must match or be empty.
+            'cannot override - same env' => [
+                'object env' => 'prod',
+                'push env' => 'prod',
+                'can override' => false,
+                'expected override' => true,
+            ],
+            'cannot override - different env' => [
+                'object env' => 'prod',
+                'push env' => 'staging',
+                'can override' => false,
+                'expected override' => false,
+            ],
+            'cannot override - env is empty' => [
+                'object env' => '',
+                'push env' => 'staging',
+                'can override' => false,
+                'expected override' => true,
             ],
         ];
     }
 
     /**
      * Tests push_object_tags when the object is replicated.
+     * Tests rules around overriding are correctly applied.
+     *
+     * @param string $objectenv the env to set when 'uploading' the object
+     * @param string $pushenv the env to set when trying to push new tags
      * @param bool $canoverride if filesystem should be able to overwrite existing objects
+     * @param bool $expectedoverride if it was expected that the tags were overwritten.
      * @dataProvider push_object_tags_replicated_provider
      */
-    public function test_push_object_tags_replicated(bool $canoverride) {
+    public function test_push_object_tags_replicated(string $objectenv, string $pushenv, bool $canoverride,
+        bool $expectedoverride) {
         global $CFG, $DB;
         $CFG->phpunit_objectfs_supports_object_tagging = true;
+        $CFG->objectfs_environment_name = $objectenv;
 
         set_config('overwriteobjecttags', $canoverride, 'tool_objectfs');
         $this->assertEquals($canoverride, tag_manager::can_overwrite_object_tags());
 
         $object = $this->create_duplicated_object('test syncing replicated');
-
-        $testtags = [
-            'test' => 123,
-            'test2' => 123,
-            'test3' => 123,
-            'test4' => 123,
-        ];
+        $testtags = tag_manager::gather_object_tags_for_upload($object->contenthash);
 
         // Fake set the tags in the external store.
         $this->filesystem->get_external_client()->tags[$object->contenthash] = $testtags;
@@ -1011,6 +1044,8 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $localtags = $DB->get_records('tool_objectfs_object_tags', ['objectid' => $object->id]);
         $this->assertCount(0, $localtags);
 
+        $CFG->objectfs_environment_name = $pushenv;
+
         // Sync the file.
         $this->filesystem->push_object_tags($object->contenthash);
 
@@ -1019,7 +1054,7 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $externaltags = $this->filesystem->get_external_client()->get_object_tags($object->contenthash);
         $time = $DB->get_field('tool_objectfs_objects', 'tagslastpushed', ['id' => $object->id]);
 
-        if ($canoverride) {
+        if ($expectedoverride) {
             // If can override, we expect it to be overwritten by the tags defined in the sources.
             $expectednum = count(tag_manager::get_defined_tag_sources());
             $this->assertCount($expectednum, $localtags);
