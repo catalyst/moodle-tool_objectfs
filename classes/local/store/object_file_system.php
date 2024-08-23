@@ -39,6 +39,7 @@ use BlobRestProxy;
 use coding_exception;
 use Throwable;
 use tool_objectfs\local\manager;
+use tool_objectfs\local\tag\environment_source;
 use tool_objectfs\local\tag\tag_manager;
 
 defined('MOODLE_INTERNAL') || die();
@@ -165,6 +166,23 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         return $path;
+    }
+
+    /**
+     * Returns mimetype for a given hash
+     * @param string $contenthash
+     * @return string mimetype as stored in mdl_files
+     */
+    protected function get_mimetype_from_hash(string $contenthash): string {
+        global $DB;
+
+        // We limit 1 because multiple files can have the same contenthash.
+        // However, they all have the same mimetype so it does not matter which one we query.
+        return $DB->get_field_sql('SELECT mimetype
+                              FROM {files}
+                             WHERE contenthash = :hash
+                             LIMIT 1',
+                        ['hash' => $contenthash]);
     }
 
     /**
@@ -1185,13 +1203,7 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         try {
-            $objectexists = $this->is_file_readable_externally_by_hash($contenthash);
-
-            // Object must exist, and we can overwrite (and not care about existing tags)
-            // or cannot overwrite, and the tags are empty.
-            // Avoid unnecessarily checking tags, since this is an extra API call.
-            $canset = $objectexists && (tag_manager::can_overwrite_object_tags() ||
-                empty($this->get_external_client()->get_object_tags($contenthash)));
+            $canset = $this->can_set_object_tags($contenthash);
             $timepushed = 0;
 
             if ($canset) {
@@ -1200,7 +1212,7 @@ abstract class object_file_system extends \file_system_filedir {
                 tag_manager::store_tags_locally($contenthash, $tags);
 
                 // Record the time it was actually pushed to the external store
-                // (i.e. not when it existed already and we pulled the tags down).
+                // (i.e. not when it existed already and was skipped).
                 $timepushed = time();
             }
 
@@ -1215,5 +1227,52 @@ abstract class object_file_system extends \file_system_filedir {
             throw $e;
         }
         $lock->release();
+    }
+
+    /**
+     * Returns true if the current env can set the given object's tags.
+     *
+     * To set the tags:
+     * - The object must exist
+     * - We can overwrite tags (and not care about any existing)
+     * OR
+     * - We cannot overwrite tags, and the tags are empty or the environment is the same as ours.
+     *
+     * Avoids unnecessarily querying tags as this is an extra api call to the object store.
+     *
+     * @param string $contenthash
+     * @return bool
+     */
+    private function can_set_object_tags(string $contenthash): bool {
+        $objectexists = $this->is_file_readable_externally_by_hash($contenthash);
+
+        // Object must exist, we cannot set tags on an object that is missing.
+        if (!$objectexists) {
+            return false;
+        }
+
+        // If can overwrite tags, we don't care then about any existing tags.
+        if (tag_manager::can_overwrite_object_tags()) {
+            return true;
+        }
+
+        // Else we need to check the tags are empty, or the env matches ours.
+        $existingtags = $this->get_external_client()->get_object_tags($contenthash);
+
+        // Not set yet, must be a new object.
+        if (empty($existingtags) || !isset($existingtags[environment_source::get_identifier()])) {
+            return true;
+        }
+
+        $envsource = new environment_source();
+        $currentenv = $envsource->get_value_for_contenthash($contenthash);
+
+        // Env is the same as ours, allowed to set.
+        if ($existingtags[environment_source::get_identifier()] == $currentenv) {
+            return true;
+        }
+
+        // Else no match, do not set.
+        return false;
     }
 }

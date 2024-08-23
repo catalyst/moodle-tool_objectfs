@@ -153,10 +153,29 @@ class tagging_test extends testcase {
         $object = $this->create_duplicated_object('gather tags for upload test');
         $tags = tag_manager::gather_object_tags_for_upload($object->contenthash);
 
-        $this->assertArrayHasKey('mimetype', $tags);
         $this->assertArrayHasKey('environment', $tags);
-        $this->assertEquals('text', $tags['mimetype']);
         $this->assertEquals('test', $tags['environment']);
+        $this->assertArrayHasKey('location', $tags);
+        $this->assertEquals('active', $tags['location']);
+    }
+
+    /**
+     * Tests gather_object_tags_for_upload when orphaned
+     * @covers \tool_objectfs\local\tag_manager::gather_object_tags_for_upload
+     */
+    public function test_gather_object_tags_for_upload_orphaned() {
+        global $DB;
+        $object = $this->create_duplicated_object('gather tags for upload test');
+
+        // Change the object record to be orphaned.
+        $DB->update_record('tool_objectfs_objects', ['id' => $object->id, 'location' => OBJECT_LOCATION_ORPHANED]);
+
+        $tags = tag_manager::gather_object_tags_for_upload($object->contenthash);
+
+        $this->assertArrayHasKey('environment', $tags);
+        $this->assertEquals('test', $tags['environment']);
+        $this->assertArrayHasKey('location', $tags);
+        $this->assertEquals('orphan', $tags['location']);
     }
 
     /**

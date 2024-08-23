@@ -27,6 +27,7 @@ namespace tool_objectfs\local;
 
 use stdClass;
 use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\local\tag\tag_manager;
 
 /**
  * [Description manager]
@@ -160,7 +161,7 @@ class manager {
             $newobject->filesize = isset($oldobject->filesize) ? $oldobject->filesize :
                     $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
 
-            return self::update_object($newobject, $newlocation);
+            return self::upsert_object($newobject, $newlocation);
         }
         $newobject->location = $newlocation;
 
@@ -173,9 +174,7 @@ class manager {
             $newobject->filesize = $filesize;
             $newobject->timeduplicated = time();
         }
-        $DB->insert_record('tool_objectfs_objects', $newobject);
-
-        return $newobject;
+        return self::upsert_object($newobject, $newlocation);
     }
 
     /**
@@ -185,7 +184,7 @@ class manager {
      * @return stdClass
      * @throws \dml_exception
      */
-    public static function update_object(stdClass $object, $newlocation) {
+    public static function upsert_object(stdClass $object, $newlocation) {
         global $DB;
 
         // If location change is 'duplicated' we update timeduplicated.
@@ -193,8 +192,21 @@ class manager {
             $object->timeduplicated = time();
         }
 
+        $locationchanged = !isset($object->location) || $object->location != $newlocation;
         $object->location = $newlocation;
-        $DB->update_record('tool_objectfs_objects', $object);
+
+        // If id is set, update, else insert new.
+        if (empty($object->id)) {
+            $object->id = $DB->insert_record('tool_objectfs_objects', $object);
+        } else {
+            $DB->update_record('tool_objectfs_objects', $object);
+        }
+
+        // Post update, notify tag manager since the location tag likely needs changing.
+        if ($locationchanged && tag_manager::is_tagging_enabled_and_supported()) {
+            $fs = get_file_storage()->get_file_system();
+            $fs->push_object_tags($object->contenthash);
+        }
 
         return $object;
     }

@@ -6,7 +6,7 @@ Currently, this is only implemented for the S3 file system client.
 
 Note object tags are different from object metadata.
 
-Object metadata is immutable, and attached to the object on upload. With metadata, if you wish to update it (for example during a migration, or the sources changed), you have to copy the object with the new metadata, and delete the old object. This is problematic, since deletion is optional in objectfs.
+Object metadata is immutable, and attached to the object on upload. With metadata, if you wish to update it (for example during a migration, or the sources changed), you have to copy the object with the new metadata, and delete the old object. This is not ideal, since deletion is optional in objectfs.
 
 Object tags are more suitable, since their permissions can be managed separately (e.g. a client can be allowed to modify tags, but not delete objects).
 
@@ -21,54 +21,33 @@ The following sources are implemented currently:
 ### Environment
 What environment the file was uploaded in. Configure the environment using `$CFG->objectfs_environment_name`
 
-### Mimetype
-What mimetype the file is stored as under the `mdl_files` table.
+This tag is also used by objectfs to determine if tags can be overwritten. See [Multiple environments setup](#multiple-environments-setup) for more information.
 
-## Multiple environments pointing to single bucket
-It is possible you are using objectfs with multiple environments (e.g. prod, staging) that both point to the same bucket. Since files are referenced by contenthash, it generally does not matter where they come from, so this isn't a problem. However to ensure the tags remain accurate, you should turn off `overwriteobjecttags` in the plugin settings for every environment except production.
+### Location
+Either `orphan` if the file no longer exists in the `files` table in Moodle, otherwise `active`.
 
-This means that staging is unable to overwrite tags for files uploaded elsewhere, but can set it on files only uploaded only from staging. However, files uploaded from production will always have the correct tags, and will overwrite any existing tags. 
+## Multiple environments setup
+This feature is designed to work in situations where multiple environments (e.g. prod, staging) points to the same bucket, however, some setup is needed:
 
-```mermaid
-graph LR
-    subgraph S3
-        Object("`**Object**
-        contenthash: xyz
-        tags: env=prod`")
-    end
-    subgraph Prod
-        UploadObjectProd["`**Upload object**
-        contenthash: xyz
-        tags: env=prod`"] --> Object
-    end
-    subgraph Staging
-        UploadObjectStaging["`**Upload object**
-        contenthash: xyz
-        tags: env=staging`"]
-    end
-    Blocked["Blocked - does not have permissions\nto overwrite existing object tags"]
-    UploadObjectStaging --- Blocked
-    Blocked -.-> Object
+1. Turn off `overwriteobjecttags` in every environment except the production environment.
+2. Configure `$CFG->objectfs_environment_name` to be unique for all environments.
 
-    style Object fill:#ffffff00,stroke:#ffa812
-    style S3 fill:#ffffff00,stroke:#ffa812
-    style Prod fill:#ffffff00,stroke:#26ff4a
-    style UploadObjectProd fill:#ffffff00,stroke:#26ff4a
-    style Staging fill:#ffffff00,stroke:#978aff
-    style UploadObjectStaging fill:#ffffff00,stroke:#978aff
-    style Blocked fill:#ffffff00,stroke:#ff0000
-```
+By doing the above two steps, it will allow the production environment to always set its own tags, even if a file was first uploaded to staging and then to production.
+
+Lower environments can still update tags, but only if the `environment` matches theirs. This allows staging to manage object tags on objects only it knows about, but as soon as the file is uploaded from production (and therefore have it's environment tag replaced with `prod`), staging will no longer touch it.
 
 ## Migration
-If the way a tag was calculated has changed, or new tags are added (or removed) or this feature was turned on for the first time (or turned on after being off), you must do the following: 
-- Manually run `trigger_update_object_tags` scheduled task from the UI, which queues a `update_object_tags` adhoc task that will process all objects marked as needing sync (default is true)
+Only new objects uploaded after enabling this feature will have tags added. To backfill tags for previously uploaded objects, you must do the following:
+
+- Manually run `trigger_update_object_tags` scheduled task from the UI, which queues a `update_object_tags` adhoc task that will process all objects marked as needing sync.
 or
 - Call the CLI to execute a `update_object_tags` adhoc task manually.
 
+You may need to update the DB to mark objects tag sync status as needing sync if the object has previously been synced before.
 ## Reporting
 There is an additional graph added to the object summary report showing the tag value combinations and counts of each.
 
-Note, this is only for files that have been uploaded from this environment, and may not be consistent for environments where `overwriteobjecttags` is disabled (because the site does not know if a file was overwritten in the external store by another client).
+Note, this is only for files that have been uploaded from the respective environment, and may not be consistent for environments where `overwriteobjecttags` is disabled (because the site does not know if a file was overwritten in the external store by another client).
 
 ## For developers
 

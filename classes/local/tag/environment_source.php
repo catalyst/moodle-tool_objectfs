@@ -17,7 +17,7 @@
 namespace tool_objectfs\local\tag;
 
 /**
- * Provides environment a file was uploaded in.
+ * Provides current environment to file.
  *
  * @package   tool_objectfs
  * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
@@ -53,7 +53,7 @@ class environment_source implements tag_source {
     /**
      * Returns the tag value for the given file contenthash
      * @param string $contenthash
-     * @return string|null mime type for file.
+     * @return string|null environment value.
      */
     public function get_value_for_contenthash(string $contenthash): ?string {
         return self::get_env();

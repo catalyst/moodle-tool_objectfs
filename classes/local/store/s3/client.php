@@ -496,10 +496,11 @@ class client extends object_client_base {
      *
      * @param string $localpath Path to a local file.
      * @param string $contenthash Content hash of the file.
+     * @param string $mimetype the mimetype of the file being uploaded
      *
      * @throws \Exception if fails.
      */
-    public function upload_to_s3($localpath, $contenthash) {
+    public function upload_to_s3($localpath, $contenthash, string $mimetype) {
         $filehandle = fopen($localpath, 'rb');
 
         if (!$filehandle) {
@@ -511,7 +512,13 @@ class client extends object_client_base {
             $uploader = new \Aws\S3\ObjectUploader(
                 $this->client, $this->bucket,
                 $this->bucketkeyprefix . $externalpath,
-                $filehandle
+                $filehandle,
+                'private',
+                [
+                    'params' => [
+                        'ContentType' => $mimetype,
+                    ],
+                ]
             );
             $uploader->upload();
             fclose($filehandle);
