@@ -66,8 +66,8 @@ class tag_manager {
         // All possible tag sources should be defined here.
         // Note this should be a maximum of 10 sources, as this is an AWS limit.
         return [
-            new mime_type_source(),
             new environment_source(),
+            new location_source(),
         ];
     }
 
