@@ -512,7 +512,7 @@ abstract class object_file_system extends \file_system_filedir {
 
             $this->logger->log_object_read('readfile', $path, $file->get_filesize());
 
-            if (!$success) {
+            if ($success === false) {
                 manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
             }
         }
