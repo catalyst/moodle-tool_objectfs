@@ -16,6 +16,8 @@
 
 namespace tool_objectfs\local\tag;
 
+use moodle_exception;
+
 /**
  * Provides current environment to file.
  *
@@ -47,7 +49,17 @@ class environment_source implements tag_source {
      */
     private static function get_env(): ?string {
         global $CFG;
-        return !empty($CFG->objectfs_environment_name) ? $CFG->objectfs_environment_name : null;
+
+        if (empty($CFG->objectfs_environment_name)) {
+            return null;
+        }
+
+        // Must never be greater than 128, unlikely, but we must enforce this.
+        if (strlen($CFG->objectfs_environment_name) > 128) {
+            throw new moodle_exception('tagsource:environment:toolong', 'tool_objectfs');
+        }
+
+        return $CFG->objectfs_environment_name;
     }
 
     /**

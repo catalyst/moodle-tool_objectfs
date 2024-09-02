@@ -17,8 +17,10 @@
 namespace tool_objectfs\local;
 
 use coding_exception;
+use moodle_exception;
 use Throwable;
 use tool_objectfs\local\manager;
+use tool_objectfs\local\tag\environment_source;
 use tool_objectfs\local\tag\tag_manager;
 use tool_objectfs\local\tag\tag_source;
 use tool_objectfs\tests\testcase;
@@ -411,5 +413,18 @@ class tagging_test extends testcase {
         $this->expectException(coding_exception::class);
         $this->expectExceptionMessage('No status string is mapped for status: 5');
         tag_manager::get_sync_status_string(5);
+    }
+
+    /**
+     * Tests the length of the defined tag source is checked correctly
+     */
+    public function test_environment_source_too_long() {
+        global $CFG;
+        $CFG->objectfs_environment_name = 'This is a really long string. It needs to be long because it needs to be more than 128 chars for the test to trigger an exception.';
+        $source = new environment_source();
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage(get_string('tagsource:environment:toolong', 'tool_objectfs'));
+        $source->get_value_for_contenthash('test');
     }
 }

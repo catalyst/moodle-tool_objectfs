@@ -303,6 +303,7 @@ $string['check:tagging:na'] = 'Tagging not enabled or is not supported by file s
 $string['check:tagging:error'] = 'Error trying to tag object';
 
 $string['tagsource:environment'] = 'Environment defined by $CFG->objectfs_environment_name, currently: "{$a}".';
+$string['tagsource:environment:toolong'] = 'The value defined in objectfs_environment_name is too long. It must be < 128 chars';
 $string['tagsource:location'] = 'Location of file, either "orphan" or "active".';
 
 $string['task:triggerupdateobjecttags'] = 'Queue adhoc task to update object tags';
