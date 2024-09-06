@@ -39,11 +39,13 @@ class client extends s3_client {
      */
     public function __construct($config) {
         global $CFG;
-        $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
+        $this->autoloader = $CFG->libdir . '/aws-sdk/src/functions.php';
         $this->testdelete = false;
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
+            require_once($CFG->libdir . '/guzzlehttp/guzzle/src/functions_include.php');
+            require_once($CFG->libdir . '/guzzlehttp/promises/src/functions_include.php');
             $this->bucket = $config->do_space;
             $this->set_client($config);
         } else {
