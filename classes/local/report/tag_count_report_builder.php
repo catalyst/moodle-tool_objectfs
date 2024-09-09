@@ -34,14 +34,11 @@ class tag_count_report_builder extends objectfs_report_builder {
         global $DB;
         $report = new objectfs_report('tag_count', $reportid);
 
-        // Returns counts + sizes of key:value.
+        // Returns counts of key:value.
         $sql = "
             SELECT CONCAT(COALESCE(object_tags.tagkey, '(untagged)'), ': ', COALESCE(object_tags.tagvalue, '')) as datakey,
-                   COUNT(objects.id) as objectcount,
-                   SUM(objects.filesize) as objectsum
-              FROM {tool_objectfs_objects} objects
-         LEFT JOIN {tool_objectfs_object_tags} object_tags
-                ON objects.id = object_tags.objectid
+                   COUNT(DISTINCT object_tags.objectid) as objectcount
+              FROM {tool_objectfs_object_tags} object_tags
           GROUP BY object_tags.tagkey, object_tags.tagvalue
         ";
         $result = $DB->get_records_sql($sql);
