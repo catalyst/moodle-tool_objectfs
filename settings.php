@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\check\tagging_migration_status;
+use tool_objectfs\check\tagging_sync_status;
 use tool_objectfs\local\tag\tag_manager;
 use tool_objectfs\task\update_object_tags;
 
@@ -290,13 +292,19 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('tool_objectfs/taggingstatus',
         new lang_string('settings:taggingstatus', 'tool_objectfs'), ''));
 
-    // TODO when this branch supports 4.4+, use admin_setting_check https://tracker.moodle.org/browse/MDL-67898.
-    $settings->add(new admin_setting_description('taggingstatuslink', '', html_writer::link(
-        new moodle_url('/report/status/index.php', ['detail' => 'tool_objectfs_tagging_sync_status']),
-        get_string('settings:taggingstatus', 'tool_objectfs')
-    )));
-    $settings->add(new admin_setting_description('taggingmigrationstatuslink', '', html_writer::link(
-        new moodle_url('/report/status/index.php', ['detail' => 'tool_objectfs_tagging_migration_status']),
-        get_string('settings:taggingmigrationstatus', 'tool_objectfs')
-    )));
+    // Only in 4.4+.
+    if (class_exists('admin_setting_check')) {
+        $settings->add(new admin_setting_check('tool_objectfs/check_taggingsyncstatus', new tagging_sync_status(), true));
+        $settings->add(new admin_setting_check('tool_objectfs/check_taggingmigrationstatus', new tagging_migration_status(), true));
+    } else {
+        // Fallback to links instead.
+        $settings->add(new admin_setting_description('taggingstatuslink', '', html_writer::link(
+            new moodle_url('/report/status/index.php', ['detail' => 'tool_objectfs_tagging_sync_status']),
+            get_string('settings:taggingstatus', 'tool_objectfs')
+        )));
+        $settings->add(new admin_setting_description('taggingmigrationstatuslink', '', html_writer::link(
+            new moodle_url('/report/status/index.php', ['detail' => 'tool_objectfs_tagging_migration_status']),
+            get_string('settings:taggingmigrationstatus', 'tool_objectfs')
+        )));
+    }
 }
