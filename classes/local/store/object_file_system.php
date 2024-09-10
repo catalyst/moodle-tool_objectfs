@@ -1187,8 +1187,9 @@ abstract class object_file_system extends \file_system_filedir {
      * External client must support tagging.
      *
      * @param string $contenthash file to sync tags for
+     * @return bool true if set tags, false if could not get lock.
      */
-    public function push_object_tags(string $contenthash) {
+    public function push_object_tags(string $contenthash): bool {
         if (!$this->get_external_client()->supports_object_tagging()) {
             throw new coding_exception("Cannot sync tags, external client does not support tagging.");
         }
@@ -1199,7 +1200,7 @@ abstract class object_file_system extends \file_system_filedir {
 
         // No lock - just skip it.
         if (!$lock) {
-            throw new coding_exception("Could not get object lock");
+            return false;
         }
 
         try {
@@ -1227,6 +1228,7 @@ abstract class object_file_system extends \file_system_filedir {
             throw $e;
         }
         $lock->release();
+        return true;
     }
 
     /**
