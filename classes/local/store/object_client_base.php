@@ -187,4 +187,13 @@ abstract class object_client_base implements object_client {
     public function test_permissions($testdelete) {
         return (object)['success' => false, 'details' => ''];
     }
+
+    /**
+     * Return expiry time of token, default is -1 meaning not implemented/enabled.
+     * @return int
+     */
+    public function get_token_expiry_time(): int {
+        // Returning -1 = not implemented.
+        return -1;
+    }
 }

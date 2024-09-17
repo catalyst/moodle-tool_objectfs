@@ -24,7 +24,9 @@ use tool_objectfs\tests\test_file_system;
  * Test basic operations of object file system.
  *
  * @covers \tool_objectfs\local\store\object_file_system
- * @package tool_objectfs
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class object_file_system_test extends tests\testcase {
 

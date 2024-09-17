@@ -22,7 +22,9 @@ use tool_objectfs\local\manager;
  * Tests for object deleter.
  *
  * @covers \tool_objectfs\local\object_manipulator\deleter
- * @package tool_objectfs
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class deleter_test extends \tool_objectfs\tests\testcase {
 

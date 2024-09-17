@@ -269,3 +269,9 @@ $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up ht
 
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
+
+$string['checktoken_expiry'] = 'Token expiry';
+$string['check:tokenexpiry:expiresin'] = 'Token expires in {$a->dayssince} days on {$a->time}';
+$string['check:tokenexpiry:expired'] = 'Token expired for {$a->dayssince} days. Expired on {$a->time}';
+$string['check:tokenexpiry:na'] = 'Token expired not implemented for filesystem, or no token is set';
+$string['settings:tokenexpirywarnperiod'] = 'Token expiry warn period';
