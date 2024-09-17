@@ -25,8 +25,10 @@
 
 namespace tool_objectfs\local\store\azure;
 
+use admin_setting_description;
 use SimpleXMLElement;
 use stdClass;
+use tool_objectfs\check\token_expiry;
 use tool_objectfs\local\store\azure\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
@@ -360,7 +362,40 @@ class client extends object_client_base {
             new \lang_string('settings:azure:sastoken', 'tool_objectfs'),
             new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'), ''));
 
+        // Admin_setting_check only exists in 4.5+, in lower versions fallback to a basic description.
+        if (class_exists('admin_setting_check')) {
+            $settings->add(new admin_setting_check('tool_objectfs/check_tokenexpiry', new token_expiry(), true));
+        } else {
+            $summary = (new token_expiry())->get_result()->get_summary();
+            $settings->add(new admin_setting_description('tool_objectfs/tokenexpirycheckresult',
+                get_string('checktoken_expiry', 'tool_objectfs'), $summary));
+        }
+
         return $settings;
+    }
+
+    /**
+     * Returns token expiry time
+     * @return int
+     */
+    public function get_token_expiry_time(): int {
+        if (empty($this->config->azure_sastoken)) {
+            return -1;
+        }
+
+        // Parse the sas token (it just uses url parameter encoding).
+        $parts = [];
+        parse_str($this->config->azure_sastoken, $parts);
+
+        // Get the 'se' part (signed expiry).
+        if (!isset($parts['se'])) {
+            // Assume expired (malformed).
+            return 0;
+        }
+
+        // Parse timestamp string into unix timestamp int.
+        $expirystr = $parts['se'];
+        return strtotime($expirystr);
     }
 
     /**

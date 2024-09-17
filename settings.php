@@ -106,6 +106,10 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:useproxy_help', 'tool_objectfs'),
         0));
 
+    $settings->add(new admin_setting_configduration('tool_objectfs/tokenexpirywarnperiod',
+        new lang_string('settings:tokenexpirywarnperiod', 'tool_objectfs'),
+        '', 60 * DAYSECS, DAYSECS));
+
     $settings->add(new admin_setting_heading('tool_objectfs/filetransfersettings',
         new lang_string('settings:filetransferheader', 'tool_objectfs'), ''));
 

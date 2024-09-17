@@ -137,6 +137,12 @@ interface object_client {
      */
     public function test_range_request($filesystem);
 
+    /**
+     * Get the expiry time of the token used for this fs.
+     * returns -1 if not implemented, or no token is set.
+     * @return int unix timestamp the token set expires at
+     */
+    public function get_token_expiry_time(): int;
 }
 
 
