@@ -20,7 +20,9 @@ namespace tool_objectfs\local;
  * End to end tests for tasks. Make sure all the plumbing is ok.
  *
  * @covers \tool_objectfs\local\manager
- * @package tool_objectfs
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tasks_test extends \tool_objectfs\tests\testcase {
 

@@ -23,7 +23,9 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * Tests for object orphaner.
  *
  * @covers \tool_objectfs\local\object_manipulator\orphaner
- * @package tool_objectfs
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class orphaner_test extends \tool_objectfs\tests\testcase {
 
