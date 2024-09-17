@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_objectfs\local\store;
+
 /**
  * Objectfs client interface.
  *
@@ -22,11 +24,7 @@
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace tool_objectfs\local\store;
-
 interface object_client {
-
     /**
      * construct
      * @param \stdClass $config
@@ -137,6 +135,12 @@ interface object_client {
      */
     public function test_range_request($filesystem);
 
+    /**
+     * Get the expiry time of the token used for this fs.
+     * returns -1 if not implemented, or no token is set.
+     * @return int unix timestamp the token set expires at
+     */
+    public function get_token_expiry_time(): int;
 }
 
 

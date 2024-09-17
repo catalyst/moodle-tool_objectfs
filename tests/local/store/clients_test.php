@@ -18,6 +18,7 @@ namespace tool_objectfs\local\store;
 
 use tool_objectfs\tests\test_digitalocean_integration_client as digitaloceanclient;
 use tool_objectfs\tests\test_s3_integration_client as s3client;
+use tool_objectfs\tests\test_azure_integration_client as azureclient;
 
 /**
  * Client tests.
@@ -107,4 +108,44 @@ class clients_test extends \advanced_testcase {
         $this->assertSame(get_string('settings:notconfigured', 'tool_objectfs'), $testresults->details);
     }
 
+    /**
+     * Provides values to azure_client_get_token_expiry test
+     * @return array
+     */
+    public static function azure_client_get_token_expiry_provider(): array {
+        return [
+            'good token' => [
+                'sastoken' => 'sp=racwl&st=2024-09-13T01:11:06Z&se=2024-12-30T09:11:06Z&spr=https&sv=2022-11-02&sr=c&sig=abcd',
+                'expectedtime' => 1735549866,
+            ],
+            'malformed se' => [
+                'sastoken' => 'sp=racwl&st=2024-09-13T01:11:06Z&se=-12-30T09:11:06Z&spr=https&sv=2022-11-02&sr=c&sig=abcd',
+                'expectedtime' => 0,
+            ],
+            'missing se' => [
+                'sastoken' => 'sp=racwl&st=2024-09-13T01:11:06Z&spr=https&sv=2022-11-02&sr=c&sig=abcd',
+                'expectedtime' => 0,
+            ],
+            'no token' => [
+                'sastoken' => '',
+                'expectedtime' => -1,
+            ],
+        ];
+    }
+
+    /**
+     * Tests azure client correctly extracts token expiry time
+     * @param string $sastoken
+     * @param int $expectedtime
+     * @dataProvider azure_client_get_token_expiry_provider
+     */
+    public function test_azure_client_get_token_expiry(string $sastoken, int $expectedtime) {
+        $config = (object) [
+            'azure_container' => 'test',
+            'azure_accountname' => 'test',
+            'azure_sastoken' => $sastoken,
+        ];
+        $azureclient = new azureclient($config);
+        $this->assertEquals($expectedtime, $azureclient->get_token_expiry_time());
+    }
 }

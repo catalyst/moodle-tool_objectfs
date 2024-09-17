@@ -19,8 +19,11 @@ namespace tool_objectfs\tests;
 use tool_objectfs\local\store\azure\client;
 
 /**
- * [Description test_azure_integration_client]
- * @package tool_objectfs
+ * Client used for integration testing azure client
+ *
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class test_azure_integration_client extends client {
 
@@ -35,7 +38,10 @@ class test_azure_integration_client extends client {
      * @return void
      */
     public function __construct($config) {
-        parent::__construct($config);
+        // Set config directly. Calling __construct will do nothing
+        // since unit tests do not have the azure sdk installed.
+        $this->config = $config;
+
         $time = microtime();
         $this->runidentifier = md5($time);
     }

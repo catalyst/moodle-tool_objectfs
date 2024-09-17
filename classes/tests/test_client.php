@@ -19,8 +19,11 @@ namespace tool_objectfs\tests;
 use tool_objectfs\local\store\object_client_base;
 
 /**
- * [Description test_client]
- * @package tool_objectfs
+ * Test client for PHP unit tests
+ *
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class test_client extends object_client_base {
     /**
@@ -156,6 +159,15 @@ class test_client extends object_client_base {
      */
     public function get_maximum_upload_size() {
         return $this->maxupload;
+    }
+
+    /**
+     * Returns test expiry time.
+     * @return int
+     */
+    public function get_token_expiry_time(): int {
+        global $CFG;
+        return $CFG->objectfs_phpunit_token_expiry_time;
     }
 }
 
