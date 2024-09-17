@@ -26,8 +26,11 @@ use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\local\store\signed_url;
 
 /**
- * [Description testcase]
- * @package tool_objectfs
+ * Testcase with useful / shared methods for common objectfs tests.
+ *
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class testcase extends \advanced_testcase {
 

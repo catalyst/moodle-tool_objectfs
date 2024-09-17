@@ -19,8 +19,11 @@ namespace tool_objectfs\tests;
 use tool_objectfs\local\store\swift\client;
 
 /**
- * [Description test_swift_integration_client]
- * @package tool_objectfs
+ * Client used for integration testing swift client
+ *
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class test_swift_integration_client extends client {
 

@@ -23,7 +23,9 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * Tests for object pusher.
  *
  * @covers \tool_objectfs\local\object_manipulator\pusher
- * @package tool_objectfs
+ * @package   tool_objectfs
+ * @copyright Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class pusher_test extends \tool_objectfs\tests\testcase {
 
