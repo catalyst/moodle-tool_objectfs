@@ -38,7 +38,10 @@ class test_azure_integration_client extends client {
      * @return void
      */
     public function __construct($config) {
-        parent::__construct($config);
+        // Set config directly. Calling __construct will do nothing
+        // since unit tests do not have the azure sdk installed.
+        $this->config = $config;
+
         $time = microtime();
         $this->runidentifier = md5($time);
     }
