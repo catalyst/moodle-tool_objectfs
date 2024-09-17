@@ -157,5 +157,14 @@ class test_client extends object_client_base {
     public function get_maximum_upload_size() {
         return $this->maxupload;
     }
+
+    /**
+     * Returns test expiry time.
+     * @return int
+     */
+    public function get_token_expiry_time(): int {
+        global $CFG;
+        return $CFG->objectfs_phpunit_token_expiry_time;
+    }
 }
 
