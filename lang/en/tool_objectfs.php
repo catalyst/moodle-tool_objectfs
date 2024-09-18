@@ -289,7 +289,6 @@ $string['settings:taggingstatus'] = 'Tagging status';
 $string['settings:taggingstatuscounts'] = 'Tag sync status overview';
 $string['settings:tagsources'] = 'Tag sources';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
-$string['settings:testingheader'] = 'Test Settings';
 $string['settings:tokenexpirywarnperiod'] = 'Token expiry warn period';
 $string['settings:useproxy'] = 'Use proxy';
 $string['settings:useproxy_help'] = 'Objectfs can use configured proxy to reach external storage.';

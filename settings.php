@@ -148,6 +148,13 @@ if ($ADMIN->fulltree) {
         DAYSECS
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'tool_objectfs/preferexternal',
+        new lang_string('settings:preferexternal', 'tool_objectfs'),
+        '',
+        ''
+    ));
+
     $settings->add(new admin_setting_heading(
         'tool_objectfs/filetransfersettings',
         new lang_string('settings:filetransferheader', 'tool_objectfs'),
@@ -351,19 +358,6 @@ if ($ADMIN->fulltree) {
             $summary
         ));
     }
-
-    $settings->add(new admin_setting_heading(
-        'tool_objectfs/testsettings',
-        new lang_string('settings:testingheader', 'tool_objectfs'),
-        ''
-    ));
-
-    $settings->add(new admin_setting_configcheckbox(
-        'tool_objectfs/preferexternal',
-        new lang_string('settings:preferexternal', 'tool_objectfs'),
-        '',
-        ''
-    ));
 
     // Tagging settings.
     $settings->add(new admin_setting_heading(
