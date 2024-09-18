@@ -246,13 +246,13 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool
      */
     public function is_file_readable_externally_by_hash($contenthash) {
-        if ($contenthash === sha1('')) {
-            // Files with empty size are either directories or empty.
+        $path = $this->get_external_path_from_hash($contenthash, false);
+
+        if ($contenthash === sha1('') && is_dir($path)) {
+            // Explicitly check if it is a directory, handle empty files as normal.
             // We handle these virtually.
             return true;
         }
-
-        $path = $this->get_external_path_from_hash($contenthash, false);
 
         // Note - it is not possible to perform a content recovery safely from a hash alone.
         return is_readable($path);
