@@ -86,6 +86,19 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($expectedpath, $actualpath);
     }
 
+    public function test_get_remote_path_from_empty_storedfile_returns_internal_path_if_duplicated_and_preferexternal() {
+        set_config('preferexternal', true, 'tool_objectfs');
+        $this->reset_file_system(); // Needed to load new config.
+        $file = $this->create_duplicated_file('');
+        $expectedpath = $this->get_local_path_from_storedfile($file);
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_remote_path_from_storedfile');
+        $reflection->setAccessible(true);
+        $actualpath = $reflection->invokeArgs($this->filesystem, [$file]);
+
+        $this->assertEquals($expectedpath, $actualpath);
+    }
+
     public function test_get_local_path_from_hash_will_fetch_remote_if_fetchifnotfound() {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
