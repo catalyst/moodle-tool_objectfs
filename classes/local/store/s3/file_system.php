@@ -85,9 +85,10 @@ class file_system extends object_file_system {
      */
     public function copy_from_local_to_external($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
+        $mime = $this->get_mimetype_from_hash($contenthash);
 
         try {
-            $this->get_external_client()->upload_to_s3($localpath, $contenthash);
+            $this->get_external_client()->upload_to_s3($localpath, $contenthash, $mime);
             return true;
         } catch (\Exception $e) {
             $this->get_logger()->error_log(
