@@ -417,10 +417,12 @@ class tagging_test extends testcase {
 
     /**
      * Tests the length of the defined tag source is checked correctly
+     * @covers \tool_objectfs\local\environment_source
      */
     public function test_environment_source_too_long() {
         global $CFG;
-        $CFG->objectfs_environment_name = 'This is a really long string. It needs to be long because it needs to be more than 128 chars for the test to trigger an exception.';
+        $CFG->objectfs_environment_name = 'This is a really long string.
+            It needs to be long because it needs to be more than 128 chars for the test to trigger an exception.';
         $source = new environment_source();
 
         $this->expectException(moodle_exception::class);
