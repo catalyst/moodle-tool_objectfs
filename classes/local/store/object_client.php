@@ -144,7 +144,7 @@ interface object_client {
      */
     public function get_token_expiry_time(): int;
 
-    /*
+    /**
      * Tests setting an objects tag.
      * @return stdClass containing 'success' and 'details' properties
      */

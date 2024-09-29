@@ -199,7 +199,7 @@ abstract class object_client_base implements object_client {
         return -1;
     }
 
-    /*
+    /**
      * Tests setting an objects tag.
      * @return stdClass containing 'success' and 'details' properties
      */

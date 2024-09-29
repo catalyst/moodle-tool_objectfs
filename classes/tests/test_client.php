@@ -176,7 +176,7 @@ class test_client extends object_client_base {
         return $CFG->objectfs_phpunit_token_expiry_time;
     }
 
-    /*
+    /**
      * Sets object tags - uses in-memory store for unit tests
      * @param string $contenthash
      * @param array $tags
