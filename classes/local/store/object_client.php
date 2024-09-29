@@ -44,7 +44,7 @@ interface object_client {
     public function proxy_range_request(\stored_file $file, $ranges);
     public function test_range_request($filesystem);
 
-    /*
+    /**
      * Tests setting an objects tag.
      * @return stdClass containing 'success' and 'details' properties
      */

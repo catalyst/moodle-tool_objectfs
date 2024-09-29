@@ -97,7 +97,7 @@ class test_client extends object_client_base {
         return $this->maxupload;
     }
 
-    /*
+    /**
      * Sets object tags - uses in-memory store for unit tests
      * @param string $contenthash
      * @param array $tags
