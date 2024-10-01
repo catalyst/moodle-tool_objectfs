@@ -38,7 +38,7 @@ abstract class tool_objectfs_testcase extends \advanced_testcase {
         global $CFG;
         $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
-        $CFG->objectfs_environment_name = 'test';
+        set_config('taggingenvironment', 'test', 'tool_objectfs');
         $this->filesystem = new test_file_system();
         $this->logger = new \tool_objectfs\log\null_logger();
 

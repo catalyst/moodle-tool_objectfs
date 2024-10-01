@@ -269,6 +269,8 @@ $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up ht
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
 
+$string['settings:taggingenvironment'] = 'Tagging environment';
+$string['settings:taggingenvironment:desc'] = 'The \'environment\' tag value. Used to distinguish the source of objects when multiple environments share a single bucket.';
 $string['settings:taggingheader'] = 'Tagging settings';
 $string['settings:taggingenabled'] = 'Tagging enabled';
 $string['settings:maxtaggingperrun'] = 'Object tagging adhoc sync maximum objects per run';
@@ -295,7 +297,7 @@ $string['check:tagging:migrationok'] = 'Object tagging migration tasks OK';
 $string['check:tagging:na'] = 'Tagging not enabled or is not supported by file system';
 $string['check:tagging:error'] = 'Error trying to tag object';
 
-$string['tagsource:environment'] = 'Environment defined by $CFG->objectfs_environment_name, currently: "{$a}".';
+$string['tagsource:environment'] = 'Environment defined by the "taggingenvironment" setting, currently: "{$a}".';
 $string['tagsource:environment:toolong'] = 'The value defined in objectfs_environment_name is too long. It must be < 128 chars';
 $string['tagsource:location'] = 'Location of file, either "orphan" or "active".';
 
