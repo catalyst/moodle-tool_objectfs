@@ -48,18 +48,18 @@ class environment_source implements tag_source {
      * @return string|null string if set, else null
      */
     private static function get_env(): ?string {
-        global $CFG;
+        $value = get_config('tool_objectfs', 'taggingenvironment');
 
-        if (empty($CFG->objectfs_environment_name)) {
+        if (empty($value)) {
             return null;
         }
 
         // Must never be greater than 128, unlikely, but we must enforce this.
-        if (strlen($CFG->objectfs_environment_name) > 128) {
+        if (strlen($value) > 128) {
             throw new moodle_exception('tagsource:environment:toolong', 'tool_objectfs');
         }
 
-        return $CFG->objectfs_environment_name;
+        return $value;
     }
 
     /**

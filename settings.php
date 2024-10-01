@@ -267,6 +267,13 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('tool_objectfs/taggingenabled',
         new lang_string('settings:taggingenabled', 'tool_objectfs'), '', 0));
 
+    $settings->add(new admin_setting_configtext('tool_objectfs/taggingenvironment',
+        new lang_string('settings:taggingenvironment', 'tool_objectfs'),
+        get_string('settings:taggingenvironment:desc', 'tool_objectfs'),
+        '',
+        PARAM_TEXT
+    ));
+
     $settings->add(new admin_setting_description('tool_objectfs/tagsources',
         new lang_string('settings:tagsources', 'tool_objectfs'),
         tag_manager::get_tag_source_summary_html()

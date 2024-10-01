@@ -276,6 +276,8 @@ $string['check:tokenexpiry:expired'] = 'Token expired for {$a->dayssince} days. 
 $string['check:tokenexpiry:na'] = 'Token expired not implemented for filesystem, or no token is set';
 $string['settings:tokenexpirywarnperiod'] = 'Token expiry warn period';
 
+$string['settings:taggingenvironment'] = 'Tagging environment';
+$string['settings:taggingenvironment:desc'] = 'The \'environment\' tag value. Used to distinguish the source of objects when multiple environments share a single bucket.';
 $string['settings:taggingheader'] = 'Tagging settings';
 $string['settings:taggingenabled'] = 'Tagging enabled';
 $string['settings:maxtaggingperrun'] = 'Object tagging adhoc sync maximum objects per run';
@@ -302,7 +304,7 @@ $string['check:tagging:migrationok'] = 'Object tagging migration tasks OK';
 $string['check:tagging:na'] = 'Tagging not enabled or is not supported by file system';
 $string['check:tagging:error'] = 'Error trying to tag object';
 
-$string['tagsource:environment'] = 'Environment defined by $CFG->objectfs_environment_name, currently: "{$a}".';
+$string['tagsource:environment'] = 'Environment defined by the "taggingenvironment" setting, currently: "{$a}".';
 $string['tagsource:environment:toolong'] = 'The value defined in objectfs_environment_name is too long. It must be < 128 chars';
 $string['tagsource:location'] = 'Location of file, either "orphan" or "active".';
 

@@ -1110,7 +1110,7 @@ class object_file_system_test extends tests\testcase {
         bool $expectedoverride) {
         global $CFG, $DB;
         $CFG->phpunit_objectfs_supports_object_tagging = true;
-        $CFG->objectfs_environment_name = $objectenv;
+        set_config('taggingenvironment', $objectenv, 'tool_objectfs');
 
         set_config('overwriteobjecttags', $canoverride, 'tool_objectfs');
         $this->assertEquals($canoverride, tag_manager::can_overwrite_object_tags());
@@ -1129,7 +1129,7 @@ class object_file_system_test extends tests\testcase {
         $localtags = $DB->get_records('tool_objectfs_object_tags', ['objectid' => $object->id]);
         $this->assertCount(0, $localtags);
 
-        $CFG->objectfs_environment_name = $pushenv;
+        set_config('taggingenvironment', $pushenv, 'tool_objectfs');
 
         // Sync the file.
         $this->filesystem->push_object_tags($object->contenthash);

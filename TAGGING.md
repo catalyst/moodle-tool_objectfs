@@ -19,7 +19,7 @@ You must allow `s3:GetObjectTagging` and `s3:PutObjectTagging` permission to the
 ## Sources
 The following sources are implemented currently:
 ### Environment
-What environment the file was uploaded in. Configure the environment using `$CFG->objectfs_environment_name`
+What environment the file was uploaded in. Configure the environment using `taggingenvironment` in the objectfs plugin settings.
 
 This tag is also used by objectfs to determine if tags can be overwritten. See [Multiple environments setup](#multiple-environments-setup) for more information.
 
@@ -30,7 +30,7 @@ Either `orphan` if the file no longer exists in the `files` table in Moodle, oth
 This feature is designed to work in situations where multiple environments (e.g. prod, staging) points to the same bucket, however, some setup is needed:
 
 1. Turn off `overwriteobjecttags` in every environment except the production environment.
-2. Configure `$CFG->objectfs_environment_name` to be unique for all environments.
+2. Configure `taggingenvironment` to be unique for all environments.
 
 By doing the above two steps, it will allow the production environment to always set its own tags, even if a file was first uploaded to staging and then to production.
 
