@@ -23,7 +23,11 @@ use tool_objectfs\local\manager;
 use tool_objectfs\local\tag\environment_source;
 use tool_objectfs\local\tag\tag_manager;
 use tool_objectfs\local\tag\tag_source;
-use tool_objectfs\tests\testcase;
+use tool_objectfs\tests\tool_objectfs_testcase;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/tool_objectfs_testcase.php');
 
 /**
  * Tests tagging
@@ -33,7 +37,7 @@ use tool_objectfs\tests\testcase;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tagging_test extends testcase {
+class tagging_test extends tool_objectfs_testcase {
     /**
      * Tests get_defined_tag_sources
      * @covers \tool_objectfs\local\tag_manager::get_defined_tag_sources

@@ -20,7 +20,11 @@ use core\check\result;
 use core\task\manager;
 use tool_objectfs\check\tagging_migration_status;
 use tool_objectfs\task\update_object_tags;
-use tool_objectfs\tests\testcase;
+use tool_objectfs\tests\tool_objectfs_testcase;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/../tool_objectfs_testcase.php');
 
 /**
  * Tagging migration status check tests
@@ -31,7 +35,7 @@ use tool_objectfs\tests\testcase;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \tool_objectfs\check\tagging_migration_status
  */
-class tagging_migration_status_test extends testcase {
+class tagging_migration_status_test extends tool_objectfs_testcase {
     /**
      * Tests scenario that returns N/A
      */

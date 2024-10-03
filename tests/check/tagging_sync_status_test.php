@@ -19,7 +19,11 @@ namespace tool_objectfs\check;
 use core\check\result;
 use tool_objectfs\check\tagging_sync_status;
 use tool_objectfs\local\tag\tag_manager;
-use tool_objectfs\tests\testcase;
+use tool_objectfs\tests\tool_objectfs_testcase;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/../tool_objectfs_testcase.php');
 
 /**
  * Tagging sync status check tests
@@ -30,7 +34,7 @@ use tool_objectfs\tests\testcase;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \tool_objectfs\check\tagging_sync_status
  */
-class tagging_sync_status_test extends testcase {
+class tagging_sync_status_test extends tool_objectfs_testcase {
     /**
      * Tests scenario that returns N/A
      */

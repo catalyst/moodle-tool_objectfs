@@ -19,7 +19,11 @@ namespace tool_objectfs\task;
 use core\task\manager;
 use moodle_exception;
 use tool_objectfs\local\tag\tag_manager;
-use tool_objectfs\tests\testcase;
+use tool_objectfs\tests\tool_objectfs_testcase;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/../tool_objectfs_testcase.php');
 
 /**
  * Tests update_object_tags
@@ -30,7 +34,7 @@ use tool_objectfs\tests\testcase;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \tool_objectfs\task\update_object_tags
  */
-class update_object_tags_test extends testcase {
+class update_object_tags_test extends tool_objectfs_testcase {
     /**
      * Creates object with tags needing to be synced
      * @param string $contents contents of object to create.
