@@ -111,7 +111,7 @@ abstract class manipulator implements object_manipulator {
 
             $newlocation = $this->manipulate_object($objectrecord);
             if (!empty($objectrecord->id)) {
-                manager::update_object($objectrecord, $newlocation);
+                manager::upsert_object($objectrecord, $newlocation);
             } else {
                 manager::update_object_by_hash($objectrecord->contenthash, $newlocation);
             }
