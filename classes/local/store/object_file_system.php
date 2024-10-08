@@ -249,7 +249,7 @@ abstract class object_file_system extends \file_system_filedir {
         if ($contenthash === sha1('')) {
             // Files with empty size are either directories or empty.
             // We handle these virtually.
-            return true;
+            return false;
         }
 
         $path = $this->get_external_path_from_hash($contenthash, false);
