@@ -110,6 +110,9 @@ if ($ADMIN->fulltree) {
         new lang_string('settings:tokenexpirywarnperiod', 'tool_objectfs'),
         '', 60 * DAYSECS, DAYSECS));
 
+    $settings->add(new admin_setting_configcheckbox('tool_objectfs/preferexternal',
+        new lang_string('settings:preferexternal', 'tool_objectfs'), '', ''));
+
     $settings->add(new admin_setting_heading('tool_objectfs/filetransfersettings',
         new lang_string('settings:filetransferheader', 'tool_objectfs'), ''));
 
@@ -247,10 +250,4 @@ if ($ADMIN->fulltree) {
             }
         }
     }
-
-    $settings->add(new admin_setting_heading('tool_objectfs/testsettings',
-        new lang_string('settings:testingheader', 'tool_objectfs'), ''));
-
-    $settings->add(new admin_setting_configcheckbox('tool_objectfs/preferexternal',
-        new lang_string('settings:preferexternal', 'tool_objectfs'), '', ''));
 }
