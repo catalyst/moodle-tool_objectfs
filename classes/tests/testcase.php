@@ -51,6 +51,11 @@ abstract class testcase extends \advanced_testcase {
         $this->filesystem = new test_file_system();
         $this->logger = new \tool_objectfs\log\null_logger();
 
+        // Get the file system with reset flag enabled to reset it,
+        // since it is static and may have been initialised as a filedir system in another test
+        // instead of the desired objectfs test file system.
+        get_file_storage(true);
+
         $this->resetAfterTest(true);
     }
 
