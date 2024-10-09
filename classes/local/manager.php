@@ -27,6 +27,7 @@ namespace tool_objectfs\local;
 
 use stdClass;
 use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\local\tag\tag_manager;
 
 class manager {
 
@@ -58,6 +59,7 @@ class manager {
         $config->batchsize = 10000;
         $config->useproxy = 0;
         $config->deleteexternal = 0;
+        $config->enabletagging = false;
 
         $config->filesystem = '';
         $config->enablepresignedurls = 0;
@@ -151,7 +153,7 @@ class manager {
             $newobject->filesize = isset($oldobject->filesize) ? $oldobject->filesize :
                     $DB->get_field('files', 'filesize', ['contenthash' => $contenthash], IGNORE_MULTIPLE);
 
-            return self::update_object($newobject, $newlocation);
+            return self::upsert_object($newobject, $newlocation);
         }
         $newobject->location = $newlocation;
 
@@ -164,9 +166,7 @@ class manager {
             $newobject->filesize = $filesize;
             $newobject->timeduplicated = time();
         }
-        $DB->insert_record('tool_objectfs_objects', $newobject);
-
-        return $newobject;
+        return self::upsert_object($newobject, $newlocation);
     }
 
     /**
@@ -175,7 +175,7 @@ class manager {
      * @return stdClass
      * @throws \dml_exception
      */
-    public static function update_object(stdClass $object, $newlocation) {
+    public static function upsert_object(stdClass $object, $newlocation) {
         global $DB;
 
         // If location change is 'duplicated' we update timeduplicated.
@@ -183,8 +183,21 @@ class manager {
             $object->timeduplicated = time();
         }
 
+        $locationchanged = !isset($object->location) || $object->location != $newlocation;
         $object->location = $newlocation;
-        $DB->update_record('tool_objectfs_objects', $object);
+
+        // If id is set, update, else insert new.
+        if (empty($object->id)) {
+            $object->id = $DB->insert_record('tool_objectfs_objects', $object);
+        } else {
+            $DB->update_record('tool_objectfs_objects', $object);
+        }
+
+        // Post update, notify tag manager since the location tag likely needs changing.
+        if ($locationchanged && tag_manager::is_tagging_enabled_and_supported()) {
+            $fs = get_file_storage()->get_file_system();
+            $fs->push_object_tags($object->contenthash);
+        }
 
         return $object;
     }
@@ -324,6 +337,10 @@ class manager {
      * @return string
      */
     public static function get_client_classname_from_fs($filesystem) {
+        // Unit tests need to return the test client.
+        if ($filesystem == '\tool_objectfs\tests\test_file_system') {
+            return '\tool_objectfs\tests\test_client';
+        }
         $clientclass = str_replace('_file_system', '', $filesystem);
         return str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $clientclass.'\\client');
     }
