@@ -16,18 +16,17 @@
 
 namespace tool_objectfs\tests;
 
-use tool_objectfs\local\store\azure\client;
+use tool_objectfs\local\store\azure_blob_storage\client;
 
 /**
- * Client used for integration testing azure client
+ * Client used for integration testing azure blob storage client
  *
  * @package   tool_objectfs
- * @copyright Catalyst IT
+ * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
+ * @copyright 2024 Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated Since Moodle 4.2 - Please see the README about updating to new azure_blob_storage client.
  */
-class test_azure_integration_client extends client {
-
+class test_azure_blob_storage_integration_client extends client {
     /**
      * @var string
      */
@@ -39,10 +38,7 @@ class test_azure_integration_client extends client {
      * @return void
      */
     public function __construct($config) {
-        // Set config directly. Calling __construct will do nothing
-        // since unit tests do not have the azure sdk installed.
-        $this->config = $config;
-
+        parent::__construct($config);
         $time = microtime();
         $this->runidentifier = md5($time);
     }
@@ -53,7 +49,7 @@ class test_azure_integration_client extends client {
      *
      * @return string
      */
-    protected function get_filepath_from_hash($contenthash) {
+    protected function get_filepath_from_hash($contenthash): string {
         $l1 = $contenthash[0] . $contenthash[1];
         $l2 = $contenthash[2] . $contenthash[3];
         $runidentifier = $this->runidentifier;

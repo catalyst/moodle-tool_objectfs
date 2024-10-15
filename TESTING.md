@@ -15,13 +15,21 @@ $CFG->phpunit_objectfs_s3_integration_test_credentials = array(
     's3_region' => 'Your region',
 );
 ```
-* Azure:
+* Azure (deprecated API):
 ```php
 $CFG->phpunit_objectfs_azure_integration_test_credentials = array(
     'azure_accountname' => 'Your account name',
     'azure_container' => 'Your container',
     'azure_sastoken' => 'Your sas token',
 );
+```
+* Azure Blob Storage:
+```php
+$CFG->phpunit_objectfs_azure_blob_storage_integration_test_credentials = [
+    'azure_accountname' => 'Your account name',
+    'azure_container' => 'Your container',
+    'azure_sastoken' => 'Your sas token',
+];
 ```
 * Swift:
 ```php

@@ -306,17 +306,18 @@ class manager {
     public static function get_available_fs_list() {
         $result[''] = get_string('pleaseselect', OBJECTFS_PLUGIN_NAME);
 
-        $filesystems['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system';
+        $filesystems['\tool_objectfs\azure_file_system'] = '\tool_objectfs\azure_file_system [DEPRECATED]';
         $filesystems['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
         $filesystems['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
         $filesystems['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
+        $filesystems['\tool_objectfs\azure_blob_storage_file_system'] = '\tool_objectfs\azure_blob_storage_file_system';
 
-        foreach ($filesystems as $filesystem) {
+        foreach ($filesystems as $filesystem => $name) {
             $clientclass = self::get_client_classname_from_fs($filesystem);
             $client = new $clientclass(null);
 
             if ($client && $client->get_availability()) {
-                $result[$filesystem] = $filesystem;
+                $result[$filesystem] = $name;
             }
         }
         return $result;

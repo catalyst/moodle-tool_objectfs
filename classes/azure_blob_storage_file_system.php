@@ -14,37 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_objectfs;
+
+use tool_objectfs\local\store\azure_blob_storage\file_system;
+
 /**
  * File system for Azure Blob Storage.
  *
+ * This file tells objectfs that this storage system is available for use.
+ * E.g. via $CFG->alternative_file_system_class
+ *
  * @package    tool_objectfs
- * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @author     Matthew Hilton <matthewhilton@catalyst-au.net>
  * @copyright  Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace tool_objectfs\local\store\azure;
-
-defined('MOODLE_INTERNAL') || die();
-
-use tool_objectfs\local\store\object_file_system;
-
-require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
-
-/**
- * file_system
- * @deprecated Since Moodle 4.2 - Please see the README about updating to new azure_blob_storage client.
- */
-class file_system extends object_file_system {
-
-    /**
-     * initialise_external_client
-     * @param mixed $config
-     *
-     * @return client
-     */
-    protected function initialise_external_client($config) {
-        $asclient = new client($config);
-        return $asclient;
-    }
+class azure_blob_storage_file_system extends file_system {
 }

@@ -44,6 +44,7 @@ use Psr\Http\Message\StreamInterface;
 
 /**
  * stream_wrapper
+ * @deprecated Since Moodle 4.2 - Please see the README about updating to new azure_blob_storage client.
  */
 class stream_wrapper {
 

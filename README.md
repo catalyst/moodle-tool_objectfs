@@ -5,31 +5,45 @@
 # moodle-tool_objectfs
 
 A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution.
-* [Use cases](#use-cases)
-  * [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
-  * [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
-  * [Sharing files across environments to save time](#sharing-files-across-environments-to-save-time)
-  * [Sharing files with data washed environments](#sharing-files-with-data-washed-environments)
-* [Installation](#installation)
-* [Compatible object stores](#compatible-object-stores)
-  * [Amazon S3](#amazon-s3)
-  * [Minio.io S3](#minio-s3)
-  * [Google gcs](#google-gcs)
-  * [Azure Blob Storage](#azure-blob-storage)
-  * [DigitalOcean Spaces](#digitalocean-spaces)
-  * [Openstack Object Storage](#openstack-object-storage)
-* [Moodle configuration](#moodle-configuration)
-  * [General Settings](#general-settings)
-  * [File Transfer settings](#file-transfer-settings)
-  * [Pre-Signed URLs Settings](#pre-signed-urls-settings)
-  * [Amazon S3 settings](#amazon-s3-settings)
-  * [Minio.io S3 settings](#minio-s3-settings)
-  * [Azure Blob Storage settings](#azure-blob-storage-settings)
-  * [DigitalOcean Spaces settings](#digitalocean-spaces-settings)
-* [Integration testing](#integration-testing)
-* [Applying core patches](#applying-core-patches)
-* [Crafted by Catalyst IT](#crafted-by-catalyst-it)
-* [Contributing and support](#contributing-and-support)
+- [moodle-tool\_objectfs](#moodle-tool_objectfs)
+  - [Use cases](#use-cases)
+    - [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
+    - [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
+    - [Sharing files across environments to save time](#sharing-files-across-environments-to-save-time)
+    - [Sharing files with data washed environments](#sharing-files-with-data-washed-environments)
+  - [GDPR](#gdpr)
+  - [Branches](#branches)
+  - [Installation](#installation)
+  - [Compatible object stores](#compatible-object-stores)
+    - [Amazon S3](#amazon-s3)
+    - [Minio S3](#minio-s3)
+    - [Google GCS](#google-gcs)
+    - [Azure Blob Storage](#azure-blob-storage)
+    - [DigitalOcean Spaces](#digitalocean-spaces)
+    - [Openstack Object Storage](#openstack-object-storage)
+  - [Moodle configuration](#moodle-configuration)
+    - [General Settings](#general-settings)
+    - [File Transfer settings](#file-transfer-settings)
+    - [File System settings](#file-system-settings)
+    - [Pre-Signed URLs Settings](#pre-signed-urls-settings)
+    - [Amazon S3 settings](#amazon-s3-settings)
+    - [Minio S3 settings](#minio-s3-settings)
+    - [Azure Blob Storage settings](#azure-blob-storage-settings)
+    - [DigitalOcean Spaces settings](#digitalocean-spaces-settings)
+    - [Openstack Object Storage settings](#openstack-object-storage-settings)
+  - [Integration testing](#integration-testing)
+  - [Applying core patches](#applying-core-patches)
+      - [Moodle 3.9:](#moodle-39)
+      - [Moodle 3.8:](#moodle-38)
+      - [Moodle 3.4 - 3.7:](#moodle-34---37)
+      - [Moodle 3.3 and Totara 12:](#moodle-33-and-totara-12)
+      - [Moodle 3.2 and Totara 11:](#moodle-32-and-totara-11)
+      - [Moodle 2.9 - 3.1 and Totara 2.9, 9 - 10:](#moodle-29---31-and-totara-29-9---10)
+      - [Moodle 2.7 - 2.8 and Totara 2.7 - 2.8:](#moodle-27---28-and-totara-27---28)
+    - [PHPUnit test compatibility](#phpunit-test-compatibility)
+  - [Contributing and support](#contributing-and-support)
+  - [Warm thanks](#warm-thanks)
+  - [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 
 ## Use cases
 There are a number of different ways you can use this plug in. See [Recommended use case settings](#recommended-use-case-settings) for recommended settings for each one.
@@ -75,7 +89,7 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 3. Clone this repository into admin/tool/objectfs
 4. Install one of the required SDK libraries for the storage file system that you will be using
     1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws for S3 or DigitalOcean Spaces or Google Cloud, or
-    2. Clone [moodle-local_azure_storage](https://github.com/catalyst/moodle-local_azure_storage) into local/azure_storage for Azure Blob Storage, or
+    2. Clone [moodle-local_azureblobstorage](https://github.com/catalyst/moodle-local_azureblobstorage) into local/azureblobstorage for Azure Blob Storage, or
     3. Clone [moodle-local_openstack](https://github.com/matt-catalyst/moodle-local_openstack.git) into local/openstack for openstack(swift) storage
 5. Install the plugins through the moodle GUI.
 6. Configure the plugin. See [Moodle configuration](#moodle-configuration)
@@ -88,7 +102,7 @@ $CFG->alternative_file_system_class = '\tool_objectfs\s3_file_system';
 
 * Azure Blob Storage
 ```php
-$CFG->alternative_file_system_class = '\tool_objectfs\azure_file_system';
+$CFG->alternative_file_system_class = '\tool_objectfs\azure_blob_storage_file_system';
 ```
 
 * DigitalOcean Spaces
@@ -154,6 +168,10 @@ Setup for Minio.io bucket can be found on there website [here](https://min.io)
 - You will need to set 'base_url' to https://storage.googleapis.com in your config
 
 ### Azure Blob Storage
+
+*Migration from previous API (Moodle 4.2+)*
+
+[Migration guide from local_azure_storage to local_azureblobstorage](MIGRATION#migrating-from-localazurestorage-to-localazureblobstorage)
 
 *Azure Storage container guide with the CLI*
 

@@ -945,6 +945,13 @@ class object_file_system_test extends tests\testcase {
         $autoloaderref = $clientref->getParentClass()->getProperty('autoloader');
         $autoloaderref->setAccessible(true);
         $autoloader = $autoloaderref->getValue($this->filesystem->externalclient);
+
+        // If client does not have autoloader, skip test.
+        if (empty($autoloader)) {
+            $this->markTestSkipped("Client does not have autoloader");
+            return;
+        }
+
         $this->set_externalclient_config('autoloader', $autoloader . '_fake');
         $this->assertFalse($this->filesystem->is_configured());
     }
