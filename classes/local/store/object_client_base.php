@@ -39,10 +39,6 @@ abstract class object_client_base implements object_client {
      */
     protected $expirationtime;
     /**
-     * @var bool
-     */
-    protected $testdelete = true;
-    /**
      * @var int
      */
     public $presignedminfilesize;
@@ -56,6 +52,15 @@ abstract class object_client_base implements object_client {
 
     /** @var object $config Client config. */
     protected $config;
+
+    /**
+     * If deletion should be tested.
+     * Only tested when the deleteexternal setting is not set to 'no'
+     * @return bool
+     */
+    public function should_test_delete(): bool {
+        return !empty($this->config) && $this->config->deleteexternal != TOOL_OBJECTFS_DELETE_EXTERNAL_NO;
+    }
 
     /**
      * construct
@@ -120,7 +125,7 @@ abstract class object_client_base implements object_client {
         if ($connection->success) {
             $output .= $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_objectfs'), 'notifysuccess');
             // Check permissions if we can connect.
-            $permissions = $this->test_permissions($this->testdelete);
+            $permissions = $this->test_permissions($this->should_test_delete());
             if ($permissions->success) {
                 $output .= $OUTPUT->notification(key($permissions->messages), 'notifysuccess');
             } else {
