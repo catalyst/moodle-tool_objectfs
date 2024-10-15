@@ -310,6 +310,7 @@ class manager {
         $filesystems['\tool_objectfs\digitalocean_file_system'] = '\tool_objectfs\digitalocean_file_system';
         $filesystems['\tool_objectfs\s3_file_system'] = '\tool_objectfs\s3_file_system';
         $filesystems['\tool_objectfs\swift_file_system'] = '\tool_objectfs\swift_file_system';
+        $filesystems['\tool_objectfs\azure_blob_storage_file_system'] = '\tool_objectfs\azure_blob_storage_file_system';
 
         foreach ($filesystems as $filesystem) {
             $clientclass = self::get_client_classname_from_fs($filesystem);
