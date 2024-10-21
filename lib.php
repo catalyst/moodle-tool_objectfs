@@ -24,6 +24,7 @@
  */
 
 use tool_objectfs\local\object_manipulator\manipulator_builder;
+use tool_objectfs\local\tag\tag_manager;
 
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
 
@@ -103,6 +104,9 @@ function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, arr
 function tool_objectfs_status_checks() {
     $checks = [
         new tool_objectfs\check\token_expiry(),
+        new tool_objectfs\check\tagging_status(),
+        new tool_objectfs\check\tagging_sync_status(),
+        new tool_objectfs\check\tagging_migration_status(),
     ];
 
     if (get_config('tool_objectfs', 'proxyrangerequests')) {
