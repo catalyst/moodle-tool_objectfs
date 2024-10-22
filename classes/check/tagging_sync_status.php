@@ -18,9 +18,8 @@ namespace tool_objectfs\check;
 
 use core\check\check;
 use core\check\result;
-use html_table;
-use html_writer;
 use tool_objectfs\local\tag\tag_manager;
+use tool_objectfs\local\tag_sync_count_result;
 
 /**
  * Tagging sync status check
@@ -47,28 +46,15 @@ class tagging_sync_status extends check {
      */
     public function get_result(): result {
         if (!tag_manager::is_tagging_enabled_and_supported()) {
-            return new result(result::NA, get_string('check:tagging:na', 'tool_objectfs'));
+            return new tag_sync_count_result(result::WARNING, get_string('check:tagging:na', 'tool_objectfs'));
         }
 
-        $statuses = tag_manager::get_tag_sync_status_summary();
-        $table = new html_table();
-        $table->head = [
-            get_string('table:status', 'tool_objectfs'),
-            get_string('table:objectcount', 'tool_objectfs'),
-        ];
-
-        foreach (tag_manager::SYNC_STATUSES as $status) {
-            // If no objects have a status, they won't appear in the SQL above.
-            // In this case, just show zero (so the use knows it exists, but is zero).
-            $count = isset($statuses[$status]->statuscount) ? $statuses[$status]->statuscount : 0;
-            $table->data[$status] = [tag_manager::get_sync_status_string($status), $count];
-        }
-        $table = html_writer::table($table);
-
-        if (!empty($statuses[tag_manager::SYNC_STATUS_ERROR])) {
-            return new result(result::WARNING, get_string('check:tagging:syncerror', 'tool_objectfs'), $table);
+        // We only do a lightweight check here, the get_details is overwritten in tag_sync_status_result
+        // to provide more information that is more computationally expensive to calculate.
+        if (tag_manager::tag_sync_errors_exist()) {
+            return new tag_sync_count_result(result::WARNING, get_string('check:tagging:syncerror', 'tool_objectfs'));
         }
 
-        return new result(result::OK, get_string('check:tagging:syncok', 'tool_objectfs'), $table);
+        return new tag_sync_count_result(result::OK, get_string('check:tagging:syncok', 'tool_objectfs'));
     }
 }
