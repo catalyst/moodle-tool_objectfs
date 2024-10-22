@@ -222,6 +222,7 @@ class tag_manager {
 
     /**
      * Returns a summary of the object tag sync statuses.
+     * Note on larger sites, this can be quite computationally difficult and should be used carefully.
      * @return array
      */
     public static function get_tag_sync_status_summary(): array {
@@ -229,5 +230,14 @@ class tag_manager {
         return $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus) as statuscount
                                        FROM {tool_objectfs_objects}
                                    GROUP BY tagsyncstatus");
+    }
+
+    /**
+     * This is a lightweight check to just check if any objects are reporting tag sync errors.
+     * @return bool
+     */
+    public static function tag_sync_errors_exist(): bool {
+        global $DB;
+        return $DB->record_exists('tool_objectfs_objects', ['tagsyncstatus' => self::SYNC_STATUS_ERROR]);
     }
 }
