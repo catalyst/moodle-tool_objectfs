@@ -62,7 +62,8 @@ class objectfs_report implements \renderable {
      */
     public function add_rows(array $rows) {
         foreach ($rows as $row) {
-            $this->add_row($row->datakey, $row->objectcount, $row->objectsum);
+            // Note objectsum is optional.
+            $this->add_row($row->datakey, $row->objectcount, $row->objectsum ?? 0);
         }
     }
 
@@ -142,6 +143,7 @@ class objectfs_report implements \renderable {
             'location',
             'log_size',
             'mime_type',
+            'tag_count',
         ];
     }
 

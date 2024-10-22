@@ -71,7 +71,7 @@ class object_status_testcase extends tool_objectfs_testcase {
     public function test_get_report_types() {
         $reporttypes = objectfs_report::get_report_types();
         $this->assertEquals('array', gettype($reporttypes));
-        $this->assertEquals(3, count($reporttypes));
+        $this->assertEquals(4, count($reporttypes));
     }
 
     /**

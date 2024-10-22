@@ -31,14 +31,40 @@ require_once(__DIR__ . '/classes/test_client.php');
 require_once(__DIR__ . '/classes/test_file_system.php');
 
 abstract class tool_objectfs_testcase extends \advanced_testcase {
+    /** @var test_file_system Filesystem */
+    public $filesystem;
 
     protected function setUp(): void {
         global $CFG;
         $CFG->alternative_file_system_class = '\\tool_objectfs\\tests\\test_file_system';
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
+        set_config('taggingenvironment', 'test', 'tool_objectfs');
         $this->filesystem = new test_file_system();
         $this->logger = new \tool_objectfs\log\null_logger();
+
+        // Get the file system with reset flag enabled to reset it,
+        // since it is static and may have been initialised as a filedir system in another test
+        // instead of the desired objectfs test file system.
+        get_file_storage(true);
+
         $this->resetAfterTest(true);
+    }
+
+    /**
+     * Enables the test object filesystem and sets the tagging value.
+     * @param bool $tagging if tagging should be enabled or not.
+     */
+    protected function enable_filesystem_and_set_tagging(bool $tagging) {
+        global $CFG;
+        set_config('taggingenabled', $tagging, 'tool_objectfs');
+
+        // Set supported by fs.
+        $config = manager::get_objectfs_config();
+        $config->taggingenabled = $tagging;
+        $config->enabletasks = true;
+        $config->filesystem = '\\tool_objectfs\\tests\\test_file_system';
+        manager::set_objectfs_config($config);
+        $CFG->phpunit_objectfs_supports_object_tagging = $tagging;
     }
 
     protected function reset_file_system() {

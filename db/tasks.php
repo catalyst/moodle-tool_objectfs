@@ -107,5 +107,17 @@ $tasks = array(
         'dayofweek' => '*',
         'month'     => '*'
     ),
+    array(
+        'classname' => 'tool_objectfs\task\trigger_update_object_tags',
+        'blocking'  => 0,
+        'minute'    => 'R',
+        'hour'      => '*',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*',
+        // Default disabled - intended to be manually run.
+        // Also, objectfs tagging support is default off.
+        'disabled' => true,
+    )
 );
 
