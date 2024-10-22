@@ -38,11 +38,18 @@ class trigger_update_object_tags extends scheduled_task {
      * Execute task
      */
     public function execute() {
-        // Queue adhoc task, nothing else.
-        $task = new update_object_tags();
-        $task->set_custom_data([
-            'iteration' => 1,
-        ]);
-        manager::queue_adhoc_task($task, true);
+        // Only schedule up to the max amount, less any that are already scheduled.
+        $alreadyexist = count(manager::get_adhoc_tasks(update_object_tags::class));
+        $maxtoschedule = get_config('tool_objectfs', 'maxtaggingtaskstospawn');
+        $toschedule = max(0, $maxtoschedule - $alreadyexist);
+
+        for($i = 0; $i < $toschedule; $i++) {
+            // Queue adhoc task, nothing else.
+            $task = new update_object_tags();
+            $task->set_custom_data([
+                'iteration' => 1,
+            ]);
+            manager::queue_adhoc_task($task);
+        }
     }
 }
