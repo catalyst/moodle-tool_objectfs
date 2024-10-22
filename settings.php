@@ -282,14 +282,21 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('tool_objectfs/maxtaggingperrun',
         new lang_string('settings:maxtaggingperrun', 'tool_objectfs'),
         get_string('settings:maxtaggingperrun:desc', 'tool_objectfs'),
-        10000,
+        1000,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext('tool_objectfs/maxtaggingiterations',
         new lang_string('settings:maxtaggingiterations', 'tool_objectfs'),
         get_string('settings:maxtaggingiterations:desc', 'tool_objectfs'),
-        1000,
+        10000,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configtext('tool_objectfs/maxtaggingtaskstospawn',
+        new lang_string('settings:maxtaggingtaskstospawn', 'tool_objectfs'),
+        get_string('settings:maxtaggingtaskstospawn:desc', 'tool_objectfs'),
+        1,
         PARAM_INT
     ));
 
