@@ -16,6 +16,7 @@
 
 namespace tool_objectfs\check;
 
+use action_link;
 use core\check\check;
 use core\check\result;
 
@@ -67,5 +68,15 @@ class token_expiry extends check {
 
         // Else ok.
         return new result(result::OK, get_string('check:tokenexpiry:expiresin', 'tool_objectfs', $strparams));
+    }
+
+    /**
+     * Link to ObjectFS settings page.
+     *
+     * @return \action_link|null
+     */
+    public function get_action_link(): ?\action_link {
+        $url = new \moodle_url('/admin/category.php', ['category' => 'tool_objectfs']);
+        return new \action_link($url, get_string('pluginname', 'tool_objectfs'));
     }
 }
