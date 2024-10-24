@@ -25,10 +25,8 @@
 
 namespace tool_objectfs\local\store\azure;
 
-use admin_setting_description;
 use SimpleXMLElement;
 use stdClass;
-use tool_objectfs\check\token_expiry;
 use tool_objectfs\local\store\azure\stream_wrapper;
 use tool_objectfs\local\store\object_client_base;
 
@@ -361,15 +359,6 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/azure_sastoken',
             new \lang_string('settings:azure:sastoken', 'tool_objectfs'),
             new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'), ''));
-
-        // Admin_setting_check only exists in 4.5+, in lower versions fallback to a basic description.
-        if (class_exists('admin_setting_check')) {
-            $settings->add(new admin_setting_check('tool_objectfs/check_tokenexpiry', new token_expiry(), true));
-        } else {
-            $summary = (new token_expiry())->get_result()->get_summary();
-            $settings->add(new admin_setting_description('tool_objectfs/tokenexpirycheckresult',
-                get_string('checktoken_expiry', 'tool_objectfs'), $summary));
-        }
 
         return $settings;
     }
