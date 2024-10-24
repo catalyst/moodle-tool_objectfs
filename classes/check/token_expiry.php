@@ -29,6 +29,16 @@ use core\check\result;
  */
 class token_expiry extends check {
     /**
+     * Link to ObjectFS settings page.
+     *
+     * @return \action_link|null
+     */
+    public function get_action_link(): ?\action_link {
+        $url = new \moodle_url('/admin/category.php', ['category' => 'tool_objectfs']);
+        return new \action_link($url, get_string('pluginname', 'tool_objectfs'));
+    }
+
+    /**
      * Checks the token expiry time against thresholds
      * @return result
      */
