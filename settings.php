@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\check\token_expiry;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/classes/local/manager.php');
@@ -246,6 +248,18 @@ if ($ADMIN->fulltree) {
                 );
             }
         }
+    }
+
+    $settings->add(new admin_setting_heading('tool_objectfs/checks',
+        new lang_string('settings:checksheader', 'tool_objectfs'), ''));
+
+    // Admin_setting_check only exists in 4.5+, in lower versions fallback to a basic description.
+    if (class_exists('admin_setting_check')) {
+        $settings->add(new admin_setting_check('tool_objectfs/check_tokenexpiry', new token_expiry(), true));
+    } else {
+        $summary = (new token_expiry())->get_result()->get_summary();
+        $settings->add(new admin_setting_description('tool_objectfs/tokenexpirycheckresult',
+            get_string('checktoken_expiry', 'tool_objectfs'), $summary));
     }
 
     $settings->add(new admin_setting_heading('tool_objectfs/testsettings',

@@ -262,6 +262,8 @@ $string['settings:handlernotset'] = '$CFG->alternative_file_system_class is not 
 $string['settings:testingheader'] = 'Test Settings';
 $string['settings:testingdescr'] = 'This setting is mainly for testing purposes and introduces overhead to check the location.';
 
+$string['settings:checksheader'] = 'Checks';
+
 $string['settings:error:numeric'] = 'Please enter a number which is greater than or equal 0.';
 $string['settings:notconfigured'] = 'Missing configuration.';
 $string['total_deleted_dirs'] = 'Total number of deleted directories: ';
@@ -273,5 +275,5 @@ $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
 $string['checktoken_expiry'] = 'Token expiry';
 $string['check:tokenexpiry:expiresin'] = 'Token expires in {$a->dayssince} days on {$a->time}';
 $string['check:tokenexpiry:expired'] = 'Token expired for {$a->dayssince} days. Expired on {$a->time}';
-$string['check:tokenexpiry:na'] = 'Token expired not implemented for filesystem, or no token is set';
+$string['check:tokenexpiry:na'] = 'Token expiry check not implemented for filesystem, or no token is set';
 $string['settings:tokenexpirywarnperiod'] = 'Token expiry warn period';
