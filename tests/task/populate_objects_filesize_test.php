@@ -179,24 +179,27 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
      */
     public function test_orphaned_objects_are_not_updated() {
         global $DB;
-        $file1 = $this->create_local_file("Test 1");
-        $this->create_local_file("Test 2");
-        $this->create_local_file("Test 3");
-        $this->create_local_file("Test 4");
-        $this->create_local_file("This is a looong name");
+        $filehashes = [
+            $this->create_local_file("Test 1")->get_contenthash(),
+            $this->create_local_file("Test 2")->get_contenthash(),
+            $this->create_local_file("Test 3")->get_contenthash(),
+            $this->create_local_file("Test 4")->get_contenthash(),
+            $this->create_local_file("This is a looong name")->get_contenthash(),
+        ];
 
         // Set all objects to have a filesize of null.
         $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
         // Set first object to be orphaned.
-        $DB->set_field('tool_objectfs_objects', 'location', -2, ['contenthash' => $file1->get_contenthash()]);
+        $DB->set_field('tool_objectfs_objects', 'location', -2, ['contenthash' => $filehashes[0]]);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
         $task->execute();
 
         // Get all objects.
-        $objects = $DB->get_records('tool_objectfs_objects');
+        [$insql, $params] = $DB->get_in_or_equal($filehashes);
+        $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
         $updatedobjects = array_filter($objects, function($object) {
             return isset($object->filesize);
         });
