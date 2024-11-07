@@ -92,7 +92,7 @@ class client extends object_client_base {
      */
     public function get_fullpath_from_hash($contenthash): string {
         $filepath = $this->get_filepath_from_hash($contenthash);
-        return "blob://$filepath";
+        return "azure://$filepath";
     }
 
     /**
@@ -113,7 +113,7 @@ class client extends object_client_base {
      * @return string
      */
     protected function get_blob_key_from_path(string $filepath): string {
-        return str_replace("blob://", '', $filepath);
+        return str_replace("azure://", '', $filepath);
     }
 
     /**
@@ -171,7 +171,7 @@ class client extends object_client_base {
      */
     public function get_seekable_stream_context() {
         $context = stream_context_create([
-            'blob' => [
+            'azure' => [
                 'seekable' => true,
             ],
         ]);
