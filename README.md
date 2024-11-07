@@ -209,7 +209,9 @@ az storage container policy create \
     --name <policy_name> \
     --start <YYYY-MM-DD> \
     --expiry <YYYY-MM-DD> \
-    --permissions rw
+    --permissions racwl
+    // Or optionally to allow delete
+    --permissions racwld
 
 # Start and Expiry are optional arguments.
 ```
