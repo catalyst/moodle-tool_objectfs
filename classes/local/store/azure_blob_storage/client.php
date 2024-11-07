@@ -256,19 +256,14 @@ class client extends object_client_base {
             return -1;
         }
 
-        // Parse the sas token (it just uses url parameter encoding).
-        $parts = [];
-        parse_str($this->config->azure_sastoken, $parts);
+        // Return expiry time, or default to 0 if could not parse.
+        $time = $this->api->get_token_expiry_time();
 
-        // Get the 'se' part (signed expiry).
-        if (!isset($parts['se'])) {
-            // Assume expired (malformed).
+        if (is_null($time)) {
             return 0;
         }
 
-        // Parse timestamp string into unix timestamp int.
-        $expirystr = $parts['se'];
-        return strtotime($expirystr);
+        return $time;
     }
 
     /**
