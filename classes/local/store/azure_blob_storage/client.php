@@ -18,6 +18,7 @@ namespace tool_objectfs\local\store\azure_blob_storage;
 
 use admin_settingpage;
 use coding_exception;
+use Exception;
 use GuzzleHttp\Psr7\Utils;
 use tool_objectfs\local\store\object_client_base;
 use local_azureblobstorage\api;
@@ -133,6 +134,12 @@ class client extends object_client_base {
         // Azure does not support renaming, instead the file is copied
         // and the old one is deleted.
         copy($currentpath, $destinationpath);
+
+        // Ensure file exists as a fail-safe.
+        if (!is_readable($destinationpath)) {
+            throw new Exception("Rename (copy and delete) failed because copy operation failed, skipping deletion.");
+        }
+
         $this->delete_file($currentpath);
     }
 
