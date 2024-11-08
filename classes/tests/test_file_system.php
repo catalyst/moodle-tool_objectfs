@@ -64,6 +64,13 @@ class test_file_system extends object_file_system {
             $config->azure_sastoken = $credentials['azure_sastoken'];
             manager::set_objectfs_config($config);
             $client = new test_azure_integration_client($config);
+        } else if (isset($CFG->phpunit_objectfs_azure_blob_storage_integration_test_credentials)) {
+            $credentials = $CFG->phpunit_objectfs_azure_blob_storage_integration_test_credentials;
+            $config->azure_accountname = $credentials['azure_accountname'];
+            $config->azure_container = $credentials['azure_container'];
+            $config->azure_sastoken = $credentials['azure_sastoken'];
+            manager::set_objectfs_config($config);
+            $client = new test_azure_blob_storage_integration_client($config);
         } else if (isset($CFG->phpunit_objectfs_swift_integration_test_credentials)) {
             $credentials = $CFG->phpunit_objectfs_swift_integration_test_credentials;
             $config->openstack_authurl = $credentials['openstack_authurl'];

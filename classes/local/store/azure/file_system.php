@@ -33,6 +33,7 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
 /**
  * file_system
+ * @deprecated Since Moodle 4.2 - Please see the README about updating to new azure_blob_storage client.
  */
 class file_system extends object_file_system {
 

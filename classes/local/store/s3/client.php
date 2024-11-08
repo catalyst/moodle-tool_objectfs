@@ -767,7 +767,7 @@ class client extends object_client_base {
             if ($connection->success) {
                 $output .= $OUTPUT->notification(get_string('settings:aws:sdkcredsok', 'tool_objectfs'), 'notifysuccess');
                 // Check permissions if we can connect.
-                $permissions = $this->test_permissions($this->testdelete);
+                $permissions = $this->test_permissions($this->should_test_delete());
                 if ($permissions->success) {
                     $output .= $OUTPUT->notification(key($permissions->messages), 'notifysuccess');
                 } else {

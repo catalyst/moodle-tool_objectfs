@@ -32,6 +32,7 @@ use tool_objectfs\local\store\object_client_base;
 
 /**
  * client
+ * @deprecated Since Moodle 4.2 - Please see the README about updating to new azure_blob_storage client.
  */
 class client extends object_client_base {
 

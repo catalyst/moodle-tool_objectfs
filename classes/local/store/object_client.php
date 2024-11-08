@@ -141,6 +141,12 @@ interface object_client {
      * @return int unix timestamp the token set expires at
      */
     public function get_token_expiry_time(): int;
+
+    /**
+     * If should test deletion as part of testing connection.
+     * @return bool
+     */
+    public function should_test_delete(): bool;
 }
 
 
