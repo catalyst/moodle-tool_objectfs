@@ -43,7 +43,7 @@ class trigger_update_object_tags extends scheduled_task {
         $maxtoschedule = get_config('tool_objectfs', 'maxtaggingtaskstospawn');
         $toschedule = max(0, $maxtoschedule - $alreadyexist);
 
-        for($i = 0; $i < $toschedule; $i++) {
+        for ($i = 0; $i < $toschedule; $i++) {
             // Queue adhoc task, nothing else.
             $task = new update_object_tags();
             $task->set_custom_data([
