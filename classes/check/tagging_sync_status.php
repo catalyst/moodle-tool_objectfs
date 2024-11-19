@@ -46,7 +46,7 @@ class tagging_sync_status extends check {
      */
     public function get_result(): result {
         if (!tag_manager::is_tagging_enabled_and_supported()) {
-            return new tag_sync_count_result(result::WARNING, get_string('check:tagging:na', 'tool_objectfs'));
+            return new tag_sync_count_result(result::NA, get_string('check:tagging:na', 'tool_objectfs'));
         }
 
         // We only do a lightweight check here, the get_details is overwritten in tag_sync_status_result
