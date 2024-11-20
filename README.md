@@ -77,6 +77,7 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 
 | Moodle version    | Totara version           | Branch                                                                                       | PHP  | MySQL   | PostgreSQL  |
 |-------------------|--------------------------|----------------------------------------------------------------------------------------------|------|---------|-------------|
+| Moodle 4.4+       |                          | [MOODLE_404_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_404_STABLE) | 8.1+ | 8.0+    | 13+         |
 | Moodle 4.2+       |                          | [MOODLE_402_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_402_STABLE) | 8.0+ | 8.0+    | 13+         |
 | Moodle 3.10 - 4.1 |                          | [MOODLE_310_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_310_STABLE) | 7.2+ | 5.7+    | 12+         |
 
@@ -85,7 +86,7 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
 2. Setup your remote object storage. See [Remote object storage setup](#amazon-s3)
 3. Clone this repository into admin/tool/objectfs
 4. Install one of the required SDK libraries for the storage file system that you will be using
-    1. Clone [moodle-local_aws](https://github.com/catalyst/moodle-local_aws) into local/aws for S3 or DigitalOcean Spaces or Google Cloud, or
+    1. AWS SDK: the SDK is already integrated into Moodle 4.4+
     2. Clone [moodle-local_azureblobstorage](https://github.com/catalyst/moodle-local_azureblobstorage) into local/azureblobstorage for Azure Blob Storage, or
     3. Clone [moodle-local_openstack](https://github.com/matt-catalyst/moodle-local_openstack.git) into local/openstack for openstack(swift) storage
 5. Install the plugins through the moodle GUI.

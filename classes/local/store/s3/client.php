@@ -28,7 +28,6 @@ namespace tool_objectfs\local\store\s3;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\store\signed_url;
-use local_aws\admin_settings_aws_region;
 
 define('AWS_API_VERSION', '2006-03-01');
 define('AWS_CAN_READ_OBJECT', 0);
@@ -69,11 +68,9 @@ class client extends object_client_base {
      */
     public function __construct($config) {
         global $CFG;
-        $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
         $this->config = $config;
 
         if ($this->get_availability() && !empty($config)) {
-            require_once($this->autoloader);
             // Using the multipart upload methods , you can upload objects from 5 MB to 5 TB in size.
             // See https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-multipart-upload.html.
             $this->maxupload = OBJECTFS_BYTES_IN_TERABYTE * 5;
@@ -87,6 +84,15 @@ class client extends object_client_base {
         } else {
             parent::__construct($config);
         }
+    }
+
+    /**
+     * We do not need to check for the autoloader as AWS SDK is integrated in to Moodle 4.4
+     *
+     * @return bool
+     */
+    public function get_availability() {
+        return true;
     }
 
     /**
@@ -432,25 +438,6 @@ class client extends object_client_base {
      */
     public function define_client_section($settings, $config) {
         global $OUTPUT;
-        $plugins = \core_component::get_plugin_list('local');
-
-        if (!array_key_exists('aws', $plugins)) {
-            $text  = $OUTPUT->notification(new \lang_string('settings:aws:installneeded', OBJECTFS_PLUGIN_NAME));
-            $settings->add(new \admin_setting_heading('tool_objectfs/aws',
-                new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
-            return $settings;
-        }
-
-        $plugin = (object)['version' => null];
-        if (file_exists($plugins['aws'].'/version.php')) {
-            include($plugins['aws'].'/version.php');
-        }
-        if (empty($plugin->version) || $plugin->version < 2020051200) {
-            $text  = $OUTPUT->notification(new \lang_string('settings:aws:upgradeneeded', OBJECTFS_PLUGIN_NAME));
-            $settings->add(new \admin_setting_heading('tool_objectfs/aws',
-                new \lang_string('settings:aws:header', 'tool_objectfs'), $text));
-            return $settings;
-        }
 
         $settings->add(new \admin_setting_heading('tool_objectfs/aws',
             new \lang_string('settings:aws:header', 'tool_objectfs'), $this->define_client_check()));

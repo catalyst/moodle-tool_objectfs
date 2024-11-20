@@ -38,16 +38,21 @@ class client extends s3_client {
      * @return void
      */
     public function __construct($config) {
-        global $CFG;
-        $this->autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
-
         if ($this->get_availability() && !empty($config)) {
-            require_once($this->autoloader);
             $this->bucket = $config->do_space;
             $this->set_client($config);
         } else {
             parent::__construct($config);
         }
+    }
+
+    /**
+     * We do not need to check for the autoloader as AWS SDK is integrated in to Moodle 4.4
+     *
+     * @return bool
+     */
+    public function get_availability() {
+        return true;
     }
 
     /**
