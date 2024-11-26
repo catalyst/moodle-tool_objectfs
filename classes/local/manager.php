@@ -79,6 +79,8 @@ class manager {
         $config->s3_region = 'us-east-1';
         $config->s3_base_url = '';
         $config->key_prefix = '';
+        $config->s3_use_path_style_endpoint = '0';
+
 
         // Digital ocean file system.
         $config->do_key = '';
