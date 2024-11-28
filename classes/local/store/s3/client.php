@@ -469,11 +469,29 @@ class client extends object_client_base {
                 new \lang_string('settings:aws:secret_help', 'tool_objectfs'), ''));
         }
 
+
+
+        //New
+        $settings->add(new \admin_setting_configcheckbox('tool_objectfs/s3_bucket_endpoint',
+        new \lang_string('settings:aws:bucket_endpoint', 'tool_objectfs'),
+        new \lang_string('settings:aws:bucket_endpoint_help', 'tool_objectfs'), '0'));
+
+        $settings->add(new \admin_setting_configcheckbox('tool_objectfs/s3_use_path_style_endpoint',
+        new \lang_string('settings:aws:use_path_style_endpoint', 'tool_objectfs'),
+        new \lang_string('settings:aws:use_path_style_endpoint_help', 'tool_objectfs'), '0'));
+
+        $settings->add(new \admin_setting_configcheckbox('tool_objectfs/s3_disable_multiregion_access_points',
+        new \lang_string('settings:aws:disable_multiregion_access_points', 'tool_objectfs'),
+        new \lang_string('settings:aws:disable_multiregion_access_points_help', 'tool_objectfs'), '0'));
+        //New
+
+
+
         $settings->add(new \admin_setting_configtext('tool_objectfs/s3_bucket',
             new \lang_string('settings:aws:bucket', 'tool_objectfs'),
             new \lang_string('settings:aws:bucket_help', 'tool_objectfs'), ''));
 
-        $settings->add(new admin_settings_aws_region('tool_objectfs/s3_region',
+        $settings->add(new \admin_settings_aws_region('tool_objectfs/s3_region',
             new \lang_string('settings:aws:region', 'tool_objectfs'),
             new \lang_string('settings:aws:region_help', 'tool_objectfs'), ''));
 
