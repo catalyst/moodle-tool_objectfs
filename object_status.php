@@ -57,6 +57,9 @@ if ($reports = objectfs_report::get_report_ids()) {
         echo $OUTPUT->box_start();
         $table = new object_status_history_table($reporttype, $reportid);
         $table->baseurl = $pageurl;
+
+        $heading = get_string('object_status:' . $reporttype, 'tool_objectfs');
+        echo $OUTPUT->heading($heading, 2);
         $table->out(0, false);
         echo $OUTPUT->box_end();
     }
