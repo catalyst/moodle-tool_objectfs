@@ -74,6 +74,11 @@ class object_status_history_table extends \table_sql {
             $columnheaders['runningsize'] = get_string('object_status:runningsize', 'tool_objectfs');
         }
 
+        // Tag count report does not display the size.
+        if ($this->reporttype == 'tag_count') {
+            unset($columnheaders['size']);
+        }
+
         $this->set_attribute('class', 'table-sm');
         $this->define_columns(array_keys($columnheaders));
         $this->define_headers(array_values($columnheaders));
