@@ -78,7 +78,7 @@ class deleter extends manipulator {
      * @return bool
      */
     protected function manipulator_can_execute() {
-        if ($this->deletelocal == 0) {
+        if (!$this->deletelocal) {
             mtrace("Delete local disabled \n");
             return false;
         }
