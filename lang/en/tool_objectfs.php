@@ -138,6 +138,16 @@ $string['settings:do:space_help'] = 'DO Space to store files in.';
 $string['settings:do:region'] = 'Region';
 $string['settings:do:region_help'] = 'DO Spaces API gateway region.';
 
+$string['settings:linode:header'] = 'Linode Object Storage Settings';
+$string['settings:linode:key'] = 'Key';
+$string['settings:linode:key_help'] = 'Linode Object Storage key credential.';
+$string['settings:linode:secret'] = 'Secret';
+$string['settings:linode:secret_help'] = 'Linode Object Storage secret credential.';
+$string['settings:linode:bucket'] = 'Space';
+$string['settings:linode:bucket_help'] = 'Linode Object Storage to store files in.';
+$string['settings:linode:region'] = 'Region';
+$string['settings:linode:region_help'] = 'Linode Object Storage API gateway region.';
+
 $string['settings:azure:header'] = 'Azure Blob Storage Settings';
 $string['settings:azure:accountname'] = 'Account name';
 $string['settings:azure:accountname_help'] = 'The name of the storage account.';
