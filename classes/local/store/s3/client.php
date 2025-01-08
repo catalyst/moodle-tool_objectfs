@@ -29,7 +29,6 @@ use coding_exception;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
 use tool_objectfs\local\store\signed_url;
-use local_aws\admin_settings_aws_region;
 use stdClass;
 use Throwable;
 
