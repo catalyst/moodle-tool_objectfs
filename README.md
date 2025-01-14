@@ -1,6 +1,4 @@
-<a href="https://github.com/catalyst/moodle-tool_objectfs/actions?query=workflow%3A%22Run+all+tests%22">
-<img src="https://github.com/catalyst/moodle-tool_objectfs/workflows/Run%20all%20tests/badge.svg">
-</a>
+[![ci](https://github.com/catalyst/moodle-tool_objectfs/actions/workflows/ci.yml/badge.svg?branch=MOODLE_310_STABLE)](https://github.com/catalyst/moodle-tool_objectfs/actions/workflows/ci.yml?branch=MOODLE_310_STABLE)
 
 # moodle-tool_objectfs
 
