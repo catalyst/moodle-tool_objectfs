@@ -178,11 +178,12 @@ abstract class object_file_system extends \file_system_filedir {
 
         // We limit 1 because multiple files can have the same contenthash.
         // However, they all have the same mimetype so it does not matter which one we query.
-        return $DB->get_field_sql('SELECT mimetype
+        $mimetype = $DB->get_field_sql('SELECT mimetype
                               FROM {files}
                              WHERE contenthash = :hash
                              LIMIT 1',
                         ['hash' => $contenthash]);
+        return !empty($mimetype) ? $mimetype : '';
     }
 
     /**
