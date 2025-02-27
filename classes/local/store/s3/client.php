@@ -518,6 +518,17 @@ class client extends object_client_base {
         }
     }
 
+    public function copy_to_local_async($localpath, $contenthash) {
+        $externalpath = $this->get_filepath_from_hash($contenthash);
+        $promise = $this->client->getObjectAsync([
+            'Bucket' => $this->bucket,
+            'Key'    => $this->bucketkeyprefix . $externalpath,
+            'SaveAs' => $localpath,
+        ]);
+        // TODO: Catch exceptions.
+        return $promise;
+    }
+
     /**
      * Does the storage support pre-signed URLs.
      *

@@ -169,6 +169,75 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
+     * Get bulk full path on disk for the specified stored files.
+     *
+     * Note: This must return a consistent path for the file's contenthash
+     * and the path _will_ be in a standard local format.
+     * Streamable paths will not work.
+     * A local copy of the file _will_ be fetched if $fetchifnotfound is tree.
+     *
+     * The $fetchifnotfound allows you to determine the expected path of the file.
+     *
+     * @param array $files Array of stored files to serve.
+     * @param bool $fetchifnotfound Whether to attempt to fetch from the remote path if not found.
+     * @return \Traversable Iterator of full path to pool files with file content and file
+     */
+    public function get_bulk_local_path_from_storedfile(array $files, $fetchifnotfound = false): \Traversable {
+        $async = [];
+        $finished = [];
+
+        foreach ($files as $file) {
+            // TODO: Possibly handle this.
+            if ($file->is_directory()) {
+                continue;
+            }
+
+            $systempath = $this->get_local_path_from_storedfile($file);
+            if (!$fetchifnotfound || is_readable($systempath)) {
+                // Stored locally or not fetching.
+                yield $systempath => $file;
+                continue;
+            }
+
+            // TODO: Tighten logic, probably new param / different return, and change filesize to a constant.
+            if ($file->get_filesize() > (1024 * 1024 * 1)) {
+                //yield $systempath => $file;
+                //continue;
+            }
+
+            // We only need these for this request, so don't store in normal location.
+            $dir = isset($dir) ? $dir : make_request_directory();
+            $filepath = $dir . $file->get_contenthash();
+            $async[$filepath] = $file;
+        }
+
+        // Create a generator to control the concurrency with each.
+        $promises = function () use ($async, &$finished) {
+            foreach ($async as $filepath => $file) {
+                yield $filepath => $this->externalclient->copy_to_local_async($filepath, $file->get_contenthash())->then(
+                    function () use ($filepath, $file, &$finished) {
+                        // Copied to tmp successfully.
+                        $finished[$filepath] = $file;
+                    },
+                    function () use ($filepath, $file, &$finished) {
+                        // Error copying file, return normal path instead.
+                        $filepath = $this->get_local_path_from_storedfile($file);
+                        $finished[$filepath] = $file;
+                    });
+            }
+        };
+
+        // Limit the amount of promises running at any time.
+        \GuzzleHttp\Promise\Each::ofLimit($promises(), 20)->wait();
+
+        // Yield results. Ideally would be done earlier, but wait is required to start promises and is blocking.
+        foreach ($finished as $filepath => $file) {
+            yield $filepath => $file;
+            unset($finished[$filepath]);
+        }
+    }
+
+    /**
      * Returns mimetype for a given hash
      * @param string $contenthash
      * @return string mimetype as stored in mdl_files
