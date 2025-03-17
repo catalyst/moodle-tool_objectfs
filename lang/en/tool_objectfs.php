@@ -125,6 +125,8 @@ $string['settings:aws:sdkcredsok'] = 'AWS credentials found. This setting can be
 $string['settings:aws:sdkcredserror'] = 'Couldn\'t find AWS credentials. It\'s unsafe to enable this setting. Follow up <a href="https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html">AWS documentation</a>.';
 $string['settings:aws:key_prefix'] = 'Prefix to use in bucket';
 $string['settings:aws:key_prefix_help'] = 'Prefix to use inside Amazon S3 bucket. Must end with trailing slash when set. Leave blank to use root of bucket.';
+$string['settings:aws:use_path_style_endpoint'] = 'Use path-style endpoint';
+$string['settings:aws:use_path_style_endpoint_help'] = 'Enable this to use path-style S3 endpoint URLs (e.g., https://s3.amazonaws.com/bucket/key) instead of virtual-hosted style URLs (e.g., https://bucket.s3.amazonaws.com/key). This is required for some S3-compatible storage services like MinIO.';
 
 $string['settings:do:header'] = 'DigitalOcean Spaces Settings';
 $string['settings:do:key'] = 'Key';
