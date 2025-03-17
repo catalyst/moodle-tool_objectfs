@@ -312,8 +312,9 @@ Use the AWS plugin for the objectfs addon.
 - **Secret**: Min.io Secret
 - **Bucket**: S3 Bucket name
 - **AWS region**: Doesn't matter
-- **Base URL***: Your ip address of Min.io server or url. (If it's internal, see issue page [here](https://github.com/catalyst/moodle-tool_objectfs/issues/579).
+- **Base URL***: Your ip address of Min.io server or url. (If it's internal, see issue page [here](https://github.com/catalyst/moodle-tool_objectfs/issues/579).)
 - **Key Prefix**: useful for adding a prefix for all data stored in bucket. Can be used to reuse the same CloudFront distribution for both Moodle itself and the pre-signed URLs files.
+- **Use path-style endpoint**: Enable this to use path-style S3 endpoint URLs, which Minio S3 compatible storage services require. (See Pull Request: [Use path-style endpoint](https://github.com/catalyst/moodle-tool_objectfs/pull/670).)
 
 ### Azure Blob Storage settings
 Azure Blob Storage specific settings
