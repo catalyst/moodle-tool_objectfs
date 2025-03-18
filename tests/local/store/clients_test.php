@@ -36,13 +36,20 @@ class clients_test extends \advanced_testcase {
     public static function s3_client_test_connection_if_not_configured_properly_data_provider(): array {
         return [
             [[]],
-            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 0, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 1, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 1, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '', 's3_secret' => '']],
-            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test', 's3_secret' => '']],
-            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '', 's3_secret' => 'test']],
+            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 0, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 1, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 1, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '',
+              's3_secret' => '', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test',
+              's3_secret' => '', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '',
+              's3_secret' => 'test', 's3_bucket_acl' => '']],
         ];
     }
 
