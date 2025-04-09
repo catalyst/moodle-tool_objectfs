@@ -169,24 +169,22 @@ class object_status_test extends \tool_objectfs\tests\testcase {
      * @return array
      */
     public static function object_status_add_barchart_method_provider(): array {
+        $html = '<div class="ofs-bar table-info" style="width:%s%%">%s</div>';
+        $runninghtml = '<div class="ofs-bar table-info" style="width:%s%%">%s%% (%s)</div>';
         return [
             [0, 0, '', 0, '0'],
-            [0, 100, 'count', 0, '<div class="ofs-bar" style="width:0%">' . number_format(0) . '</div>'],
-            [0, 100, 'size', 0, '<div class="ofs-bar" style="width:0%">' . display_size(0) . '</div>'],
-            [0, 100, 'runningsize', 0,
-                '<div class="ofs-bar" style="width:0%">' . number_format(0) . '% (' . display_size(0) . ')</div>'],
-            [0, 100, 'count', 2, '<div class="ofs-bar" style="width:0%">' . number_format(0) . '</div>'],
-            [0, 100, 'size', 2, '<div class="ofs-bar" style="width:0%">' . display_size(0) . '</div>'],
-            [0, 100, 'runningsize', 2,
-                '<div class="ofs-bar" style="width:0%">' . number_format(0, 2) . '% (' . display_size(0) . ')</div>'],
-            [10, 100, 'count', 2, '<div class="ofs-bar" style="width:10%">' . number_format(10) . '</div>'],
-            [10, 100, 'size', 2, '<div class="ofs-bar" style="width:10%">' . display_size(10) . '</div>'],
-            [10, 100, 'runningsize', 2,
-                '<div class="ofs-bar" style="width:10%">' . number_format(10, 2) . '% (' . display_size(10) . ')</div>'],
-            [12345678, 123456789, 'count', 0, '<div class="ofs-bar" style="width:10%">' . number_format(12345678) . '</div>'],
-            [12345678, 123456789, 'size', 0, '<div class="ofs-bar" style="width:10%">' . display_size(12345678) . '</div>'],
-            [12345678, 123456789, 'runningsize', 2,
-                '<div class="ofs-bar" style="width:10%">' . number_format(10, 2) . '% (' . display_size(12345678) . ')</div>'],
+            [0, 100, 'count', 0, sprintf($html, 0, number_format(0))],
+            [0, 100, 'size', 0, sprintf($html, 0, display_size(0))],
+            [0, 100, 'runningsize', 0, sprintf($runninghtml, 0, number_format(0), display_size(0))],
+            [0, 100, 'count', 2, sprintf($html, 0, number_format(0))],
+            [0, 100, 'size', 2, sprintf($html, 0, display_size(0))],
+            [0, 100, 'runningsize', 2, sprintf($runninghtml, 0, number_format(0, 2), display_size(0))],
+            [10, 100, 'count', 2, sprintf($html, 10, number_format(10))],
+            [10, 100, 'size', 2, sprintf($html, 10, display_size(10))],
+            [10, 100, 'runningsize', 2, sprintf($runninghtml, 10, number_format(10, 2), display_size(10))],
+            [12345678, 123456789, 'count', 0, sprintf($html, 10, number_format(12345678))],
+            [12345678, 123456789, 'size', 0, sprintf($html, 10, display_size(12345678))],
+            [12345678, 123456789, 'runningsize', 2, sprintf($runninghtml, 10, number_format(10, 2), display_size(12345678))],
         ];
     }
 
@@ -203,7 +201,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
      */
     public function test_object_status_add_barchart_method($value, $max, $type, $precision, $expected) {
         $table = new object_status_history_table('location', 0);
-        $actual = $table->add_barchart($value, $max, $type, $precision);
+        $actual = $table->add_barchart($value, '', $max, $type, $precision);
         $this->assertEquals($expected, $actual);
     }
 
