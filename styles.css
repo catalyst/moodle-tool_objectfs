@@ -1,4 +1,7 @@
 .ofs-bar {
-    background: #17a5eb;
     white-space: nowrap;
+}
+
+.ofs-bar-column {
+    min-width: 12vw;
 }
