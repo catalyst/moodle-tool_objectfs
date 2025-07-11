@@ -235,9 +235,21 @@ class tag_manager {
      */
     public static function get_tag_sync_status_summary(): array {
         global $DB;
-        return $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus) as statuscount
+        $cachekey = 'tag_sync_status_summary';
+        $cache = \cache::make('tool_objectfs', 'tagsummary');
+        $cachedresult = $cache->get($cachekey);
+
+        if ($cachedresult !== false) {
+            return $cachedresult;
+        }
+
+        $result = $DB->get_records_sql("SELECT tagsyncstatus, COUNT(tagsyncstatus) as statuscount
                                        FROM {tool_objectfs_objects}
                                    GROUP BY tagsyncstatus");
+
+        $cache->set($cachekey, $result);
+
+        return $result;
     }
 
     /**

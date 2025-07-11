@@ -65,4 +65,31 @@ final class tagging_sync_status_test extends testcase {
         $check = new tagging_sync_status();
         $this->assertEquals(result::WARNING, $check->get_result()->get_status());
     }
+
+    /**
+     * Test caching
+     */
+    public function test_tag_sync_status_summary_caching() {
+        global $DB;
+        $this->enable_filesystem_and_set_tagging(true);
+
+        $cache = \cache::make('tool_objectfs', 'tagsummary');
+        $cache->delete('tag_sync_status_summary');
+
+        $this->assertEquals($cache->get('tag_sync_status_summary'), false);
+
+        // Test: First call should hit DB, second should use cache.
+        $before = $DB->perf_get_queries();
+        $result1 = tag_manager::get_tag_sync_status_summary();
+        $after1 = $DB->perf_get_queries();
+
+        $this->assertNotEquals($cache->get('tag_sync_status_summary'), false);
+
+        $result2 = tag_manager::get_tag_sync_status_summary();
+        $after2 = $DB->perf_get_queries();
+
+        $this->assertGreaterThan($before, $after1, 'First call should hit DB');
+        $this->assertEquals($after1, $after2, 'Second call should use cache');
+        $this->assertEquals($result1, $result2, 'Cached and DB results should match');
+    }
 }

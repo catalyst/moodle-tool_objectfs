@@ -15,19 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Cache definitions for tool_objectfs
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025082701;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2025082701;      // Same as version.
-$plugin->requires  = 2024042200;      // Requires 4.4.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->supported = [404, 405];
+$definitions = [
+    'tagsummary' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'ttl' => 1800,
+        'simplekeys' => true,
+        'simpledata' => true,
+    ],
+];
