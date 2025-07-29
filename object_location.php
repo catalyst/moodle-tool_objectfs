@@ -22,6 +22,8 @@
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use core\chart_line;
+use core\chart_series;
 
 define('NO_OUTPUT_BUFFERING', true);
 require_once(__DIR__ . '/../../../config.php');
@@ -45,16 +47,26 @@ $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
 
 $OUTPUT = $PAGE->get_renderer('tool_objectfs');
-
 $table = new tool_objectfs\local\report\object_location_history_table();
 $table->baseurl = $pageurl;
-
 if (empty($logformat)) {
-    echo $OUTPUT->header();
+    ob_start();
     $table->out(0, false);
+    $tablehtml = ob_get_clean();
+    $chartdata = $table->get_chart_data();
+    $chart = new chart_line();
+    $chart->set_labels($chartdata['labels']);
+    foreach ($chartdata['series'] as $series) {
+        $chartseries = new chart_series($series['label'], $series['data'] ?? null);
+        $chart->add_series($chartseries);
+    }
+    echo $OUTPUT->header();
+    echo $OUTPUT->render($chart);
+    echo $tablehtml;
     echo $OUTPUT->footer();
 } else {
     $filename = 'object_location_history_' . userdate(time(), get_string('backupnameformat', 'langconfig'), 99, false);
     $table->is_downloading($logformat, $filename);
     $table->out(0, false);
 }
+
