@@ -185,6 +185,22 @@ class object_location_history_table extends \table_sql {
             $this->rawdata[] = $row;
 
         }
+        $this->sort_chart_data();
+    }
+
+    /**
+     * Sort data for displaying history chart.
+     */
+    private function sort_chart_data(): void {
+        $this->dates = array_reverse($this->dates);
+        $this->localsizes = array_reverse($this->localsizes);
+        $this->duplicatedsizes = array_reverse($this->duplicatedsizes);
+        $this->orphanedsizes = array_reverse($this->orphanedsizes);
+        $this->externalsizes = array_reverse($this->externalsizes);
+        $this->missingsizes = array_reverse($this->missingsizes);
+        $this->totalsizes = array_reverse($this->totalsizes);
+        $this->filedirsizes = array_reverse($this->filedirsizes);
+        $this->deltasizes = array_reverse($this->deltasizes);
     }
 
     /**
