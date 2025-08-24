@@ -26,7 +26,7 @@ use tool_objectfs\local\manager;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class checker_test extends \tool_objectfs\tests\testcase {
+final class checker_test extends \tool_objectfs\tests\testcase {
 
     /** @var string $manipulator */
     protected $manipulator = checker::class;
@@ -45,9 +45,10 @@ class checker_test extends \tool_objectfs\tests\testcase {
 
     protected function tearDown(): void {
         ob_end_clean();
+        parent::tearDown();
     }
 
-    public function test_checker_get_location_local_if_object_is_local() {
+    public function test_checker_get_location_local_if_object_is_local(): void {
         global $DB;
         $file = $this->create_local_object();
         $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
@@ -55,7 +56,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
-    public function test_checker_get_location_duplicated_if_object_is_duplicated() {
+    public function test_checker_get_location_duplicated_if_object_is_duplicated(): void {
         global $DB;
         $file = $this->create_duplicated_object();
         $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
@@ -63,7 +64,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_checker_get_location_external_if_object_is_external() {
+    public function test_checker_get_location_external_if_object_is_external(): void {
         global $DB;
         $file = $this->create_remote_object();
         $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
@@ -71,7 +72,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
-    public function test_checker_get_candidate_objects_will_not_get_objects() {
+    public function test_checker_get_candidate_objects_will_not_get_objects(): void {
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_not_get_objects_local');
         $remoteobject = $this->create_remote_object('test_checker_get_candidate_objects_will_not_get_objects_remote');
         $duplicatedbject = $this->create_duplicated_object('test_checker_get_candidate_objects_will_not_get_objects_duplicated');
@@ -81,7 +82,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
-    public function test_checker_get_candidate_objects_will_get_object() {
+    public function test_checker_get_candidate_objects_will_get_object(): void {
         global $DB;
         $localobject = $this->create_local_object('test_checker_get_candidate_objects_will_get_object');
         $DB->delete_records('tool_objectfs_objects', ['contenthash' => $localobject->contenthash]);
@@ -89,7 +90,7 @@ class checker_test extends \tool_objectfs\tests\testcase {
         self::assertTrue($this->objects_contain_hash($localobject->contenthash));
     }
 
-    public function test_checker_can_update_object() {
+    public function test_checker_can_update_object(): void {
         global $DB;
         $localobject = $this->create_local_object('test_checker_can_update_object');
         $localobject->id = null;
@@ -102,28 +103,28 @@ class checker_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($localobject->contenthash));
     }
 
-    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_local() {
+    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_local(): void {
         $file = $this->create_local_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $reflection->invokeArgs($this->checker, [$file]));
     }
 
-    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_duplicated() {
+    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_duplicated(): void {
         $file = $this->create_duplicated_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $reflection->invokeArgs($this->checker, [$file]));
     }
 
-    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_external() {
+    public function test_checker_manipulate_object_method_will_get_correct_location_if_file_is_external(): void {
         $file = $this->create_remote_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $reflection->invokeArgs($this->checker, [$file]));
     }
 
-    public function test_checker_manipulate_object_method_will_get_error_location_on_error_file() {
+    public function test_checker_manipulate_object_method_will_get_error_location_on_error_file(): void {
         $file = $this->create_error_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);

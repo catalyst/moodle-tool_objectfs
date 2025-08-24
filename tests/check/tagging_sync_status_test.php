@@ -30,11 +30,11 @@ use tool_objectfs\tests\testcase;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \tool_objectfs\check\tagging_sync_status
  */
-class tagging_sync_status_test extends testcase {
+final class tagging_sync_status_test extends testcase {
     /**
      * Tests scenario that returns N/A
      */
-    public function test_get_result_na() {
+    public function test_get_result_na(): void {
         // Not enabled by default, should return N/A.
         $check = new tagging_sync_status();
         $this->assertEquals(result::NA, $check->get_result()->get_status());
@@ -43,7 +43,7 @@ class tagging_sync_status_test extends testcase {
     /**
      * Test scenario that returns OK
      */
-    public function test_get_result_ok() {
+    public function test_get_result_ok(): void {
         $this->enable_filesystem_and_set_tagging(true);
         $object = $this->create_remote_object();
         tag_manager::mark_object_tag_sync_status($object->contenthash, tag_manager::SYNC_STATUS_COMPLETE);
@@ -56,7 +56,7 @@ class tagging_sync_status_test extends testcase {
     /**
      * Tests scenario that returns WARNING
      */
-    public function test_get_result_warning() {
+    public function test_get_result_warning(): void {
         $this->enable_filesystem_and_set_tagging(true);
         $object = $this->create_remote_object();
         tag_manager::mark_object_tag_sync_status($object->contenthash, tag_manager::SYNC_STATUS_ERROR);

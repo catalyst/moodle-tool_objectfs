@@ -24,7 +24,7 @@ namespace tool_objectfs\local;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tasks_test extends \tool_objectfs\tests\testcase {
+final class tasks_test extends \tool_objectfs\tests\testcase {
 
     protected function setUp(): void {
         parent::setUp();
@@ -33,6 +33,7 @@ class tasks_test extends \tool_objectfs\tests\testcase {
 
     protected function tearDown(): void {
         ob_end_clean();
+        parent::tearDown();
     }
 
     public function test_run_scheduled_tasks() {

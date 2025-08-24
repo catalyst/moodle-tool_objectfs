@@ -31,7 +31,7 @@ namespace tool_objectfs\local;
  *
  * @covers \tool_objectfs\local\manager
  */
-class manager_test extends \tool_objectfs\tests\testcase {
+final class manager_test extends \tool_objectfs\tests\testcase {
 
     /**
      * Data provider for test_all_extensions_whitelisted().
@@ -57,7 +57,7 @@ class manager_test extends \tool_objectfs\tests\testcase {
      * @param  bool   $result            Expected result
      * @throws \dml_exception
      */
-    public function test_all_extensions_whitelisted($signingwhitelist, $result) {
+    public function test_all_extensions_whitelisted($signingwhitelist, $result): void {
         if (isset($signingwhitelist)) {
             set_config('signingwhitelist', $signingwhitelist, 'tool_objectfs');
         }
@@ -91,7 +91,7 @@ class manager_test extends \tool_objectfs\tests\testcase {
      * @param  bool    $result            Expected result
      * @throws \dml_exception
      */
-    public function test_is_extension_whitelisted($signingwhitelist, $filename, $result) {
+    public function test_is_extension_whitelisted($signingwhitelist, $filename, $result): void {
         if (isset($signingwhitelist)) {
             set_config('signingwhitelist', $signingwhitelist, 'tool_objectfs');
         }
@@ -129,7 +129,7 @@ class manager_test extends \tool_objectfs\tests\testcase {
      * @param  string  $search      What we are searching for
      * @param  bool    $expected    Expected result
      */
-    public function test_get_header($headers, $search, $expected) {
+    public function test_get_header($headers, $search, $expected): void {
         $actual = manager::get_header($headers, $search);
         $this->assertEquals($expected, $actual);
     }

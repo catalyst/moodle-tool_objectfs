@@ -25,12 +25,12 @@ namespace tool_objectfs\privacy;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \tool_objectfs\privacy\provider
  */
-class privacy_test extends \advanced_testcase {
+final class privacy_test extends \advanced_testcase {
 
     /**
      * Check the privacy provider implements null_provider.
      */
-    public function test_provider_implements_null_provider() {
+    public function test_provider_implements_null_provider(): void {
         // Privacy classes may not exist in older Moodles/Totara.
         if (interface_exists('\core_privacy\local\metadata\null_provider')) {
             $provider = new provider();

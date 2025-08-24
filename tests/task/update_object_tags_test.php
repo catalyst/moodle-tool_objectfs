@@ -30,7 +30,7 @@ use tool_objectfs\tests\testcase;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \tool_objectfs\task\update_object_tags
  */
-class update_object_tags_test extends testcase {
+final class update_object_tags_test extends testcase {
     /**
      * Creates object with tags needing to be synced
      * @param string $contents contents of object to create.
@@ -46,7 +46,7 @@ class update_object_tags_test extends testcase {
     /**
      * Tests task exits when the tagging feature is disabled.
      */
-    public function test_not_enabled() {
+    public function test_not_enabled(): void {
         $this->resetAfterTest();
 
         // By default filesystem does not support and tagging not enabled, so should error.
@@ -60,7 +60,7 @@ class update_object_tags_test extends testcase {
     /**
      * Tests handles an invalid iteration limit
      */
-    public function test_invalid_iteration_limit() {
+    public function test_invalid_iteration_limit(): void {
         $this->resetAfterTest();
         $this->enable_filesystem_and_set_tagging(true);
 
@@ -79,7 +79,7 @@ class update_object_tags_test extends testcase {
     /**
      * Tests handles an invalid number of iterations in custom data
      */
-    public function test_invalid_iteration_number() {
+    public function test_invalid_iteration_number(): void {
         $this->resetAfterTest();
         $this->enable_filesystem_and_set_tagging(true);
 
@@ -97,7 +97,7 @@ class update_object_tags_test extends testcase {
     /**
      * Tests exits when there are no more objects needing to be synced
      */
-    public function test_no_more_objects_to_sync() {
+    public function test_no_more_objects_to_sync(): void {
         $this->resetAfterTest();
         $this->enable_filesystem_and_set_tagging(true);
         set_config('maxtaggingiterations', 5, 'tool_objectfs');
@@ -112,7 +112,7 @@ class update_object_tags_test extends testcase {
     /**
      * Tests maxtaggingiterations is correctly checked
      */
-    public function test_max_iterations() {
+    public function test_max_iterations(): void {
         $this->resetAfterTest();
         $this->enable_filesystem_and_set_tagging(true);
 
@@ -133,7 +133,7 @@ class update_object_tags_test extends testcase {
     /**
      * Tests a successful tagging run where it needs to requeue for further processing
      */
-    public function test_tagging_run_with_requeue() {
+    public function test_tagging_run_with_requeue(): void {
         $this->resetAfterTest();
         $this->enable_filesystem_and_set_tagging(true);
 
@@ -167,7 +167,7 @@ class update_object_tags_test extends testcase {
      * Tests get_iteration
      * @covers \tool_objectfs\task\update_object_tags::get_iteration
      */
-    public function test_get_iteration() {
+    public function test_get_iteration(): void {
         $task = new update_object_tags();
 
         // No custom data, should return zero.
@@ -184,7 +184,7 @@ class update_object_tags_test extends testcase {
      * Tests getting status badge
      * @covers \tool_objectfs\task\update_object_tags::get_status_badge
      */
-    public function test_get_status_badge() {
+    public function test_get_status_badge(): void {
         // Spawn three tasks and break each one in a different way.
         // Test their badge output.
         $task1 = new update_object_tags();

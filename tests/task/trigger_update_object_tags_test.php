@@ -27,12 +27,12 @@ use core\task\manager;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class trigger_update_object_tags_test extends advanced_testcase {
+final class trigger_update_object_tags_test extends advanced_testcase {
     /**
      * Tests executing scheduled task.
      * @covers \tool_objectfs\task\trigger_update_object_tags::execute
      */
-    public function test_execute() {
+    public function test_execute(): void {
         $this->resetAfterTest();
 
         $task = new trigger_update_object_tags();
