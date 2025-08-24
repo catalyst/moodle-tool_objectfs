@@ -26,7 +26,7 @@ use tool_objectfs\local\manager;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class puller_test extends \tool_objectfs\tests\testcase {
+final class puller_test extends \tool_objectfs\tests\testcase {
 
     /** @var string $manipulator */
     protected $manipulator = puller::class;
@@ -46,6 +46,7 @@ class puller_test extends \tool_objectfs\tests\testcase {
 
     protected function tearDown(): void {
         ob_end_clean();
+        parent::tearDown();
     }
 
     /**
@@ -62,13 +63,13 @@ class puller_test extends \tool_objectfs\tests\testcase {
         $this->puller = new puller($this->filesystem, $config, $this->logger);
     }
 
-    public function test_puller_get_candidate_objects_will_get_remote_objects() {
+    public function test_puller_get_candidate_objects_will_get_remote_objects(): void {
         $remoteobject = $this->create_remote_object();
 
         self::assertTrue($this->objects_contain_hash($remoteobject->contenthash));
     }
 
-    public function test_puller_get_candidate_objects_will_not_get_duplicated_or_local_objects() {
+    public function test_puller_get_candidate_objects_will_not_get_duplicated_or_local_objects(): void {
         $localobject = $this->create_local_object();
         $duplicatedobject = $this->create_duplicated_object();
 
@@ -76,7 +77,7 @@ class puller_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($duplicatedobject->contenthash));
     }
 
-    public function test_puller_get_candidate_objects_will_not_get_objects_over_sizethreshold() {
+    public function test_puller_get_candidate_objects_will_not_get_objects_over_sizethreshold(): void {
         global $DB;
         $remoteobject = $this->create_remote_object();
         $DB->set_field('files', 'filesize', 10, ['contenthash' => $remoteobject->contenthash]);
@@ -85,7 +86,7 @@ class puller_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
-    public function test_puller_can_pull_remote_file() {
+    public function test_puller_can_pull_remote_file(): void {
         global $DB;
         $object = $this->create_remote_object();
 
@@ -97,7 +98,7 @@ class puller_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_puller_can_handle_duplicated_file() {
+    public function test_puller_can_handle_duplicated_file(): void {
         global $DB;
         $object = $this->create_duplicated_object();
 
@@ -109,7 +110,7 @@ class puller_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_puller_can_handle_local_file() {
+    public function test_puller_can_handle_local_file(): void {
         global $DB;
         $object = $this->create_local_object();
 

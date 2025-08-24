@@ -29,7 +29,7 @@ use tool_objectfs\tests\testcase;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class token_expiry_test extends testcase {
+final class token_expiry_test extends testcase {
     /**
      * Provides to test_get_result
      * @return array
@@ -61,7 +61,7 @@ class token_expiry_test extends testcase {
      * @param string $expectedresult one of the result:: constants that is expected to be returned.
      * @dataProvider get_result_provider
      */
-    public function test_get_result(int $expirytime, int $warnperiod, string $expectedresult) {
+    public function test_get_result(int $expirytime, int $warnperiod, string $expectedresult): void {
         global $CFG;
         $config = manager::get_objectfs_config();
         $config->filesystem = '\\tool_objectfs\\tests\\test_file_system';

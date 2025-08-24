@@ -25,12 +25,12 @@ namespace tool_objectfs\task;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \tool_objectfs\task\populate_objects_filesize
  */
-class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
+final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
 
     /**
      * Test multiple objects have their filesize updated.
      */
-    public function test_empty_filesizes_updated() {
+    public function test_empty_filesizes_updated(): void {
         global $DB;
         $filehashes = [
             $this->create_local_file("Test 1")->get_contenthash(),
@@ -62,7 +62,7 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
     /**
      * Test filesize is not updated from 0, if file is empty.
      */
-    public function test_empty_filesizes_with_real_empty_files_not_updated() {
+    public function test_empty_filesizes_with_real_empty_files_not_updated(): void {
         global $DB;
         $filehash = $this->create_local_file("")->get_contenthash();
 
@@ -86,7 +86,7 @@ class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that file size is updated accurately.
      */
-    public function test_filesize_updated_accurately() {
+    public function test_filesize_updated_accurately(): void {
         global $DB;
         $file1 = $this->create_local_file("four");
         $file2 = $this->create_local_file("five5");

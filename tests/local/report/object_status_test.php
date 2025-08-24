@@ -30,7 +30,7 @@ namespace tool_objectfs\local\report;
  *
  * @covers \tool_objectfs\local\report\objectfs_report
  */
-class object_status_test extends \tool_objectfs\tests\testcase {
+final class object_status_test extends \tool_objectfs\tests\testcase {
 
     /**
      * Clean up after each test.
@@ -44,7 +44,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that generate_status_report creates a snapshot of report.
      */
-    public function test_generate_status_report() {
+    public function test_generate_status_report(): void {
         objectfs_report::generate_status_report();
         $reports = objectfs_report::get_report_ids();
         $this->assertEquals(1, count($reports));
@@ -53,7 +53,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that tool_objectfs_reports table holds historic data.
      */
-    public function test_generate_status_report_historic() {
+    public function test_generate_status_report_historic(): void {
         objectfs_report::generate_status_report();
         objectfs_report::generate_status_report();
         $reports = objectfs_report::get_report_ids();
@@ -63,7 +63,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that get_report_types returns an array of report types.
      */
-    public function test_get_report_types() {
+    public function test_get_report_types(): void {
         $reporttypes = objectfs_report::get_report_types();
         $this->assertEquals('array', gettype($reporttypes));
         $this->assertEquals(4, count($reporttypes));
@@ -72,7 +72,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that object_status_history_table has correct location section.
      */
-    public function test_object_status_history_table_location() {
+    public function test_object_status_history_table_location(): void {
         global $CFG;
         objectfs_report::generate_status_report();
         $reports = objectfs_report::get_report_ids();
@@ -87,7 +87,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that object_status_history_table has correct log_size section.
      */
-    public function test_object_status_history_table_log_size() {
+    public function test_object_status_history_table_log_size(): void {
         global $DB, $CFG;
         $DB->delete_records('files');
         $this->create_local_file('local file');
@@ -107,7 +107,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that object_status_history_table has correct mime_type section.
      */
-    public function test_object_status_history_table_mime_type() {
+    public function test_object_status_history_table_mime_type(): void {
         global $DB, $CFG;
         $DB->delete_records('files');
         $this->create_local_file('local file');
@@ -127,7 +127,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that object_location_history_table has records.
      */
-    public function test_object_location_history_table() {
+    public function test_object_location_history_table(): void {
         global $DB, $CFG;
         $DB->delete_records('files');
         $this->create_local_file('local file');
@@ -149,7 +149,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that cleanup_reports deletes old data.
      */
-    public function test_cleanup_reports() {
+    public function test_cleanup_reports(): void {
         global $DB;
         objectfs_report::generate_status_report();
         $reports = objectfs_report::get_report_ids();
@@ -199,7 +199,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
      * @param  int    $precision The optional number of decimal digits to round to
      * @param  string $expected  Expected result
      */
-    public function test_object_status_add_barchart_method($value, $max, $type, $precision, $expected) {
+    public function test_object_status_add_barchart_method($value, $max, $type, $precision, $expected): void {
         $table = new object_status_history_table('location', 0);
         $actual = $table->add_barchart($value, '', $max, $type, $precision);
         $this->assertEquals($expected, $actual);
@@ -230,7 +230,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
      * @param  string $logsize   Log size to be ranged
      * @param  string $expected  Expected result
      */
-    public function test_object_status_get_size_range_from_logsize($logsize, $expected) {
+    public function test_object_status_get_size_range_from_logsize($logsize, $expected): void {
         $table = new object_status_history_table('location', 0);
         $actual = $table->get_size_range_from_logsize($logsize);
         $this->assertEquals($expected, $actual);
@@ -239,7 +239,7 @@ class object_status_test extends \tool_objectfs\tests\testcase {
     /**
      * Test that compress_small_log_sizes() correctly compresses small entries.
      */
-    public function test_compress_small_log_sizes() {
+    public function test_compress_small_log_sizes(): void {
         $stats = [
             (object)['datakey' => 1, 'objectsum' => 1, 'objectcount' => 10],
             (object)['datakey' => 5, 'objectsum' => 1, 'objectcount' => 10],

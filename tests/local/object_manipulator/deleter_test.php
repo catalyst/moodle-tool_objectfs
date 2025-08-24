@@ -26,7 +26,7 @@ use tool_objectfs\local\manager;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class deleter_test extends \tool_objectfs\tests\testcase {
+final class deleter_test extends \tool_objectfs\tests\testcase {
 
     /** @var string $manipulator */
     protected $manipulator = deleter::class;
@@ -48,6 +48,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
 
     protected function tearDown(): void {
         ob_end_clean();
+        parent::tearDown();
     }
 
     /**
@@ -64,13 +65,13 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         $this->deleter = new deleter($this->filesystem, $config, $this->logger);
     }
 
-    public function test_deleter_get_candidate_objects_will_get_duplicated_objects() {
+    public function test_deleter_get_candidate_objects_will_get_duplicated_objects(): void {
         $duplicatedbject = $this->create_duplicated_object();
 
         self::assertTrue($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
-    public function test_deleter_get_candidate_objects_will_not_get_local_or_remote_objects() {
+    public function test_deleter_get_candidate_objects_will_not_get_local_or_remote_objects(): void {
         $localobject = $this->create_local_object();
         $remoteobject = $this->create_remote_object();
 
@@ -78,14 +79,14 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
-    public function test_deleter_get_candidate_objects_will_not_get_objects_which_havent_been_duplicated_for_consistancy_delay() {
+    public function test_deleter_get_candidate_objects_will_not_get_objects_which_havent_been_duplicated_for_consistancy_delay(): void {
         $duplicatedbject = $this->create_duplicated_object();
         $this->set_deleter_config('consistencydelay', 100);
 
         self::assertFalse($this->objects_contain_hash($duplicatedbject->contenthash));
     }
 
-    public function test_deleter_can_delete_object() {
+    public function test_deleter_can_delete_object(): void {
         global $DB;
         $object = $this->create_duplicated_object();
 
@@ -97,7 +98,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_deleter_can_handle_local_object() {
+    public function test_deleter_can_handle_local_object(): void {
         global $DB;
         $object = $this->create_local_object();
 
@@ -109,7 +110,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         $this->assertFalse($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_deleter_can_handle_remote_object() {
+    public function test_deleter_can_handle_remote_object(): void {
         global $DB;
         $object = $this->create_remote_object();
 
@@ -121,7 +122,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_deleter_will_delete_no_objects_if_deletelocal_disabled() {
+    public function test_deleter_will_delete_no_objects_if_deletelocal_disabled(): void {
         global $DB;
         $object = $this->create_duplicated_object();
         $this->set_deleter_config('deletelocal', 0);
@@ -134,7 +135,7 @@ class deleter_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_deleter_can_delete_multiple_objects() {
+    public function test_deleter_can_delete_multiple_objects(): void {
         global $DB;
         $objects = [];
         for ($i = 0; $i < 5; $i++) {
