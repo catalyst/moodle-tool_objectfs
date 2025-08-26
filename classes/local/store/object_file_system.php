@@ -152,16 +152,18 @@ abstract class object_file_system extends \file_system_filedir {
 
             // Try and pull from remote.
             $objectlock = $this->acquire_object_lock($contenthash, 600);
+            try {
+                // While gaining lock object might have been moved locally so we recheck.
+                if ($objectlock && !is_readable($path)) {
+                    $location = $this->copy_object_from_external_to_local_by_hash($contenthash);
+                    // We want this file to be deleted again later.
+                    manager::update_object_by_hash($contenthash, $location);
 
-            // While gaining lock object might have been moved locally so we recheck.
-            if ($objectlock && !is_readable($path)) {
-                $location = $this->copy_object_from_external_to_local_by_hash($contenthash);
-                // We want this file to be deleted again later.
-                manager::update_object_by_hash($contenthash, $location);
-
-            }
-            if ($objectlock) {
-                $objectlock->release();
+                }
+            } finally {
+                if ($objectlock) {
+                    $objectlock->release();
+                }
             }
         }
 
@@ -1221,14 +1223,13 @@ abstract class object_file_system extends \file_system_filedir {
             // Regardless, it has synced.
             tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_COMPLETE, $timepushed);
         } catch (Throwable $e) {
-            $lock->release();
-
             // Mark object as tag sync error, this should stop it re-trying until fixed manually.
             tag_manager::mark_object_tag_sync_status($contenthash, tag_manager::SYNC_STATUS_ERROR);
 
             throw $e;
+        } finally {
+            $lock->release();
         }
-        $lock->release();
         return true;
     }
 
