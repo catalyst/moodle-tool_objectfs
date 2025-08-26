@@ -336,14 +336,15 @@ abstract class object_file_system extends \file_system_filedir {
 
         if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
 
-            $localpath = $this->get_local_path_from_hash($contenthash);
             $localdirpath = $this->get_fulldir_from_hash($contenthash);
 
             // Folder may not exist yet if pulling a file that came from another environment.
             if (!is_dir($localdirpath)) {
-                if (!mkdir($localdirpath, $this->dirpermissions, true)) {
+                mkdir($localdirpath, $this->dirpermissions, true);
+                // Re-check after mkdir() to handle the race where $localdirpath is created between is_dir() and mkdir().
+                if (!is_dir($localdirpath)) {
                     // Permission trouble.
-                    throw new file_exception('storedfilecannotcreatefiledirs');
+                    throw new \file_exception('storedfilecannotcreatefiledirs');
                 }
             }
 
