@@ -31,7 +31,7 @@ use tool_objectfs\tests\test_file_system;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class object_file_system_test extends tests\testcase {
+final class object_file_system_test extends tests\testcase {
 
     /**
      * set_externalclient_config
@@ -54,7 +54,7 @@ class object_file_system_test extends tests\testcase {
         $property->setValue($externalclientref->getValue($this->filesystem), $value);
     }
 
-    public function test_get_remote_path_from_storedfile_returns_local_path_if_local() {
+    public function test_get_remote_path_from_storedfile_returns_local_path_if_local(): void {
         $file = $this->create_local_file();
         $expectedpath = $this->get_local_path_from_storedfile($file);
 
@@ -65,7 +65,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($expectedpath, $actualpath);
     }
 
-    public function test_get_remote_path_from_storedfile_returns_external_path_if_not_local() {
+    public function test_get_remote_path_from_storedfile_returns_external_path_if_not_local(): void {
         $file = $this->create_remote_file();
         $expectedpath = $this->get_external_path_from_storedfile($file);
 
@@ -76,7 +76,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($expectedpath, $actualpath);
     }
 
-    public function test_get_remote_path_from_storedfile_returns_external_path_if_duplicated_and_preferexternal() {
+    public function test_get_remote_path_from_storedfile_returns_external_path_if_duplicated_and_preferexternal(): void {
         set_config('preferexternal', true, 'tool_objectfs');
         $this->reset_file_system(); // Needed to load new config.
         $file = $this->create_duplicated_file();
@@ -89,7 +89,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($expectedpath, $actualpath);
     }
 
-    public function test_get_remote_path_from_empty_storedfile_returns_internal_path_if_duplicated_and_preferexternal() {
+    public function test_get_remote_path_from_empty_storedfile_returns_internal_path_if_duplicated_and_preferexternal(): void {
         set_config('preferexternal', true, 'tool_objectfs');
         $this->reset_file_system(); // Needed to load new config.
         $file = $this->create_duplicated_file('');
@@ -102,7 +102,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($expectedpath, $actualpath);
     }
 
-    public function test_get_local_path_from_hash_will_fetch_remote_if_fetchifnotfound() {
+    public function test_get_local_path_from_hash_will_fetch_remote_if_fetchifnotfound(): void {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
         $expectedpath = $this->get_local_path_from_hash($filehash);
@@ -115,7 +115,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_readable($actualpath));
     }
 
-    public function test_get_local_path_from_hash_fetch_remote_will_restore_file_permissions() {
+    public function test_get_local_path_from_hash_fetch_remote_will_restore_file_permissions(): void {
         global $CFG;
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -129,7 +129,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($cfgperms, $fileperms);
     }
 
-    public function test_copy_object_from_external_to_local() {
+    public function test_copy_object_from_external_to_local(): void {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
         $localpath = $this->get_local_path_from_storedfile($file);
@@ -140,7 +140,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_readable($localpath));
     }
 
-    public function test_copy_object_from_external_to_local_by_hash_if_local() {
+    public function test_copy_object_from_external_to_local_by_hash_if_local(): void {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
 
@@ -149,7 +149,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
-    public function test_copy_object_from_external_to_local_by_hash_succeeds_if_already_duplicated() {
+    public function test_copy_object_from_external_to_local_by_hash_succeeds_if_already_duplicated(): void {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
@@ -158,7 +158,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_copy_object_from_external_to_local_by_hash_if_not_local_and_not_remote() {
+    public function test_copy_object_from_external_to_local_by_hash_if_not_local_and_not_remote(): void {
         $fakehash = 'this is a fake hash';
 
         $location = $this->filesystem->copy_object_from_external_to_local_by_hash($fakehash);
@@ -166,7 +166,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_copy_object_from_local_to_external_by_hash() {
+    public function test_copy_object_from_local_to_external_by_hash(): void {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
         $externalpath = $this->get_external_path_from_storedfile($file);
@@ -177,7 +177,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_readable($externalpath));
     }
 
-    public function test_copy_object_from_local_to_external_by_hash_if_remote() {
+    public function test_copy_object_from_local_to_external_by_hash_if_remote(): void {
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
 
@@ -186,7 +186,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
-    public function test_copy_object_from_local_to_external_by_hash_succeeds_if_already_duplicated() {
+    public function test_copy_object_from_local_to_external_by_hash_succeeds_if_already_duplicated(): void {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
 
@@ -195,7 +195,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_copy_object_from_local_to_external_by_hash_if_not_local_and_not_remote() {
+    public function test_copy_object_from_local_to_external_by_hash_if_not_local_and_not_remote(): void {
         $fakehash = 'this is a fake hash';
 
         $location = $this->filesystem->copy_object_from_local_to_external_by_hash($fakehash);
@@ -203,7 +203,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_delete_object_from_local_by_hash() {
+    public function test_delete_object_from_local_by_hash(): void {
         $file = $this->create_duplicated_file();
         $filehash = $file->get_contenthash();
         $localpath = $this->get_local_path_from_storedfile($file);
@@ -214,7 +214,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertFalse(is_readable($localpath));
     }
 
-    public function test_delete_object_from_local_by_hash_if_not_remote() {
+    public function test_delete_object_from_local_by_hash_if_not_remote(): void {
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
         $localpath = $this->get_local_path_from_storedfile($file);
@@ -225,7 +225,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_readable($localpath));
     }
 
-    public function test_delete_object_from_local_by_hash_if_not_local() {
+    public function test_delete_object_from_local_by_hash_if_not_local(): void {
         $fakehash = 'this is a fake hash';
 
         $location = $this->filesystem->delete_object_from_local_by_hash($fakehash);
@@ -233,7 +233,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_delete_object_from_local_by_hash_if_can_verify_external_object() {
+    public function test_delete_object_from_local_by_hash_if_can_verify_external_object(): void {
         $file = $this->create_duplicated_file();
         $contenthash = $file->get_contenthash();
         $externalpath = $this->get_external_path_from_hash($contenthash);
@@ -307,7 +307,7 @@ class object_file_system_test extends tests\testcase {
         $files,
         $expectedparentreadable,
         $expectedgrandparentpathreadable
-    ) {
+    ): void {
         global $CFG;
         $testdir = $CFG->dataroot . '/filedir/test';
         foreach ($dirs as $key => $dir) {
@@ -328,7 +328,7 @@ class object_file_system_test extends tests\testcase {
         remove_dir($testdir);
     }
 
-    public function test_readfile_if_object_is_local() {
+    public function test_readfile_if_object_is_local(): void {
         $expectedcontent = 'expected content';
         $file = $this->create_local_file($expectedcontent);
 
@@ -337,7 +337,7 @@ class object_file_system_test extends tests\testcase {
         $this->filesystem->readfile($file);
     }
 
-    public function test_readfile_if_object_is_remote() {
+    public function test_readfile_if_object_is_remote(): void {
         $expectedcontent = 'expected content';
         $file = $this->create_remote_file($expectedcontent);
 
@@ -346,7 +346,7 @@ class object_file_system_test extends tests\testcase {
         $this->filesystem->readfile($file);
     }
 
-    public function test_readfile_updates_object_with_error_location_on_fail() {
+    public function test_readfile_updates_object_with_error_location_on_fail(): void {
         global $DB;
         $fakefile = $this->create_error_file();
 
@@ -360,7 +360,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_get_content_if_object_is_local() {
+    public function test_get_content_if_object_is_local(): void {
         $expectedcontent = 'expected content';
         $file = $this->create_local_file($expectedcontent);
 
@@ -369,7 +369,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($expectedcontent, $actualcontent);
     }
 
-    public function test_get_content_if_object_is_remote() {
+    public function test_get_content_if_object_is_remote(): void {
         $expectedcontent = 'expected content';
         $file = $this->create_remote_file($expectedcontent);
 
@@ -378,7 +378,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals($expectedcontent, $actualcontent);
     }
 
-    public function test_get_content_updates_object_with_error_location_on_fail() {
+    public function test_get_content_updates_object_with_error_location_on_fail(): void {
         global $DB;
         $fakefile = $this->create_error_file();
 
@@ -401,7 +401,7 @@ class object_file_system_test extends tests\testcase {
         // normally because phpunit will still fail.
     }
 
-    public function test_xsendfile_updates_object_with_error_location_on_fail() {
+    public function test_xsendfile_updates_object_with_error_location_on_fail(): void {
         global $DB;
         $fakefile = $this->create_error_file();
 
@@ -415,7 +415,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_get_content_file_handle_if_object_is_local() {
+    public function test_get_content_file_handle_if_object_is_local(): void {
         $file = $this->create_local_file();
 
         $filehandle = $this->filesystem->get_content_file_handle($file);
@@ -423,7 +423,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_resource($filehandle));
     }
 
-    public function test_get_content_file_handle_if_object_is_remote() {
+    public function test_get_content_file_handle_if_object_is_remote(): void {
         $file = $this->create_remote_file();
 
         $filehandle = $this->filesystem->get_content_file_handle($file);
@@ -431,7 +431,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_resource($filehandle));
     }
 
-    public function test_get_content_file_handle_will_pull_remote_object_if_gzopen() {
+    public function test_get_content_file_handle_will_pull_remote_object_if_gzopen(): void {
         $file = $this->create_remote_file();
         $localpath = $this->get_local_path_from_storedfile($file);
 
@@ -441,7 +441,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_readable($localpath));
     }
 
-    public function test_get_content_file_handle_updates_object_with_error_location_on_fail() {
+    public function test_get_content_file_handle_updates_object_with_error_location_on_fail(): void {
         global $DB;
         $fakefile = $this->create_error_file();
 
@@ -455,7 +455,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
-    public function test_remove_file_will_remove_local_file() {
+    public function test_remove_file_will_remove_local_file(): void {
         global $DB;
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
@@ -468,7 +468,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertFalse($islocalreadable);
     }
 
-    public function test_remove_file_will_not_remove_remote_file() {
+    public function test_remove_file_will_not_remove_remote_file(): void {
         global $DB;
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -481,7 +481,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue($isremotereadable);
     }
 
-    public function test_file_is_seekable() {
+    public function test_file_is_seekable(): void {
         $file = $this->create_remote_file('this is some content for the remote file');
         $filehandle = $this->filesystem->get_content_file_handle($file);
 
@@ -492,7 +492,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue(rewind($filehandle));
     }
 
-    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_local() {
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_local(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_FULL;
@@ -505,7 +505,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_local() {
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_local(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
@@ -518,7 +518,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_duplicated() {
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_duplicated(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_FULL;
@@ -531,7 +531,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_duplicated() {
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_duplicated(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
@@ -544,7 +544,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_remote() {
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_on_and_object_is_remote(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_FULL;
@@ -557,7 +557,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertFalse($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_remote() {
+    public function test_object_storage_deleter_can_delete_object_if_enabledelete_is_off_and_object_is_remote(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = false;
@@ -570,7 +570,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_object_storage_locker_can_acquire_lock_if_object_is_not_locked() {
+    public function test_object_storage_locker_can_acquire_lock_if_object_is_not_locked(): void {
         $this->filesystem = new test_file_system();
         $file = $this->create_local_file();
         $filehash = $file->get_contenthash();
@@ -580,7 +580,7 @@ class object_file_system_test extends tests\testcase {
         $lock->release();
     }
 
-    public function test_can_recover_object_if_deleted_while_duplicated() {
+    public function test_can_recover_object_if_deleted_while_duplicated(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH;
@@ -593,7 +593,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_can_recover_object_if_deleted_while_external() {
+    public function test_can_recover_object_if_deleted_while_external(): void {
         global $CFG;
 
         $CFG->forced_plugin_settings['tool_objectfs']['deleteexternal'] = TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH;
@@ -606,7 +606,7 @@ class object_file_system_test extends tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($filehash));
     }
 
-    public function test_can_generate_signed_url_by_hash_if_object_is_external() {
+    public function test_can_generate_signed_url_by_hash_if_object_is_external(): void {
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -618,7 +618,7 @@ class object_file_system_test extends tests\testcase {
         }
     }
 
-    public function test_can_generate_signed_url_with_headers() {
+    public function test_can_generate_signed_url_with_headers(): void {
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -634,7 +634,7 @@ class object_file_system_test extends tests\testcase {
         }
     }
 
-    public function test_can_generate_signed_url_with_unicode_filename() {
+    public function test_can_generate_signed_url_with_unicode_filename(): void {
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
@@ -651,12 +651,12 @@ class object_file_system_test extends tests\testcase {
         }
     }
 
-    public function test_presigned_url_configured_method_returns_false_if_not_configured() {
+    public function test_presigned_url_configured_method_returns_false_if_not_configured(): void {
         $this->filesystem = new test_file_system();
         $this->assertFalse($this->filesystem->presigned_url_configured());
     }
 
-    public function test_presigned_url_configured_method_returns_true_if_configured() {
+    public function test_presigned_url_configured_method_returns_true_if_configured(): void {
         $this->filesystem = new test_file_system();
         $externalclient = $this->filesystem->get_external_client();
 
@@ -720,7 +720,7 @@ class object_file_system_test extends tests\testcase {
      * @throws \dml_exception
      */
     public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls,
-            $presignedminfilesize, $result) {
+            $presignedminfilesize, $result): void {
         $this->filesystem = new test_file_system();
         $externalclient = $this->filesystem->get_external_client();
 
@@ -807,7 +807,7 @@ class object_file_system_test extends tests\testcase {
      * @param mixed $expiresheader     'Expires' header
      * @param int   $expectedresult    Expiration timestamp for URL
      */
-    public function test_get_expiration_time_method_if_supported($expirationsetting, $now, $expiresheader, $expectedresult) {
+    public function test_get_expiration_time_method_if_supported($expirationsetting, $now, $expiresheader, $expectedresult): void {
         $this->filesystem = new test_file_system();
         $externalclient = $this->filesystem->get_external_client();
 
@@ -825,7 +825,7 @@ class object_file_system_test extends tests\testcase {
     /**
      * Test copy_content_from_storedfile() method does direct copying.
      */
-    public function test_copy_content_from_storedfile() {
+    public function test_copy_content_from_storedfile(): void {
         $file = $this->create_remote_file();
         // Confirm, that the file is not readable locally.
         $this->assertFalse($this->filesystem->is_file_readable_locally_by_storedfile($file));
@@ -842,7 +842,7 @@ class object_file_system_test extends tests\testcase {
     /**
      * Test get_filesize_by_contenthash() returns file size by its contenthash.
      */
-    public function test_get_filesize_by_contenthash() {
+    public function test_get_filesize_by_contenthash(): void {
         // Test existing file.
         $file = $this->create_local_file();
         $actual = $this->filesystem->get_filesize_by_contenthash($file->get_contenthash());
@@ -877,7 +877,7 @@ class object_file_system_test extends tests\testcase {
      * @param int    $filesize        File size.
      * @param mixed  $expectedresult  Expected result.
      */
-    public function test_get_valid_http_ranges($httprangeheader, $filesize, $expectedresult) {
+    public function test_get_valid_http_ranges($httprangeheader, $filesize, $expectedresult): void {
         $_SERVER['HTTP_RANGE'] = $httprangeheader;
         $actual = $this->filesystem->get_valid_http_ranges($filesize);
         $this->assertEquals($expectedresult, $actual);
@@ -905,7 +905,7 @@ class object_file_system_test extends tests\testcase {
      * @param mixed  $ranges         Request ranges object.
      * @param string $expectedresult Expected result.
      */
-    public function test_curl_range_request_to_presigned_url($content, $ranges, $expectedresult) {
+    public function test_curl_range_request_to_presigned_url($content, $ranges, $expectedresult): void {
         if (!$this->filesystem->get_external_client()->support_presigned_urls()) {
             $this->markTestSkipped('Pre-signed URLs not supported for given storage.');
         }
@@ -923,7 +923,7 @@ class object_file_system_test extends tests\testcase {
     /**
      * Test external client test_range_request() method.
      */
-    public function test_test_range_request() {
+    public function test_test_range_request(): void {
         $externalclient = $this->filesystem->get_external_client();
         if ($externalclient->support_presigned_urls()) {
             $this->assertTrue($externalclient->test_range_request($this->filesystem)->result);
@@ -935,14 +935,14 @@ class object_file_system_test extends tests\testcase {
     /**
      * Test that is_configured() returns true by default.
      */
-    public function test_is_configured_default() {
+    public function test_is_configured_default(): void {
         $this->assertTrue($this->filesystem->is_configured());
     }
 
     /**
      * Test that is_configured() returns false when the client SDK does not exist.
      */
-    public function test_is_configured_fake_autoloader() {
+    public function test_is_configured_fake_autoloader(): void {
         $this->assertTrue($this->filesystem->is_configured());
         $clientref = new \ReflectionClass($this->filesystem->externalclient);
         $autoloaderref = $clientref->getParentClass()->getProperty('autoloader');
@@ -963,7 +963,7 @@ class object_file_system_test extends tests\testcase {
      * Test that is_configured() returns false when filesystem set in config.php
      * and filesystem set via admin settings do not match.
      */
-    public function test_is_configured_settings_do_not_match() {
+    public function test_is_configured_settings_do_not_match(): void {
         global $CFG;
         $this->assertTrue($this->filesystem->is_configured());
         $CFG->alternative_file_system_class = 'fake_file_system';
@@ -973,7 +973,7 @@ class object_file_system_test extends tests\testcase {
     /**
      * Test that is_configured() returns false when alternative_file_system_class is not set in config.php.
      */
-    public function test_is_configured_alternative_file_system_class_is_not_set() {
+    public function test_is_configured_alternative_file_system_class_is_not_set(): void {
         global $CFG;
         $this->assertTrue($this->filesystem->is_configured());
         unset($CFG->alternative_file_system_class);
@@ -985,7 +985,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @covers ::add_file_from_path
      */
-    public function test_add_file_from_path_update_object_fail() {
+    public function test_add_file_from_path_update_object_fail(): void {
         global $DB;
 
         $error = "ERROR!";
@@ -1015,7 +1015,7 @@ class object_file_system_test extends tests\testcase {
      *
      * @covers ::add_file_from_string
      */
-    public function test_add_file_from_string_update_object_fail() {
+    public function test_add_file_from_string_update_object_fail(): void {
         global $DB;
 
         $content = "Hi!";
@@ -1045,7 +1045,7 @@ class object_file_system_test extends tests\testcase {
     /**
      * Test syncing tags throws exception when client does not support tagging.
      */
-    public function test_push_object_tags_not_supported() {
+    public function test_push_object_tags_not_supported(): void {
         global $CFG;
         $CFG->phpunit_objectfs_supports_object_tagging = false;
 
@@ -1063,7 +1063,7 @@ class object_file_system_test extends tests\testcase {
     /**
      * Tests syncing object tags where the file is not replicated.
      */
-    public function test_push_object_tags_object_not_replicated() {
+    public function test_push_object_tags_object_not_replicated(): void {
         global $CFG, $DB;
         $CFG->phpunit_objectfs_supports_object_tagging = true;
 
@@ -1085,41 +1085,41 @@ class object_file_system_test extends tests\testcase {
         return [
             // Can override, doesn't matter if envs are different.
             'can override - different env' => [
-                'object env' => 'prod',
-                'push env' => 'staging',
-                'can override' => true,
-                'expected override' => true,
+                'objectenv' => 'prod',
+                'pushenv' => 'staging',
+                'canoverride' => true,
+                'expectedoverride' => true,
             ],
             'can override - same env' => [
-                'object env' => 'prod',
-                'push env' => 'prod',
-                'can override' => true,
-                'expected override' => true,
+                'objectenv' => 'prod',
+                'pushenv' => 'prod',
+                'canoverride' => true,
+                'expectedoverride' => true,
             ],
             'can override - empty env' => [
-                'object env' => '',
-                'push env' => 'prod',
-                'can override' => true,
-                'expected override' => true,
+                'objectenv' => '',
+                'pushenv' => 'prod',
+                'canoverride' => true,
+                'expectedoverride' => true,
             ],
             // Cannot override, env must match or be empty.
             'cannot override - same env' => [
-                'object env' => 'prod',
-                'push env' => 'prod',
-                'can override' => false,
-                'expected override' => true,
+                'objectenv' => 'prod',
+                'pushenv' => 'prod',
+                'canoverride' => false,
+                'expectedoverride' => true,
             ],
             'cannot override - different env' => [
-                'object env' => 'prod',
-                'push env' => 'staging',
-                'can override' => false,
-                'expected override' => false,
+                'objectenv' => 'prod',
+                'pushenv' => 'staging',
+                'canoverride' => false,
+                'expectedoverride' => false,
             ],
             'cannot override - env is empty' => [
-                'object env' => '',
-                'push env' => 'staging',
-                'can override' => false,
-                'expected override' => true,
+                'objectenv' => '',
+                'pushenv' => 'staging',
+                'canoverride' => false,
+                'expectedoverride' => true,
             ],
         ];
     }
@@ -1135,7 +1135,7 @@ class object_file_system_test extends tests\testcase {
      * @dataProvider push_object_tags_replicated_provider
      */
     public function test_push_object_tags_replicated(string $objectenv, string $pushenv, bool $canoverride,
-        bool $expectedoverride) {
+        bool $expectedoverride): void {
         global $CFG, $DB;
         $CFG->phpunit_objectfs_supports_object_tagging = true;
         set_config('taggingenvironment', $objectenv, 'tool_objectfs');

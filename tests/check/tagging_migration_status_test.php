@@ -31,11 +31,11 @@ use tool_objectfs\tests\testcase;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \tool_objectfs\check\tagging_migration_status
  */
-class tagging_migration_status_test extends testcase {
+final class tagging_migration_status_test extends testcase {
     /**
      * Tests scenario that returns N/A
      */
-    public function test_get_result_na() {
+    public function test_get_result_na(): void {
         // Regardless if this is disabled, the check should still return a non n/a status.
         $this->enable_filesystem_and_set_tagging(false);
         $check = new tagging_migration_status();
@@ -45,7 +45,7 @@ class tagging_migration_status_test extends testcase {
     /*
      * Test scenario that returns WARNING
      */
-    public function test_get_result_warning() {
+    public function test_get_result_warning(): void {
         // Regardless if this is disabled, the check should still return a non n/a status.
         $this->enable_filesystem_and_set_tagging(false);
 
@@ -60,7 +60,7 @@ class tagging_migration_status_test extends testcase {
     /*
      * Test scenario that returns OK
      */
-    public function test_get_result_ok() {
+    public function test_get_result_ok(): void {
         // Regardless if this is disabled, the check should still return a non n/a status.
         $this->enable_filesystem_and_set_tagging(false);
 

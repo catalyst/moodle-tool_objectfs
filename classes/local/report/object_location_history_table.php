@@ -36,39 +36,77 @@ require_once($CFG->libdir . '/tablelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class object_location_history_table extends \table_sql {
+    /** @var array $local_sizes */
+    public $localsizes = [];
+    /** @var array $duplicatedsizes */
+    public $duplicatedsizes = [];
+    /** @var array $orphanedsizes */
+    public $orphanedsizes = [];
+    /** @var array $externalsizes */
+    public $externalsizes = [];
+    /** @var array $missingsizes */
+    public $missingsizes = [];
+    /** @var array $totalsizes */
+    public $totalsizes = [];
+    /** @var array $filedirsizes */
+    public $filedirsizes = [];
+    /** @var array $deltasizes */
+    public $deltasizes = [];
 
+    /** @var array dates */
+    public $dates = [];
     /**
      * Constructor for the file location history table.
      */
     public function __construct() {
         parent::__construct('locationhistory');
-
         $columnheaders = [
             'date' => get_string('date'),
             'local_count' => get_string('object_status:location:localcount', 'tool_objectfs'),
-            'local_size' => get_string('object_status:location:localsize', 'tool_objectfs'),
             'duplicated_count' => get_string('object_status:location:duplicatedcount', 'tool_objectfs'),
-            'duplicated_size' => get_string('object_status:location:duplicatedsize', 'tool_objectfs'),
             'orphaned_count' => get_string('object_status:location:orphanedcount', 'tool_objectfs'),
-            'orphaned_size' => get_string('object_status:location:orphanedsize', 'tool_objectfs'),
             'external_count' => get_string('object_status:location:externalcount', 'tool_objectfs'),
-            'external_size' => get_string('object_status:location:externalsize', 'tool_objectfs'),
             'missing_count' => get_string('object_status:location:missingcount', 'tool_objectfs'),
-            'missing_size' => get_string('object_status:location:missingsize', 'tool_objectfs'),
             'total_count' => get_string('object_status:location:totalcount', 'tool_objectfs'),
-            'total_size' => get_string('object_status:location:totalsize', 'tool_objectfs'),
             'filedir_count' => get_string('object_status:location:filedircount', 'tool_objectfs'),
-            'filedir_size' => get_string('object_status:location:filedirsize', 'tool_objectfs'),
             'delta_count' => get_string('object_status:location:deltacount', 'tool_objectfs'),
-            'delta_size' => get_string('object_status:location:deltasize', 'tool_objectfs'),
         ];
-
         $this->is_downloadable(true);
         $this->define_columns(array_keys($columnheaders));
         $this->define_headers(array_values($columnheaders));
         $this->collapsible(false);
         $this->sortable(false);
         $this->pageable(false);
+    }
+
+    /**
+     * Build the table from the fetched data.
+     */
+    public function build_table() {
+        if ($this->is_downloading()) {
+            $columnheaders = [
+                'date' => get_string('date'),
+                'local_count' => get_string('object_status:location:localcount', 'tool_objectfs'),
+                'local_size' => get_string('object_status:location:localsize', 'tool_objectfs'),
+                'duplicated_count' => get_string('object_status:location:duplicatedcount', 'tool_objectfs'),
+                'duplicated_size' => get_string('object_status:location:duplicatedsize', 'tool_objectfs'),
+                'orphaned_count' => get_string('object_status:location:orphanedcount', 'tool_objectfs'),
+                'orphaned_size' => get_string('object_status:location:orphanedsize', 'tool_objectfs'),
+                'external_count' => get_string('object_status:location:externalcount', 'tool_objectfs'),
+                'external_size' => get_string('object_status:location:externalsize', 'tool_objectfs'),
+                'missing_count' => get_string('object_status:location:missingcount', 'tool_objectfs'),
+                'missing_size' => get_string('object_status:location:missingsize', 'tool_objectfs'),
+                'total_count' => get_string('object_status:location:totalcount', 'tool_objectfs'),
+                'total_size' => get_string('object_status:location:totalsize', 'tool_objectfs'),
+                'filedir_count' => get_string('object_status:location:filedircount', 'tool_objectfs'),
+                'filedir_size' => get_string('object_status:location:filedirsize', 'tool_objectfs'),
+                'delta_count' => get_string('object_status:location:deltacount', 'tool_objectfs'),
+                'delta_size' => get_string('object_status:location:deltasize', 'tool_objectfs'),
+            ];
+            $this->define_columns(array_keys($columnheaders));
+            $this->define_headers(array_values($columnheaders));
+        }
+        parent::build_table();
     }
 
     /**
@@ -126,23 +164,78 @@ class object_location_history_table extends \table_sql {
                 $row['delta_size'] = $deltasize;
             } else {
                 $row['local_count'] = number_format($localrecord->count);
-                $row['local_size'] = display_size($localrecord->size);
                 $row['duplicated_count'] = number_format($duplicatedrecord->count);
-                $row['duplicated_size'] = display_size($duplicatedrecord->size);
                 $row['orphaned_count'] = number_format($orphanedrecord->count);
-                $row['orphaned_size'] = get_string('object_status:location:orphanedsizeunknown', 'tool_objectfs');
                 $row['external_count'] = number_format($externalrecord->count);
-                $row['external_size'] = display_size($externalrecord->size);
                 $row['missing_count'] = number_format($errorrecord->count);
-                $row['missing_size'] = display_size($errorrecord->size);
                 $row['total_count'] = number_format($total->count);
-                $row['total_size'] = display_size($total->size);
                 $row['filedir_count'] = number_format($filedir->count);
-                $row['filedir_size'] = display_size($filedir->size);
                 $row['delta_count'] = number_format($deltacount);
-                $row['delta_size'] = display_size($deltasize);
+                // Prepare data for chart.
+                $this->localsizes[] = $this->size_to_mb($localrecord->size);
+                $this->duplicatedsizes[] = $this->size_to_mb($duplicatedrecord->size);
+                $this->orphanedsizes[] = $this->size_to_mb($orphanedrecord->size);
+                $this->externalsizes[] = $this->size_to_mb($externalrecord->size);
+                $this->missingsizes[] = $this->size_to_mb($errorrecord->size);
+                $this->totalsizes[] = $this->size_to_mb($total->size);
+                $this->filedirsizes[] = $this->size_to_mb($filedir->size);
+                $this->deltasizes[] = $this->size_to_mb($deltasize);
+                $this->dates[] = userdate($timecreated, get_string('strftimedatetime'));
             }
             $this->rawdata[] = $row;
+
         }
+        $this->sort_chart_data();
+    }
+
+    /**
+     * Sort data for displaying history chart.
+     */
+    private function sort_chart_data(): void {
+        $this->dates = array_reverse($this->dates);
+        $this->localsizes = array_reverse($this->localsizes);
+        $this->duplicatedsizes = array_reverse($this->duplicatedsizes);
+        $this->orphanedsizes = array_reverse($this->orphanedsizes);
+        $this->externalsizes = array_reverse($this->externalsizes);
+        $this->missingsizes = array_reverse($this->missingsizes);
+        $this->totalsizes = array_reverse($this->totalsizes);
+        $this->filedirsizes = array_reverse($this->filedirsizes);
+        $this->deltasizes = array_reverse($this->deltasizes);
+    }
+
+    /**
+     * Convert size in bytes to mb.
+     *
+     * @param int $size size of object.
+     */
+    private function size_to_mb(int $size): int {
+        return intval($size / (1024 * 1024));
+    }
+
+    /**
+     * Generate chart data from table.
+     */
+    public function get_chart_data() {
+        return [
+           'labels' => $this->dates,
+           'series' => [
+               ["label" => get_string('object_status:location:localsizechart', 'tool_objectfs'),
+                   "data" => $this->localsizes],
+               ["label" => get_string('object_status:location:duplicatedsizechart', 'tool_objectfs'),
+                   "data" => $this->duplicatedsizes],
+               ["label" => get_string('object_status:location:orphanedsizechart', 'tool_objectfs'),
+                   "data" => $this->orphanedsizes],
+               ["label" => get_string('object_status:location:externalsizechart', 'tool_objectfs'),
+                   "data" => $this->externalsizes],
+               ["label" => get_string('object_status:location:missingsizechart', 'tool_objectfs'),
+                   "data" => $this->missingsizes],
+               ["label" => get_string('object_status:location:totalsizechart', 'tool_objectfs'),
+                   "data" => $this->totalsizes],
+               ["label" => get_string('object_status:location:filedirsizechart', 'tool_objectfs'),
+                   "data" => $this->filedirsizes],
+               ["label" => get_string('object_status:location:deltasizechart', 'tool_objectfs'),
+                   "data" => $this->deltasizes],
+           ],
+        ];
     }
 }

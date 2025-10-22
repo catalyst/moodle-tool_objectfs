@@ -27,7 +27,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class pusher_test extends \tool_objectfs\tests\testcase {
+final class pusher_test extends \tool_objectfs\tests\testcase {
 
     /** @var string $manipulator */
     protected $manipulator = pusher::class;
@@ -48,6 +48,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
 
     protected function tearDown(): void {
         ob_end_clean();
+        parent::tearDown();
     }
 
     /**
@@ -64,13 +65,13 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         $this->pusher = new pusher($this->filesystem, $config, $this->logger);
     }
 
-    public function test_pusher_get_candidate_objects_will_get_local_objects() {
+    public function test_pusher_get_candidate_objects_will_get_local_objects(): void {
         $object = $this->create_local_object();
 
         self::assertTrue($this->objects_contain_hash($object->contenthash));;
     }
 
-    public function test_pusher_get_candidate_objects_wont_get_duplicated_or_remote_objects() {
+    public function test_pusher_get_candidate_objects_wont_get_duplicated_or_remote_objects(): void {
         $duplicatedobject = $this->create_duplicated_object();
         $remoteobject = $this->create_remote_object();
 
@@ -78,7 +79,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
-    public function test_pusher_get_candidate_objects_wont_get_objects_bigger_than_maximum_filesize() {
+    public function test_pusher_get_candidate_objects_wont_get_objects_bigger_than_maximum_filesize(): void {
         global $DB;
         $object = $this->create_local_object();
         $maximumfilesize = $this->filesystem->get_maximum_upload_filesize() + 1;
@@ -87,7 +88,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
 
-    public function test_pusher_get_candidate_objects_wont_get_objects_under_size_threshold() {
+    public function test_pusher_get_candidate_objects_wont_get_objects_under_size_threshold(): void {
         global $DB;
         $this->set_pusher_config('sizethreshold', 100);
         $object = $this->create_local_object();
@@ -96,14 +97,14 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
 
-    public function test_pusher_get_candidate_objects_wont_get_objects_younger_than_minimum_age() {
+    public function test_pusher_get_candidate_objects_wont_get_objects_younger_than_minimum_age(): void {
         $this->set_pusher_config('minimumage', 100);
         $object = $this->create_local_object();
 
         self::assertFalse($this->objects_contain_hash($object->contenthash));
     }
 
-    public function test_pusher_can_push_local_file() {
+    public function test_pusher_can_push_local_file(): void {
         global $DB;
         $object = $this->create_local_object();
 
@@ -115,7 +116,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_pusher_can_handle_duplicated_file() {
+    public function test_pusher_can_handle_duplicated_file(): void {
         global $DB;
         $object = $this->create_duplicated_object();
 
@@ -127,7 +128,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_pusher_can_handle_remote_file() {
+    public function test_pusher_can_handle_remote_file(): void {
         global $DB;
         $object = $this->create_remote_object();
 
@@ -139,7 +140,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
     }
 
-    public function test_pusher_can_push_multiple_objects() {
+    public function test_pusher_can_push_multiple_objects(): void {
         global $DB;
         $objects = [];
         for ($i = 0; $i < 5; $i++) {
@@ -156,7 +157,7 @@ class pusher_test extends \tool_objectfs\tests\testcase {
         }
     }
 
-    public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_mimetype() {
+    public function test_get_candidate_objects_get_one_object_if_files_have_same_hash_different_mimetype(): void {
         global $DB;
         // Push initial objects so they arnt candidates.
         $config = manager::get_objectfs_config();

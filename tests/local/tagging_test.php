@@ -34,12 +34,12 @@ use tool_objectfs\tests\testcase;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tagging_test extends testcase {
+final class tagging_test extends testcase {
     /**
      * Tests get_defined_tag_sources
      * @covers \tool_objectfs\local\tag_manager::get_defined_tag_sources
      */
-    public function test_get_defined_tag_sources() {
+    public function test_get_defined_tag_sources(): void {
         $sources = tag_manager::get_defined_tag_sources();
         $this->assertIsArray($sources);
 
@@ -70,7 +70,7 @@ class tagging_test extends testcase {
      * @dataProvider tag_source_provider
      * @covers \tool_objectfs\local\tag_source::get_identifier
      */
-    public function test_tag_sources_identifier(tag_source $source) {
+    public function test_tag_sources_identifier(tag_source $source): void {
         $count = strlen($source->get_identifier());
 
         // Ensure < 32 chars, the max length as defined in our docs.
@@ -84,7 +84,7 @@ class tagging_test extends testcase {
      * @dataProvider tag_source_provider
      * @covers \tool_objectfs\local\tag_source::get_value_for_contenthash
      */
-    public function test_tag_sources_value(tag_source $source) {
+    public function test_tag_sources_value(tag_source $source): void {
         $file = $this->create_duplicated_object('tag source value test ' . $source->get_identifier());
         $value = $source->get_value_for_contenthash($file->contenthash);
 
@@ -132,7 +132,7 @@ class tagging_test extends testcase {
      * @dataProvider is_tagging_enabled_and_supported_provider
      * @covers \tool_objectfs\local\tag_manager::is_tagging_enabled_and_supported
      */
-    public function test_is_tagging_enabled_and_supported(bool $enabledinconfig, bool $supportedbyfs, bool $expected) {
+    public function test_is_tagging_enabled_and_supported(bool $enabledinconfig, bool $supportedbyfs, bool $expected): void {
         global $CFG;
         // Set config.
         set_config('taggingenabled', $enabledinconfig, 'tool_objectfs');
@@ -152,7 +152,7 @@ class tagging_test extends testcase {
      * Tests gather_object_tags_for_upload
      * @covers \tool_objectfs\local\tag_manager::gather_object_tags_for_upload
      */
-    public function test_gather_object_tags_for_upload() {
+    public function test_gather_object_tags_for_upload(): void {
         $object = $this->create_duplicated_object('gather tags for upload test');
         $tags = tag_manager::gather_object_tags_for_upload($object->contenthash);
 
@@ -166,7 +166,7 @@ class tagging_test extends testcase {
      * Tests gather_object_tags_for_upload when orphaned
      * @covers \tool_objectfs\local\tag_manager::gather_object_tags_for_upload
      */
-    public function test_gather_object_tags_for_upload_orphaned() {
+    public function test_gather_object_tags_for_upload_orphaned(): void {
         global $DB;
         $object = $this->create_duplicated_object('gather tags for upload test');
 
@@ -185,7 +185,7 @@ class tagging_test extends testcase {
      * Tests store_tags_locally
      * @covers \tool_objectfs\local\tag_manager::store_tags_locally
      */
-    public function test_store_tags_locally() {
+    public function test_store_tags_locally(): void {
         global $DB;
 
         $tags = [
@@ -213,37 +213,37 @@ class tagging_test extends testcase {
         return [
             'duplicated, needs sync' => [
                 'location' => OBJECT_LOCATION_DUPLICATED,
-                'status' => tag_manager::SYNC_STATUS_NEEDS_SYNC,
+                'syncstatus' => tag_manager::SYNC_STATUS_NEEDS_SYNC,
                 'expectedneedssync' => true,
             ],
             'remote, needs sync' => [
                 'location' => OBJECT_LOCATION_EXTERNAL,
-                'status' => tag_manager::SYNC_STATUS_NEEDS_SYNC,
+                'syncstatus' => tag_manager::SYNC_STATUS_NEEDS_SYNC,
                 'expectedneedssync' => true,
             ],
             'local, needs sync' => [
                 'location' => OBJECT_LOCATION_LOCAL,
-                'status' => tag_manager::SYNC_STATUS_NEEDS_SYNC,
+                'syncstatus' => tag_manager::SYNC_STATUS_NEEDS_SYNC,
                 'expectedneedssync' => false,
             ],
             'duplicated, does not need sync' => [
                 'location' => OBJECT_LOCATION_DUPLICATED,
-                'status' => tag_manager::SYNC_STATUS_COMPLETE,
+                'syncstatus' => tag_manager::SYNC_STATUS_COMPLETE,
                 'expectedneedssync' => false,
             ],
             'local, does not need sync' => [
                 'location' => OBJECT_LOCATION_LOCAL,
-                'status' => tag_manager::SYNC_STATUS_COMPLETE,
+                'syncstatus' => tag_manager::SYNC_STATUS_COMPLETE,
                 'expectedneedssync' => false,
             ],
             'duplicated, sync error' => [
                 'location' => OBJECT_LOCATION_DUPLICATED,
-                'status' => tag_manager::SYNC_STATUS_ERROR,
+                'syncstatus' => tag_manager::SYNC_STATUS_ERROR,
                 'expectedneedssync' => false,
             ],
             'local, sync error' => [
                 'location' => OBJECT_LOCATION_LOCAL,
-                'status' => tag_manager::SYNC_STATUS_ERROR,
+                'syncstatus' => tag_manager::SYNC_STATUS_ERROR,
                 'expectedneedssync' => false,
             ],
         ];
@@ -257,7 +257,7 @@ class tagging_test extends testcase {
      * @dataProvider get_objects_needing_sync_provider
      * @covers \tool_objectfs\local\tag_manager::get_objects_needing_sync
      */
-    public function test_get_objects_needing_sync(int $location, int $syncstatus, bool $expectedneedssync) {
+    public function test_get_objects_needing_sync(int $location, int $syncstatus, bool $expectedneedssync): void {
         global $DB;
 
         // Create the test object at the required location.
@@ -292,7 +292,7 @@ class tagging_test extends testcase {
      * Tests the limit input to get_objects_needing_sync
      * @covers \tool_objectfs\local\tag_manager::get_objects_needing_sync
      */
-    public function test_get_objects_needing_sync_limit() {
+    public function test_get_objects_needing_sync_limit(): void {
         global $DB;
 
         // Create two duplicated objects needing sync.
@@ -310,7 +310,7 @@ class tagging_test extends testcase {
      * Test get_tag_source_summary_html
      * @covers \tool_objectfs\local\tag_manager::get_tag_source_summary_html
      */
-    public function test_get_tag_source_summary_html() {
+    public function test_get_tag_source_summary_html(): void {
         // Quick test just to ensure it generates and nothing explodes.
         $html = tag_manager::get_tag_source_summary_html();
         $this->assertIsString($html);
@@ -320,7 +320,7 @@ class tagging_test extends testcase {
      * Tests when fails to sync object tags, that the sync status is updated to SYNC_STATUS_ERROR.
      * @covers \tool_objectfs\local\tag_manager
      */
-    public function test_object_tag_sync_error() {
+    public function test_object_tag_sync_error(): void {
         global $CFG, $DB;
 
         // Integration clients won't simulate errors, so we can't test this functionality.
@@ -363,7 +363,7 @@ class tagging_test extends testcase {
      * Tests tag_manger::get_tag_sync_status_summary
      * @covers \tool_objectfs\local\tag_manager::get_tag_sync_status_summary
      */
-    public function test_get_tag_sync_status_summary() {
+    public function test_get_tag_sync_status_summary(): void {
         // Ensure clean slate before test starts.
         global $DB;
         $DB->delete_records('tool_objectfs_objects');
@@ -407,7 +407,7 @@ class tagging_test extends testcase {
      * @dataProvider sync_status_provider
      * @covers \tool_objectfs\local\tag_manager::get_sync_status_string
      */
-    public function test_get_sync_status_string(int $status) {
+    public function test_get_sync_status_string(int $status): void {
         $string = tag_manager::get_sync_status_string($status);
         // Cheap check to ensure placeholder string not returned.
         $this->assertStringNotContainsString('[', $string);
@@ -417,7 +417,7 @@ class tagging_test extends testcase {
      * Tests get_sync_status_string when an invalid status is provided
      * @covers \tool_objectfs\local\tag_manager::get_sync_status_string
      */
-    public function test_get_sync_status_string_does_not_exist() {
+    public function test_get_sync_status_string_does_not_exist(): void {
         $this->expectException(coding_exception::class);
         $this->expectExceptionMessage('No status string is mapped for status: 5');
         tag_manager::get_sync_status_string(5);
@@ -427,7 +427,7 @@ class tagging_test extends testcase {
      * Tests the length of the defined tag source is checked correctly
      * @covers \tool_objectfs\local\environment_source
      */
-    public function test_environment_source_too_long() {
+    public function test_environment_source_too_long(): void {
         global $CFG;
         set_config('taggingenvironment', 'This is a really long string.
             It needs to be long because it needs to be more than 128 chars for the test to trigger an exception.',

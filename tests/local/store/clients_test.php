@@ -26,7 +26,7 @@ use tool_objectfs\tests\test_azure_integration_client as azureclient;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class clients_test extends \advanced_testcase {
+final class clients_test extends \advanced_testcase {
 
     /**
      * Data provider for testing s3 client connection.
@@ -36,13 +36,20 @@ class clients_test extends \advanced_testcase {
     public static function s3_client_test_connection_if_not_configured_properly_data_provider(): array {
         return [
             [[]],
-            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 0, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 1, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 1, 's3_key' => 'test', 's3_secret' => 'test']],
-            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '', 's3_secret' => '']],
-            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test', 's3_secret' => '']],
-            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '', 's3_secret' => 'test']],
+            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 0, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => '', 's3_region' => 'test', 's3_usesdkcreds' => 1, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => '', 's3_usesdkcreds' => 1, 's3_key' => 'test',
+              's3_secret' => 'test', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '',
+              's3_secret' => '', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => 'test',
+              's3_secret' => '', 's3_bucket_acl' => 'test']],
+            [['s3_bucket' => 'test', 's3_region' => 'test', 's3_usesdkcreds' => 0, 's3_key' => '',
+              's3_secret' => 'test', 's3_bucket_acl' => '']],
         ];
     }
 
@@ -53,7 +60,7 @@ class clients_test extends \advanced_testcase {
      * @param array $config Config to test on.
      * @covers \tool_objectfs\local\store\s3\client
      */
-    public function test_s3_client_test_connection_if_not_configured_properly(array $config) {
+    public function test_s3_client_test_connection_if_not_configured_properly(array $config): void {
         if (!empty($config)) {
             $otherproperties = ['expirationtime', 'presignedminfilesize', 'enablepresignedurls', 'signingmethod', 'key_prefix'];
             $config = (object)$config;
@@ -93,7 +100,7 @@ class clients_test extends \advanced_testcase {
      * @param array $config Config to test on.
      * @covers \tool_objectfs\local\store\digitalocean\client
      */
-    public function test_digitalocean_client_test_connection_if_not_configured_properly(array $config) {
+    public function test_digitalocean_client_test_connection_if_not_configured_properly(array $config): void {
         if (!empty($config)) {
             $otherproperties = ['do_space'];
             $config = (object)$config;
@@ -139,7 +146,7 @@ class clients_test extends \advanced_testcase {
      * @param int $expectedtime
      * @dataProvider azure_client_get_token_expiry_provider
      */
-    public function test_azure_client_get_token_expiry(string $sastoken, int $expectedtime) {
+    public function test_azure_client_get_token_expiry(string $sastoken, int $expectedtime): void {
         $config = (object) [
             'azure_container' => 'test',
             'azure_accountname' => 'test',

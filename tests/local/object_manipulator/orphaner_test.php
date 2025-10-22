@@ -27,7 +27,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class orphaner_test extends \tool_objectfs\tests\testcase {
+final class orphaner_test extends \tool_objectfs\tests\testcase {
 
     /** @var string $manipulator */
     protected $manipulator = orphaner::class;
@@ -48,6 +48,7 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
 
     protected function tearDown(): void {
         ob_end_clean();
+        parent::tearDown();
     }
 
     /**
@@ -64,7 +65,7 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
         $this->orphaner = new orphaner($this->filesystem, $config, $this->logger);
     }
 
-    public function test_orphaner_can_orphan_files() {
+    public function test_orphaner_can_orphan_files(): void {
         global $DB;
         $this->orphaner->execute([
             $object1 = $this->create_local_object(),
@@ -79,7 +80,7 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location3);
     }
 
-    public function test_orphaner_finds_correct_candidates() {
+    public function test_orphaner_finds_correct_candidates(): void {
         global $DB;
 
         // Initialise the candidate finder.
@@ -110,7 +111,7 @@ class orphaner_test extends \tool_objectfs\tests\testcase {
         $this->assertCount(0, $objects); // No candidates - only candidate has been orphaned.
     }
 
-    public function test_orphaner_correctly_orphans_provided_files() {
+    public function test_orphaner_correctly_orphans_provided_files(): void {
         global $DB;
         $this->orphaner->execute([
             $object1 = $this->create_local_object(),

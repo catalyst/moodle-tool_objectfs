@@ -27,7 +27,7 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class recoverer_test extends \tool_objectfs\tests\testcase {
+final class recoverer_test extends \tool_objectfs\tests\testcase {
 
     /** @var candidates_finder Candidates finder object */
     protected $candidatesfinder;
@@ -47,9 +47,10 @@ class recoverer_test extends \tool_objectfs\tests\testcase {
 
     protected function tearDown(): void {
         ob_end_clean();
+        parent::tearDown();
     }
 
-    public function test_recoverer_get_candidate_objects_will_get_error_objects() {
+    public function test_recoverer_get_candidate_objects_will_get_error_objects(): void {
         $recovererobject = $this->create_error_object();
         $candidateobjects = $this->candidatesfinder->get();
 
@@ -58,7 +59,7 @@ class recoverer_test extends \tool_objectfs\tests\testcase {
         }
     }
 
-    public function test_recoverer_will_recover_local_objects() {
+    public function test_recoverer_will_recover_local_objects(): void {
         global $DB;
         $object = $this->create_local_object();
         $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);
@@ -69,7 +70,7 @@ class recoverer_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
-    public function test_recoverer_will_recover_duplicated_objects() {
+    public function test_recoverer_will_recover_duplicated_objects(): void {
         global $DB;
         $object = $this->create_duplicated_object();
         $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);
@@ -80,7 +81,7 @@ class recoverer_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
-    public function test_recoverer_will_recover_remote_objects() {
+    public function test_recoverer_will_recover_remote_objects(): void {
         global $DB;
         $object = $this->create_remote_object();
         $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);
@@ -91,7 +92,7 @@ class recoverer_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
-    public function test_recoverer_will_not_recover_error_objects() {
+    public function test_recoverer_will_not_recover_error_objects(): void {
         global $DB;
         $object = $this->create_error_object();
         $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);

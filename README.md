@@ -144,6 +144,27 @@ Note: Not all object stores listed below are tested/in-use directly by Catalyst 
   ]
 }
 ```
+
+#### Configurable S3 Object Ownership
+
+S3 Object Ownership is an Amazon S3 bucket-level setting that you can use to control ownership of objects uploaded to your bucket and to disable or enable [access control lists (ACLs).](https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html)  By default, Object Ownership is set to the Bucket owner enforced setting and all ACLs are disabled. When ACLs are disabled, the bucket owner owns all the objects in the bucket and manages access to data exclusively using access management policies.
+
+To provide control over S3 Object Ownership when storing files in an S3 bucket, users can now select from various ACL options. Previously, the default ACL was set to private, which could lead to access control limitations in certain configurations. This setting allows users to better manage permissions by choosing the most appropriate ACL option for their needs.
+
+The available ACL options are:
+  - private
+  - public-read
+  - public-read-write
+  - authenticated-read
+  - aws-exec-read
+  - bucket-owner-read
+  - bucket-owner-full-control
+
+For more details on S3 Object Ownership and permissions, refer to:
+- [Amazon S3 Object Ownership](https://aws.amazon.com/about-aws/whats-new/2021/11/amazon-s3-object-ownership-simplify-access-management-data-s3/)
+- [AWS PutObject API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html)
+- [AWS Object Ownership Guide](https://docs.aws.amazon.com/AmazonS3/latest/userguide/about-object-ownership.html)
+
 ### Minio S3
 
 Setup for Minio.io bucket can be found on there website [here](https://min.io)
@@ -302,6 +323,7 @@ S3 specific settings
 - **Key**: AWS credential key.
 - **Secret**: AWS credential secret.
 - **Bucket**: S3 bucket name to store files in.
+- **Bucket ACL**: ACL permission to S3 Bucket.
 - **AWS region**: AWS API endpoint region to use.
 - **Base URL**: useful for s3-compatible providers *eg* set to `https://storage.googleapis.com` for gcs
 - **Key Prefix**: useful for adding a prefix for all data stored in bucket. Can be used to reuse the same CloudFront distribution for both Moodle itself and the pre-signed URLs files.

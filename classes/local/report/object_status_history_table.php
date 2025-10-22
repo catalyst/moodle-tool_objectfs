@@ -79,9 +79,12 @@ class object_status_history_table extends \table_sql {
             unset($columnheaders['size']);
         }
 
-        $this->set_attribute('class', 'table-sm');
+        $this->set_attribute('class', 'table-sm w-auto');
         $this->define_columns(array_keys($columnheaders));
         $this->define_headers(array_values($columnheaders));
+        foreach (['count', 'size', 'runningsize'] as $col) {
+            $this->column_class($col, 'ofs-bar-column');
+        }
         $this->collapsible(false);
         $this->sortable(false);
         $this->pageable(false);
@@ -153,7 +156,7 @@ class object_status_history_table extends \table_sql {
      * @return string
      */
     public function col_count(\stdClass $row) {
-        return $this->add_barchart($row->count, $this->maxcount, 'count');
+        return $this->add_barchart($row->count, $row->heading, $this->maxcount, 'count');
     }
 
     /**
@@ -167,7 +170,7 @@ class object_status_history_table extends \table_sql {
         if ($row->heading == OBJECT_LOCATION_ORPHANED) {
             return get_string('object_status:location:orphanedsizeunknown', 'tool_objectfs');
         }
-        return $this->add_barchart($row->size, $this->maxsize, 'size');
+        return $this->add_barchart($row->size, $row->heading, $this->maxsize, 'size');
     }
 
     /**
@@ -184,24 +187,26 @@ class object_status_history_table extends \table_sql {
                 break;
             }
         }
-        return $this->add_barchart($runningsize, $this->totalsize, 'runningsize', 2);
+        return $this->add_barchart($runningsize, $row->heading, $this->totalsize, 'runningsize', 2);
     }
 
     /**
      * Wrap the column value into HTML tag with bar chart.
      *
      * @param  int    $value     Table cell value
+     * @param  string $heading   Table row heading
      * @param  int    $max       Maximum value for a given column
      * @param  string $type      Column type (count, size or runningsize)
      * @param  int    $precision The optional number of decimal digits to round to
      * @return string
      */
-    public function add_barchart($value, $max, $type, $precision = 0) {
+    public function add_barchart($value, $heading, $max, $type, $precision = 0) {
         $share = 0;
         if ($max > 0) {
             $share = round(100 * $value / $max, $precision);
         }
-        $htmlparams = ['class' => 'ofs-bar', 'style' => 'width:'.$share.'%'];
+        $background = $this->reporttype === 'location' ? $this->get_file_location_class($heading) : 'table-info';
+        $htmlparams = ['class' => "ofs-bar $background", 'style' => 'width:'.$share.'%'];
 
         switch ($type) {
             case 'count':
@@ -246,6 +251,34 @@ class object_status_history_table extends \table_sql {
             return get_string($locationstringmap[$filelocation], 'tool_objectfs');
         }
         return get_string('object_status:location:unknown', 'tool_objectfs');
+    }
+
+    /**
+     * Returns additional classes to use based on the filelocation
+     *
+     * @param  int|string $filelocation
+     * @return string additional classes to format bar chart
+     */
+    public function get_file_location_class($filelocation): string {
+        switch ($filelocation) {
+            case 'deltaa':
+            case 'deltab':
+            case OBJECT_LOCATION_ERROR:
+            case OBJECT_LOCATION_ORPHANED:
+                $class = 'table-danger';
+                break;
+            case 'filedir':
+            case OBJECT_LOCATION_LOCAL:
+            case OBJECT_LOCATION_DUPLICATED:
+                $class = 'table-warning';
+                break;
+            case OBJECT_LOCATION_EXTERNAL:
+                $class = 'table-success';
+                break;
+            default:
+                $class = 'table-info';
+        }
+        return $class;
     }
 
     /**
