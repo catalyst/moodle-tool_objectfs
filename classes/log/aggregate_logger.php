@@ -35,7 +35,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * [Description aggregate_logger]
  */
 class aggregate_logger extends objectfs_logger {
-
     /**
      * 1d array of objectfs_statistics.
      * @var array

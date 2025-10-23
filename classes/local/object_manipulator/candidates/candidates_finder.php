@@ -31,7 +31,6 @@ use stdClass;
  * Candidates Finder
  */
 class candidates_finder {
-
     /** @var string $finder */
     private $finder = '';
 

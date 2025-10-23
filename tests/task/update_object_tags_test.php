@@ -188,17 +188,23 @@ final class update_object_tags_test extends testcase {
         // Spawn three tasks and break each one in a different way.
         // Test their badge output.
         $task1 = new update_object_tags();
-        $this->assertStringContainsString(get_string('status:waiting', 'tool_objectfs'),
-            $task1->get_status_badge());
+        $this->assertStringContainsString(
+            get_string('status:waiting', 'tool_objectfs'),
+            $task1->get_status_badge()
+        );
 
         $task2 = new update_object_tags();
         $task2->set_fail_delay(1000);
-        $this->assertStringContainsString(get_string('status:failing', 'tool_objectfs', 1000),
-            $task2->get_status_badge());
+        $this->assertStringContainsString(
+            get_string('status:failing', 'tool_objectfs', 1000),
+            $task2->get_status_badge()
+        );
 
         $task3 = new update_object_tags();
         $task3->set_timestarted(1000);
-        $this->assertStringContainsString(get_string('status:running', 'tool_objectfs'),
-            $task3->get_status_badge());
+        $this->assertStringContainsString(
+            get_string('status:running', 'tool_objectfs'),
+            $task3->get_status_badge()
+        );
     }
 }

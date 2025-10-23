@@ -31,7 +31,6 @@ use stdClass;
  * manipulator_candidates_base
  */
 abstract class manipulator_candidates_base implements manipulator_candidates {
-
     /** @var stdClass $config */
     protected $config;
 

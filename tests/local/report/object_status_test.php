@@ -31,7 +31,6 @@ namespace tool_objectfs\local\report;
  * @covers \tool_objectfs\local\report\objectfs_report
  */
 final class object_status_test extends \tool_objectfs\tests\testcase {
-
     /**
      * Clean up after each test.
      */

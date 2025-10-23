@@ -35,7 +35,6 @@ use tool_objectfs\local\store\object_file_system;
  * [Description test_file_system]
  */
 class test_file_system extends object_file_system {
-
     /**
      * @var int
      */

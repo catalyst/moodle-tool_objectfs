@@ -26,7 +26,6 @@ namespace tool_objectfs\privacy;
  * @covers \tool_objectfs\privacy\provider
  */
 final class privacy_test extends \advanced_testcase {
-
     /**
      * Check the privacy provider implements null_provider.
      */

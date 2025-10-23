@@ -28,7 +28,7 @@ use core\chart_series;
 define('NO_OUTPUT_BUFFERING', true);
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/tablelib.php');
 
 admin_externalpage_setup('tool_objectfs_object_location_history');
 
@@ -69,4 +69,3 @@ if (empty($logformat)) {
     $table->is_downloading($logformat, $filename);
     $table->out(0, false);
 }
-

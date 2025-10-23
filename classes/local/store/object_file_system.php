@@ -53,7 +53,6 @@ require_once($CFG->libdir . '/filestorage/file_storage.php');
  * [Description object_file_system]
  */
 abstract class object_file_system extends \file_system_filedir {
-
     /**
      * @var mixed
      */
@@ -149,7 +148,6 @@ abstract class object_file_system extends \file_system_filedir {
         $path = parent::get_local_path_from_hash($contenthash, $fetchifnotfound);
 
         if ($fetchifnotfound && !is_readable($path)) {
-
             // Try and pull from remote.
             $objectlock = $this->acquire_object_lock($contenthash, 600);
             try {
@@ -158,7 +156,6 @@ abstract class object_file_system extends \file_system_filedir {
                     $location = $this->copy_object_from_external_to_local_by_hash($contenthash);
                     // We want this file to be deleted again later.
                     manager::update_object_by_hash($contenthash, $location);
-
                 }
             } finally {
                 if ($objectlock) {
@@ -180,11 +177,13 @@ abstract class object_file_system extends \file_system_filedir {
 
         // We limit 1 because multiple files can have the same contenthash.
         // However, they all have the same mimetype so it does not matter which one we query.
-        $mimetype = $DB->get_field_sql('SELECT mimetype
-                              FROM {files}
-                             WHERE contenthash = :hash
-                             LIMIT 1',
-                        ['hash' => $contenthash]);
+        $mimetype = $DB->get_field_sql(
+            'SELECT mimetype
+                 FROM {files}
+                 WHERE contenthash = :hash
+                 LIMIT 1',
+            ['hash' => $contenthash]
+        );
         return !empty($mimetype) ? $mimetype : '';
     }
 
@@ -335,7 +334,6 @@ abstract class object_file_system extends \file_system_filedir {
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
-
             $localdirpath = $this->get_fulldir_from_hash($contenthash);
 
             // Folder may not exist yet if pulling a file that came from another environment.
@@ -354,13 +352,14 @@ abstract class object_file_system extends \file_system_filedir {
                 chmod($this->get_local_path_from_hash($contenthash), $this->filepermissions);
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
             }
-
         }
-        $this->logger->log_object_move('copy_object_from_external_to_local',
-                                        $initiallocation,
-                                        $finallocation,
-                                        $contenthash,
-                                        $objectsize);
+        $this->logger->log_object_move(
+            'copy_object_from_external_to_local',
+            $initiallocation,
+            $finallocation,
+            $contenthash,
+            $objectsize
+        );
         return $finallocation;
     }
 
@@ -377,7 +376,6 @@ abstract class object_file_system extends \file_system_filedir {
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_LOCAL) {
-
             $success = $this->copy_from_local_to_external($contenthash);
 
             if ($success) {
@@ -391,11 +389,13 @@ abstract class object_file_system extends \file_system_filedir {
             $this->push_object_tags($contenthash);
         }
 
-        $this->logger->log_object_move('copy_object_from_local_to_external',
-                                        $initiallocation,
-                                        $finallocation,
-                                        $contenthash,
-                                        $objectsize);
+        $this->logger->log_object_move(
+            'copy_object_from_local_to_external',
+            $initiallocation,
+            $finallocation,
+            $contenthash,
+            $objectsize
+        );
         return $finallocation;
     }
 
@@ -433,11 +433,13 @@ abstract class object_file_system extends \file_system_filedir {
             }
         }
 
-        $this->logger->log_object_move('delete_local_object',
-                                        $initiallocation,
-                                        $finallocation,
-                                        $contenthash,
-                                        $objectsize);
+        $this->logger->log_object_move(
+            'delete_local_object',
+            $initiallocation,
+            $finallocation,
+            $contenthash,
+            $objectsize
+        );
         return $finallocation;
     }
 
@@ -599,17 +601,19 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $contenthash = $file->get_contenthash();
-        if ($this->presigned_url_configured() &&
-                $this->presigned_url_should_redirect_file($file) &&
-                $this->is_file_readable_externally_by_hash($contenthash)) {
-
+        if (
+            $this->presigned_url_configured() &&
+            $this->presigned_url_should_redirect_file($file) &&
+            $this->is_file_readable_externally_by_hash($contenthash)
+        ) {
             return $this->redirect_to_presigned_url($contenthash, headers_list());
         }
 
         $ranges = $this->get_valid_http_ranges($file->get_filesize());
-        if ($this->externalclient->support_presigned_urls() && !empty($ranges) &&
-                $this->is_file_readable_externally_by_hash($contenthash)) {
-
+        if (
+            $this->externalclient->support_presigned_urls() && !empty($ranges) &&
+            $this->is_file_readable_externally_by_hash($contenthash)
+        ) {
             return $this->externalclient->proxy_range_request($file, $ranges);
         }
 
@@ -632,10 +636,11 @@ abstract class object_file_system extends \file_system_filedir {
             return parent::xsendfile($contenthash);
         }
         $headers = headers_list();
-        if ($this->presigned_url_configured() &&
-                $this->is_file_readable_externally_by_hash($contenthash) &&
-                $this->presigned_url_should_redirect($contenthash, $headers)) {
-
+        if (
+            $this->presigned_url_configured() &&
+            $this->is_file_readable_externally_by_hash($contenthash) &&
+            $this->presigned_url_should_redirect($contenthash, $headers)
+        ) {
             return $this->redirect_to_presigned_url($contenthash, $headers);
         }
         return false;
@@ -725,7 +730,7 @@ abstract class object_file_system extends \file_system_filedir {
     protected function recover_file(\stored_file $file) {
         $contentfile = $this->get_external_path_from_storedfile($file);
 
-        if (file_exists($contentfile) ) {
+        if (file_exists($contentfile)) {
             // The file already exists on the external storage. No need to recover.
             return true;
         }
@@ -897,7 +902,7 @@ abstract class object_file_system extends \file_system_filedir {
                 }
                 // Set expires and cache-control values to match the presigned URL expiry, which may be
                 // different to values previously set.
-                header('Expires: '. gmdate('D, d M Y H:i:s', $signedurl->expiresat) .' GMT');
+                header('Expires: ' . gmdate('D, d M Y H:i:s', $signedurl->expiresat) . ' GMT');
                 // Unless cache-control was previously set to 'public' by Moodle for the actual file send,
                 // use 'private' to allow browser caching only; otherwise via a shared cache users might
                 // be able to redirect to content that was only supposed to be displayed to a different
@@ -959,8 +964,10 @@ abstract class object_file_system extends \file_system_filedir {
      */
     public function presigned_url_should_redirect($contenthash, $headers = []) {
         // Redirect regardless.
-        if ($this->externalclient->presignedminfilesize == 0 &&
-                manager::all_extensions_whitelisted()) {
+        if (
+            $this->externalclient->presignedminfilesize == 0 &&
+            manager::all_extensions_whitelisted()
+        ) {
             return true;
         }
 

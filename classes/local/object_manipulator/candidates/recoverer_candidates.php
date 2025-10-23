@@ -28,7 +28,6 @@ namespace tool_objectfs\local\object_manipulator\candidates;
  * recoverer_candidates
  */
 class recoverer_candidates extends manipulator_candidates_base {
-
     /**
      * queryname
      * @var string

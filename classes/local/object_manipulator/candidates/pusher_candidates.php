@@ -28,7 +28,6 @@ namespace tool_objectfs\local\object_manipulator\candidates;
  * pusher_candidates
  */
 class pusher_candidates extends manipulator_candidates_base {
-
     /**
      * queryname
      * @var string
@@ -54,7 +53,7 @@ class pusher_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        $filesystem = new $this->config->filesystem;
+        $filesystem = new $this->config->filesystem();
         return [
             'maxcreatedtimestamp' => time() - $this->config->minimumage,
             'threshold' => $this->config->sizethreshold,

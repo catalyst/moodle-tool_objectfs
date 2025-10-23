@@ -35,7 +35,6 @@ require_once(__DIR__ . '/../../lib.php');
  * [Description generate_status_report]
  */
 class generate_status_report extends task {
-
     /** @var string $stringname */
     protected $stringname = 'generate_status_report_task';
 

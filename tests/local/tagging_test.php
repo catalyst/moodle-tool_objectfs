@@ -429,9 +429,12 @@ final class tagging_test extends testcase {
      */
     public function test_environment_source_too_long(): void {
         global $CFG;
-        set_config('taggingenvironment', 'This is a really long string.
+        set_config(
+            'taggingenvironment',
+            'This is a really long string.
             It needs to be long because it needs to be more than 128 chars for the test to trigger an exception.',
-            'tool_objectfs');
+            'tool_objectfs'
+        );
 
         $source = new environment_source();
 

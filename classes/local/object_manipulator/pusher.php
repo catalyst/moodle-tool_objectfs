@@ -33,7 +33,6 @@ use tool_objectfs\log\aggregate_logger;
  * pusher
  */
 class pusher extends manipulator {
-
     /**
      * Minimum age of a file to be pushed to remote in seconds.
      *

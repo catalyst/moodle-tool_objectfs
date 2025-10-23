@@ -37,7 +37,6 @@ use tool_objectfs\local\object_manipulator\orphaner;
  * Candidates Factory
  */
 class candidates_factory {
-
     /** @var array $manipulatormap */
     private static $manipulatormap = [
         checker::class => checker_candidates::class,

@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * [Description real_time_logger]
  */
 class real_time_logger extends objectfs_logger {
-
     /**
      * log_object_read_action
      * @param string $actionname
@@ -42,7 +41,6 @@ class real_time_logger extends objectfs_logger {
      * @return mixed
      */
     public function log_object_read_action($actionname, $objectpath) {
-
     }
 
     /**
@@ -55,7 +53,6 @@ class real_time_logger extends objectfs_logger {
      * @return mixed
      */
     public function log_object_move_action($actionname, $objecthash, $initallocation, $finallocation) {
-
     }
 
     /**
@@ -69,7 +66,6 @@ class real_time_logger extends objectfs_logger {
         if ($timetaken > 0) {
             $logstring .= "Time taken was: $timetaken seconds. ";
         }
-
     }
 
     /**
@@ -166,9 +162,9 @@ class real_time_logger extends objectfs_logger {
     public function log_lock_timing($lock) {
         $locktime = $this->get_timing();
         if ($lock) {
-            $this->error_log('Lock acquired in '.$locktime.' seconds.');
+            $this->error_log('Lock acquired in ' . $locktime . ' seconds.');
         } else {
-            $this->error_log('Can\'t acquire lock. Time waited '.$locktime.' seconds.');
+            $this->error_log('Can\'t acquire lock. Time waited ' . $locktime . ' seconds.');
         }
     }
 }

@@ -44,8 +44,10 @@ if ($delete) {
 
 echo $output->header();
 echo $output->heading(get_string('presignedurl_testing:page', 'tool_objectfs'));
-$settingslink = \html_writer::link(new \moodle_url('/admin/settings.php?section=tool_objectfs_settings'),
-    get_string('presignedurl_testing:objectfssettings', 'tool_objectfs'));
+$settingslink = \html_writer::link(
+    new \moodle_url('/admin/settings.php?section=tool_objectfs_settings'),
+    get_string('presignedurl_testing:objectfssettings', 'tool_objectfs')
+);
 
 $config = manager::get_objectfs_config();
 $support = false;
@@ -64,19 +66,19 @@ if ($support) {
             $testfiles = $output->presignedurl_tests_load_files($fs);
             echo $output->presignedurl_tests_content($fs, $testfiles);
         } else {
-            echo $output->notification(get_string('settings:connectionfailure', 'tool_objectfs', $connection->details),
-                'notifyproblem');
-            echo $output->heading(get_string('presignedurl_testing:checkconnectionsettings', 'tool_objectfs').$settingslink, 5);
+            echo $output->notification(
+                get_string('settings:connectionfailure', 'tool_objectfs', $connection->details),
+                'notifyproblem'
+            );
+            echo $output->heading(get_string('presignedurl_testing:checkconnectionsettings', 'tool_objectfs') . $settingslink, 5);
         }
-
     } else {
         echo $output->notification(get_string('settings:clientnotavailable', 'tool_objectfs'), 'notifyproblem');
-        echo $output->heading(get_string('presignedurl_testing:checkclientsettings', 'tool_objectfs').$settingslink, 5);
+        echo $output->heading(get_string('presignedurl_testing:checkclientsettings', 'tool_objectfs') . $settingslink, 5);
     }
-
 } else {
     echo $output->notification(get_string('presignedurl_testing:presignedurlsnotsupported', 'tool_objectfs'), 'notifyproblem');
-    echo $output->heading(get_string('presignedurl_testing:checkfssettings', 'tool_objectfs').$settingslink, 5);
+    echo $output->heading(get_string('presignedurl_testing:checkfssettings', 'tool_objectfs') . $settingslink, 5);
 }
 
 echo $output->footer();

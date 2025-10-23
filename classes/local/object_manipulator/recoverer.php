@@ -31,7 +31,6 @@ use stdClass;
  * recoverer
  */
 class recoverer extends manipulator {
-
     /**
      * manipulate_object
      * @param stdClass $objectrecord

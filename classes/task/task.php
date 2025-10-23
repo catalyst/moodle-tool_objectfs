@@ -39,7 +39,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * [Description task]
  */
 abstract class task extends \core\task\scheduled_task implements objectfs_task {
-
     /** @var stdClass $config */
     protected $config;
 

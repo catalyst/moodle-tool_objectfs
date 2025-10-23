@@ -33,7 +33,6 @@ use tool_objectfs\log\aggregate_logger;
  * checker
  */
 class checker extends manipulator {
-
     /**
      * Checker constructor.
      * This manipulator adds location for files that do not have records in {tool_objectfs_objects} table.

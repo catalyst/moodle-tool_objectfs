@@ -132,13 +132,13 @@ class object_location_history_table extends \table_sql {
         ];
         foreach ($reports as $id => $timecreated) {
             // Initialises the records to be used, and fallback to an empty one if not found.
-            $localrecord = $rawrecords[$id.OBJECT_LOCATION_LOCAL] ?? $emptyrecord;
-            $duplicatedrecord = $rawrecords[$id.OBJECT_LOCATION_DUPLICATED] ?? $emptyrecord;
-            $orphanedrecord = $rawrecords[$id.OBJECT_LOCATION_ORPHANED] ?? $emptyrecord;
-            $externalrecord = $rawrecords[$id.OBJECT_LOCATION_EXTERNAL] ?? $emptyrecord;
-            $errorrecord = $rawrecords[$id.OBJECT_LOCATION_ERROR] ?? $emptyrecord;
-            $filedir = $rawrecords[$id.'filedir'] ?? $emptyrecord;
-            $total = $rawrecords[$id.'total'] ?? $emptyrecord;
+            $localrecord = $rawrecords[$id . OBJECT_LOCATION_LOCAL] ?? $emptyrecord;
+            $duplicatedrecord = $rawrecords[$id . OBJECT_LOCATION_DUPLICATED] ?? $emptyrecord;
+            $orphanedrecord = $rawrecords[$id . OBJECT_LOCATION_ORPHANED] ?? $emptyrecord;
+            $externalrecord = $rawrecords[$id . OBJECT_LOCATION_EXTERNAL] ?? $emptyrecord;
+            $errorrecord = $rawrecords[$id . OBJECT_LOCATION_ERROR] ?? $emptyrecord;
+            $filedir = $rawrecords[$id . 'filedir'] ?? $emptyrecord;
+            $total = $rawrecords[$id . 'total'] ?? $emptyrecord;
 
             $localcount = $localrecord->count + $duplicatedrecord->count;
             $deltacount = abs($filedir->count - $localcount);
@@ -183,7 +183,6 @@ class object_location_history_table extends \table_sql {
                 $this->dates[] = userdate($timecreated, get_string('strftimedatetime'));
             }
             $this->rawdata[] = $row;
-
         }
         $this->sort_chart_data();
     }

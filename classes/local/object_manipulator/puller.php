@@ -31,7 +31,6 @@ use stdClass;
  * puller
  */
 class puller extends manipulator {
-
     /**
      * manipulate_object
      * @param stdClass $objectrecord

@@ -29,7 +29,6 @@ namespace tool_objectfs\local\report;
  * log_size_report_builder
  */
 class log_size_report_builder extends objectfs_report_builder {
-
     /**
      * build_report
      * @param int $reportid
@@ -71,14 +70,12 @@ class log_size_report_builder extends objectfs_report_builder {
         $smallstats->objectcount = 0;
 
         foreach ($stats as $key => $stat) {
-
             // Logsize of <= 9 means that files are smaller than 1 KB.
             if ($stat->datakey <= 9) {
                 $smallstats->objectcount += $stat->objectcount;
                 $smallstats->objectsum += $stat->objectsum;
                 unset($stats[$key]);
             }
-
         }
         // Add to the beginning of the array.
         array_unshift($stats, $smallstats);

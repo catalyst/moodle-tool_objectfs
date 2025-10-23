@@ -31,5 +31,4 @@ use tool_objectfs\local\store\swift\file_system;
  * [Description swift_file_system]
  */
 class swift_file_system extends file_system {
-
 }

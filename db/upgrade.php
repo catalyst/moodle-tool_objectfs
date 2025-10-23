@@ -34,7 +34,6 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2017030300) {
-
         $table = new xmldb_table('tool_objectfs_report_data');
         $dbman->rename_table($table, 'tool_objectfs_reports');
 
@@ -144,7 +143,6 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022070401) {
-
         // Add filesize field to objects table.
         $table = new xmldb_table('tool_objectfs_objects');
         $field = new xmldb_field('filesize', XMLDB_TYPE_INTEGER, '20');
@@ -172,7 +170,6 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024120600) {
-
         // Define table tool_objectfs_object_tags to be created.
         $table = new xmldb_table('tool_objectfs_object_tags');
 

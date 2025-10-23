@@ -40,7 +40,6 @@ require_once(__DIR__ . '/../../../lib.php');
  * manipulator_builder
  */
 class manipulator_builder {
-
     /** @var array $manipulators */
     private $manipulators = [
         deleter::class,

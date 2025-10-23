@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tag_manager {
-
     /**
      * @var int If object needs sync. These will periodically be picked up by scheduled tasks and queued for syncing.
      */
@@ -142,8 +141,15 @@ class tag_manager {
         [$insql, $inparams] = $DB->get_in_or_equal([
             OBJECT_LOCATION_DUPLICATED, OBJECT_LOCATION_EXTERNAL, OBJECT_LOCATION_ORPHANED], SQL_PARAMS_NAMED);
         $inparams['syncstatus'] = self::SYNC_STATUS_NEEDS_SYNC;
-        $records = $DB->get_records_select('tool_objectfs_objects', 'tagsyncstatus = :syncstatus AND location ' . $insql,
-            $inparams, '', 'contenthash', 0, $limit);
+        $records = $DB->get_records_select(
+            'tool_objectfs_objects',
+            'tagsyncstatus = :syncstatus AND location ' . $insql,
+            $inparams,
+            '',
+            'contenthash',
+            0,
+            $limit
+        );
         return array_column($records, 'contenthash');
     }
 
@@ -168,11 +174,13 @@ class tag_manager {
         ];
 
         // Need raw execute since update_records requires an id column, but we use contenthash instead.
-        $DB->execute("UPDATE {tool_objectfs_objects}
-                         SET tagsyncstatus = :status
-                         {$timeupdate}
-                       WHERE contenthash = :contenthash",
-                       $params);
+        $DB->execute(
+            "UPDATE {tool_objectfs_objects}
+                 SET tagsyncstatus = :status
+                 {$timeupdate}
+                 WHERE contenthash = :contenthash",
+            $params
+        );
     }
 
     /**
