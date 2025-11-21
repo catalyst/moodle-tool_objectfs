@@ -39,7 +39,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * manipulator
  */
 abstract class manipulator implements object_manipulator {
-
     /**
      * object file system
      *

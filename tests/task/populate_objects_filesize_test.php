@@ -26,7 +26,6 @@ namespace tool_objectfs\task;
  * @covers \tool_objectfs\task\populate_objects_filesize
  */
 final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase {
-
     /**
      * Test multiple objects have their filesize updated.
      */
@@ -42,8 +41,13 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
 
         // Set all objects to have a filesize of null.
         [$insql, $params] = $DB->get_in_or_equal($filehashes);
-        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
-                'contenthash ' . $insql, $params);
+        $DB->set_field_select(
+            'tool_objectfs_objects',
+            'filesize',
+            null,
+            'contenthash ' . $insql,
+            $params
+        );
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -94,8 +98,13 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
 
         // Set all objects to have a filesize of null.
         [$insql, $params] = $DB->get_in_or_equal($filehashes);
-        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
-                'contenthash ' . $insql, $params);
+        $DB->set_field_select(
+            'tool_objectfs_objects',
+            'filesize',
+            null,
+            'contenthash ' . $insql,
+            $params
+        );
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
         $task->execute();
@@ -117,7 +126,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
     /**
      * Test that filesizes that are already populated are not pulled again.
      */
-    public function test_that_non_null_values_are_not_updated() {
+    public function test_that_non_null_values_are_not_updated(): void {
         global $DB;
         $filehashes = [
             $this->create_local_file("Test 1")->get_contenthash(),
@@ -129,8 +138,13 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
 
         // Set all objects to have a filesize of null.
         [$insql, $params] = $DB->get_in_or_equal($filehashes);
-        $DB->set_field_select('tool_objectfs_objects', 'filesize', null,
-                'contenthash ' . $insql, $params);
+        $DB->set_field_select(
+            'tool_objectfs_objects',
+            'filesize',
+            null,
+            'contenthash ' . $insql,
+            $params
+        );
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -139,7 +153,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
 
         // Get all objects.
         $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
-        $updatedobjects = array_filter($objects, function($object) {
+        $updatedobjects = array_filter($objects, function ($object) {
             return isset($object->filesize);
         });
 
@@ -158,7 +172,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
 
         // Get all objects.
         $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
-        $updatedobjects = array_filter($objects, function($object) {
+        $updatedobjects = array_filter($objects, function ($object) {
             return isset($object->filesize);
         });
 
@@ -170,7 +184,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
     /**
      * Test objects that are marked as orphans and hence have no associated file record are not updated.
      */
-    public function test_orphaned_objects_are_not_updated() {
+    public function test_orphaned_objects_are_not_updated(): void {
         global $DB;
         $filehashes = [
             $this->create_local_file("Test 1")->get_contenthash(),
@@ -193,7 +207,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
         // Get all objects.
         [$insql, $params] = $DB->get_in_or_equal($filehashes);
         $objects = $DB->get_records_select('tool_objectfs_objects', 'contenthash ' . $insql, $params);
-        $updatedobjects = array_filter($objects, function($object) {
+        $updatedobjects = array_filter($objects, function ($object) {
             return isset($object->filesize);
         });
 
@@ -205,7 +219,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
     /**
      * Tests objects with an error for location are not updated to prevent unexpected behaviour.
      */
-    public function test_objects_with_error_are_not_updated() {
+    public function test_objects_with_error_are_not_updated(): void {
         global $DB;
         $numstart = $DB->count_records('tool_objectfs_objects');
 
@@ -227,7 +241,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
 
         // Get all objects.
         $objects = $DB->get_records('tool_objectfs_objects');
-        $updatedobjects = array_filter($objects, function($object) {
+        $updatedobjects = array_filter($objects, function ($object) {
             return isset($object->filesize);
         });
 

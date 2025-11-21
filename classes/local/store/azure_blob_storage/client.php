@@ -35,7 +35,6 @@ use Throwable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client extends object_client_base {
-
     /** @var api $api Azure API */
     protected api $api;
 
@@ -278,20 +277,32 @@ class client extends object_client_base {
      * @return admin_settingpage
      */
     public function define_client_section($settings, $config): admin_settingpage {
-        $settings->add(new \admin_setting_heading('tool_objectfs/azure',
-            new \lang_string('settings:azure:header', 'tool_objectfs'), $this->define_client_check()));
+        $settings->add(new \admin_setting_heading(
+            'tool_objectfs/azure',
+            new \lang_string('settings:azure:header', 'tool_objectfs'),
+            $this->define_client_check()
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/azure_accountname',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/azure_accountname',
             new \lang_string('settings:azure:accountname', 'tool_objectfs'),
-            new \lang_string('settings:azure:accountname_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:azure:accountname_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/azure_container',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/azure_container',
             new \lang_string('settings:azure:container', 'tool_objectfs'),
-            new \lang_string('settings:azure:container_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:azure:container_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/azure_sastoken',
+        $settings->add(new \admin_setting_configpasswordunmask(
+            'tool_objectfs/azure_sastoken',
             new \lang_string('settings:azure:sastoken', 'tool_objectfs'),
-            new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'),
+            ''
+        ));
 
         return $settings;
     }

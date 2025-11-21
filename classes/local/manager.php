@@ -33,7 +33,6 @@ use tool_objectfs\local\tag\tag_manager;
  * [Description manager]
  */
 class manager {
-
     /**
      * set_objectfs_config
      * @param stdClass $config
@@ -51,8 +50,7 @@ class manager {
      * @throws \dml_exception
      */
     public static function get_objectfs_config() {
-        global $CFG;
-        $config = new stdClass;
+        $config = new stdClass();
         $config->enabletasks = 0;
         $config->enablelogging = 0;
         $config->sizethreshold = 1024 * 10;
@@ -349,7 +347,7 @@ class manager {
             return '\tool_objectfs\tests\test_client';
         }
         $clientclass = str_replace('_file_system', '', $filesystem);
-        return str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $clientclass.'\\client');
+        return str_replace('tool_objectfs\\', 'tool_objectfs\\local\\store\\', $clientclass . '\\client');
     }
 
     /**
@@ -364,7 +362,7 @@ class manager {
         foreach ($headers as $key => $value) {
             if (is_int($key)) {
                 // Indexed array where element value looks like "Header name: Header value".
-                $found = strpos(strtolower($value), strtolower($search).':', 0);
+                $found = strpos(strtolower($value), strtolower($search) . ':', 0);
                 if ($found !== false) {
                     return substr($value, strlen($search) + 2);
                 }

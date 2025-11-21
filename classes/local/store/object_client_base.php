@@ -31,7 +31,6 @@ use stdClass;
  * [Description object_client_base]
  */
 abstract class object_client_base implements object_client {
-
     /**
      * @var string
      */
@@ -69,7 +68,6 @@ abstract class object_client_base implements object_client {
      * @param \stdClass $config
      */
     public function __construct($config) {
-
     }
 
     /**
@@ -90,7 +88,6 @@ abstract class object_client_base implements object_client {
      * @return void
      */
     public function register_stream_wrapper() {
-
     }
 
     /**

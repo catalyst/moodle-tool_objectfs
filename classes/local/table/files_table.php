@@ -33,7 +33,6 @@ require_once($CFG->libdir . '/tablelib.php');
  * [Description files_table]
  */
 class files_table extends \table_sql {
-
     /**
      * Constructor.
      *
@@ -190,7 +189,7 @@ class files_table extends \table_sql {
         if (substr($row->component, 0, strlen('mod_')) === "mod_") {
             switch ((int)$row->contextlevel) {
                 case CONTEXT_MODULE:
-                    list ($course, $cm) = get_course_and_cm_from_cmid($row->instanceid);
+                     [$course, $cm] = get_course_and_cm_from_cmid($row->instanceid);
                     if (!empty($cm)) {
                         $url = new \moodle_url($cm->url);
                     }
@@ -205,12 +204,10 @@ class files_table extends \table_sql {
             if ($row->filearea === "legacy") {
                 $params = ['contextid' => $row->contextid];
                 $url = new \moodle_url("/files/index.php", $params);
-
             } else if ($row->filearea === "section") {
                 $params = ['id' => $row->instanceid];
                 $url = new \moodle_url("/course/view.php", $params);
             }
-
         } else if ($row->component === 'block_html') {
             // Internally blocks are different to course modules and require a different lookup.
             $bi = $DB->get_record('block_instances', ['id' => $row->instanceid]);

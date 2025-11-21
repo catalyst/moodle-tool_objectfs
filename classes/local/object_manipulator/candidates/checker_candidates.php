@@ -27,8 +27,7 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 /**
  * chcker_candiates
  */
-class checker_candidates extends  manipulator_candidates_base {
-
+class checker_candidates extends manipulator_candidates_base {
     /**
      * queryname
      * @var string

@@ -32,7 +32,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * logger
  */
 class logger {
-
     /**
      * @var [type]
      */

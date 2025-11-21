@@ -67,7 +67,7 @@ class tagging_migration_status extends check {
         }
         $html = html_writer::table($table);
 
-        $ataskisfailing = !empty(array_filter($tasks, function($task) {
+        $ataskisfailing = !empty(array_filter($tasks, function ($task) {
             return $task->get_fail_delay() > 0;
         }));
 

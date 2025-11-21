@@ -33,7 +33,6 @@ use tool_objectfs\log\aggregate_logger;
  * deleter
  */
 class deleter extends manipulator {
-
     /**
      * How long file must exist after
      * duplication before it can be deleted.

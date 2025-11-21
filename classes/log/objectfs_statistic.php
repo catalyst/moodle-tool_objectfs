@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * [Description objectfs_statistic]
  */
 class objectfs_statistic {
-
     /**
      * @var string
      */

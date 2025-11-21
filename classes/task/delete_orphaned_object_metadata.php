@@ -36,7 +36,6 @@ require_once(__DIR__ . '/../../lib.php');
  * [Description delete_orphaned_object_metadata]
  */
 class delete_orphaned_object_metadata extends task {
-
     /** @var string $stringname */
     protected $stringname = 'delete_orphaned_object_metadata_task';
 

@@ -27,7 +27,6 @@ use tool_objectfs\tests\test_azure_integration_client as azureclient;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class clients_test extends \advanced_testcase {
-
     /**
      * Data provider for testing s3 client connection.
      *
@@ -145,6 +144,7 @@ final class clients_test extends \advanced_testcase {
      * @param string $sastoken
      * @param int $expectedtime
      * @dataProvider azure_client_get_token_expiry_provider
+     * @covers \tool_objectfs\local\store\digitalocean\client
      */
     public function test_azure_client_get_token_expiry(string $sastoken, int $expectedtime): void {
         $config = (object) [

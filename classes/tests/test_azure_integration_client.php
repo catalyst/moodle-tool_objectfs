@@ -27,7 +27,6 @@ use tool_objectfs\local\store\azure\client;
  * @deprecated Since Moodle 4.2 - Please see the README about updating to new azure_blob_storage client.
  */
 class test_azure_integration_client extends client {
-
     /**
      * @var string
      */
@@ -59,6 +58,4 @@ class test_azure_integration_client extends client {
         $runidentifier = $this->runidentifier;
         return "test/$runidentifier/$l1/$l2/$contenthash";
     }
-
 }
-

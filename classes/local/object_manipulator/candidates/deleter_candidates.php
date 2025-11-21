@@ -28,7 +28,6 @@ namespace tool_objectfs\local\object_manipulator\candidates;
  * deleter_candidates
  */
 class deleter_candidates extends manipulator_candidates_base {
-
     /**
      * queryname
      * @var string

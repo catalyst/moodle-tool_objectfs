@@ -31,5 +31,4 @@ use tool_objectfs\local\store\digitalocean\file_system;
  * Unknown?
  */
 class digitalocean_file_system extends file_system {
-
 }

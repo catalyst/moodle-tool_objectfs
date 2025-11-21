@@ -35,7 +35,6 @@ use tool_objectfs\local\store\object_client_base;
  * @deprecated Since Moodle 4.2 - Please see the README about updating to new azure_blob_storage client.
  */
 class client extends object_client_base {
-
     /** @var BlobRestProxy $client The Blob client. */
     protected $client;
 
@@ -183,7 +182,6 @@ class client extends object_client_base {
             $key = $this->get_filepath_from_hash($contenthash);
 
             $result = $this->client->getBlobProperties($this->container, $key)->getProperties();
-
         } catch (\MicrosoftAzure\Storage\Common\Exceptions\ServiceException $e) {
             return false;
         }
@@ -346,20 +344,32 @@ class client extends object_client_base {
      */
     public function define_client_section($settings, $config) {
 
-        $settings->add(new \admin_setting_heading('tool_objectfs/azure',
-            new \lang_string('settings:azure:header', 'tool_objectfs'), $this->define_client_check()));
+        $settings->add(new \admin_setting_heading(
+            'tool_objectfs/azure',
+            new \lang_string('settings:azure:header', 'tool_objectfs'),
+            $this->define_client_check()
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/azure_accountname',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/azure_accountname',
             new \lang_string('settings:azure:accountname', 'tool_objectfs'),
-            new \lang_string('settings:azure:accountname_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:azure:accountname_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/azure_container',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/azure_container',
             new \lang_string('settings:azure:container', 'tool_objectfs'),
-            new \lang_string('settings:azure:container_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:azure:container_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/azure_sastoken',
+        $settings->add(new \admin_setting_configpasswordunmask(
+            'tool_objectfs/azure_sastoken',
             new \lang_string('settings:azure:sastoken', 'tool_objectfs'),
-            new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:azure:sastoken_help', 'tool_objectfs'),
+            ''
+        ));
 
         return $settings;
     }

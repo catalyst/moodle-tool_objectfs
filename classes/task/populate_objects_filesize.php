@@ -28,7 +28,6 @@ use core\task\manager;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class populate_objects_filesize extends adhoc_task {
-
     /** @var int Max number of updates that task should trigger before scheduling a new task. */
     private const MAX_UPDATES = 100000;
 

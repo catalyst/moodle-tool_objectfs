@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * [Description null_logger]
  */
 class null_logger extends objectfs_logger {
-
     /**
      * log_object_read
      * @param mixed $readname

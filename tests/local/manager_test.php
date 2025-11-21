@@ -32,7 +32,6 @@ namespace tool_objectfs\local;
  * @covers \tool_objectfs\local\manager
  */
 final class manager_test extends \tool_objectfs\tests\testcase {
-
     /**
      * Data provider for test_all_extensions_whitelisted().
      *

@@ -26,7 +26,6 @@ use tool_objectfs\local\store\swift\client;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class test_swift_integration_client extends client {
-
     /**
      * @var string
      */

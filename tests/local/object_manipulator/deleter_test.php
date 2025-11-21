@@ -27,7 +27,6 @@ use tool_objectfs\local\manager;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class deleter_test extends \tool_objectfs\tests\testcase {
-
     /** @var string $manipulator */
     protected $manipulator = deleter::class;
 
@@ -79,7 +78,7 @@ final class deleter_test extends \tool_objectfs\tests\testcase {
         self::assertFalse($this->objects_contain_hash($remoteobject->contenthash));
     }
 
-    public function test_deleter_get_candidate_objects_will_not_get_objects_which_havent_been_duplicated_for_consistancy_delay(): void {
+    public function test_deleter_get_candidate_objects_will_not_get_objects_which_not_duplicated_for_consistancy_delay(): void {
         $duplicatedbject = $this->create_duplicated_object();
         $this->set_deleter_config('consistencydelay', 100);
 

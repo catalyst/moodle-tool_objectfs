@@ -32,7 +32,6 @@ use tool_objectfs\local\object_manipulator\orphaner;
  * [Description orphan_objects]
  */
 class orphan_objects extends task {
-
     /** @var string $manipulator */
     protected $manipulator = orphaner::class;
 

@@ -176,5 +176,3 @@ interface object_client {
      */
     public function supports_object_tagging(): bool;
 }
-
-

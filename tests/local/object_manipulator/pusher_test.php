@@ -28,7 +28,6 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class pusher_test extends \tool_objectfs\tests\testcase {
-
     /** @var string $manipulator */
     protected $manipulator = pusher::class;
 
@@ -68,7 +67,7 @@ final class pusher_test extends \tool_objectfs\tests\testcase {
     public function test_pusher_get_candidate_objects_will_get_local_objects(): void {
         $object = $this->create_local_object();
 
-        self::assertTrue($this->objects_contain_hash($object->contenthash));;
+        self::assertTrue($this->objects_contain_hash($object->contenthash));
     }
 
     public function test_pusher_get_candidate_objects_wont_get_duplicated_or_remote_objects(): void {

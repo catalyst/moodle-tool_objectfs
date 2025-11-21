@@ -25,7 +25,6 @@ namespace tool_objectfs\task;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface objectfs_task {
-
     /**
      * Get a descriptive name for this task (shown to admins).
      *

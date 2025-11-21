@@ -32,7 +32,6 @@ use tool_objectfs\tests\test_file_system;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class object_file_system_test extends tests\testcase {
-
     /**
      * set_externalclient_config
      * @param mixed $key
@@ -260,7 +259,7 @@ final class object_file_system_test extends tests\testcase {
                     /filedir/test/d2/file2
                     deleted: 0 dirs
                 */
-                ['/d1', '/d2'], ['file1', 'file2'], [true, true],  true,
+                ['/d1', '/d2'], ['file1', 'file2'], [true, true], true,
             ],
             [
                 /*
@@ -269,7 +268,7 @@ final class object_file_system_test extends tests\testcase {
                     deleted: 1dirs
                         - /filedir/test/d2/
                 */
-                ['/d1', '/d2'], ['file1'], [true, false],  true,
+                ['/d1', '/d2'], ['file1'], [true, false], true,
             ],
             [
                 /*
@@ -278,7 +277,7 @@ final class object_file_system_test extends tests\testcase {
                     deleted: 1 dirs
                         - /filedir/test/d1/
                 */
-                ['/d1', '/d2'], ['', 'file1'], [false, true],  true,
+                ['/d1', '/d2'], ['', 'file1'], [false, true], true,
             ],
             [
                 /*
@@ -289,7 +288,7 @@ final class object_file_system_test extends tests\testcase {
                         - /filedir/test/d2/
                         - /filedir/test/
                 */
-                ['/d1', '/d2'], [], [false, false],  false,
+                ['/d1', '/d2'], [], [false, false], false,
             ],
         ];
     }
@@ -645,7 +644,6 @@ final class object_file_system_test extends tests\testcase {
             ];
             $signedurl = $this->filesystem->externalclient->generate_presigned_url($filehash, $headers);
             $this->assertTrue($this->is_externally_readable_by_url($signedurl));
-
         } catch (\coding_exception $e) {
             $this->assertEquals($e->a, 'Pre-signed URLs not supported');
         }
@@ -719,8 +717,11 @@ final class object_file_system_test extends tests\testcase {
      * @param bool $result expected result.
      * @throws \dml_exception
      */
-    public function test_presigned_url_should_redirect_method_with_data_provider($enablepresignedurls,
-            $presignedminfilesize, $result): void {
+    public function test_presigned_url_should_redirect_method_with_data_provider(
+        $enablepresignedurls,
+        $presignedminfilesize,
+        $result
+    ): void {
         $this->filesystem = new test_file_system();
         $externalclient = $this->filesystem->get_external_client();
 
@@ -1134,8 +1135,12 @@ final class object_file_system_test extends tests\testcase {
      * @param bool $expectedoverride if it was expected that the tags were overwritten.
      * @dataProvider push_object_tags_replicated_provider
      */
-    public function test_push_object_tags_replicated(string $objectenv, string $pushenv, bool $canoverride,
-        bool $expectedoverride): void {
+    public function test_push_object_tags_replicated(
+        string $objectenv,
+        string $pushenv,
+        bool $canoverride,
+        bool $expectedoverride
+    ): void {
         global $CFG, $DB;
         $CFG->phpunit_objectfs_supports_object_tagging = true;
         set_config('taggingenvironment', $objectenv, 'tool_objectfs');

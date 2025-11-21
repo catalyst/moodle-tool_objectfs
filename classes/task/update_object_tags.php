@@ -52,7 +52,7 @@ class update_object_tags extends adhoc_task {
             $class = 'badge-info';
         }
 
-        return html_writer::span(get_string('status:'.$identifier, 'tool_objectfs', $this->get_fail_delay()), 'badge ' . $class);
+        return html_writer::span(get_string('status:' . $identifier, 'tool_objectfs', $this->get_fail_delay()), 'badge ' . $class);
     }
 
     /**

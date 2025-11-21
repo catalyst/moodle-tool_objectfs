@@ -31,8 +31,7 @@ use tool_objectfs\local\manager;
 /**
  * [Description delete_local_empty_directories]
  */
-class delete_local_empty_directories  extends task {
-
+class delete_local_empty_directories extends task {
     /** @var string $stringname  */
     protected $stringname = 'delete_local_empty_directories_task';
 

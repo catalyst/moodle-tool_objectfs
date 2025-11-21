@@ -41,7 +41,6 @@ define('AWS_CAN_DELETE_OBJECT', 2);
  * [Description client]
  */
 class client extends object_client_base {
-
     /**
      * @var int A predefined limit of data stored.
      * When hit, php://temp will use a temporary file.
@@ -455,42 +454,70 @@ class client extends object_client_base {
             'bucket-owner-full-control' => 'bucket-owner-full-control',
         ];
 
-        $settings->add(new \admin_setting_heading('tool_objectfs/aws',
-            new \lang_string('settings:aws:header', 'tool_objectfs'), $this->define_client_check()));
+        $settings->add(new \admin_setting_heading(
+            'tool_objectfs/aws',
+            new \lang_string('settings:aws:header', 'tool_objectfs'),
+            $this->define_client_check()
+        ));
 
-        $settings->add(new \admin_setting_configcheckbox('tool_objectfs/s3_usesdkcreds',
+        $settings->add(new \admin_setting_configcheckbox(
+            'tool_objectfs/s3_usesdkcreds',
             new \lang_string('settings:aws:usesdkcreds', 'tool_objectfs'),
-            $this->define_client_check_sdk($config), ''));
+            $this->define_client_check_sdk($config),
+            ''
+        ));
 
         if (empty($config->s3_usesdkcreds)) {
-            $settings->add(new \admin_setting_configtext('tool_objectfs/s3_key',
+            $settings->add(new \admin_setting_configtext(
+                'tool_objectfs/s3_key',
                 new \lang_string('settings:aws:key', 'tool_objectfs'),
-                new \lang_string('settings:aws:key_help', 'tool_objectfs'), ''));
+                new \lang_string('settings:aws:key_help', 'tool_objectfs'),
+                ''
+            ));
 
-            $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/s3_secret',
+            $settings->add(new \admin_setting_configpasswordunmask(
+                'tool_objectfs/s3_secret',
                 new \lang_string('settings:aws:secret', 'tool_objectfs'),
-                new \lang_string('settings:aws:secret_help', 'tool_objectfs'), ''));
+                new \lang_string('settings:aws:secret_help', 'tool_objectfs'),
+                ''
+            ));
         }
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/s3_bucket',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/s3_bucket',
             new \lang_string('settings:aws:bucket', 'tool_objectfs'),
-            new \lang_string('settings:aws:bucket_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:aws:bucket_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configselect('tool_objectfs/s3_bucket_acl',
+        $settings->add(new \admin_setting_configselect(
+            'tool_objectfs/s3_bucket_acl',
             new \lang_string('settings:aws:bucket_acl', 'tool_objectfs'),
-            new \lang_string('settings:aws:bucket_acl_help', 'tool_objectfs'), 'private', $acloptions));
+            new \lang_string('settings:aws:bucket_acl_help', 'tool_objectfs'),
+            'private',
+            $acloptions
+        ));
 
-        $settings->add(new admin_settings_aws_region('tool_objectfs/s3_region',
+        $settings->add(new admin_settings_aws_region(
+            'tool_objectfs/s3_region',
             new \lang_string('settings:aws:region', 'tool_objectfs'),
-            new \lang_string('settings:aws:region_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:aws:region_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/s3_base_url',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/s3_base_url',
             new \lang_string('settings:aws:base_url', 'tool_objectfs'),
-            new \lang_string('settings:aws:base_url_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:aws:base_url_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/key_prefix',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/key_prefix',
             new \lang_string('settings:aws:key_prefix', 'tool_objectfs'),
-            new \lang_string('settings:aws:key_prefix_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:aws:key_prefix_help', 'tool_objectfs'),
+            ''
+        ));
 
         return $settings;
     }
@@ -514,7 +541,8 @@ class client extends object_client_base {
         try {
             $externalpath = $this->get_filepath_from_hash($contenthash);
             $uploader = new \Aws\S3\ObjectUploader(
-                $this->client, $this->bucket,
+                $this->client,
+                $this->bucket,
                 $this->bucketkeyprefix . $externalpath,
                 $filehandle,
                 $this->bucketacl,
@@ -754,7 +782,7 @@ class client extends object_client_base {
         if (!empty($CFG->proxyhost)) {
             $proxy = $CFG->proxyhost;
             if (!empty($CFG->proxyport)) {
-                $proxy .= ':'. $CFG->proxyport;
+                $proxy .= ':' . $CFG->proxyport;
             }
             if (!empty($CFG->proxyuser) && !empty($CFG->proxypassword)) {
                 $proxy = $CFG->proxyuser . ':' . $CFG->proxypassword . '@' . $proxy;
@@ -876,8 +904,11 @@ class client extends object_client_base {
         foreach ($testfiles as $file) {
             if ($file->get_filename() == 'testvideo.mp4') {
                 $ranges = (object)['rangefrom' => 0, 'rangeto' => 999, 'length' => 1000];
-                $response = $this->curl_range_request_to_presigned_url($file->get_contenthash(),
-                    $ranges, ['Expires' => time() + HOURSECS]);
+                $response = $this->curl_range_request_to_presigned_url(
+                    $file->get_contenthash(),
+                    $ranges,
+                    ['Expires' => time() + HOURSECS]
+                );
                 $httpcode = manager::get_header($response['responseheaders'], 'HTTP/1.1');
                 if ($response['content'] != '' && $httpcode == '206 Partial Content') {
                     return (object)['result' => true];

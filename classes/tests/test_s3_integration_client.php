@@ -26,7 +26,6 @@ use tool_objectfs\local\store\s3\client;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class test_s3_integration_client extends client {
-
     /**
      * @var string
      */
@@ -54,6 +53,4 @@ class test_s3_integration_client extends client {
         $runidentifier = $this->runidentifier;
         return "test/$runidentifier/$l1/$l2/$contenthash";
     }
-
 }
-

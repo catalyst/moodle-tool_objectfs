@@ -31,5 +31,4 @@ use tool_objectfs\local\store\azure\file_system;
  * Unknown?
  */
 class azure_file_system extends file_system {
-
 }

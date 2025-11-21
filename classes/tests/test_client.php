@@ -207,4 +207,3 @@ class test_client extends object_client_base {
         return $CFG->phpunit_objectfs_supports_object_tagging;
     }
 }
-

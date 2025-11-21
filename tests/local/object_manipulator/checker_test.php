@@ -27,7 +27,6 @@ use tool_objectfs\local\manager;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class checker_test extends \tool_objectfs\tests\testcase {
-
     /** @var string $manipulator */
     protected $manipulator = checker::class;
 

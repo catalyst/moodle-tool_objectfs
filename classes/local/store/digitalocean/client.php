@@ -31,7 +31,6 @@ use tool_objectfs\local\store\s3\client as s3_client;
  * client
  */
 class client extends s3_client {
-
     /**
      * construct
      * @param \stdClass $config
@@ -105,26 +104,41 @@ class client extends s3_client {
             'fra1'      => 'fra1 (Frankfurt)',
         ];
 
-        $settings->add(new \admin_setting_heading('tool_objectfs/do',
-            new \lang_string('settings:do:header', 'tool_objectfs'), ''));
+        $settings->add(new \admin_setting_heading(
+            'tool_objectfs/do',
+            new \lang_string('settings:do:header', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/do_key',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/do_key',
             new \lang_string('settings:do:key', 'tool_objectfs'),
-            new \lang_string('settings:do:key_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:do:key_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/do_secret',
+        $settings->add(new \admin_setting_configpasswordunmask(
+            'tool_objectfs/do_secret',
             new \lang_string('settings:do:secret', 'tool_objectfs'),
-            new \lang_string('settings:do:secret_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:do:secret_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/do_space',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/do_space',
             new \lang_string('settings:do:space', 'tool_objectfs'),
-            new \lang_string('settings:do:space_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:do:space_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configselect('tool_objectfs/do_region',
+        $settings->add(new \admin_setting_configselect(
+            'tool_objectfs/do_region',
             new \lang_string('settings:do:region', 'tool_objectfs'),
-            new \lang_string('settings:do:region_help', 'tool_objectfs'), '', $regionoptions));
+            new \lang_string('settings:do:region_help', 'tool_objectfs'),
+            '',
+            $regionoptions
+        ));
 
         return $settings;
     }
-
 }

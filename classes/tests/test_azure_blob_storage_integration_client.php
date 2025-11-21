@@ -55,6 +55,4 @@ class test_azure_blob_storage_integration_client extends client {
         $runidentifier = $this->runidentifier;
         return "test/$runidentifier/$l1/$l2/$contenthash";
     }
-
 }
-

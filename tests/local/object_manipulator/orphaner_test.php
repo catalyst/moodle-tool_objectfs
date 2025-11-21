@@ -28,7 +28,6 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class orphaner_test extends \tool_objectfs\tests\testcase {
-
     /** @var string $manipulator */
     protected $manipulator = orphaner::class;
 
@@ -125,5 +124,4 @@ final class orphaner_test extends \tool_objectfs\tests\testcase {
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location2);
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location3);
     }
-
 }

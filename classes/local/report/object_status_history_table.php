@@ -36,7 +36,6 @@ require_once($CFG->libdir . '/tablelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class object_status_history_table extends \table_sql {
-
     /** @var string $reporttype */
     protected $reporttype = '';
 
@@ -206,7 +205,7 @@ class object_status_history_table extends \table_sql {
             $share = round(100 * $value / $max, $precision);
         }
         $background = $this->reporttype === 'location' ? $this->get_file_location_class($heading) : 'table-info';
-        $htmlparams = ['class' => "ofs-bar $background", 'style' => 'width:'.$share.'%'];
+        $htmlparams = ['class' => "ofs-bar $background", 'style' => 'width:' . $share . '%'];
 
         switch ($type) {
             case 'count':
@@ -218,7 +217,7 @@ class object_status_history_table extends \table_sql {
                 break;
 
             case 'runningsize':
-                $text = number_format($share, $precision). '% (' . display_size($value) . ')';
+                $text = number_format($share, $precision) . '% (' . display_size($value) . ')';
                 $output = \html_writer::tag('div', $text, $htmlparams);
                 break;
 

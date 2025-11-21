@@ -29,7 +29,6 @@ namespace tool_objectfs\local\report;
  * objectfs_report
  */
 class objectfs_report implements \renderable {
-
     /**
      * reporttype
      * @var string

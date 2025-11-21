@@ -35,7 +35,6 @@ use stdClass;
  * orphaner
  */
 class orphaner extends manipulator {
-
     /**
      * Updates the location of {tool_objectfs_objects} records for files that
      * have been deleted from the core {files} table.

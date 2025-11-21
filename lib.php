@@ -82,8 +82,15 @@ define('TOOL_OBJECTFS_DELETE_EXTERNAL_FULL', 2);
  * @return bool
  * @throws coding_exception
  */
-function tool_objectfs_pluginfile($course, $cm, context $context, $filearea, array $args, bool $forcedownload,
-    array $options = []) {
+function tool_objectfs_pluginfile(
+    $course,
+    $cm,
+    context $context,
+    $filearea,
+    array $args,
+    bool $forcedownload,
+    array $options = []
+) {
 
     $fs = get_file_storage();
     $file = $fs->get_file($context->id, OBJECTFS_PLUGIN_NAME, $filearea, $args[0], '/', $args[1]);

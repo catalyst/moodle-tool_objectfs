@@ -35,7 +35,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  * [Description file_system]
  */
 class file_system extends object_file_system {
-
     /**
      * initialise_external_client
      * @param \stdClass $config

@@ -32,7 +32,6 @@ use tool_objectfs\local\manager;
  * [Description client]
  */
 class client extends object_client_base {
-
     /** @var string $containername The current container. */
     protected $containername;
 
@@ -73,19 +72,18 @@ class client extends object_client_base {
             'scope'   => ['project' => ['id' => $this->config->openstack_projectid]],
         ];
 
-        if (!isset($this->config->openstack_authtoken['expires_at'])
+        if (
+            !isset($this->config->openstack_authtoken['expires_at'])
             || (
                 new \DateTimeImmutable($this->config->openstack_authtoken['expires_at']))
                 <
                 ( (new \DateTimeImmutable('now'))->add(new \DateInterval('PT1H'))
             )
         ) {
-
             $lockfactory = \core\lock\lock_config::get_lock_factory('tool_objectfs_swift');
 
             // Try and get a lock and do the renewal.
             if ($lock = $lockfactory->get_lock('authtoken', 1)) {
-
                 try {
                     $openstack = new \OpenStack\OpenStack($endpoint);
                     $this->config->openstack_authtoken = $openstack->identityV3()->generateToken($endpoint)->export();
@@ -104,7 +102,7 @@ class client extends object_client_base {
             new \DateTimeImmutable($this->config->openstack_authtoken['expires_at'])
             >
             new \DateTimeImmutable('now')
-           ) {
+        ) {
             $endpoint['cachedToken'] = $this->config->openstack_authtoken;
         }
 
@@ -125,7 +123,6 @@ class client extends object_client_base {
         $openstack = new \OpenStack\OpenStack($params);
 
         return $openstack->objectStoreV1()->getContainer($this->containername);
-
     }
 
     /**
@@ -144,11 +141,9 @@ class client extends object_client_base {
             \tool_objectfs\local\store\swift\stream_wrapper::set_default_context($this->get_seekable_stream_context());
 
             $bootstraped = true;
-
         } else {
             parent::register_stream_wrapper();
         }
-
     }
 
     /**
@@ -193,13 +188,11 @@ class client extends object_client_base {
      */
     private function get_md5_from_hash($contenthash) {
         try {
-
             $key = $this->get_filepath_from_hash($contenthash);
 
             $obj = $this->get_container()->getObject($key);
 
             $obj->retrieve();
-
         } catch (\OpenStack\Common\Error\BadResponseError $e) {
             return false;
         }
@@ -306,7 +299,6 @@ class client extends object_client_base {
             $details = $this->get_exception_details($e);
             $permissions->messages[get_string('settings:permissionreadfailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
-
         }
 
         try {
@@ -314,7 +306,6 @@ class client extends object_client_base {
             $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
             $permissions->success = false;
         } catch (\Exception $e) {
-
             $code = $this->get_error_code($e);
 
             // Bug in openstack means that a 404 will be returned if an object has not been replicated.
@@ -358,36 +349,60 @@ class client extends object_client_base {
      */
     public function define_client_section($settings, $config) {
 
-        $settings->add(new \admin_setting_heading('tool_objectfs/openstack',
-            new \lang_string('settings:openstack:header', 'tool_objectfs'), $this->define_client_check()));
+        $settings->add(new \admin_setting_heading(
+            'tool_objectfs/openstack',
+            new \lang_string('settings:openstack:header', 'tool_objectfs'),
+            $this->define_client_check()
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_authurl',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/openstack_authurl',
             new \lang_string('settings:openstack:authurl', 'tool_objectfs'),
-            new \lang_string('settings:openstack:authurl_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:authurl_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_region',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/openstack_region',
             new \lang_string('settings:openstack:region', 'tool_objectfs'),
-            new \lang_string('settings:openstack:region_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:region_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_container',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/openstack_container',
             new \lang_string('settings:openstack:container', 'tool_objectfs'),
-            new \lang_string('settings:openstack:container_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:container_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_username',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/openstack_username',
             new \lang_string('settings:openstack:username', 'tool_objectfs'),
-            new \lang_string('settings:openstack:username_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:username_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configpasswordunmask('tool_objectfs/openstack_password',
+        $settings->add(new \admin_setting_configpasswordunmask(
+            'tool_objectfs/openstack_password',
             new \lang_string('settings:openstack:password', 'tool_objectfs'),
-            new \lang_string('settings:openstack:password', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:password', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_tenantname',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/openstack_tenantname',
             new \lang_string('settings:openstack:tenantname', 'tool_objectfs'),
-            new \lang_string('settings:openstack:tenantname_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:tenantname_help', 'tool_objectfs'),
+            ''
+        ));
 
-        $settings->add(new \admin_setting_configtext('tool_objectfs/openstack_projectid',
+        $settings->add(new \admin_setting_configtext(
+            'tool_objectfs/openstack_projectid',
             new \lang_string('settings:openstack:projectid', 'tool_objectfs'),
-            new \lang_string('settings:openstack:projectid_help', 'tool_objectfs'), ''));
+            new \lang_string('settings:openstack:projectid_help', 'tool_objectfs'),
+            ''
+        ));
 
         return $settings;
     }
