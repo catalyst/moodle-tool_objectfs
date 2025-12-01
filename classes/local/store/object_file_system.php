@@ -948,6 +948,12 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function presigned_url_should_redirect_file($file) {
+
+        // Core will throw an exception is we try to redirect inside cli or ajax.
+        if (CLI_SCRIPT || AJAX_SCRIPT) {
+            return false;
+        }
+
         // Redirect when the file size is bigger than presignedminfilesize setting
         // and file extension is whitelisted.
         return ($file->get_filesize() >= $this->externalclient->presignedminfilesize &&
