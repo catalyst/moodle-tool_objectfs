@@ -170,6 +170,8 @@ class client extends object_client_base {
             'version' => AWS_API_VERSION,
         ];
 
+        $options['use_path_style_endpoint'] = !empty($config->use_path_style_endpoint);
+
         if (empty($config->s3_usesdkcreds)) {
             $options['credentials'] = ['key' => $config->s3_key, 'secret' => $config->s3_secret];
         }
@@ -518,6 +520,10 @@ class client extends object_client_base {
             new \lang_string('settings:aws:key_prefix_help', 'tool_objectfs'),
             ''
         ));
+
+        $settings->add(new \admin_setting_configcheckbox('tool_objectfs/use_path_style_endpoint',
+            new \lang_string('settings:aws:use_path_style_endpoint', 'tool_objectfs'),
+            new \lang_string('settings:aws:use_path_style_endpoint_help', 'tool_objectfs'), 1));
 
         return $settings;
     }
