@@ -135,6 +135,8 @@ $string['settings:aws:key'] = 'Key';
 $string['settings:aws:key_help'] = 'Amazon S3 key credential.';
 $string['settings:aws:key_prefix'] = 'Prefix to use in bucket';
 $string['settings:aws:key_prefix_help'] = 'Prefix to use inside Amazon S3 bucket. Must end with trailing slash when set. Leave blank to use root of bucket.';
+$string['settings:aws:path_style_endpoint'] = 'Path style endpoint';
+$string['settings:aws:path_style_endpoint_help'] = 'Use path style endpoints for S3 client.';
 $string['settings:aws:region'] = 'region';
 $string['settings:aws:region_help'] = 'Amazon S3 API gateway region.';
 $string['settings:aws:sdkcredserror'] = 'Couldn\'t find AWS credentials. It\'s unsafe to enable this setting. Follow up <a href="https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html">AWS documentation</a>.';
