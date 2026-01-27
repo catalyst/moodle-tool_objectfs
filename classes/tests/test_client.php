@@ -142,6 +142,18 @@ class test_client extends object_client_base {
     }
 
     /**
+     * define_client_section
+     * @param mixed $settings
+     * @param mixed $config
+     *
+     * @return mixed
+     */
+    public function define_client_section($settings, $config) {
+        // No settings required for the test client.
+        return $settings;
+    }
+
+    /**
      * test_connection
      * @return \stdClass
      */

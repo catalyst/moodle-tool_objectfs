@@ -273,10 +273,10 @@ class client extends object_client_base {
      * Shared Access Signature.
      *
      * @param admin_settingpage $settings
-     * @param  \stdClass $config
+     * @param object $config
      * @return admin_settingpage
      */
-    public function define_client_section($settings, $config): admin_settingpage {
+    public function define_client_section($settings, $config) {
         $settings->add(new \admin_setting_heading(
             'tool_objectfs/azure',
             new \lang_string('settings:azure:header', 'tool_objectfs'),
