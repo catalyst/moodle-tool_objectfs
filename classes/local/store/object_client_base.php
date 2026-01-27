@@ -112,6 +112,16 @@ abstract class object_client_base implements object_client {
     }
 
     /**
+     * Defines the setting section for the client. Logic is implemented by child classes.
+     *
+     * @param admin_settingpage $settings
+     * @param object $config
+     * @return admin_settingpage
+     */
+    abstract public function define_client_section($settings, $config);
+
+
+    /**
      * Moodle admin settings form to display connection details for the client service.
      *
      * @return string

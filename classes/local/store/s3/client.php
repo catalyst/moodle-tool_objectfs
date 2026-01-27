@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\store\s3;
 
+use admin_setting;
 use coding_exception;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;

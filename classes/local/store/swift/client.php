@@ -344,7 +344,7 @@ class client extends object_client_base {
      * swift settings form with the following elements:
      *
      * @param \admin_settingpage $settings
-     * @param \stdClass $config
+     * @param object $config
      * @return \admin_settingpage
      */
     public function define_client_section($settings, $config) {
