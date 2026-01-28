@@ -214,7 +214,7 @@ if ($ADMIN->fulltree) {
     ));
 
     $client = \tool_objectfs\local\manager::get_client($config);
-    if ($client && $client->get_availability() && $objectfspage) {
+    if ($client && $client->get_availability()) {
         $settings = $client->define_client_section($settings, $config);
     }
 
