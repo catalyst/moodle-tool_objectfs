@@ -334,6 +334,9 @@ class client extends object_client_base {
         } catch (\Aws\Exception\CredentialsException $e) {
             $connection->success = false;
             $connection->details = $this->get_exception_details($e);
+        } catch (\Aws\Auth\Exception\UnresolvedAuthSchemeException $e) {
+            $connection->success = false;
+            $connection->details = $this->get_exception_details($e);
         }
 
         return $connection;
