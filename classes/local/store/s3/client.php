@@ -185,7 +185,7 @@ class client extends object_client_base {
         }
 
         if (!empty($config->s3_path_style_endpoint)) {
-            $options['use_path_style_endpoint'] = $config->s3_path_style_endpoint;
+            $options['use_path_style_endpoint'] = (bool) $config->s3_path_style_endpoint;
         }
 
         $this->client = \Aws\S3\S3Client::factory($options);
