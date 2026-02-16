@@ -818,6 +818,14 @@ class client extends object_client_base {
         global $OUTPUT;
         $output = '';
         if (empty($config->s3_usesdkcreds)) {
+            // If AWS_ACCESS_KEY_ID is missing from the environment, we assume 
+            // no SDK credentials are available. This prevents the AWS SDK from 
+            // falling back to the Instance Metadata Service
+            // which causes a 5+ second connection timeout on non-AWS environments.
+            if (!getenv('AWS_ACCESS_KEY_ID')) {
+                return '';
+            }
+
             $config->s3_usesdkcreds = 1;
             $this->set_client($config);
             $connection = $this->test_connection();
