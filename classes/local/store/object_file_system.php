@@ -718,7 +718,11 @@ abstract class object_file_system extends \file_system_filedir {
             // Don't remove the file - it's still in use.
             return;
         }
-        $this->delete_object_from_hash($contenthash);
+        if ($this->deleteexternally == TOOL_OBJECTFS_DELETE_EXTERNAL_FULL) {
+            $this->delete_object_from_hash($contenthash);
+        } else if ($this->is_file_readable_locally_by_hash($contenthash)) {
+            $this->delete_local_file_from_hash($contenthash);
+        }
     }
 
     /**
