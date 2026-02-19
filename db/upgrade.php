@@ -220,5 +220,15 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024120600, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2025082701) {
+        $table = new xmldb_table('tool_objectfs_objects');
+        $index = new xmldb_index('tagsyncstatus_idx', XMLDB_INDEX_NOTUNIQUE, ['tagsyncstatus']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2025082701, 'tool', 'objectfs');
+    }
+
     return true;
 }
