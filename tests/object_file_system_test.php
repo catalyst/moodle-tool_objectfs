@@ -293,40 +293,6 @@ final class object_file_system_test extends tests\testcase {
         ];
     }
 
-    /**
-     * test_delete_empty_folders_provider
-     * @dataProvider delete_empty_folders_provider
-     * @param array $dirs Dirs to be created.
-     * @param array $files Files to be created.
-     * @param array $expectedparentreadable Indicates whether a dir will remain after calling 'delete_empty_folders'.
-     * @param bool $expectedgrandparentpathreadable If grandparent dir exists after calling 'delete_empty_folders'.
-     */
-    public function test_delete_empty_folders(
-        $dirs,
-        $files,
-        $expectedparentreadable,
-        $expectedgrandparentpathreadable
-    ): void {
-        global $CFG;
-        $testdir = $CFG->dataroot . '/filedir/test';
-        foreach ($dirs as $key => $dir) {
-            $fullpath = $testdir . $dir;
-            mkdir($fullpath, 0777, true);
-            $file = !empty($files[$key]) ? $files[$key] : '';
-            if ($file !== '') {
-                touch($fullpath . '/' . $file);
-            }
-        }
-        $this->filesystem->delete_empty_dirs($testdir);
-        foreach ($dirs as $key => $dir) {
-            $this->assertEquals($expectedparentreadable[$key], is_readable($testdir . $dir));
-        }
-        $this->assertEquals($expectedgrandparentpathreadable, is_readable($testdir));
-
-        // Totara 12 clean-up.
-        remove_dir($testdir);
-    }
-
     public function test_readfile_if_object_is_local(): void {
         $expectedcontent = 'expected content';
         $file = $this->create_local_file($expectedcontent);

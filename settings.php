@@ -132,6 +132,14 @@ if ($ADMIN->fulltree) {
         DAYSECS
     ));
 
+    $settings->add(new admin_setting_configduration(
+        'tool_objectfs/minorphanedage',
+        new lang_string('settings:minorphanedage', 'tool_objectfs'),
+        new lang_string('settings:minorphanedage_help', 'tool_objectfs'),
+        2678400,
+        DAYSECS
+    ));
+
     $settings->add(new admin_setting_configcheckbox(
         'tool_objectfs/enablelogging',
         new lang_string('settings:enablelogging', 'tool_objectfs'),

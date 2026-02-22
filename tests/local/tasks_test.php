@@ -49,10 +49,10 @@ final class tasks_test extends \tool_objectfs\tests\testcase {
 
         $scheduledtasknames = [
             'delete_local_objects',
-            'delete_local_empty_directories',
             'generate_status_report',
             'pull_objects_from_storage',
             'push_objects_to_storage',
+            'reconcile_filedir',
             'recover_error_objects',
             'check_objects_location',
             'delete_orphaned_object_metadata',
