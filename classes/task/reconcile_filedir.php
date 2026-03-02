@@ -180,10 +180,7 @@ class reconcile_filedir extends task {
                         set_config('reconcile_file_lasthash', $lasthash, 'tool_objectfs');
                         mtrace("ObjectFS: Time limit reached.");
                         mtrace("ObjectFS: Finishing on hash {$lasthash}");
-                        mtrace(
-                            "ObjectFS: Processed {$processed}, deleted {$deleted}, " .
-                            "inserted {$inserted}, updated {$updated}, skipped {$skipped}."
-                        );
+                        $this->log_summary($processed, $deleted, $inserted, $updated, $skipped);
                         return;
                     }
 
@@ -282,10 +279,7 @@ class reconcile_filedir extends task {
                             \core\task\manager::static_caches_cleared_since($cronstart)
                         ) {
                             mtrace("ObjectFS: Graceful shutdown requested.");
-                            mtrace(
-                                "ObjectFS: Processed {$processed}, deleted {$deleted}, " .
-                                "inserted {$inserted}, updated {$updated}."
-                            );
+                            $this->log_summary($processed, $deleted, $inserted, $updated, $skipped);
                             return;
                         }
                     }
@@ -306,6 +300,29 @@ class reconcile_filedir extends task {
         if ($lasthash) {
             mtrace("ObjectFS: Finished on hash {$lasthash}");
         }
+        $this->log_summary($processed, $deleted, $inserted, $updated, $skipped);
+    }
+
+    /**
+     * Outputs a reconciliation summary to CLI.
+     *
+     * Logs the total number of processed, deleted, inserted, updated,
+     * and skipped files for the current execution cycle.
+     *
+     * @param int $processed Total number of files processed.
+     * @param int $deleted   Total number of files deleted.
+     * @param int $inserted  Total number of ObjectFS records inserted.
+     * @param int $updated   Total number of ObjectFS records updated.
+     * @param int $skipped   Total number of files skipped.
+     * @return void
+     */
+    private function log_summary(
+        int $processed,
+        int $deleted,
+        int $inserted,
+        int $updated,
+        int $skipped
+    ): void {
         mtrace(
             "ObjectFS: Processed {$processed}, deleted {$deleted}, " .
             "inserted {$inserted}, updated {$updated}, skipped {$skipped}."
