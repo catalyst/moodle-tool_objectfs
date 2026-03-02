@@ -585,11 +585,18 @@ class stream_wrapper {
         }
 
         try {
-            $this->object = $this->container->createObject([
-                'name' => $this->objectname,
-                'stream' => $this->objstream,
-            ]);
-
+            if ($this->objstream->getSize() > 5368709120) {
+                 $this->object = $this->container->createLargeObject([
+                    'name' => $this->objectname,
+                    'stream' => $this->objstream,
+                    'segmentContainer' => $this->container->name.'+segments',
+                ]);
+            } else {
+                $this->object = $this->container->createObject([
+                    'name' => $this->objectname,
+                    'stream' => $this->objstream,
+                ]);
+            }
             return true;
         } catch (\Exception $e) {
             trigger_error("Object creation failed", E_USER_WARNING);

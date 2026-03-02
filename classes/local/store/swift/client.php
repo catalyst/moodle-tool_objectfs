@@ -46,7 +46,7 @@ class client extends object_client_base {
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
-            $this->maxupload = 5368709120; // 5GiB.
+            $this->maxupload = OBJECTFS_BYTES_IN_TERABYTE * 5;
             $this->containername = $config->openstack_container;
             $config->openstack_authtoken = unserialize($config->openstack_authtoken);
             $this->config = $config;
