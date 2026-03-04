@@ -68,6 +68,10 @@ class reconcile_filedir extends task {
         $updated   = 0;
         $skipped   = 0;
 
+        // Time-based checkpoint tracking.
+        $lastcheckpoint = time();
+        $checkpointinterval = 10;
+
         // Get the path to the filedir.
         if (isset($CFG->filedir)) {
             $filedir = $CFG->filedir;
@@ -262,13 +266,18 @@ class reconcile_filedir extends task {
 
                     // Persist progress frequently for safety.
                     //
-                    // Every 100 files, we save our place in the traversal so the
-                    // task can resume safely without reprocessing or skipping
+                    // Every 100 files or every 10 seconds,
+                    // we save our place in the traversal so the task can
+                    // resume safely without reprocessing or skipping
                     // too many files.
                     //
                     // We do not want to set_config every loop, that would be slow.
                     $processed++;
-                    if ($processed % 100 === 0) {
+                    $now = time();
+                    if (
+                        $processed % 100 === 0 ||
+                        ($now - $lastcheckpoint) >= $checkpointinterval
+                    ) {
                         set_config('reconcile_file_lasthash', $lasthash, 'tool_objectfs');
 
                         mtrace("ObjectFS: Checkpoint at {$processed} files. Current hash {$lasthash}");
