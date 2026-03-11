@@ -226,6 +226,28 @@ class client extends object_client_base {
     }
 
     /**
+     * Check if the client configured properly.
+     *
+     * @param \stdClass $config Client config.
+     * @return bool
+     */
+    public function is_configured($config) {
+        if (empty($config->azure_container)) {
+            return false;
+        }
+
+        if (empty($config->azure_accountname)) {
+            return false;
+        }
+
+        if (empty($config->azure_sastoken)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Tests connection
      * @return stdClass with 'success' and 'details' values.
      */
@@ -280,7 +302,7 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_heading(
             'tool_objectfs/azure',
             new \lang_string('settings:azure:header', 'tool_objectfs'),
-            $this->define_client_check()
+            ''
         ));
 
         $settings->add(new \admin_setting_configtext(

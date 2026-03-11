@@ -61,7 +61,7 @@ class client extends s3_client {
      * @param \stdClass $config Client config.
      * @return bool
      */
-    protected function is_configured($config) {
+    public function is_configured($config) {
         if (empty($config->do_key) || empty($config->do_secret) || empty($config->do_region)) {
             return false;
         }
