@@ -111,6 +111,7 @@ function tool_objectfs_pluginfile(
 function tool_objectfs_status_checks() {
     $checks = [
         new tool_objectfs\check\token_expiry(),
+        new tool_objectfs\check\connection(),
     ];
     if (get_config('tool_objectfs', 'taggingenabled') == '1') {
         $checks += [

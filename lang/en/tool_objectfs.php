@@ -25,6 +25,9 @@
  */
 
 $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up https://github.com/catalyst/moodle-tool_objectfs#applying-core-patches';
+$string['check:connection:error'] = 'Could not establish connection to the object store: {$a}';
+$string['check:connection:na'] = 'No object store client is configured';
+$string['check:connection:ok'] = 'Connection to the object store is working';
 $string['check:proxyrangerequestsdisabled'] = 'The proxy range request setting is disabled.';
 $string['check:tagging:error'] = 'Error trying to tag object';
 $string['check:tagging:migrationerror'] = 'Object tagging migration task(s) have faildelay > 0';
@@ -37,12 +40,14 @@ $string['check:tokenexpiry:expired'] = 'Token expired for {$a->dayssince} days. 
 $string['check:tokenexpiry:expiresin'] = 'Token expires in {$a->dayssince} days on {$a->time}';
 $string['check:tokenexpiry:na'] = 'Token expiry check not implemented for filesystem, or no token is set';
 $string['check_objects_location_task'] = 'Object file system check objects location task';
+$string['checkconnection'] = 'Object store connection status';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
 $string['checktagging_migration_status'] = 'Object tagging migration status';
 $string['checktagging_status'] = 'Object tagging';
 $string['checktagging_sync_status'] = 'Object tagging sync status';
 $string['checktoken_expiry'] = 'Token expiry';
 $string['client_not_available'] = 'The configured remote client is not available. Please ensure it is installed correctly.';
+$string['connectionstatus'] = 'Connection status';
 $string['delete_local_empty_directories_task'] = 'Object file system delete local empty directories task';
 $string['delete_local_objects_task'] = 'Object file system delete local objects task';
 $string['delete_orphaned_object_metadata_task'] = 'Object file system delete orphaned metadata task';

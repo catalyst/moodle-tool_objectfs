@@ -110,6 +110,36 @@ class client extends object_client_base {
     }
 
     /**
+     * Check if the client configured properly.
+     *
+     * @param \stdClass $config Client config.
+     * @return bool
+     */
+    public function is_configured($config) {
+        if (empty($config->openstack_authurl)) {
+            return false;
+        }
+
+        if (empty($config->openstack_username)) {
+            return false;
+        }
+
+        if (empty($config->openstack_password)) {
+            return false;
+        }
+
+        if (empty($config->openstack_projectid)) {
+            return false;
+        }
+
+        if (empty($config->openstack_region)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * get_container
      * @return mixed
      */
@@ -352,7 +382,7 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_heading(
             'tool_objectfs/openstack',
             new \lang_string('settings:openstack:header', 'tool_objectfs'),
-            $this->define_client_check()
+            ''
         ));
 
         $settings->add(new \admin_setting_configtext(

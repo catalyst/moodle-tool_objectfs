@@ -23,6 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_objectfs\check\connection;
 use tool_objectfs\check\token_expiry;
 use tool_objectfs\check\tagging_migration_status;
 use tool_objectfs\check\tagging_sync_status;
@@ -442,6 +443,15 @@ if ($ADMIN->fulltree) {
         get_string('settings:overrideobjecttags:desc', 'tool_objectfs'),
         1
     ));
+
+    // Connection status.
+    $settings->add(new admin_setting_heading(
+        'tool_objectfs/connectionstatus',
+        new lang_string('connectionstatus', 'tool_objectfs'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_check('tool_objectfs/check_connectionstatus', new connection(), true));
 
     // Tagging status.
     $settings->add(new admin_setting_heading(

@@ -120,37 +120,6 @@ abstract class object_client_base implements object_client {
      */
     abstract public function define_client_section($settings, $config);
 
-
-    /**
-     * Moodle admin settings form to display connection details for the client service.
-     *
-     * @return string
-     * @throws /coding_exception
-     */
-    public function define_client_check() {
-        global $OUTPUT;
-        $output = '';
-        $connection = $this->test_connection();
-        if ($connection->success) {
-            $output .= $OUTPUT->notification(get_string('settings:connectionsuccess', 'tool_objectfs'), 'notifysuccess');
-            // Check permissions if we can connect.
-            $permissions = $this->test_permissions($this->should_test_delete());
-            if ($permissions->success) {
-                $output .= $OUTPUT->notification(key($permissions->messages), 'notifysuccess');
-            } else {
-                foreach ($permissions->messages as $message => $type) {
-                    $output .= $OUTPUT->notification($message, $type);
-                }
-            }
-        } else {
-            $output .= $OUTPUT->notification(
-                get_string('settings:connectionfailure', 'tool_objectfs', $connection->details),
-                'notifyproblem'
-            );
-        }
-        return $output;
-    }
-
     /**
      * Returns the maximum allowed file size that is to be uploaded.
      *
