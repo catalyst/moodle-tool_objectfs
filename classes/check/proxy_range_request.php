@@ -51,6 +51,10 @@ class proxy_range_request extends check {
             $signingsupport = (new $config->filesystem())->supports_presigned_urls();
         }
 
+        if (!$client) {
+            return new result(result::UNKNOWN, get_string('check:proxyrangerequestsdisabled', 'tool_objectfs'));
+        }
+
         $testconn = $client->test_connection();
         $connstatus = $testconn->success;
 
