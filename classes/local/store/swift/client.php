@@ -72,10 +72,14 @@ class client extends object_client_base {
             'scope'   => ['project' => ['id' => $this->config->openstack_projectid]],
         ];
 
+        // Try to get token from cache first.
+        $cache = \cache::make('tool_objectfs', 'openstack_authtoken');
+        $cachedtoken = $cache->get('openstack_authtoken');
+
         if (
-            !isset($this->config->openstack_authtoken['expires_at'])
+            !isset($cachedtoken['expires_at'])
             || (
-                new \DateTimeImmutable($this->config->openstack_authtoken['expires_at']))
+                new \DateTimeImmutable($cachedtoken['expires_at']))
                 <
                 ( (new \DateTimeImmutable('now'))->add(new \DateInterval('PT1H'))
             )
@@ -86,8 +90,10 @@ class client extends object_client_base {
             if ($lock = $lockfactory->get_lock('authtoken', 1)) {
                 try {
                     $openstack = new \OpenStack\OpenStack($endpoint);
-                    $this->config->openstack_authtoken = $openstack->identityV3()->generateToken($endpoint)->export();
-                    manager::set_objectfs_config(['openstack_authtoken' => serialize($this->config->openstack_authtoken)]);
+                    $newtoken = $openstack->identityV3()->generateToken($endpoint)->export();
+                    // Store token in cache.
+                    $cache->set('openstack_authtoken', $newtoken);
+                    $cachedtoken = $newtoken;
                     $lock->release();
                 } catch (\Exception $e) {
                     $lock->release();
@@ -97,13 +103,13 @@ class client extends object_client_base {
 
         // Use the token if it's valid, otherwise clients will need to use username/password auth.
         if (
-            isset($this->config->openstack_authtoken['expires_at'])
+            isset($cachedtoken['expires_at'])
             &&
-            new \DateTimeImmutable($this->config->openstack_authtoken['expires_at'])
+            new \DateTimeImmutable($cachedtoken['expires_at'])
             >
             new \DateTimeImmutable('now')
         ) {
-            $endpoint['cachedToken'] = $this->config->openstack_authtoken;
+            $endpoint['cachedToken'] = $cachedtoken;
         }
 
         return $endpoint;
@@ -193,8 +199,9 @@ class client extends object_client_base {
      * @return resource
      */
     public function get_seekable_stream_context() {
+        // Ensure valid token or refresh it.
+        $endpoint = $this->get_endpoint();
 
-        $this->get_endpoint();
         $context = stream_context_create([
             "swift" => [
                 'username' => $this->config->openstack_username,
@@ -203,7 +210,7 @@ class client extends object_client_base {
                 'tenantname' => $this->config->openstack_tenantname,
                 'endpoint' => $this->config->openstack_authurl,
                 'region' => $this->config->openstack_region,
-                'cachedtoken' => $this->config->openstack_authtoken,
+                'cachedtoken' => $endpoint['cachedToken'],
             ],
         ]);
         return $context;
