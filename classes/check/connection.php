@@ -48,7 +48,6 @@ class connection extends check {
         $config = manager::get_objectfs_config();
         $client = manager::get_client($config);
 
-
         if (empty($client) || !$client->is_configured($config)) {
             return new result(result::NA, get_string('check:connection:na', 'tool_objectfs'));
         }
