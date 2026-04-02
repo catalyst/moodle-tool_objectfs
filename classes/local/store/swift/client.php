@@ -55,6 +55,20 @@ class client extends object_client_base {
         }
     }
 
+    public function get_availability() {
+        $result = parent::get_availability();
+        // local_openstack exists, check dependency is high enough version for
+        // large file support.
+        if ($result) {
+            $requirements = [
+                'local_openstack' => 2026040100,
+            ];
+            $pluginmanager = \core\plugin_manager::instance();
+            return $pluginmanager->are_dependencies_satisfied($requirements);
+        }
+        return $result;
+    }
+
     /**
      * get_endpoint
      * @return array
