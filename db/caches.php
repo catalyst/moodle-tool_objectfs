@@ -15,19 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Cache definitions for tool_objectfs.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
+ * @author    Francis Devine <francis@catalyst.net.nz>
  * @copyright Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026030200;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2026022401;      // Same as version.
-$plugin->requires  = 2024042200;      // Requires 4.4.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->supported = [404, 405];
+$definitions = [
+    'openstack_authtoken' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'ttl' => 3600, // 1 hour
+        // No reason to not let each node aquire it's own token.
+        'canuselocalstore' => true,
+    ],
+];
