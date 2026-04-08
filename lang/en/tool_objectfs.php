@@ -25,6 +25,7 @@
  */
 
 $string['backportfiletypesclass'] = 'Backport MDL-53240 is missing. Follow up https://github.com/catalyst/moodle-tool_objectfs#applying-core-patches';
+$string['cachedef_openstack_authtoken'] = 'Openstack auth token';
 $string['check:connection:error'] = 'Could not establish connection to the object store: {$a}';
 $string['check:connection:na'] = 'No object store client is configured';
 $string['check:connection:ok'] = 'Connection to the object store is working';
