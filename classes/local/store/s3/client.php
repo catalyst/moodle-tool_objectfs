@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\store\s3;
 
+use admin_setting;
 use coding_exception;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_client_base;
@@ -137,7 +138,7 @@ class client extends object_client_base {
      * @param \stdClass $config Client config.
      * @return bool
      */
-    protected function is_configured($config) {
+    public function is_configured($config) {
         if (empty($config->s3_bucket)) {
             return false;
         }
@@ -461,14 +462,14 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_heading(
             'tool_objectfs/aws',
             new \lang_string('settings:aws:header', 'tool_objectfs'),
-            $this->define_client_check()
+            ''
         ));
 
         $settings->add(new \admin_setting_configcheckbox(
             'tool_objectfs/s3_usesdkcreds',
             new \lang_string('settings:aws:usesdkcreds', 'tool_objectfs'),
-            $this->define_client_check_sdk($config),
-            ''
+            '',
+            0
         ));
 
         if (empty($config->s3_usesdkcreds)) {
@@ -800,41 +801,6 @@ class client extends object_client_base {
             }
         }
         return $proxy;
-    }
-
-    /**
-     * Perform test connection and permission check using
-     * the default credential provider chain to find AWS credentials.
-     *
-     * @param  object $config
-     * @return string HTML string holding notification messages
-     * @throws /coding_exception
-     */
-    public function define_client_check_sdk($config) {
-        global $OUTPUT;
-        $output = '';
-        if (empty($config->s3_usesdkcreds)) {
-            $config->s3_usesdkcreds = 1;
-            $this->set_client($config);
-            $connection = $this->test_connection();
-            if ($connection->success) {
-                $output .= $OUTPUT->notification(get_string('settings:aws:sdkcredsok', 'tool_objectfs'), 'notifysuccess');
-                // Check permissions if we can connect.
-                $permissions = $this->test_permissions($this->should_test_delete());
-                if ($permissions->success) {
-                    $output .= $OUTPUT->notification(key($permissions->messages), 'notifysuccess');
-                } else {
-                    foreach ($permissions->messages as $message => $type) {
-                        $output .= $OUTPUT->notification($message, $type);
-                    }
-                }
-            } else {
-                $output .= $OUTPUT->notification(get_string('settings:aws:sdkcredserror', 'tool_objectfs'), 'warning');
-            }
-            $config->s3_usesdkcreds = 0;
-            $this->set_client($config);
-        }
-        return $output;
     }
 
     /**

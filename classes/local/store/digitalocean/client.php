@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\store\digitalocean;
 
+use admin_settingpage;
 use tool_objectfs\local\store\s3\client as s3_client;
 
 /**
@@ -60,7 +61,7 @@ class client extends s3_client {
      * @param \stdClass $config Client config.
      * @return bool
      */
-    protected function is_configured($config) {
+    public function is_configured($config) {
         if (empty($config->do_key) || empty($config->do_secret) || empty($config->do_region)) {
             return false;
         }
@@ -91,7 +92,7 @@ class client extends s3_client {
     /**
      * define_client_section
      * @param admin_settingpage $settings
-     * @param \stdClass $config
+     * @param object $config
      * @return admin_settingpage
      */
     public function define_client_section($settings, $config) {
