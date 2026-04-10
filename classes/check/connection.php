@@ -15,18 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace tool_objectfs\check;
+
 use core\check\check;
 use core\check\result;
+use tool_objectfs\local\manager;
 
 /**
- * Status check for objectFS proxied range requests.
+ * Status check for objectFS connection to cloud storage.
  *
  * @package    tool_objectfs
- * @author     Peter Burnett <peterburnett@catalyst-au.net>
+ * @author     Abhinav Gandham <abhinavgandham@catalyst-au.net>
  * @copyright  Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class proxy_range_request extends check {
+class connection extends check {
     /**
      * Link to ObjectFS settings page.
      *
@@ -38,36 +40,24 @@ class proxy_range_request extends check {
     }
 
     /**
-     * Check for the success of a proxied range request, if the setting is enabled.
+     * Get the result of the connection check if the config is not empty.
      *
      * @return result
      */
     public function get_result(): result {
-        $config = \tool_objectfs\local\manager::get_objectfs_config();
-        $client = \tool_objectfs\local\manager::get_client($config);
+        $config = manager::get_objectfs_config();
+        $client = manager::get_client($config);
 
-        $signingsupport = false;
-        if (!empty($config->filesystem)) {
-            $signingsupport = (new $config->filesystem())->supports_presigned_urls();
+        if (empty($client) || !$client->is_configured($config)) {
+            return new result(result::NA, get_string('check:connection:na', 'tool_objectfs'));
         }
 
-        if (!$client) {
-            return new result(result::UNKNOWN, get_string('check:proxyrangerequestsdisabled', 'tool_objectfs'));
+        $connection = $client->test_connection();
+
+        if ($connection->success) {
+            return new result(result::OK, get_string('check:connection:ok', 'tool_objectfs'));
         }
 
-        $testconn = $client->test_connection();
-        $connstatus = $testconn->success;
-
-        if ($connstatus && $signingsupport) {
-            $range = $client->test_range_request(new $config->filesystem());
-
-            if ($range->result) {
-                return new result(result::OK, get_string('settings:presignedurl:testrangeok', 'tool_objectfs'));
-            } else {
-                return new result(result::WARNING, get_string('settings:presignedurl:testrangeerror', 'tool_objectfs'));
-            }
-        }
-
-        return new result(result::UNKNOWN, get_string('check:proxyrangerequestsdisabled', 'tool_objectfs'));
+        return new result(result::ERROR, get_string('check:connection:error', 'tool_objectfs', $connection->details));
     }
 }

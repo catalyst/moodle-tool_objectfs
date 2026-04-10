@@ -25,6 +25,8 @@
 
 namespace tool_objectfs\local\store\azure;
 
+use admin_setting;
+use admin_settingpage;
 use SimpleXMLElement;
 use stdClass;
 use tool_objectfs\local\store\azure\stream_wrapper;
@@ -59,6 +61,28 @@ class client extends object_client_base {
         } else {
             parent::__construct($config);
         }
+    }
+
+    /**
+     * Check if the client configured properly.
+     *
+     * @param \stdClass $config Client config.
+     * @return bool
+     */
+    public function is_configured($config) {
+        if (empty($config->azure_container)) {
+            return false;
+        }
+
+        if (empty($config->azure_accountname)) {
+            return false;
+        }
+
+        if (empty($config->azure_sastoken)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -339,7 +363,7 @@ class client extends object_client_base {
      * Shared Access Signature.
      *
      * @param admin_settingpage $settings
-     * @param  \stdClass $config
+     * @param object $config
      * @return admin_settingpage
      */
     public function define_client_section($settings, $config) {
@@ -347,7 +371,7 @@ class client extends object_client_base {
         $settings->add(new \admin_setting_heading(
             'tool_objectfs/azure',
             new \lang_string('settings:azure:header', 'tool_objectfs'),
-            $this->define_client_check()
+            ''
         ));
 
         $settings->add(new \admin_setting_configtext(

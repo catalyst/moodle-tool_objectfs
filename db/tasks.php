@@ -72,15 +72,6 @@ $tasks = [
         'month'     => '*',
     ],
     [
-        'classname' => 'tool_objectfs\task\delete_local_empty_directories',
-        'blocking'  => 0,
-        'minute'    => '0',
-        'hour'      => '1',
-        'day'       => '*',
-        'dayofweek' => '*',
-        'month'     => '*',
-    ],
-    [
         'classname' => 'tool_objectfs\task\pull_objects_from_storage',
         'blocking'  => 0,
         'minute'    => '*',
@@ -118,5 +109,14 @@ $tasks = [
         // Default disabled - intended to be manually run.
         // Also, objectfs tagging support is default off.
         'disabled' => true,
+    ],
+    [
+        'classname' => 'tool_objectfs\task\reconcile_filedir',
+        'blocking'  => 0,
+        'minute'    => '0',
+        'hour'      => '1',
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*',
     ],
 ];
