@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/local/openstack/vendor/autoload.php');
 
 use GuzzleHttp\Psr7\Stream;
+use GuzzleHttp\Psr7\CachingStream;
 
 /**
  * Stream wrapper for swift.
@@ -167,6 +168,36 @@ class stream_wrapper {
      */
     private static $defaultcontext;
 
+    /**  Name of the protocol e.g. swift
+     * @var string  
+     *
+     */
+    private $protocol = 'swift';
+
+    /**
+     * Tracks if a seek has been requested before the first read.
+     * When true, the next read will use an HTTP Range request instead of
+     * reading from the already-open sequential stream.
+     *
+     * @var bool
+     */
+    private $pendingseek = false;
+
+    /**
+     * The byte offset to seek to, used when $pendingseek is true.
+     *
+     * @var int
+     */
+    private $pendingseekoffset = 0;
+
+    /**
+     * Has the object stream has been fetched from Swift yet.
+     * We defer the download until the first read so that a seek
+     * preceding the read can be satisfied with a Range request.
+     *
+     * @var bool
+     */
+    private $streamfetched = false;
 
     // Stream API functions.
 
@@ -241,6 +272,9 @@ class stream_wrapper {
      * @return bool
      */
     public function stream_eof() {
+        if (!$this->streamfetched) {
+            return false;
+        }
         return $this->objstream->eof();
     }
 
@@ -282,9 +316,11 @@ class stream_wrapper {
         try {
             $this->object->retrieve();
 
-            if (empty($this->object->lastModified)) { // File exits even though retrieve worked.
-
+            if (empty($this->object->lastModified)) {
+                // File exists even though retrieve worked – treat as empty.
                 $this->objstream = new Stream(fopen('php://temp', $mode));
+                $this->streamfetched = true;
+
             } else {
                 if ($this->iswriting && $this->nooverwrite) {
                     trigger_error('File exists and cannot be overwritten', E_USER_WARNING);
@@ -292,14 +328,16 @@ class stream_wrapper {
                 }
 
                 if ($this->isappending || $this->isreading) {
-
-                    $this->objstream = $this->object->download();
-
+                    // Defer the download; it will be fetched lazily in
+                    // stream_read() once we know whether a Range is needed.
+                    $this->streamfetched = false;
+                    $this->objstream = null;
                 } else {
                     $this->objstream = new Stream(fopen('php://temp', $mode));
+                    $this->streamfetched = true;
                 }
 
-                if ($this->isappending) {
+                if ($this->isappending && $this->streamfetched) {
                     $this->objstream->seek(0, SEEK_END);
                 }
             }
@@ -312,30 +350,37 @@ class stream_wrapper {
             }
 
             $this->objstream = new Stream(fopen('php://temp', $mode));
+            $this->streamfetched = true;
 
         } catch (\Exception $e) {
             trigger_error('Failed to fetch object: ' . $e->getMessage(), E_USER_WARNING);
-
             return false;
         }
 
         return true;
     }
 
-
     /**
-     * Read from open stream
+     * Read from open stream.
      *
      * @param integer $count
      * @return string
      */
     public function stream_read($count) {
 
+        if (!$this->streamfetched) {
+            $this->fetch_stream_from_swift();
+        }
+
         return $this->objstream->read($count);
     }
 
     /**
-     * Set position of file pointer
+     * Perfom a seek request.
+     *
+     * If the underlying stream has not been fetched from Swift yet we simply use a
+     * a HTTP Range header.  If the stream is already open we seek
+     * within the local buffer as before.
      *
      * @param integer $offset
      * @param integer $whence
@@ -343,10 +388,21 @@ class stream_wrapper {
      */
     public function stream_seek($offset, $whence = SEEK_SET) {
 
+        if (!$this->streamfetched) {
+            if ($whence === SEEK_SET) {
+                $this->pendingseek = true;
+                $this->pendingseekoffset = $offset;
+                return true;
+            }
+
+            // For SEEK_CUR or SEEK_END we must download the full object first
+            // so we have something to seek within.
+            $this->fetch_stream_from_swift();
+        }
+
         $this->objstream->seek($offset, $whence);
         return true;
     }
-
 
     /**
      * Stat open file
@@ -367,6 +423,12 @@ class stream_wrapper {
      * @return integer
      */
     public function stream_tell() {
+
+        if (!$this->streamfetched) {
+            // Nothing has been downloaded yet; the logical position is
+            // whatever offset was recorded by the last stream_seek call.
+            return $this->pendingseek ? $this->pendingseekoffset : 0;
+        }
 
         return $this->objstream->tell();
     }
@@ -509,6 +571,47 @@ class stream_wrapper {
     //
     // Internal functions.
     //
+
+
+    /**
+     * Fetch the object stream from Swift, using an HTTP Range header if a
+     * seek was recorded before the first read.
+     *
+     * Sequential reads (no prior seek) download the object from byte 0 with
+     * no Range header, exactly as the original code did.
+     *
+     * Seeked reads request only "bytes=<offset>-"
+     *
+     * @return void
+     */
+    private function fetch_stream_from_swift() {
+
+        if ($this->streamfetched) {
+            return;
+        }
+
+        if ($this->pendingseek && $this->pendingseekoffset > 0) {
+            // Use an HTTP Range header to skip the leading bytes on the server.
+            $this->objstream = $this->object->download([
+                'requestOptions' => [
+                    'stream' => true,
+                    'headers' => [
+                        'Range' => 'bytes=' . $this->pendingseekoffset . '-',
+                    ]
+                ],
+            ]);
+        } else {
+            // Sequential read – no Range header, stream from the beginning.
+            $this->objstream = $this->object->download(['requestOptions' => ['stream' => true]]);
+
+            if ($this->isappending) {
+                $this->objstream->seek(0, SEEK_END);
+            }
+        }
+
+        $this->streamfetched = true;
+        $this->pendingseek = false;
+    }
 
     /**
      * Parse URL to object
@@ -727,6 +830,42 @@ class stream_wrapper {
         $final = array_values($values) + $values;
 
         return $final;
+    }
+
+     /**
+     * Get the stream context options available to the current stream
+     * @return array
+     */
+    private function get_options(): array {
+        // Context is not set when doing things like stat.
+        if ($this->context === null) {
+            $options = [];
+        } else {
+            $options = stream_context_get_options($this->context);
+            $options = isset($options[$this->protocol])
+                ? $options[$this->protocol]
+                : [];
+        }
+
+        $default = stream_context_get_options(stream_context_get_default());
+        $default = isset($default[$this->protocol])
+            ? $default[$this->protocol]
+            : [];
+        $result = $options + $default;
+
+        return $result;
+    }
+
+    /**
+     * Get a specific stream context option
+     *
+     * @param string $name Name of the option to retrieve
+     *
+     * @return mixed|null
+     */
+    private function get_option($name) {
+        $options = $this->get_options();
+        return isset($options[$name]) ? $options[$name] : null;
     }
 
 }

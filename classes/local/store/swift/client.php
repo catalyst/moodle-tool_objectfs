@@ -211,6 +211,7 @@ class client extends object_client_base {
                 'endpoint' => $this->config->openstack_authurl,
                 'region' => $this->config->openstack_region,
                 'cachedtoken' => $endpoint['cachedToken'],
+                'seekable' => true,
             ],
         ]);
         return $context;
