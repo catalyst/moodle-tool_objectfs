@@ -46,13 +46,27 @@ class client extends object_client_base {
 
         if ($this->get_availability() && !empty($config)) {
             require_once($this->autoloader);
-            $this->maxupload = 5368709120; // 5GiB.
+            $this->maxupload = OBJECTFS_BYTES_IN_TERABYTE * 5;
             $this->containername = $config->openstack_container;
             $config->openstack_authtoken = unserialize($config->openstack_authtoken);
             $this->config = $config;
         } else {
             parent::__construct($config);
         }
+    }
+
+    public function get_availability() {
+        $result = parent::get_availability();
+        // local_openstack exists, check dependency is high enough version for
+        // large file support.
+        if ($result) {
+            $requirements = [
+                'local_openstack' => 2026040100,
+            ];
+            $pluginmanager = \core\plugin_manager::instance();
+            return $pluginmanager->are_dependencies_satisfied($requirements);
+        }
+        return $result;
     }
 
     /**
@@ -211,6 +225,7 @@ class client extends object_client_base {
                 'endpoint' => $this->config->openstack_authurl,
                 'region' => $this->config->openstack_region,
                 'cachedtoken' => $endpoint['cachedToken'],
+                'seekable' => true,
             ],
         ]);
         return $context;
