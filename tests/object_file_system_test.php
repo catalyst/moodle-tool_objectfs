@@ -1163,4 +1163,26 @@ final class object_file_system_test extends tests\testcase {
         $object = $DB->get_record('tool_objectfs_objects', ['contenthash' => $object->contenthash]);
         $this->assertEquals($object->tagsyncstatus, tag_manager::SYNC_STATUS_COMPLETE);
     }
+
+    /**
+     * Tests the is_file_stored_externally_by_hash function.
+     */
+    public function test_is_file_stored_externally_by_hash(): void {
+        $this->resetAfterTest();
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'is_file_stored_externally_by_hash');
+        $reflection->setAccessible(true);
+
+        // Create a remote file so that the contenthash will be marked as external.
+        $file = $this->create_remote_file();
+        $contenthash = $file->get_contenthash();
+        $result = $reflection->invokeArgs($this->filesystem, [$contenthash]);
+        $this->assertTrue($result);
+
+        // Create a local file so that the contenthash will be marked as local.
+        $file = $this->create_local_file('test_content_2');
+        $contenthash = $file->get_contenthash();
+        $result = $reflection->invokeArgs($this->filesystem, [$contenthash]);
+        $this->assertFalse($result);
+    }
 }

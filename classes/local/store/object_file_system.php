@@ -523,7 +523,7 @@ abstract class object_file_system extends \file_system_filedir {
         if (
             $this->presigned_url_configured() &&
             $this->presigned_url_should_redirect_file($file) &&
-            $this->is_file_readable_externally_by_hash($contenthash)
+            $this->is_file_stored_externally_by_hash($contenthash)
         ) {
             return $this->redirect_to_presigned_url($contenthash, headers_list());
         }
@@ -531,7 +531,7 @@ abstract class object_file_system extends \file_system_filedir {
         $ranges = $this->get_valid_http_ranges($file->get_filesize());
         if (
             $this->externalclient->support_presigned_urls() && !empty($ranges) &&
-            $this->is_file_readable_externally_by_hash($contenthash)
+            $this->is_file_stored_externally_by_hash($contenthash)
         ) {
             return $this->externalclient->proxy_range_request($file, $ranges);
         }
@@ -557,7 +557,7 @@ abstract class object_file_system extends \file_system_filedir {
         $headers = headers_list();
         if (
             $this->presigned_url_configured() &&
-            $this->is_file_readable_externally_by_hash($contenthash) &&
+            $this->is_file_stored_externally_by_hash($contenthash) &&
             $this->presigned_url_should_redirect($contenthash, $headers)
         ) {
             return $this->redirect_to_presigned_url($contenthash, $headers);
@@ -1215,5 +1215,18 @@ abstract class object_file_system extends \file_system_filedir {
 
         // Else no match, do not set.
         return false;
+    }
+
+    /**
+     * According to the stored metadata, is this file stored externally?
+     *
+     * @param string $contenthash
+     * @return bool
+     */
+    private function is_file_stored_externally_by_hash(string $contenthash): bool {
+        global $DB;
+        $location = (int) $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $contenthash]);
+
+        return $location === OBJECT_LOCATION_DUPLICATED || $location === OBJECT_LOCATION_EXTERNAL;
     }
 }
