@@ -55,9 +55,14 @@ class client extends object_client_base {
         }
     }
 
+    /**
+     * Returns true if the Client SDK exists and has been loaded.
+     *
+     * @return bool
+     */
     public function get_availability() {
         $result = parent::get_availability();
-        // local_openstack exists, check dependency is high enough version for
+        // If local_openstack exists, then check if dependency is a high enough version for
         // large file support.
         if ($result) {
             $requirements = [

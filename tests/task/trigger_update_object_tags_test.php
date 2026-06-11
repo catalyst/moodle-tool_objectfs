@@ -35,6 +35,9 @@ final class trigger_update_object_tags_test extends advanced_testcase {
     public function test_execute(): void {
         $this->resetAfterTest();
 
+        // Ensure this value is set to one, because the checks below assume it.
+        set_config('maxtaggingtaskstospawn', 1, 'tool_objectfs');
+
         $task = new trigger_update_object_tags();
         $task->execute();
 

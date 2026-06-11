@@ -31,15 +31,14 @@ use tool_objectfs\local\store\swift\file_system;
  * [Description swift_file_system]
  */
 class swift_file_system extends file_system {
-
     /**
-    * Output the content of the specified stored file.
-    *
-    * Note, this is different to get_content() as it uses the built-in php
-    * readfile function which is more efficient.
-    *
-    * @param stored_file $file The file to serve.
-    * @return void
+     * Output the content of the specified stored file.
+     *
+     * Note, this is different to get_content() as it uses the built-in php
+     * readfile function which is more efficient.
+     *
+     * @param stored_file $file The file to serve.
+     * @return void
      */
     public function readfile(\stored_file $file) {
         \core_php_time_limit::raise(HOURSECS);
@@ -48,5 +47,4 @@ class swift_file_system extends file_system {
             throw new \file_exception('storedfilecannotreadfile', $file->get_filename());
         }
     }
- 
 }
