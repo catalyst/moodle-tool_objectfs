@@ -45,7 +45,7 @@ class delete_orphaned_object_metadata extends task {
     public function execute() {
         global $DB;
 
-        $ageforremoval = $this->config->maxorphanedage;
+        $ageforremoval = $this->config->maxorphanedage ?? null;
         if (empty($ageforremoval)) {
             mtrace('Skipping deletion of orphaned object metadata as maxorphanedage is set to an empty value.');
             return;

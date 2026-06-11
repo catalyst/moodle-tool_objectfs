@@ -65,8 +65,10 @@ final class task_reconcile_filedir_test extends testcase {
         );
 
         // Execute scheduled task.
+        ob_start();
         $task = new reconcile_filedir();
         $task->execute();
+        ob_end_clean();
 
         // Assertions.
 
