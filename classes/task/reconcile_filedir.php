@@ -21,6 +21,28 @@ use tool_objectfs\local\manager;
 /**
  * Reconciles the filedir.
  *
+ * Walks the local filedir tree (filedir/<xx>/<yy>/<sha1hash>) deterministically
+ * in lexical hash order and reconciles each file against the database:
+ *
+ * - Files not referenced in mdl_files that are older than the configured minimum
+ *   orphaned age are deleted from disk.
+ * - Files referenced in mdl_files but missing from tool_objectfs_objects are
+ *   inserted with their true location: if the file is already in remote storage it is
+ *   registered as OBJECT_LOCATION_DUPLICATED (or OBJECT_LOCATION_EXTERNAL), avoiding
+ *   redundant reprocessing by the push task. Falls back to OBJECT_LOCATION_LOCAL if
+ *   the filesystem is unavailable.
+ * - Files referenced in mdl_files that ObjectFS believes are OBJECT_LOCATION_EXTERNAL
+ *   are updated to OBJECT_LOCATION_DUPLICATED (the file exists both locally and remotely).
+ * - Stale .tmp files older than 24 hours are deleted.
+ * - Empty subdirectories are pruned after processing.
+ *
+ * Progress is checkpointed to config (reconcile_file_lasthash) every 100 files or
+ * every 10 seconds, allowing the task to resume from where it left off across runs
+ * without reprocessing or skipping files. A full sweep resets the checkpoint.
+ *
+ * Requires deletelocal to be enabled. Respects maxtaskruntime and supports
+ * graceful shutdown.
+ *
  * @package   tool_objectfs
  * @author    Alex Damsted <alexdamsted@catalyst-au.net>
  * @copyright Catalyst IT
@@ -44,6 +66,17 @@ class reconcile_filedir extends task {
         if (!get_config('tool_objectfs', 'deletelocal')) {
             mtrace('ObjectFS: deletelocal disabled — skipping filedir reconciliation.');
             return;
+        }
+
+        // Instantiate the filesystem once so we can check remote existence without
+        // making a new connection per file.
+        $filesystem = null;
+        if (!empty($this->config->filesystem)) {
+            try {
+                $filesystem = new $this->config->filesystem();
+            } catch (\Throwable $e) {
+                mtrace('ObjectFS: Could not instantiate filesystem — will register new files as local only. ' . $e->getMessage());
+            }
         }
 
         // Start time for runtime + graceful shutdown checks.
@@ -244,12 +277,20 @@ class reconcile_filedir extends task {
                         );
 
                         if (!$object) {
+                            // If the filesystem is available, check whether the file already
+                            // exists remotely so we can register the correct location immediately
+                            // and avoid redundant processing by the push task.
+                            if ($filesystem !== null) {
+                                $location = $filesystem->get_object_location_from_hash($filename);
+                            } else {
+                                $location = OBJECT_LOCATION_LOCAL;
+                            }
                             $record = (object)[
                                 'contenthash'     => $filename,
                                 'timeduplicated'  => 0,
                                 'filesize'        => filesize($fullpath) ?: null,
                             ];
-                            manager::upsert_object($record, OBJECT_LOCATION_LOCAL);
+                            manager::upsert_object($record, $location);
                             $inserted++;
                         } else {
                             // If ObjectFS thinks the file is remote-only,
