@@ -279,6 +279,7 @@ class reconcile_filedir extends task {
                         ($now - $lastcheckpoint) >= $checkpointinterval
                     ) {
                         set_config('reconcile_file_lasthash', $lasthash, 'tool_objectfs');
+                        $lastcheckpoint = $now;
 
                         mtrace("ObjectFS: Checkpoint at {$processed} files. Current hash {$lasthash}");
 
