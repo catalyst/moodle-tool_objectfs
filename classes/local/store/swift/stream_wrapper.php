@@ -411,6 +411,10 @@ class stream_wrapper {
      */
     public function stream_stat() {
 
+        if (empty($this->objstream)) {
+            return false;
+        }
+
         $size = $this->objstream->getSize();
 
         return $this->generate_stat($this->object, $this->container, $size);
