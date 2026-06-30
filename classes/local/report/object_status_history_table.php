@@ -143,7 +143,7 @@ class object_status_history_table extends \table_sql {
                 break;
 
             default:
-                $heading = $row->heading;
+                $heading = s($row->heading);
         }
         return $heading;
     }

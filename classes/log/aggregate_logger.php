@@ -140,7 +140,6 @@ class aggregate_logger extends objectfs_logger {
      * @return void
      */
     protected function output_move_statistic($movestatistic, $initiallocation, $finallocation) {
-        $key = $movestatistic->get_key();
         $objectcount = $movestatistic->get_objectcount();
         $objectsum = $movestatistic->get_objectsum();
         $objectsum = display_size($objectsum);

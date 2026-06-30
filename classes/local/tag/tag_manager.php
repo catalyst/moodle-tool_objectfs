@@ -170,8 +170,10 @@ class tag_manager {
         $params = [
             'status' => $status,
             'contenthash' => $contenthash,
-            'time' => $tagpushedtime,
         ];
+        if (!empty($tagpushedtime)) {
+            $params['time'] = $tagpushedtime;
+        }
 
         // Need raw execute since update_records requires an id column, but we use contenthash instead.
         $DB->execute(

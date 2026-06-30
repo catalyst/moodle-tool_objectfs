@@ -943,7 +943,7 @@ abstract class object_file_system extends \file_system_filedir {
         if (empty($CFG->pathtodu)) {
             return 0;
         }
-        $output = $this->exec_command("{$CFG->pathtodu} -sk " . escapeshellarg($this->filedir) . ' | cut -f1');
+        $output = $this->exec_command(escapeshellcmd($CFG->pathtodu) . ' -sk ' . escapeshellarg($this->filedir) . ' | cut -f1');
         // Convert kilobytes to bytes.
         return $output * 1000;
     }

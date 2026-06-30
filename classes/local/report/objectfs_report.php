@@ -116,12 +116,13 @@ class objectfs_report implements \renderable {
         global $DB;
 
         // Add report type to each row.
+        $rows = [];
         foreach ($this->rows as $row) {
             $row->reporttype = $this->reporttype;
             $row->reportid = $this->reportid;
-            // We dont use insert_records because of 26 compatibility.
-            $DB->insert_record('tool_objectfs_report_data', $row);
+            $rows[] = $row;
         }
+        $DB->insert_records('tool_objectfs_report_data', $rows);
     }
 
     /**

@@ -92,6 +92,11 @@ function tool_objectfs_pluginfile(
     array $options = []
 ) {
 
+    if ($filearea !== 'settings') {
+        send_file_not_found();
+    }
+    require_capability('moodle/site:config', context_system::instance());
+
     $fs = get_file_storage();
     $file = $fs->get_file($context->id, OBJECTFS_PLUGIN_NAME, $filearea, $args[0], '/', $args[1]);
     if (!$file || (is_object($file) && $file->is_directory())) {

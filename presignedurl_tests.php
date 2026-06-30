@@ -33,9 +33,8 @@ admin_externalpage_setup('tool_objectfs_presignedurl_testing');
 
 $output = $PAGE->get_renderer('tool_objectfs');
 
-$delete = optional_param('delete', 0, PARAM_BOOL);
 $deletedsuccess = '';
-if ($delete) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && optional_param('delete', 0, PARAM_BOOL)) {
     require_sesskey();
     $output->delete_presignedurl_tests_files();
     $deletedstring = get_string('settings:presignedurl:deletedsuccess', OBJECTFS_PLUGIN_NAME);
@@ -56,9 +55,9 @@ if (!empty($config->filesystem)) {
     $support = $fs->supports_presigned_urls();
 }
 if ($support) {
-    $deleteurl = new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php', ['delete' => 1, 'sesskey' => sesskey()]);
-    $deletelinktext = get_string('settings:presignedurl:deletefiles', OBJECTFS_PLUGIN_NAME);
-    echo $output->heading(html_writer::link($deleteurl, $deletelinktext) . $deletedsuccess, 6);
+    $deleteurl = new \moodle_url('/admin/tool/objectfs/presignedurl_tests.php', ['delete' => 1]);
+    echo $output->heading($output->single_button($deleteurl,
+        get_string('settings:presignedurl:deletefiles', OBJECTFS_PLUGIN_NAME), 'post') . $deletedsuccess, 6);
     $client = manager::get_client($config);
     if ($client && $client->get_availability()) {
         $connection = $client->test_connection();

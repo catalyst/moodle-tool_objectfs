@@ -349,7 +349,7 @@ class client extends object_client_base {
         $permissions->success = true;
         $permissions->messages = [];
 
-        if ($this->is_functional()) {
+        if (!$this->is_functional()) {
             $permissions->success = false;
             $permissions->messages = [];
             return $permissions;
@@ -848,7 +848,6 @@ class client extends object_client_base {
         $curl = new \curl();
         $curl->setopt(['CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1]);
         $curl->setopt(['CURLOPT_RETURNTRANSFER' => true]);
-        $curl->setopt(['CURLOPT_SSL_VERIFYPEER' => false]);
         $curl->setopt(['CURLOPT_CONNECTTIMEOUT' => 15]);
         $curl->setopt(['CURLOPT_TIMEOUT' => 15]);
         $curl->setHeader($headers);
@@ -879,7 +878,7 @@ class client extends object_client_base {
                 if ($response['content'] != '' && $httpcode == '206 Partial Content') {
                     return (object)['result' => true];
                 } else {
-                    $a = (object)['url' => $response['url'], 'httpcode' => $httpcode, 'details' => $response['content']];
+                    $a = (object)['url' => s($response['url']), 'httpcode' => s($httpcode), 'details' => s($response['content'])];
                     return (object)['result' => false, 'error' => get_string('rangerequestfailed', 'tool_objectfs', $a)];
                 }
             }
