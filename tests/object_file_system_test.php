@@ -714,6 +714,80 @@ final class object_file_system_test extends tests\testcase {
     }
 
     /**
+     * is_disallowed_presigned_filearea_provider
+     *
+     * @return array
+     */
+    public static function is_disallowed_presigned_filearea_provider(): array {
+        return [
+            'empty config' => [
+                'disallowfileareas' => '',
+                'expected' => false,
+            ],
+            'case-insensitive match' => [
+                'disallowfileareas' => 'CORE|UNITTEST',
+                'expected' => true,
+            ],
+            'ignore comments and invalid lines' => [
+                'disallowfileareas' => implode("\n", [
+                    '# comment line',
+                    'invalidline',
+                    'core|',
+                    '|unittest',
+                    'core|unittest',
+                ]),
+                'expected' => true,
+            ],
+        ];
+    }
+
+    /**
+     * test_is_disallowed_presigned_filearea
+     *
+     * @dataProvider is_disallowed_presigned_filearea_provider
+     * @param string $disallowfileareas configured disallowed component|filearea pairs.
+     * @param bool $expected expected result.
+     *
+     * @return void
+     */
+    public function test_is_disallowed_presigned_filearea(string $disallowfileareas, bool $expected): void {
+        set_config('disallowfileareas', $disallowfileareas, 'tool_objectfs');
+
+        $file = $this->create_local_file('test content');
+        $this->assertEquals($expected, $this->filesystem->is_disallowed_presigned_filearea($file));
+    }
+
+    /**
+     * test_is_disallowed_presigned_filearea_refreshes_lookup_when_config_changes
+     *
+     * @return void
+     */
+    public function test_is_disallowed_presigned_filearea_refreshes_lookup_when_config_changes(): void {
+        $file = $this->create_local_file('test content');
+
+        set_config('disallowfileareas', 'core|unittest', 'tool_objectfs');
+        $this->assertTrue($this->filesystem->is_disallowed_presigned_filearea($file));
+
+        set_config('disallowfileareas', 'mod_scorm|content', 'tool_objectfs');
+        $this->assertFalse($this->filesystem->is_disallowed_presigned_filearea($file));
+
+        $fs = get_file_storage();
+        $syscontext = \context_system::instance();
+        $scormfile = $fs->create_file_from_string([
+            'contextid' => $syscontext->id,
+            'component' => 'mod_scorm',
+            'filearea' => 'content',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => md5('scorm content test') . '_scorm',
+            'source' => 'Copyright stuff',
+            'mimetype' => 'text',
+        ], 'scorm content test');
+
+        $this->assertTrue($this->filesystem->is_disallowed_presigned_filearea($scormfile));
+    }
+
+    /**
      * Data provider for test_get_expiration_time_method_if_supported().
      *
      * @return array

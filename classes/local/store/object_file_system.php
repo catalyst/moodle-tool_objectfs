@@ -877,10 +877,58 @@ abstract class object_file_system extends \file_system_filedir {
             return false;
         }
 
+        if ($this->is_disallowed_presigned_filearea($file)) {
+            return false;
+        }
+
         // Redirect when the file size is bigger than presignedminfilesize setting
         // and file extension is whitelisted.
         return ($file->get_filesize() >= $this->externalclient->presignedminfilesize &&
             manager::is_extension_whitelisted($file->get_filename()));
+    }
+
+    /**
+     * Returns true if this file belongs to a component/filearea pair configured to avoid redirects.
+     *
+     * @param stored_file $file
+     * @return bool
+     */
+    public function is_disallowed_presigned_filearea(stored_file $file): bool {
+        static $cachedraw = null;
+        static $lookup = [];
+
+        $pairs = trim((string)get_config('tool_objectfs', 'disallowfileareas'));
+        if ($pairs === '') {
+            return false;
+        }
+
+        if ($pairs !== $cachedraw) {
+            $cachedraw = $pairs;
+            $lookup = [];
+
+            foreach (preg_split('/\R+/', $pairs) as $line) {
+                $line = trim($line);
+                if ($line === '' || $line[0] === '#') {
+                    continue;
+                }
+
+                $parts = explode('|', $line, 2);
+                if (count($parts) !== 2) {
+                    continue;
+                }
+
+                $component = trim($parts[0]);
+                $filearea = trim($parts[1]);
+                if ($component === '' || $filearea === '') {
+                    continue;
+                }
+
+                $lookup[strtolower($component . '|' . $filearea)] = true;
+            }
+        }
+
+        $needle = strtolower($file->get_component() . '|' . $file->get_filearea());
+        return isset($lookup[$needle]);
     }
 
     /**
