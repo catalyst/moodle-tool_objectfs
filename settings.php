@@ -302,6 +302,14 @@ if ($ADMIN->fulltree) {
                 PARAM_INT
             ));
 
+            $settings->add(new admin_setting_configtextarea(
+                'tool_objectfs/disallowfileareas',
+                new lang_string('settings:presignedurl:disallowfileareas', 'tool_objectfs'),
+                new lang_string('settings:presignedurl:disallowfileareas_help', 'tool_objectfs'),
+                'mod_scorm|content',
+                PARAM_RAW_TRIMMED
+            ));
+
             $settings->add(
                 new admin_setting_filetypes(
                     'tool_objectfs/signingwhitelist',
