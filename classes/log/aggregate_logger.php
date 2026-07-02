@@ -64,7 +64,8 @@ class aggregate_logger extends objectfs_logger {
     public function __construct() {
         parent::__construct();
         $this->movestatistics = [
-            OBJECT_LOCATION_ERROR => [],
+            OBJECT_LOCATION_MISSING => [],
+            OBJECT_LOCATION_ORPHANED => [],
             OBJECT_LOCATION_LOCAL => [],
             OBJECT_LOCATION_DUPLICATED => [],
             OBJECT_LOCATION_EXTERNAL => [],
@@ -157,16 +158,16 @@ class aggregate_logger extends objectfs_logger {
      */
     public function location_to_string($location) {
         switch ($location) {
-            case OBJECT_LOCATION_ERROR:
-                return 'error';
+            case OBJECT_LOCATION_MISSING:
+                return 'missing';
+            case OBJECT_LOCATION_ORPHANED:
+                return 'orphaned';
             case OBJECT_LOCATION_LOCAL:
                 return 'local';
             case OBJECT_LOCATION_DUPLICATED:
                 return 'duplicated';
             case OBJECT_LOCATION_EXTERNAL:
                 return 'remote';
-            case OBJECT_LOCATION_ORPHANED:
-                return 'orphaned';
             default:
                 return $location;
         }

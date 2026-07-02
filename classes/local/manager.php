@@ -148,11 +148,15 @@ class manager {
 
         $oldobject = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash]);
         if ($oldobject) {
+            // Reconstruct bitmask from stored columns for comparison.
+            $oldlocation = location_helper::columns_to_bits($oldobject);
+
             $newobject->timeduplicated = $oldobject->timeduplicated;
             $newobject->id = $oldobject->id;
 
             // If location hasn't changed we do not need to update unless filesize is not populated.
-            if ((int)$oldobject->location === $newlocation && isset($oldobject->filesize)) {
+            if ($oldlocation === $newlocation && isset($oldobject->filesize)) {
+                $oldobject->location = $oldlocation;
                 return $oldobject;
             }
 
@@ -162,7 +166,6 @@ class manager {
 
             return self::upsert_object($newobject, $newlocation);
         }
-        $newobject->location = $newlocation;
 
         // Use existing file data related to the object if it exists.
         $filerecord = $DB->get_record('files', ['contenthash' => $contenthash], 'filesize,timecreated', IGNORE_MULTIPLE);
@@ -191,14 +194,28 @@ class manager {
             $object->timeduplicated = time();
         }
 
-        $locationchanged = !isset($object->location) || $object->location != $newlocation;
+        // Determine if location actually changed.
+        $oldlocation = isset($object->location) ? $object->location : null;
+        $locationchanged = $oldlocation === null || $oldlocation != $newlocation;
+
+        // Store the bitmask on the PHP object for callers.
         $object->location = $newlocation;
+
+        // Split bitmask into individual DB columns.
+        $columns = location_helper::bits_to_columns($newlocation);
+        foreach ($columns as $col => $val) {
+            $object->$col = $val;
+        }
+
+        // Remove the virtual 'location' property before DB write - it's not a real column.
+        $dbobject = clone $object;
+        unset($dbobject->location);
 
         // If id is set, update, else insert new.
         if (empty($object->id)) {
-            $object->id = $DB->insert_record('tool_objectfs_objects', $object);
+            $object->id = $DB->insert_record('tool_objectfs_objects', $dbobject);
         } else {
-            $DB->update_record('tool_objectfs_objects', $object);
+            $DB->update_record('tool_objectfs_objects', $dbobject);
         }
 
         // Post update, notify tag manager since the location tag likely needs changing.
@@ -208,6 +225,22 @@ class manager {
         }
 
         return $object;
+    }
+
+    /**
+     * Get the location bitmask for an object by its contenthash.
+     *
+     * @param string $contenthash
+     * @return int The location bitmask, or OBJECT_LOCATION_ERROR (0) if not found.
+     */
+    public static function get_location_by_hash(string $contenthash): int {
+        global $DB;
+        $record = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash],
+            'in_filedir, in_mdl_files, in_remote');
+        if (!$record) {
+            return OBJECT_LOCATION_ERROR;
+        }
+        return location_helper::columns_to_bits($record);
     }
 
     /**

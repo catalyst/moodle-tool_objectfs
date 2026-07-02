@@ -136,7 +136,7 @@ class object_location_history_table extends \table_sql {
             $duplicatedrecord = $rawrecords[$id . OBJECT_LOCATION_DUPLICATED] ?? $emptyrecord;
             $orphanedrecord = $rawrecords[$id . OBJECT_LOCATION_ORPHANED] ?? $emptyrecord;
             $externalrecord = $rawrecords[$id . OBJECT_LOCATION_EXTERNAL] ?? $emptyrecord;
-            $errorrecord = $rawrecords[$id . OBJECT_LOCATION_ERROR] ?? $emptyrecord;
+            $missingrecord = $rawrecords[$id . OBJECT_LOCATION_MISSING] ?? $emptyrecord;
             $filedir = $rawrecords[$id . 'filedir'] ?? $emptyrecord;
             $total = $rawrecords[$id . 'total'] ?? $emptyrecord;
 
@@ -154,8 +154,8 @@ class object_location_history_table extends \table_sql {
                 $row['orphaned_size'] = get_string('object_status:location:orphanedsizeunknown', 'tool_objectfs');
                 $row['external_count'] = $externalrecord->count;
                 $row['external_size'] = $externalrecord->size;
-                $row['missing_count'] = $errorrecord->count;
-                $row['missing_size'] = $errorrecord->size;
+                $row['missing_count'] = $missingrecord->count;
+                $row['missing_size'] = $missingrecord->size;
                 $row['total_count'] = $total->count;
                 $row['total_size'] = $total->size;
                 $row['filedir_count'] = $filedir->count;
@@ -167,7 +167,7 @@ class object_location_history_table extends \table_sql {
                 $row['duplicated_count'] = number_format($duplicatedrecord->count);
                 $row['orphaned_count'] = number_format($orphanedrecord->count);
                 $row['external_count'] = number_format($externalrecord->count);
-                $row['missing_count'] = number_format($errorrecord->count);
+                $row['missing_count'] = number_format($missingrecord->count);
                 $row['total_count'] = number_format($total->count);
                 $row['filedir_count'] = number_format($filedir->count);
                 $row['delta_count'] = number_format($deltacount);
@@ -176,7 +176,7 @@ class object_location_history_table extends \table_sql {
                 $this->duplicatedsizes[] = $this->size_to_mb($duplicatedrecord->size);
                 $this->orphanedsizes[] = $this->size_to_mb($orphanedrecord->size);
                 $this->externalsizes[] = $this->size_to_mb($externalrecord->size);
-                $this->missingsizes[] = $this->size_to_mb($errorrecord->size);
+                $this->missingsizes[] = $this->size_to_mb($missingrecord->size);
                 $this->totalsizes[] = $this->size_to_mb($total->size);
                 $this->filedirsizes[] = $this->size_to_mb($filedir->size);
                 $this->deltasizes[] = $this->size_to_mb($deltasize);

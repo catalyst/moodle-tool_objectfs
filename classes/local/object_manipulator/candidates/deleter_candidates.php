@@ -38,24 +38,24 @@ class deleter_candidates extends manipulator_candidates_base {
      * get_candiates_sql
      * @return string
      */
-    public function get_candidates_sql() {
-        return 'SELECT contenthash,
+    protected function get_candidates_sql(): string {
+        $locationconditions = \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_DUPLICATED);
+        return "SELECT contenthash,
                        filesize
                   FROM {tool_objectfs_objects}
                  WHERE timeduplicated <= :consistancythreshold
-                   AND location = :location
-                   AND filesize > :sizethreshold';
+                   AND {$locationconditions}
+                   AND filesize > :sizethreshold";
     }
 
     /**
      * get_candiates_sql_params
      * @return array
      */
-    public function get_candidates_sql_params() {
+    protected function get_candidates_sql_params(): array {
         $consistancythreshold = time() - $this->config->consistencydelay;
         return [
             'consistancythreshold' => $consistancythreshold,
-            'location' => OBJECT_LOCATION_DUPLICATED,
             'sizethreshold' => $this->config->sizethreshold,
         ];
     }

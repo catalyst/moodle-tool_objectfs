@@ -27,31 +27,45 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 /**
  * chcker_candiates
  */
-class checker_candidates extends manipulator_candidates_base {
+class checker_candidates implements manipulator_candidates {
     /**
      * queryname
      * @var string
      */
     protected $queryname = 'get_check_candidates';
 
+    /** @var \stdClass $config */
+    protected $config;
+
     /**
-     * get_candiates_sql
-     * @return string
+     * checker_candidates constructor.
+     * @param \stdClass $config
      */
-    public function get_candidates_sql() {
-        return 'SELECT f.contenthash
-                  FROM {files} f
-             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
-                 WHERE f.filesize > 0
-                   AND o.location is NULL
-              GROUP BY f.contenthash';
+    public function __construct(\stdClass $config) {
+        $this->config = $config;
     }
 
     /**
-     * get_candidates_sql_params
+     * get_query_name
+     * @return string
+     */
+    public function get_query_name() {
+        return $this->queryname;
+    }
+
+    /**
+     * Get files that exist in {files} but have no tracking row in {tool_objectfs_objects}.
+     *
      * @return array
      */
-    public function get_candidates_sql_params() {
-        return [];
+    public function get() {
+        global $DB;
+        $sql = 'SELECT f.contenthash
+                  FROM {files} f
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                 WHERE f.filesize > 0
+                   AND o.id IS NULL
+              GROUP BY f.contenthash';
+        return $DB->get_records_sql($sql, [], 0, $this->config->batchsize);
     }
 }

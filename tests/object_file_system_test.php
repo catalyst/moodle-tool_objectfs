@@ -162,7 +162,7 @@ final class object_file_system_test extends tests\testcase {
 
         $location = $this->filesystem->copy_object_from_external_to_local_by_hash($fakehash);
 
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $location);
     }
 
     public function test_copy_object_from_local_to_external_by_hash(): void {
@@ -199,7 +199,7 @@ final class object_file_system_test extends tests\testcase {
 
         $location = $this->filesystem->copy_object_from_local_to_external_by_hash($fakehash);
 
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $location);
     }
 
     public function test_delete_object_from_local_by_hash(): void {
@@ -229,7 +229,7 @@ final class object_file_system_test extends tests\testcase {
 
         $location = $this->filesystem->delete_object_from_local_by_hash($fakehash);
 
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $location);
     }
 
     public function test_delete_object_from_local_by_hash_if_can_verify_external_object(): void {
@@ -321,8 +321,8 @@ final class object_file_system_test extends tests\testcase {
         $this->filesystem->readfile($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $location = manager::get_location_by_hash($fakefile->get_contenthash());
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $location);
     }
 
     public function test_get_content_if_object_is_local(): void {
@@ -353,8 +353,8 @@ final class object_file_system_test extends tests\testcase {
         $this->filesystem->get_content($fakefile);
         restore_error_handler();
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $location = manager::get_location_by_hash($fakefile->get_contenthash());
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $location);
     }
 
     /**
@@ -426,8 +426,8 @@ final class object_file_system_test extends tests\testcase {
             $this->assertStringContainsString('Failed to open', $e->getMessage());
         }
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->get_contenthash()]);
-        $this->assertNotEquals(OBJECT_LOCATION_ERROR, $location);
+        $location = manager::get_location_by_hash($file->get_contenthash());
+        $this->assertNotEquals(OBJECT_LOCATION_MISSING, $location);
     }
 
     public function test_remove_file_will_remove_local_file(): void {

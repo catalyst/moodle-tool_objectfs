@@ -25,6 +25,7 @@
 
 namespace tool_objectfs\local\report;
 
+use tool_objectfs\local\location_helper;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 
@@ -46,7 +47,7 @@ class location_report_builder extends objectfs_report_builder {
             OBJECT_LOCATION_DUPLICATED,
             OBJECT_LOCATION_EXTERNAL,
             OBJECT_LOCATION_ORPHANED,
-            OBJECT_LOCATION_ERROR,
+            OBJECT_LOCATION_MISSING,
         ];
 
         $totalcount = 0;
@@ -54,12 +55,14 @@ class location_report_builder extends objectfs_report_builder {
         $filedircount = 0;
         $filedirsum = 0;
         foreach ($locations as $location) {
+            $locationwhere = location_helper::bits_to_exact_sql($location, 'o');
+
             $sql =
-                'WITH
+                "WITH
                   cte_objects AS (
-                    SELECT o.contenthash, o.location
+                    SELECT o.contenthash
                       FROM {tool_objectfs_objects} o
-                     WHERE o.location = ? ),
+                     WHERE {$locationwhere} ),
                   cte_obj_files AS (
                     SELECT f.contenthash, MAX(f.filesize) AS filesize
                       FROM {files} f
@@ -68,39 +71,40 @@ class location_report_builder extends objectfs_report_builder {
                   GROUP BY f.contenthash, f.filesize)
                SELECT COALESCE(COUNT(cof.contenthash),0) AS objectcount,
                       COALESCE(SUM(cof.filesize),0) AS objectsum
-                 FROM cte_obj_files cof';
+                 FROM cte_obj_files cof";
 
             if ($location == OBJECT_LOCATION_LOCAL) {
+                $localwhere = location_helper::bits_to_exact_sql($location, 'co');
                 $sql =
-                    'WITH
+                    "WITH
                       cte_objects AS (
-                        SELECT o.contenthash,  o.location
+                        SELECT o.contenthash
                           FROM {tool_objectfs_objects} o ),
                       cte_obj_files AS (
                         SELECT f.contenthash, MAX(f.filesize) AS filesize
                           FROM {files} f
                      LEFT JOIN cte_objects co ON f.contenthash = co.contenthash
-                         WHERE filesize > 0 AND ( co.location = ? OR co.location IS NULL )
+                         WHERE filesize > 0 AND ( {$localwhere} OR co.in_filedir IS NULL )
                       GROUP BY f.contenthash, f.filesize)
                    SELECT COALESCE(COUNT(cof.contenthash),0) AS objectcount,
                           COALESCE(SUM(cof.filesize),0) AS objectsum
-                     FROM cte_obj_files cof';
+                     FROM cte_obj_files cof";
             }
 
             if ($location !== OBJECT_LOCATION_ORPHANED) {
                 // Process the query normally.
-                $result = $DB->get_record_sql($sql, [$location]);
+                $result = $DB->get_record_sql($sql);
             } else if ($location === OBJECT_LOCATION_ORPHANED) {
                 // Start the query from objectfs, for ORPHANED objects, they are not located in the files table.
                 $sql =
-                    'WITH
+                    "WITH
                       cte_objects AS (
                         SELECT o.contenthash
                          FROM {tool_objectfs_objects} o
-                        WHERE o.location = ?)
+                        WHERE {$locationwhere})
                    SELECT COALESCE(COUNT(co.contenthash),0) AS objectcount
-                     FROM cte_objects co';
-                $result = $DB->get_record_sql($sql, [$location]);
+                     FROM cte_objects co";
+                $result = $DB->get_record_sql($sql);
                 $result->objectsum = 0;
             }
 
