@@ -127,6 +127,6 @@ final class checker_test extends \tool_objectfs\tests\testcase {
         $file = $this->create_error_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $reflection->invokeArgs($this->checker, [$file]));
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $reflection->invokeArgs($this->checker, [$file]));
     }
 }

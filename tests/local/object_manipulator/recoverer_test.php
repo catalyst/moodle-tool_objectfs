@@ -61,7 +61,7 @@ final class recoverer_test extends \tool_objectfs\tests\testcase {
     public function test_recoverer_will_recover_local_objects(): void {
         global $DB;
         $object = $this->create_local_object();
-        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);
+        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_MISSING, ['contenthash' => $object->contenthash]);
 
         $this->recoverer->execute([$object]);
 
@@ -72,7 +72,7 @@ final class recoverer_test extends \tool_objectfs\tests\testcase {
     public function test_recoverer_will_recover_duplicated_objects(): void {
         global $DB;
         $object = $this->create_duplicated_object();
-        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);
+        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_MISSING, ['contenthash' => $object->contenthash]);
 
         $this->recoverer->execute([$object]);
 
@@ -83,7 +83,7 @@ final class recoverer_test extends \tool_objectfs\tests\testcase {
     public function test_recoverer_will_recover_remote_objects(): void {
         global $DB;
         $object = $this->create_remote_object();
-        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);
+        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_MISSING, ['contenthash' => $object->contenthash]);
 
         $this->recoverer->execute([$object]);
 
@@ -94,11 +94,11 @@ final class recoverer_test extends \tool_objectfs\tests\testcase {
     public function test_recoverer_will_not_recover_error_objects(): void {
         global $DB;
         $object = $this->create_error_object();
-        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ERROR, ['contenthash' => $object->contenthash]);
+        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_MISSING, ['contenthash' => $object->contenthash]);
 
         $this->recoverer->execute([$object]);
 
         $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $location);
     }
 }

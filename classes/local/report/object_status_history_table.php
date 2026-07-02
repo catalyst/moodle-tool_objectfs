@@ -240,11 +240,11 @@ class object_status_history_table extends \table_sql {
             'filedir' => 'object_status:filedir',
             'deltaa' => 'object_status:delta:a',
             'deltab' => 'object_status:delta:b',
-            OBJECT_LOCATION_ERROR => 'object_status:location:error',
+            OBJECT_LOCATION_MISSING => 'object_status:location:missing',
+            OBJECT_LOCATION_ORPHANED => 'object_status:location:orphaned',
             OBJECT_LOCATION_LOCAL => 'object_status:location:local',
             OBJECT_LOCATION_DUPLICATED => 'object_status:location:duplicated',
             OBJECT_LOCATION_EXTERNAL => 'object_status:location:external',
-            OBJECT_LOCATION_ORPHANED => 'object_status:location:orphaned',
         ];
         if (isset($locationstringmap[$filelocation])) {
             return get_string($locationstringmap[$filelocation], 'tool_objectfs');
@@ -262,7 +262,7 @@ class object_status_history_table extends \table_sql {
         switch ($filelocation) {
             case 'deltaa':
             case 'deltab':
-            case OBJECT_LOCATION_ERROR:
+            case OBJECT_LOCATION_MISSING:
             case OBJECT_LOCATION_ORPHANED:
                 $class = 'table-danger';
                 break;

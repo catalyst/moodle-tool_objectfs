@@ -50,6 +50,6 @@ class recoverer_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        return ['location' => OBJECT_LOCATION_ERROR];
+        return ['location' => OBJECT_LOCATION_MISSING];
     }
 }

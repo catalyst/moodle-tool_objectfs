@@ -46,7 +46,7 @@ class location_report_builder extends objectfs_report_builder {
             OBJECT_LOCATION_DUPLICATED,
             OBJECT_LOCATION_EXTERNAL,
             OBJECT_LOCATION_ORPHANED,
-            OBJECT_LOCATION_ERROR,
+            OBJECT_LOCATION_MISSING,
         ];
 
         $totalcount = 0;

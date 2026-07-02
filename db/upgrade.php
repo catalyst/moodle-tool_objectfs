@@ -220,5 +220,34 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024120600, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2026041007) {
+        // Migrate OBJECT_LOCATION_* constants from sequential integers to bit flags.
+        // Old values: ORPHANED=-2, ERROR(missing)=-1, LOCAL=0, DUPLICATED=1, EXTERNAL=2
+        // New values: ERROR=0, ORPHANED=1, MISSING=2, LOCAL=3, EXTERNAL=6, DUPLICATED=7
+        //
+        // Processing in an order that avoids value collisions (highest old value first).
+
+        // Widen the location column to match install.xml (LENGTH 1 -> 3) before migrating values.
+        $table = new xmldb_table('tool_objectfs_objects');
+        $field = new xmldb_field('location', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, null, 'timeduplicated');
+        $dbman->change_field_precision($table, $field);
+
+        // tool_objectfs_objects.location column.
+        $DB->execute('UPDATE {tool_objectfs_objects} SET location = 6 WHERE location = 2');
+        $DB->execute('UPDATE {tool_objectfs_objects} SET location = 7 WHERE location = 1');
+        $DB->execute('UPDATE {tool_objectfs_objects} SET location = 3 WHERE location = 0');
+        $DB->execute('UPDATE {tool_objectfs_objects} SET location = 2 WHERE location = -1');
+        $DB->execute('UPDATE {tool_objectfs_objects} SET location = 1 WHERE location = -2');
+
+        // tool_objectfs_report_data.datakey stores location values as strings for the 'location' report type.
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '6' WHERE reporttype = 'location' AND datakey = '2'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '7' WHERE reporttype = 'location' AND datakey = '1'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '3' WHERE reporttype = 'location' AND datakey = '0'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '2' WHERE reporttype = 'location' AND datakey = '-1'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '1' WHERE reporttype = 'location' AND datakey = '-2'");
+
+        upgrade_plugin_savepoint(true, 2026041007, 'tool', 'objectfs');
+    }
+
     return true;
 }
