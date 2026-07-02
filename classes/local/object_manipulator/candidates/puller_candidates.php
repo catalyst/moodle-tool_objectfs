@@ -38,19 +38,20 @@ class puller_candidates extends manipulator_candidates_base {
      * get_candidates_sql
      * @return string
      */
-    public function get_candidates_sql() {
-        return 'SELECT contenthash,
+    protected function get_candidates_sql(): string {
+        $locationconditions = \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_EXTERNAL);
+        return "SELECT contenthash,
                        filesize
                   FROM {tool_objectfs_objects}
                  WHERE filesize <= :sizethreshold
-                   AND location = :location';
+                   AND {$locationconditions}";
     }
 
     /**
      * get_candidates_sql_params
      * @return array
      */
-    public function get_candidates_sql_params() {
-        return ['sizethreshold' => $this->config->sizethreshold, 'location' => OBJECT_LOCATION_EXTERNAL];
+    protected function get_candidates_sql_params(): array {
+        return ['sizethreshold' => $this->config->sizethreshold];
     }
 }

@@ -71,7 +71,7 @@ class file_system extends object_file_system {
         $this->get_logger()->log_object_read('readfile', $path, $file->get_filesize());
 
         if ($success === false) {
-            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_MISSING);
             throw new \file_exception('storedfilecannotreadfile', $file->get_filename());
         }
     }

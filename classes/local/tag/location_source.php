@@ -49,8 +49,9 @@ class location_source implements tag_source {
     public function get_value_for_contenthash(string $contenthash): ?string {
         global $DB;
 
-        $isorphaned = $DB->record_exists('tool_objectfs_objects', ['contenthash' => $contenthash,
-            'location' => OBJECT_LOCATION_ORPHANED]);
+        $columns = \tool_objectfs\local\location_helper::bits_to_columns(OBJECT_LOCATION_ORPHANED);
+        $conditions = array_merge(['contenthash' => $contenthash], $columns);
+        $isorphaned = $DB->record_exists('tool_objectfs_objects', $conditions);
 
         return $isorphaned ? 'orphan' : 'active';
     }

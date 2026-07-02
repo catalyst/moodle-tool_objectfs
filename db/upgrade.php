@@ -220,5 +220,67 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024120600, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2026041007) {
+        // Migrate from single 'location' integer column to individual boolean columns.
+        // Old values: ORPHANED=-2, ERROR(missing)=-1, LOCAL=0, DUPLICATED=1, EXTERNAL=2
+        // New columns: in_filedir, in_mdl_files, in_remote (each 0 or 1).
+
+        $table = new xmldb_table('tool_objectfs_objects');
+
+        // Add the new boolean columns.
+        $field = new xmldb_field('in_filedir', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'timeduplicated');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('in_mdl_files', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'in_filedir');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('in_remote', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'in_mdl_files');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Populate new columns from old location values.
+        // ORPHANED (-2): in_filedir=1, in_mdl_files=0, in_remote=0.
+        $DB->execute('UPDATE {tool_objectfs_objects} SET in_filedir = 1 WHERE location = -2');
+        // ERROR/MISSING (-1): in_filedir=0, in_mdl_files=1, in_remote=0.
+        $DB->execute('UPDATE {tool_objectfs_objects} SET in_mdl_files = 1 WHERE location = -1');
+        // LOCAL (0): in_filedir=1, in_mdl_files=1, in_remote=0.
+        $DB->execute('UPDATE {tool_objectfs_objects} SET in_filedir = 1, in_mdl_files = 1 WHERE location = 0');
+        // DUPLICATED (1): in_filedir=1, in_mdl_files=1, in_remote=1.
+        $DB->execute('UPDATE {tool_objectfs_objects} SET in_filedir = 1, in_mdl_files = 1, in_remote = 1 WHERE location = 1');
+        // EXTERNAL (2): in_filedir=0, in_mdl_files=1, in_remote=1.
+        $DB->execute('UPDATE {tool_objectfs_objects} SET in_mdl_files = 1, in_remote = 1 WHERE location = 2');
+
+        // Drop the old index that references location.
+        $index = new xmldb_index('toolobjeobje_con_idu_ix', XMLDB_INDEX_UNIQUE, ['contenthash', 'location']);
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Drop the old location column.
+        $field = new xmldb_field('location');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Add composite index on the new boolean columns.
+        $index = new xmldb_index('ix_location_bits', XMLDB_INDEX_NOTUNIQUE, ['in_filedir', 'in_mdl_files', 'in_remote']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Migrate report_data datakey values to the new bitmask values.
+        // Reports store the composite location value as a string key.
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '6' WHERE reporttype = 'location' AND datakey = '2'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '7' WHERE reporttype = 'location' AND datakey = '1'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '3' WHERE reporttype = 'location' AND datakey = '0'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '2' WHERE reporttype = 'location' AND datakey = '-1'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '1' WHERE reporttype = 'location' AND datakey = '-2'");
+
+        upgrade_plugin_savepoint(true, 2026041007, 'tool', 'objectfs');
+    }
+
     return true;
 }

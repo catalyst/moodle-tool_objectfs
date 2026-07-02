@@ -27,32 +27,45 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 /**
  * orphaner_candidates
  */
-class orphaner_candidates extends manipulator_candidates_base {
+class orphaner_candidates implements manipulator_candidates {
     /**
      * queryname
      * @var string
      */
     protected $queryname = 'get_orphan_candidates';
 
+    /** @var \stdClass $config */
+    protected $config;
+
     /**
-     * get_candidates_sql
-     * @return string
+     * orphaner_candidates constructor.
+     * @param \stdClass $config
      */
-    public function get_candidates_sql() {
-        return 'SELECT o.id, o.contenthash, o.location
-                  FROM {tool_objectfs_objects} o
-             LEFT JOIN {files} f ON o.contenthash = f.contenthash
-                 WHERE f.id is null
-                   AND o.location != :location';
+    public function __construct(\stdClass $config) {
+        $this->config = $config;
     }
 
     /**
-     * get_candidates_sql_params
+     * get_query_name
+     * @return string
+     */
+    public function get_query_name() {
+        return $this->queryname;
+    }
+
+    /**
+     * Get tracked objects that no longer have a reference in {files}.
+     * Excludes objects already marked as orphaned (in_filedir=1, in_mdl_files=0, in_remote=0).
+     *
      * @return array
      */
-    public function get_candidates_sql_params() {
-        return [
-          'location' => OBJECT_LOCATION_ORPHANED,
-        ];
+    public function get() {
+        global $DB;
+        $sql = 'SELECT o.id, o.contenthash, o.in_filedir, o.in_mdl_files, o.in_remote
+                  FROM {tool_objectfs_objects} o
+             LEFT JOIN {files} f ON o.contenthash = f.contenthash
+                 WHERE f.id IS NULL
+                   AND NOT (o.in_filedir = 1 AND o.in_mdl_files = 0 AND o.in_remote = 0)';
+        return $DB->get_records_sql($sql, [], 0, $this->config->batchsize);
     }
 }

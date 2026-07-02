@@ -310,20 +310,21 @@ abstract class object_file_system extends \file_system_filedir {
      * @return int
      */
     public function get_object_location_from_hash($contenthash) {
-        $localreadable = $this->is_file_readable_locally_by_hash($contenthash);
-        $externalreadable = $this->is_file_readable_externally_by_hash($contenthash);
-
-        if ($localreadable && $externalreadable) {
-            return OBJECT_LOCATION_DUPLICATED;
-        } else if ($localreadable && !$externalreadable) {
-            return OBJECT_LOCATION_LOCAL;
-        } else if (!$localreadable && $externalreadable) {
-            return OBJECT_LOCATION_EXTERNAL;
-        } else {
-            // Object is not anywhere - we toggle an error state in the DB.
-            manager::update_object_by_hash($contenthash, OBJECT_LOCATION_ERROR);
-            return OBJECT_LOCATION_ERROR;
+        // The mdl_files bit is always set because this function is only called
+        // for objects known to be referenced in the files table.
+        $location = OBJECT_LOCATION_IN_MDL_FILES;
+        if ($this->is_file_readable_locally_by_hash($contenthash)) {
+            $location |= OBJECT_LOCATION_IN_FILEDIR;
         }
+        if ($this->is_file_readable_externally_by_hash($contenthash)) {
+            $location |= OBJECT_LOCATION_IN_REMOTE;
+        }
+
+        if ($location === OBJECT_LOCATION_MISSING) {
+            // Object exists in mdl_files but is not anywhere physically - record missing state.
+            manager::update_object_by_hash($contenthash, OBJECT_LOCATION_MISSING);
+        }
+        return $location;
     }
 
     /**
@@ -487,7 +488,7 @@ abstract class object_file_system extends \file_system_filedir {
             $this->logger->log_object_read('readfile', $path, $file->get_filesize());
 
             if ($success === false) {
-                manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+                manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_MISSING);
             }
         }
     }
@@ -517,7 +518,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->logger->log_object_read('file_get_contents', $path, $file->get_filesize());
 
         if (!$contents) {
-            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_MISSING);
         }
 
         return $contents;
@@ -627,7 +628,7 @@ abstract class object_file_system extends \file_system_filedir {
         $this->logger->log_object_read('get_file_handle_for_path', $path, $file->get_filesize());
 
         if (!$filehandle) {
-            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+            manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_MISSING);
         }
 
         return $filehandle;
@@ -764,6 +765,7 @@ abstract class object_file_system extends \file_system_filedir {
                 $this->delete_external_file_from_hash($contenthash);
                 break;
 
+            case OBJECT_LOCATION_MISSING:
             case OBJECT_LOCATION_ERROR:
             default:
                 return;
@@ -1317,8 +1319,7 @@ abstract class object_file_system extends \file_system_filedir {
      */
     private function is_file_stored_externally_by_hash(string $contenthash): bool {
         global $DB;
-        $location = (int) $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $contenthash]);
-
-        return $location === OBJECT_LOCATION_DUPLICATED || $location === OBJECT_LOCATION_EXTERNAL;
+        $record = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash], 'in_remote');
+        return !empty($record->in_remote);
     }
 }
