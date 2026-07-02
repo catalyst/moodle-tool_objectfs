@@ -64,4 +64,16 @@ abstract class manipulator_candidates_base implements manipulator_candidates {
             $this->config->batchsize
         );
     }
+
+    /**
+     * Returns SQL to retrieve objects for manipulation.
+     * @return string
+     */
+    abstract protected function get_candidates_sql(): string;
+
+    /**
+     * Returns parameters for the SQL from get_candidates_sql.
+     * @return array
+     */
+    abstract protected function get_candidates_sql_params(): array;
 }

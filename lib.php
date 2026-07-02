@@ -29,36 +29,62 @@ use tool_objectfs\local\tag\tag_manager;
 define('OBJECTFS_PLUGIN_NAME', 'tool_objectfs');
 
 /**
- * Location enum of the object
- * ORPHANED is when the {objectfs_objects} table contains a record linking to a
- * moodle {files} record which is no longer present.
+ * Location bit flag: the object exists in the local filedir.
+ * Bit 1.
  */
-define('OBJECT_LOCATION_ORPHANED', -2);
+define('OBJECT_LOCATION_IN_FILEDIR', 1);
 
 /**
- * Location enum of the object
- * ERROR is when the file is missing when it is expected to be there.
+ * Location bit flag: the object is referenced in the Moodle files table (mdl_files).
+ * Bit 2.
+ */
+define('OBJECT_LOCATION_IN_MDL_FILES', 2);
+
+/**
+ * Location bit flag: the object exists in the primary remote object store.
+ * Bit 4.
+ */
+define('OBJECT_LOCATION_IN_REMOTE', 4);
+
+/**
+ * Location of the object: completely absent — no bits set.
+ * This is an invalid state that should not normally be stored in the database.
+ * Value: 0.
+ */
+define('OBJECT_LOCATION_ERROR', 0);
+
+/**
+ * Location of the object: in filedir only, no mdl_files reference.
+ * This is a trashdir candidate marked for cleanup.
+ * Value: OBJECT_LOCATION_IN_FILEDIR = 1.
+ */
+define('OBJECT_LOCATION_ORPHANED', OBJECT_LOCATION_IN_FILEDIR);
+
+/**
+ * Location of the object: referenced in mdl_files but not present in filedir or any remote store.
+ * This is a missing-file error state.
+ * Value: OBJECT_LOCATION_IN_MDL_FILES = 2.
  * @see tests/object_file_system_test.php for examples.
  */
-define('OBJECT_LOCATION_ERROR', -1);
+define('OBJECT_LOCATION_MISSING', OBJECT_LOCATION_IN_MDL_FILES);
 
 /**
- * Location enum of the object
- * LOCAL is when the object exists locally only.
+ * Location of the object: in filedir and mdl_files, not yet pushed to any remote store.
+ * Value: OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES = 3.
  */
-define('OBJECT_LOCATION_LOCAL', 0);
+define('OBJECT_LOCATION_LOCAL', OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES);
 
 /**
- * Location enum of the object
- * DUPLICATED is when the object exists both locally, and remotely.
+ * Location of the object: in mdl_files and the primary remote store, no local filedir copy.
+ * Value: OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE = 6.
  */
-define('OBJECT_LOCATION_DUPLICATED', 1);
+define('OBJECT_LOCATION_EXTERNAL', OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE);
 
 /**
- * Location enum of the object
- * EXTERNAL is when when the object lives remotely only.
+ * Location of the object: in filedir, mdl_files, and the primary remote store.
+ * Value: OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE = 7.
  */
-define('OBJECT_LOCATION_EXTERNAL', 2);
+define('OBJECT_LOCATION_DUPLICATED', OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE);
 
 define('OBJECTFS_REPORT_OBJECT_LOCATION', 0);
 define('OBJECTFS_REPORT_LOG_SIZE', 1);

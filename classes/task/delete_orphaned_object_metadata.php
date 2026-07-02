@@ -51,8 +51,8 @@ class delete_orphaned_object_metadata extends task {
             return;
         }
 
+        $orphanconditions = \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_ORPHANED, 'o');
         $params = [
-            'location' => OBJECT_LOCATION_ORPHANED,
             'ageforremoval' => time() - $ageforremoval,
         ];
 
@@ -64,7 +64,7 @@ class delete_orphaned_object_metadata extends task {
             $sql = 'SELECT o.*
                       FROM {tool_objectfs_objects} o
                  LEFT JOIN {files} f ON o.contenthash = f.contenthash
-                     WHERE f.id is null AND o.location = :location AND timeduplicated < :ageforremoval';
+                     WHERE f.id is null AND {$orphanconditions} AND timeduplicated < :ageforremoval';
 
             $objects = $DB->get_recordset_sql($sql, $params);
             $count = 0;
@@ -79,7 +79,8 @@ class delete_orphaned_object_metadata extends task {
             mtrace("Deleted $count orphaned files and their metadata (orphaned tool_objectfs_objects)");
         } else {
             // Delete external files is turned off, we only delete the metadata.
-            $wheresql = 'location = :location and timeduplicated < :ageforremoval';
+            $orphanconditions2 = \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_ORPHANED);
+            $wheresql = "{$orphanconditions2} and timeduplicated < :ageforremoval";
             $count = $DB->count_records_select('tool_objectfs_objects', $wheresql, $params);
             if (!empty($count)) {
                 mtrace("Deleting $count records with orphaned metadata (orphaned tool_objectfs_objects)");

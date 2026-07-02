@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
-use tool_objectfs\local\location_query;
-
 /**
  * recoverer_candidates
  */
@@ -40,18 +38,19 @@ class recoverer_candidates extends manipulator_candidates_base {
      * get_candidates_sql
      * @return string
      */
-    public function get_candidates_sql() {
-        return 'SELECT contenthash,
+    protected function get_candidates_sql(): string {
+        $locationconditions = \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_MISSING);
+        return "SELECT contenthash,
                        filesize
                   FROM {tool_objectfs_objects}
-                 WHERE ' . location_query::condition(OBJECT_LOCATION_ERROR) . '';
+                 WHERE {$locationconditions}";
     }
 
     /**
      * get_candidates_sql_params
      * @return array
      */
-    public function get_candidates_sql_params() {
+    protected function get_candidates_sql_params(): array {
         return [];
     }
 }

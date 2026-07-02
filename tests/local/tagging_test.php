@@ -171,7 +171,9 @@ final class tagging_test extends testcase {
         $object = $this->create_duplicated_object('gather tags for upload test');
 
         // Change the object record to be orphaned.
-        $DB->update_record('tool_objectfs_objects', ['id' => $object->id, 'location' => OBJECT_LOCATION_ORPHANED]);
+        $columns = \tool_objectfs\local\location_helper::bits_to_columns(OBJECT_LOCATION_ORPHANED);
+        $columns['id'] = $object->id;
+        $DB->update_record('tool_objectfs_objects', $columns);
 
         $tags = tag_manager::gather_object_tags_for_upload($object->contenthash);
 

@@ -91,7 +91,7 @@ final class puller_test extends \tool_objectfs\tests\testcase {
 
         $this->puller->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
+        $location = manager::get_location_by_hash($object->contenthash);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -103,7 +103,7 @@ final class puller_test extends \tool_objectfs\tests\testcase {
 
         $this->puller->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
+        $location = manager::get_location_by_hash($object->contenthash);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertTrue($this->is_externally_readable_by_hash($object->contenthash));
@@ -115,7 +115,7 @@ final class puller_test extends \tool_objectfs\tests\testcase {
 
         $this->puller->execute([$object]);
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object->contenthash]);
+        $location = manager::get_location_by_hash($object->contenthash);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
         $this->assertTrue($this->is_locally_readable_by_hash($object->contenthash));
         $this->assertFalse($this->is_externally_readable_by_hash($object->contenthash));

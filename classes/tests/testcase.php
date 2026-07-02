@@ -180,7 +180,7 @@ abstract class testcase extends \advanced_testcase {
         $file = $this->create_local_file();
         $path = $this->get_local_path_from_storedfile($file);
         unlink($path);
-        manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_ERROR);
+        manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_MISSING);
         return $file;
     }
 
@@ -311,7 +311,7 @@ abstract class testcase extends \advanced_testcase {
      */
     protected function create_error_object($content = 'error object content') {
         $file = $this->create_error_file($content);
-        return $this->create_object_record($file, OBJECT_LOCATION_ERROR);
+        return $this->create_object_record($file, OBJECT_LOCATION_MISSING);
     }
 
     /**

@@ -25,7 +25,7 @@
 
 namespace tool_objectfs\local\report;
 
-use tool_objectfs\local\location_query;
+use tool_objectfs\local\location_helper;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\store\object_file_system;
 
@@ -40,27 +40,77 @@ class location_report_builder extends objectfs_report_builder {
      * @throws \dml_exception
      */
     public function build_report($reportid) {
+        global $DB;
         $report = new objectfs_report('location', $reportid);
         $locations = [
             OBJECT_LOCATION_LOCAL,
             OBJECT_LOCATION_DUPLICATED,
             OBJECT_LOCATION_EXTERNAL,
             OBJECT_LOCATION_ORPHANED,
-            OBJECT_LOCATION_ERROR,
+            OBJECT_LOCATION_MISSING,
         ];
-
-        $results = location_query::uses_bits()
-            ? $this->get_results_from_bits($locations)
-            : $this->get_results_from_legacy_location($locations);
 
         $totalcount = 0;
         $totalsum = 0;
         $filedircount = 0;
         $filedirsum = 0;
         foreach ($locations as $location) {
-            $result = $results[$location];
+            $locationwhere = location_helper::bits_to_exact_sql($location, 'o');
 
-            $report->add_row($location, $result->objectcount, $result->objectsum);
+            $sql =
+                "WITH
+                  cte_objects AS (
+                    SELECT o.contenthash
+                      FROM {tool_objectfs_objects} o
+                     WHERE {$locationwhere} ),
+                  cte_obj_files AS (
+                    SELECT f.contenthash, MAX(f.filesize) AS filesize
+                      FROM {files} f
+                INNER JOIN cte_objects co ON f.contenthash = co.contenthash
+                     WHERE filesize > 0
+                  GROUP BY f.contenthash, f.filesize)
+               SELECT COALESCE(COUNT(cof.contenthash),0) AS objectcount,
+                      COALESCE(SUM(cof.filesize),0) AS objectsum
+                 FROM cte_obj_files cof";
+
+            if ($location == OBJECT_LOCATION_LOCAL) {
+                $localwhere = location_helper::bits_to_exact_sql($location, 'co');
+                $sql =
+                    "WITH
+                      cte_objects AS (
+                        SELECT o.contenthash
+                          FROM {tool_objectfs_objects} o ),
+                      cte_obj_files AS (
+                        SELECT f.contenthash, MAX(f.filesize) AS filesize
+                          FROM {files} f
+                     LEFT JOIN cte_objects co ON f.contenthash = co.contenthash
+                         WHERE filesize > 0 AND ( {$localwhere} OR co.in_filedir IS NULL )
+                      GROUP BY f.contenthash, f.filesize)
+                   SELECT COALESCE(COUNT(cof.contenthash),0) AS objectcount,
+                          COALESCE(SUM(cof.filesize),0) AS objectsum
+                     FROM cte_obj_files cof";
+            }
+
+            if ($location !== OBJECT_LOCATION_ORPHANED) {
+                // Process the query normally.
+                $result = $DB->get_record_sql($sql);
+            } else if ($location === OBJECT_LOCATION_ORPHANED) {
+                // Start the query from objectfs, for ORPHANED objects, they are not located in the files table.
+                $sql =
+                    "WITH
+                      cte_objects AS (
+                        SELECT o.contenthash
+                         FROM {tool_objectfs_objects} o
+                        WHERE {$locationwhere})
+                   SELECT COALESCE(COUNT(co.contenthash),0) AS objectcount
+                     FROM cte_objects co";
+                $result = $DB->get_record_sql($sql);
+                $result->objectsum = 0;
+            }
+
+            $result->datakey = $location;
+
+            $report->add_row($result->datakey, $result->objectcount, $result->objectsum);
 
             if (in_array($location, [OBJECT_LOCATION_LOCAL, OBJECT_LOCATION_DUPLICATED])) {
                 $filedircount += $result->objectcount;
@@ -73,113 +123,6 @@ class location_report_builder extends objectfs_report_builder {
         $report->add_row('total', $totalcount, $totalsum);
         $this->add_filedir_size_stats($report, $filedircount, $filedirsum);
         return $report;
-    }
-
-    /**
-     * Counts and sizes per location from the objects table only, without joining {files}.
-     *
-     * Files with no object row yet are not included until the checker has created their row.
-     *
-     * @param int[] $locations OBJECT_LOCATION_* constants.
-     * @return \stdClass[] Keyed by location, each with objectcount and objectsum.
-     */
-    private function get_results_from_bits(array $locations): array {
-        global $DB;
-
-        $results = [];
-        $keys = [];
-        foreach ($locations as $location) {
-            $results[$location] = (object) ['objectcount' => 0, 'objectsum' => 0];
-            $keys[implode(':', location_query::bits($location))] = $location;
-        }
-
-        // Zero-size files are excluded, matching the legacy report.
-        $sql = 'SELECT o.in_filedir, o.in_mdl_files, o.in_remote,
-                       COUNT(1) AS objectcount,
-                       COALESCE(SUM(o.filesize), 0) AS objectsum
-                  FROM {tool_objectfs_objects} o
-                 WHERE o.in_mdl_files = 0 OR o.filesize IS NULL OR o.filesize > 0
-              GROUP BY o.in_filedir, o.in_mdl_files, o.in_remote';
-        $rows = $DB->get_recordset_sql($sql);
-        foreach ($rows as $row) {
-            $location = $keys["{$row->in_filedir}:{$row->in_mdl_files}:{$row->in_remote}"] ?? null;
-            if ($location === null) {
-                continue;
-            }
-            $results[$location]->objectcount = (int) $row->objectcount;
-            // Orphaned objects have no file in {files}, so no size is reported.
-            $results[$location]->objectsum = $location === OBJECT_LOCATION_ORPHANED ? 0 : (int) $row->objectsum;
-        }
-        $rows->close();
-
-        return $results;
-    }
-
-    /**
-     * Per-location queries joining {files}, used until the location bits migration completes.
-     *
-     * @param int[] $locations OBJECT_LOCATION_* constants.
-     * @return \stdClass[] Keyed by location, each with objectcount and objectsum.
-     */
-    private function get_results_from_legacy_location(array $locations): array {
-        global $DB;
-
-        $results = [];
-        foreach ($locations as $location) {
-            $sql =
-                'WITH
-                  cte_objects AS (
-                    SELECT o.contenthash, o.location
-                      FROM {tool_objectfs_objects} o
-                     WHERE o.location = ? ),
-                  cte_obj_files AS (
-                    SELECT f.contenthash, MAX(f.filesize) AS filesize
-                      FROM {files} f
-                INNER JOIN cte_objects co ON f.contenthash = co.contenthash
-                     WHERE filesize > 0
-                  GROUP BY f.contenthash, f.filesize)
-               SELECT COALESCE(COUNT(cof.contenthash),0) AS objectcount,
-                      COALESCE(SUM(cof.filesize),0) AS objectsum
-                 FROM cte_obj_files cof';
-
-            if ($location == OBJECT_LOCATION_LOCAL) {
-                $sql =
-                    'WITH
-                      cte_objects AS (
-                        SELECT o.contenthash,  o.location
-                          FROM {tool_objectfs_objects} o ),
-                      cte_obj_files AS (
-                        SELECT f.contenthash, MAX(f.filesize) AS filesize
-                          FROM {files} f
-                     LEFT JOIN cte_objects co ON f.contenthash = co.contenthash
-                         WHERE filesize > 0 AND ( co.location = ? OR co.location IS NULL )
-                      GROUP BY f.contenthash, f.filesize)
-                   SELECT COALESCE(COUNT(cof.contenthash),0) AS objectcount,
-                          COALESCE(SUM(cof.filesize),0) AS objectsum
-                     FROM cte_obj_files cof';
-            }
-
-            if ($location !== OBJECT_LOCATION_ORPHANED) {
-                // Process the query normally.
-                $result = $DB->get_record_sql($sql, [$location]);
-            } else {
-                // Start the query from objectfs, for ORPHANED objects, they are not located in the files table.
-                $sql =
-                    'WITH
-                      cte_objects AS (
-                        SELECT o.contenthash
-                         FROM {tool_objectfs_objects} o
-                        WHERE o.location = ?)
-                   SELECT COALESCE(COUNT(co.contenthash),0) AS objectcount
-                     FROM cte_objects co';
-                $result = $DB->get_record_sql($sql, [$location]);
-                $result->objectsum = 0;
-            }
-
-            $results[$location] = $result;
-        }
-
-        return $results;
     }
 
     /**

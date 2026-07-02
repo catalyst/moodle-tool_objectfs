@@ -24,8 +24,6 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
-use tool_objectfs\local\location_query;
-
 /**
  * pusher_candidates
  */
@@ -40,21 +38,22 @@ class pusher_candidates extends manipulator_candidates_base {
      * get_candidates_sql
      * @return string
      */
-    public function get_candidates_sql() {
-        return 'SELECT contenthash,
+    protected function get_candidates_sql(): string {
+        $locationconditions = \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_LOCAL);
+        return "SELECT contenthash,
                        filesize
                   FROM {tool_objectfs_objects}
                  WHERE filesize > :threshold
                    AND filesize < :maximum_file_size
                    AND timeduplicated <= :maxcreatedtimestamp
-                   AND ' . location_query::condition(OBJECT_LOCATION_LOCAL) . '';
+                   AND {$locationconditions}";
     }
 
     /**
      * get_candidates_sql_params
      * @return array
      */
-    public function get_candidates_sql_params() {
+    protected function get_candidates_sql_params(): array {
         $filesystem = new $this->config->filesystem();
         return [
             'maxcreatedtimestamp' => time() - $this->config->minimumage,

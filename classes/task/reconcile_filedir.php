@@ -64,7 +64,7 @@ class reconcile_filedir extends task {
 
         // The config deletelocal must be enabled.
         if (!get_config('tool_objectfs', 'deletelocal')) {
-            mtrace('ObjectFS: deletelocal disabled — skipping filedir reconciliation.');
+            mtrace('ObjectFS: deletelocal disabled - skipping filedir reconciliation.');
             return;
         }
 
@@ -75,7 +75,7 @@ class reconcile_filedir extends task {
             try {
                 $filesystem = new $this->config->filesystem();
             } catch (\Throwable $e) {
-                mtrace('ObjectFS: Could not instantiate filesystem — will register new files as local only. ' . $e->getMessage());
+                mtrace('ObjectFS: Could not instantiate filesystem - will register new files as local only. ' . $e->getMessage());
             }
         }
 
@@ -295,7 +295,8 @@ class reconcile_filedir extends task {
                         } else {
                             // If ObjectFS thinks the file is remote-only,
                             // update it so it knows the file is duplicated.
-                            if ($object->location == OBJECT_LOCATION_EXTERNAL) {
+                            $objectlocation = \tool_objectfs\local\location_helper::columns_to_bits($object);
+                            if ($objectlocation == OBJECT_LOCATION_EXTERNAL) {
                                 manager::upsert_object($object, OBJECT_LOCATION_DUPLICATED);
                                 $updated++;
                             }

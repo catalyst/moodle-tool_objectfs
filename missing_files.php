@@ -37,7 +37,7 @@ $PAGE->set_url('/admin/tool/objectfs/missing_files.php');
 $PAGE->set_context(context_system::instance());
 $PAGE->set_cacheable(false);
 $output = $PAGE->get_renderer('tool_objectfs');
-$table = new files_table('missing-files', OBJECT_LOCATION_ERROR);
+$table = new files_table('missing-files', OBJECT_LOCATION_MISSING);
 $table->define_baseurl('/admin/tool/objectfs/missing_files.php');
 
 if ($table->is_downloading($download, get_string('filename:missingfiles', 'tool_objectfs'))) {

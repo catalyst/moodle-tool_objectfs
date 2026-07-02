@@ -71,9 +71,9 @@ final class orphaner_test extends \tool_objectfs\tests\testcase {
             $object2 = $this->create_duplicated_object(),
             $object3 = $this->create_remote_object(),
         ]);
-        $location1 = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object1->contenthash]);
-        $location2 = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object2->contenthash]);
-        $location3 = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object3->contenthash]);
+        $location1 = manager::get_location_by_hash($object1->contenthash);
+        $location2 = manager::get_location_by_hash($object2->contenthash);
+        $location3 = manager::get_location_by_hash($object3->contenthash);
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location1);
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location2);
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location3);
@@ -105,7 +105,7 @@ final class orphaner_test extends \tool_objectfs\tests\testcase {
         $this->assertCount(1, $objects);
 
         // Ensure it ignores orphaned records during the find.
-        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ORPHANED, ['contenthash' => $object->contenthash]);
+        manager::update_object_by_hash($object->contenthash, OBJECT_LOCATION_ORPHANED);
         $objects = $finder->get();
         $this->assertCount(0, $objects); // No candidates - only candidate has been orphaned.
     }
@@ -117,9 +117,9 @@ final class orphaner_test extends \tool_objectfs\tests\testcase {
             $object2 = $this->create_duplicated_object(),
             $object3 = $this->create_remote_object(),
         ]);
-        $location1 = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object1->contenthash]);
-        $location2 = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object2->contenthash]);
-        $location3 = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $object3->contenthash]);
+        $location1 = manager::get_location_by_hash($object1->contenthash);
+        $location2 = manager::get_location_by_hash($object2->contenthash);
+        $location3 = manager::get_location_by_hash($object3->contenthash);
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location1);
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location2);
         $this->assertEquals(OBJECT_LOCATION_ORPHANED, $location3);
