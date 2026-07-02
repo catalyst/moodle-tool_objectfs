@@ -46,8 +46,8 @@ class files_table extends \table_sql {
         $from = '{files} f';
         $from .= ' LEFT JOIN {tool_objectfs_objects} o on f.contenthash = o.contenthash';
         $from .= ' LEFT JOIN {context} ctx ON f.contextid = ctx.id';
-        $where = 'o.location = ?';
-        $params = [$objectlocation];
+        $where = \tool_objectfs\local\location_helper::bits_to_exact_sql((int)$objectlocation, 'o');
+        $params = [];
 
         $this->columns = $this->headers = ['id', 'contextid', 'contenthash', 'localpath', 'link', 'component',
             'filearea', 'filename', 'filepath', 'mimetype', 'filesize', 'timecreated'];

@@ -16,6 +16,7 @@
 
 namespace tool_objectfs\task;
 
+use tool_objectfs\local\manager;
 use tool_objectfs\tests\testcase;
 use tool_objectfs\task\reconcile_filedir;
 
@@ -57,12 +58,7 @@ final class task_reconcile_filedir_test extends testcase {
 
         // 4. File marked EXTERNAL but exists locally, should update to DUPLICATED.
         $remotefile = $this->create_local_file('remote content');
-        $DB->set_field(
-            'tool_objectfs_objects',
-            'location',
-            OBJECT_LOCATION_EXTERNAL,
-            ['contenthash' => $remotefile->get_contenthash()]
-        );
+        manager::update_object_by_hash($remotefile->get_contenthash(), OBJECT_LOCATION_EXTERNAL);
 
         // Execute scheduled task.
         ob_start();
@@ -99,15 +95,9 @@ final class task_reconcile_filedir_test extends testcase {
         );
 
         // 4. External file should now be marked as DUPLICATED.
-        $updatedobject = $DB->get_record(
-            'tool_objectfs_objects',
-            ['contenthash' => $remotefile->get_contenthash()],
-            '*',
-            MUST_EXIST
-        );
         $this->assertEquals(
             OBJECT_LOCATION_DUPLICATED,
-            $updatedobject->location,
+            manager::get_location_by_hash($remotefile->get_contenthash()),
             'External file should now be marked as DUPLICATED.'
         );
 

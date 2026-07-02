@@ -42,14 +42,19 @@ class populate_objects_filesize extends adhoc_task {
         $maxupdates = !empty($data->maxupdates) ? $data->maxupdates : self::MAX_UPDATES;
 
         // Get all objects without a filesize and join them to a filesize from the files table.
-        // Values less than 0 for object's location indicate an error for the object.
-        $sql = "SELECT o.id, o.contenthash, o.timeduplicated, o.location, f.filesize
+        // Exclude error objects (those with all location bits = 0).
+        $sql = "SELECT o.id, o.contenthash, o.timeduplicated, o.in_filedir, o.in_mdl_files, o.in_remote, f.filesize
                   FROM {tool_objectfs_objects} o
                   JOIN {files} f ON o.contenthash = f.contenthash
                  WHERE o.filesize IS NULL
-                   AND o.location >= 0
+                   AND o.in_mdl_files = 1
+                   AND (o.in_filedir = 1 OR o.in_remote = 1)
               GROUP BY o.id,
                        o.contenthash,
+                       o.timeduplicated,
+                       o.in_filedir,
+                       o.in_mdl_files,
+                       o.in_remote,
                        f.filesize";
         $records = $DB->get_recordset_sql($sql, null, 0, $maxupdates + 1);
 

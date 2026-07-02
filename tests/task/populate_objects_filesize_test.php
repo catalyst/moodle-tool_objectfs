@@ -16,6 +16,8 @@
 
 namespace tool_objectfs\task;
 
+use tool_objectfs\local\manager;
+
 /**
  * Test adhoc-task populate_objects_filesize.
  *
@@ -198,7 +200,7 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
         $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
         // Set first object to be orphaned.
-        $DB->set_field('tool_objectfs_objects', 'location', -2, ['contenthash' => $filehashes[0]]);
+        manager::update_object_by_hash($filehashes[0], OBJECT_LOCATION_ORPHANED);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -232,8 +234,8 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
         // Set all objects to have a filesize of null.
         $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
-        // Set first object to be orphaned.
-        $DB->set_field('tool_objectfs_objects', 'location', -1, ['contenthash' => $file1->get_contenthash()]);
+        // Set first object to have error/missing state.
+        manager::update_object_by_hash($file1->get_contenthash(), OBJECT_LOCATION_MISSING);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();

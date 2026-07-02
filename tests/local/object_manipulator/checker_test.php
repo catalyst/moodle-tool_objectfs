@@ -50,24 +50,24 @@ final class checker_test extends \tool_objectfs\tests\testcase {
     public function test_checker_get_location_local_if_object_is_local(): void {
         global $DB;
         $file = $this->create_local_object();
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
-        $this->assertEquals('string', gettype($location));
+        $location = manager::get_location_by_hash($file->contenthash);
+        $this->assertIsInt($location);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $location);
     }
 
     public function test_checker_get_location_duplicated_if_object_is_duplicated(): void {
         global $DB;
         $file = $this->create_duplicated_object();
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
-        $this->assertEquals('string', gettype($location));
+        $location = manager::get_location_by_hash($file->contenthash);
+        $this->assertIsInt($location);
         $this->assertEquals(OBJECT_LOCATION_DUPLICATED, $location);
     }
 
     public function test_checker_get_location_external_if_object_is_external(): void {
         global $DB;
         $file = $this->create_remote_object();
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->contenthash]);
-        $this->assertEquals('string', gettype($location));
+        $location = manager::get_location_by_hash($file->contenthash);
+        $this->assertIsInt($location);
         $this->assertEquals(OBJECT_LOCATION_EXTERNAL, $location);
     }
 
@@ -95,9 +95,9 @@ final class checker_test extends \tool_objectfs\tests\testcase {
         $localobject->id = null;
         $DB->delete_records('tool_objectfs_objects', ['contenthash' => $localobject->contenthash]);
         $this->checker->execute([$localobject]);
-        $dblocation = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $localobject->contenthash]);
+        $dblocation = manager::get_location_by_hash($localobject->contenthash);
 
-        $this->assertEquals('string', gettype($dblocation));
+        $this->assertIsInt($dblocation);
         $this->assertEquals(OBJECT_LOCATION_LOCAL, $dblocation);
         self::assertFalse($this->objects_contain_hash($localobject->contenthash));
     }
@@ -127,6 +127,6 @@ final class checker_test extends \tool_objectfs\tests\testcase {
         $file = $this->create_error_object();
         $reflection = new \ReflectionMethod(checker::class, "manipulate_object");
         $reflection->setAccessible(true);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $reflection->invokeArgs($this->checker, [$file]));
+        $this->assertEquals(OBJECT_LOCATION_MISSING, $reflection->invokeArgs($this->checker, [$file]));
     }
 }

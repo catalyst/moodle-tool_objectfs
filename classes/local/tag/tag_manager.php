@@ -138,13 +138,15 @@ class tag_manager {
         global $DB;
 
         // Find object records where the status is NEEDS_SYNC and is replicated.
-        [$insql, $inparams] = $DB->get_in_or_equal([
-            OBJECT_LOCATION_DUPLICATED, OBJECT_LOCATION_EXTERNAL, OBJECT_LOCATION_ORPHANED], SQL_PARAMS_NAMED);
-        $inparams['syncstatus'] = self::SYNC_STATUS_NEEDS_SYNC;
+        $locationconditions = '(' .
+            '(' . \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_DUPLICATED) . ')' .
+            ' OR (' . \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_EXTERNAL) . ')' .
+            ' OR (' . \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_ORPHANED) . ')' .
+        ')';
         $records = $DB->get_records_select(
             'tool_objectfs_objects',
-            'tagsyncstatus = :syncstatus AND location ' . $insql,
-            $inparams,
+            "tagsyncstatus = :syncstatus AND {$locationconditions}",
+            ['syncstatus' => self::SYNC_STATUS_NEEDS_SYNC],
             '',
             'contenthash',
             0,

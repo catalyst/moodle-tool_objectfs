@@ -72,6 +72,7 @@ $string['object_status:location:duplicatedcount'] = 'Duplicated (count)';
 $string['object_status:location:duplicatedsize'] = 'Duplicated (size)';
 $string['object_status:location:duplicatedsizechart'] = 'Duplicated (MB)';
 $string['object_status:location:error'] = 'Missing from filedir and external storage (<a href="/admin/tool/objectfs/missing_files.php">view files</a>)';
+$string['object_status:location:missing'] = 'Missing from filedir and external storage (<a href="/admin/tool/objectfs/missing_files.php">view files</a>)';
 $string['object_status:location:external'] = 'Only in external storage';
 $string['object_status:location:externalcount'] = 'External (count)';
 $string['object_status:location:externalsize'] = 'External (size)';
