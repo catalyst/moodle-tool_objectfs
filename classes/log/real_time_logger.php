@@ -34,28 +34,6 @@ require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
  */
 class real_time_logger extends objectfs_logger {
     /**
-     * log_object_read_action
-     * @param string $actionname
-     * @param string $objectpath
-     *
-     * @return mixed
-     */
-    public function log_object_read_action($actionname, $objectpath) {
-    }
-
-    /**
-     * log_object_move_action
-     * @param string $actionname
-     * @param string $objecthash
-     * @param string $initallocation
-     * @param string $finallocation
-     *
-     * @return mixed
-     */
-    public function log_object_move_action($actionname, $objecthash, $initallocation, $finallocation) {
-    }
-
-    /**
      * append_timing_string
      * @param mixed $logstring
      *

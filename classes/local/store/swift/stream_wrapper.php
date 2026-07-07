@@ -447,7 +447,7 @@ class stream_wrapper {
     public function stream_write($data) {
 
         if (!$this->iswriting) {
-            tigger_error("Steam is not writable", E_USER_WARNING);
+            trigger_error('Stream is not writable', E_USER_WARNING);
         }
 
         $this->isdirty = true;
@@ -459,7 +459,7 @@ class stream_wrapper {
      *
      * @return boolean
      */
-    public function steam_flush() {
+    public function stream_flush() {
 
         return $this->push_object();
     }

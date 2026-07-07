@@ -48,7 +48,7 @@ class client extends object_client_base {
             require_once($this->autoloader);
             $this->maxupload = OBJECTFS_BYTES_IN_TERABYTE * 5;
             $this->containername = $config->openstack_container;
-            $config->openstack_authtoken = unserialize($config->openstack_authtoken);
+            $config->openstack_authtoken = unserialize($config->openstack_authtoken, ['allowed_classes' => false]);
             $this->config = $config;
         } else {
             parent::__construct($config);

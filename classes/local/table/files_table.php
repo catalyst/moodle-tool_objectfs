@@ -134,7 +134,7 @@ class files_table extends \table_sql {
      * @return mixed
      */
     public function col_filename(\stdClass $row) {
-        return $row->filename;
+        return s($row->filename);
     }
 
     /**
@@ -144,7 +144,7 @@ class files_table extends \table_sql {
      * @return string
      */
     public function col_filepath(\stdClass $row) {
-        return $row->filepath;
+        return s($row->filepath);
     }
 
     /**
@@ -154,7 +154,7 @@ class files_table extends \table_sql {
      * @return string
      */
     public function col_mimetype(\stdClass $row) {
-        return $row->mimetype;
+        return s($row->mimetype);
     }
 
     /**

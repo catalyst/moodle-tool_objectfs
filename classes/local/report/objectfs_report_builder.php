@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * sss report abstract class.
+ * objectfs report abstract class.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>

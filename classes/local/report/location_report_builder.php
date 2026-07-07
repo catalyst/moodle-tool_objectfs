@@ -90,7 +90,7 @@ class location_report_builder extends objectfs_report_builder {
             if ($location !== OBJECT_LOCATION_ORPHANED) {
                 // Process the query normally.
                 $result = $DB->get_record_sql($sql, [$location]);
-            } else if ($location === OBJECT_LOCATION_ORPHANED) {
+            } else {
                 // Start the query from objectfs, for ORPHANED objects, they are not located in the files table.
                 $sql =
                     'WITH

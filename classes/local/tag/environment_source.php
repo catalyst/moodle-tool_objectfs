@@ -40,7 +40,7 @@ class environment_source implements tag_source {
      * @return string
      */
     public static function get_description(): string {
-        return get_string('tagsource:environment', 'tool_objectfs', self::get_env());
+        return get_string('tagsource:environment', 'tool_objectfs', s(self::get_env() ?? ''));
     }
 
     /**

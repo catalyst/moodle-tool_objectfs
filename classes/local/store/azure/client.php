@@ -222,7 +222,7 @@ class client extends object_client_base {
     }
 
     /**
-     * verify_objectverify_object
+     * Verifies that an object exists and is readable.
      * @param string $contenthash
      * @param string $localpath
      *

@@ -316,14 +316,10 @@ return $this->openWriteStream();
     /**
      * Validates the provided stream arguments for fopen and returns an array
      * of errors.
-     */
-    /**
-     * Validates the provided stream arguments for fopen and returns an array
-     * of errors.
      * @param string $path
      * @param string $mode
      *
-     * @return [type]
+     * @return string[]
      */
     private function validate($path, $mode) {
         $errors = [];

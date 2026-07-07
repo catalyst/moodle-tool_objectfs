@@ -112,6 +112,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
      */
     public function presignedurl_tests_content($fs, $testfiles) {
         global $CFG;
+        $original = $CFG->enablepresignedurls ?? false;
         $CFG->enablepresignedurls = true;
         $output = '';
 
@@ -143,8 +144,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         foreach ($testfiles as $file) {
             $presignedurl = $this->generate_file_url($file);
 
-            $outputstring = '"' . $file->get_filename() . '" ' .
-                get_string('presignedurl_testing:fileiniframe', 'tool_objectfs') . ':';
+            $outputstring = '"'.s($file->get_filename()).'" '.get_string('presignedurl_testing:fileiniframe', 'tool_objectfs').':';
             $output .= $this->heading($outputstring, 5);
 
             $output .= $this->box($this->get_output($fs, $presignedurl, $file, 'iframesnotsupported'));
@@ -162,7 +162,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             }
             $presignedurl = $this->generate_file_url($file, $testexpirefiles[$filename]);
 
-            $outputstring = '"' . $filename . '" ' .
+            $outputstring = '"' . s($filename) . '" '.
                 get_string('presignedurl_testing:fileiniframe', OBJECTFS_PLUGIN_NAME) . ':';
             $output .= $this->heading($outputstring, 5);
 
@@ -170,6 +170,7 @@ class tool_objectfs_renderer extends plugin_renderer_base {
             $output .= $this->box('');
         }
 
+        $CFG->enablepresignedurls = $original;
         return $output;
     }
 
@@ -213,8 +214,8 @@ class tool_objectfs_renderer extends plugin_renderer_base {
         if (!$fs->presigned_url_should_redirect($file->get_contenthash())) {
             $redirect = $this->output->pix_icon('i/grade_incorrect', '', 'moodle', ['class' => 'icon']) . 'Not redirecting: ';
         }
-        $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs') . ': ' .
-            '<a href="' . $url . '">' . $file->get_filename() . '</a>';
+        $output = get_string('presignedurl_testing:' . $identifier, 'tool_objectfs') . ': '.
+            '<a href="'. $url .'">'. s($file->get_filename()) . '</a>';
         if ('iframesnotsupported' === $identifier) {
             $output = '<iframe height="400" width="100%" src="' . $url . '">' .
                 get_string('presignedurl_testing:' . $identifier, 'tool_objectfs') . '</iframe>';
