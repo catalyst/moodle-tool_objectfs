@@ -560,8 +560,10 @@ abstract class object_file_system extends \file_system_filedir {
             }
         } catch (\Exception $e) {
             // Transient external storage error - fall back to standard file serving.
-            debugging('objectfs: transient error in xsendfile_file for ' . $contenthash . ': ' . $e->getMessage(),
-                DEBUG_DEVELOPER);
+            debugging(
+                'objectfs: transient error in xsendfile_file for ' . $contenthash . ': ' . $e->getMessage(),
+                DEBUG_DEVELOPER
+            );
         }
 
         return false;
@@ -593,8 +595,10 @@ abstract class object_file_system extends \file_system_filedir {
             }
         } catch (\Exception $e) {
             // Transient external storage error - fall back to standard file serving.
-            debugging('objectfs: transient error in xsendfile for ' . $contenthash . ': ' . $e->getMessage(),
-                DEBUG_DEVELOPER);
+            debugging(
+                'objectfs: transient error in xsendfile for ' . $contenthash . ': ' . $e->getMessage(),
+                DEBUG_DEVELOPER
+            );
         }
         return false;
     }
