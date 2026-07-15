@@ -255,11 +255,17 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $path = $this->get_external_path_from_storedfile($file);
-        if (is_readable($path)) {
-            return true;
+        error_clear_last();
+        $readable = @is_readable($path);
+        if (!$readable) {
+            $error = error_get_last();
+            if ($error !== null) {
+                throw new \Exception(
+                    'Transient external storage error: ' . ($error['message'] ?? 'Unknown error')
+                );
+            }
         }
-
-        return false;
+        return $readable;
     }
 
     /**
@@ -267,6 +273,8 @@ abstract class object_file_system extends \file_system_filedir {
      * @param mixed $contenthash
      *
      * @return bool
+     * @throws \Exception On transient external storage errors (e.g. S3 connectivity failure).
+     *                    Returns false only when the object is confirmed absent.
      */
     public function is_file_readable_externally_by_hash($contenthash) {
         if ($contenthash === sha1('')) {
@@ -277,8 +285,22 @@ abstract class object_file_system extends \file_system_filedir {
 
         $path = $this->get_external_path_from_hash($contenthash, false);
 
-        // Note - it is not possible to perform a content recovery safely from a hash alone.
-        return is_readable($path);
+        // Suppress the PHP Warning from the S3 StreamWrapper so we can inspect it ourselves.
+        // If is_readable returns false AND a PHP error was raised, the failure is transient
+        // (e.g. a connectivity blip) rather than the object genuinely being absent. In that
+        // case we throw so callers can retry rather than silently recording OBJECT_LOCATION_ERROR.
+        error_clear_last();
+        $readable = @is_readable($path);
+        if (!$readable) {
+            $error = error_get_last();
+            if ($error !== null) {
+                throw new \Exception(
+                    'Transient external storage error for ' . $contenthash . ': ' .
+                    ($error['message'] ?? 'Unknown error')
+                );
+            }
+        }
+        return $readable;
     }
 
     /**
@@ -520,20 +542,24 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $contenthash = $file->get_contenthash();
-        if (
-            $this->presigned_url_configured() &&
-            $this->presigned_url_should_redirect_file($file) &&
-            $this->is_file_stored_externally_by_hash($contenthash)
-        ) {
-            return $this->redirect_to_presigned_url($contenthash, headers_list());
-        }
+        try {
+            if (
+                $this->presigned_url_configured() &&
+                $this->presigned_url_should_redirect_file($file) &&
+                $this->is_file_readable_externally_by_hash($contenthash)
+            ) {
+                return $this->redirect_to_presigned_url($contenthash, headers_list());
+            }
 
-        $ranges = $this->get_valid_http_ranges($file->get_filesize());
-        if (
-            $this->externalclient->support_presigned_urls() && !empty($ranges) &&
-            $this->is_file_stored_externally_by_hash($contenthash)
-        ) {
-            return $this->externalclient->proxy_range_request($file, $ranges);
+            $ranges = $this->get_valid_http_ranges($file->get_filesize());
+            if (
+                $this->externalclient->support_presigned_urls() && !empty($ranges) &&
+                $this->is_file_readable_externally_by_hash($contenthash)
+            ) {
+                return $this->externalclient->proxy_range_request($file, $ranges);
+            }
+        } catch (\Exception $e) {
+            // Transient external storage error - fall back to standard file serving.
         }
 
         return false;
@@ -555,12 +581,16 @@ abstract class object_file_system extends \file_system_filedir {
             return parent::xsendfile($contenthash);
         }
         $headers = headers_list();
-        if (
-            $this->presigned_url_configured() &&
-            $this->is_file_stored_externally_by_hash($contenthash) &&
-            $this->presigned_url_should_redirect($contenthash, $headers)
-        ) {
-            return $this->redirect_to_presigned_url($contenthash, $headers);
+        try {
+            if (
+                $this->presigned_url_configured() &&
+                $this->is_file_readable_externally_by_hash($contenthash) &&
+                $this->presigned_url_should_redirect($contenthash, $headers)
+            ) {
+                return $this->redirect_to_presigned_url($contenthash, $headers);
+            }
+        } catch (\Exception $e) {
+            // Transient external storage error - fall back to standard file serving.
         }
         return false;
     }
@@ -609,7 +639,13 @@ abstract class object_file_system extends \file_system_filedir {
         switch ($type) {
             case \stored_file::FILE_HANDLE_FOPEN:
                 $context = $this->externalclient->get_seekable_stream_context();
-                return fopen($path, 'rb', false, $context);
+                $handle = @fopen($path, 'rb', false, $context);
+                if ($handle === false) {
+                    $error = error_get_last();
+                    $message = $error['message'] ?? 'Unknown filesystem error occurred.';
+                    throw new \Exception('Failed to open object file handle: ' . $message);
+                }
+                return $handle;
             case \stored_file::FILE_HANDLE_GZOPEN:
                 // Binary reading of file in gz format.
                 return gzopen($path, 'rb');
