@@ -366,18 +366,12 @@ final class object_file_system_test extends tests\testcase {
         // normally because phpunit will still fail.
     }
 
-    public function test_xsendfile_updates_object_with_error_location_on_fail(): void {
-        global $DB;
+    public function test_xsendfile_returns_false_on_transient_fail(): void {
         $fakefile = $this->create_error_file();
 
-        // Phpunit will fail if PHP warning is thrown (which we want)
-        // so we surpress here.
-        set_error_handler([$this, 'error_surpressor']);
-        $this->filesystem->xsendfile($fakefile->get_contenthash());
-        restore_error_handler();
+        $result = $this->filesystem->xsendfile($fakefile->get_contenthash());
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $this->assertFalse($result);
     }
 
     public function test_get_content_file_handle_if_object_is_local(): void {
@@ -406,18 +400,34 @@ final class object_file_system_test extends tests\testcase {
         $this->assertTrue(is_readable($localpath));
     }
 
-    public function test_get_content_file_handle_updates_object_with_error_location_on_fail(): void {
-        global $DB;
+    public function test_get_content_file_handle_throws_on_fail(): void {
         $fakefile = $this->create_error_file();
 
-        // Phpunit will fail if PHP warning is thrown (which we want)
-        // so we surpress here.
-        set_error_handler([$this, 'error_surpressor']);
-        $filehandle = $this->filesystem->get_content_file_handle($fakefile);
-        restore_error_handler();
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessageMatches('/Failed to open object file handle/');
 
-        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $fakefile->get_contenthash()]);
-        $this->assertEquals(OBJECT_LOCATION_ERROR, $location);
+        $this->filesystem->get_content_file_handle($fakefile);
+    }
+
+    public function test_get_content_file_handle_does_not_set_error_location_on_transient_fail(): void {
+        global $DB;
+
+        // Create a file that physically doesn't exist so the file handle open will fail,
+        // but whose DB location is LOCAL (not already -1) so we can verify it stays that way.
+        $file = $this->create_local_file('transient fail test content');
+        $path = $this->get_local_path_from_storedfile($file);
+        unlink($path);
+        manager::update_object_by_hash($file->get_contenthash(), OBJECT_LOCATION_LOCAL);
+
+        try {
+            $this->filesystem->get_content_file_handle($file);
+        } catch (\Exception $e) {
+            // Expected — transient failure should throw, not silently record OBJECT_LOCATION_ERROR.
+            $this->assertStringContainsString('Failed to open', $e->getMessage());
+        }
+
+        $location = $DB->get_field('tool_objectfs_objects', 'location', ['contenthash' => $file->get_contenthash()]);
+        $this->assertNotEquals(OBJECT_LOCATION_ERROR, $location);
     }
 
     public function test_remove_file_will_remove_local_file(): void {

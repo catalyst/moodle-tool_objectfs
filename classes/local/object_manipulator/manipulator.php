@@ -115,6 +115,12 @@ abstract class manipulator implements object_manipulator {
                 } else {
                     manager::update_object_by_hash($objectrecord->contenthash, $newlocation);
                 }
+            } catch (\Exception $e) {
+                // Transient storage errors (e.g. S3 connectivity blip) must not abort
+                // the entire batch — log and continue with the next object.
+                $this->logger->error_log(
+                    'Error processing object ' . $objectrecord->contenthash . ': ' . $e->getMessage()
+                );
             } finally {
                 $objectlock->release();
             }
