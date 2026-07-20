@@ -32,11 +32,11 @@ use stdClass;
 use tool_objectfs\local\location_helper;
 
 /**
- * Universal candidate finder using bitmask filters on the location column.
+ * Universal candidate finder using bitmask filters on the location bit columns.
  *
  * Accepts two bitmasks:
- * - "has" mask: bits the file MUST have (location & has_mask = has_mask)
- * - "not" mask: bits the file must NOT have (location & not_mask = 0)
+ * - "has" mask: bits the file MUST have (in_filedir/in_mdl_files/in_remote column = 1)
+ * - "not" mask: bits the file must NOT have (column = 0)
  *
  * Optional filters for filesize and timeduplicated are applied when provided.
  */
@@ -94,7 +94,8 @@ class bitmask_candidates implements manipulator_candidates {
         global $DB;
 
         // Convert bitmasks to column-based SQL conditions.
-        $locationconditions = location_helper::bits_to_sql_conditions($this->hasmask, $this->notmask);
+        // Fallback so the WHERE clause remains valid when no location filtering is requested.
+        $locationconditions = location_helper::bits_to_sql_conditions($this->hasmask, $this->notmask) ?: '1=1';
 
         $conditions = [$locationconditions];
         $params = [];

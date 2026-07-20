@@ -235,8 +235,11 @@ class manager {
      */
     public static function get_location_by_hash(string $contenthash): int {
         global $DB;
-        $record = $DB->get_record('tool_objectfs_objects', ['contenthash' => $contenthash],
-            'in_filedir, in_mdl_files, in_remote');
+        $record = $DB->get_record(
+            'tool_objectfs_objects',
+            ['contenthash' => $contenthash],
+            'in_filedir, in_mdl_files, in_remote'
+        );
         if (!$record) {
             return OBJECT_LOCATION_ERROR;
         }

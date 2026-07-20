@@ -54,18 +54,21 @@ class checker_candidates implements manipulator_candidates {
     }
 
     /**
-     * Get files that exist in {files} but have no tracking row in {tool_objectfs_objects}.
+     * Get files that exist in {files} but either have no tracking row in {tool_objectfs_objects}
+     * or have an ERROR state (all location bits zero), which includes rows migrated from a NULL
+     * location in the previous schema.
      *
      * @return array
      */
     public function get() {
         global $DB;
-        $sql = 'SELECT f.contenthash
+        $errorconditions = \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_ERROR, 'o');
+        $sql = "SELECT f.contenthash
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE f.filesize > 0
-                   AND o.id IS NULL
-              GROUP BY f.contenthash';
+                   AND (o.id IS NULL OR ({$errorconditions}))
+              GROUP BY f.contenthash";
         return $DB->get_records_sql($sql, [], 0, $this->config->batchsize);
     }
 }

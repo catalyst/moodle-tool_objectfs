@@ -37,6 +37,8 @@ class recoverer extends manipulator {
      * @return int
      */
     public function manipulate_object(stdClass $objectrecord) {
-        return $this->filesystem->get_object_location_from_hash($objectrecord->contenthash);
+        // The recoverer only knows the object is in the objectfs table, not necessarily
+        // in mdl_files, so pass 0 to check all location bits fresh.
+        return $this->filesystem->get_object_location_from_hash($objectrecord->contenthash, 0);
     }
 }

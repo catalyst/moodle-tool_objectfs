@@ -78,7 +78,7 @@ class location_report_builder extends objectfs_report_builder {
                 $sql =
                     "WITH
                       cte_objects AS (
-                        SELECT o.contenthash
+                        SELECT o.contenthash, o.in_filedir, o.in_mdl_files, o.in_remote
                           FROM {tool_objectfs_objects} o ),
                       cte_obj_files AS (
                         SELECT f.contenthash, MAX(f.filesize) AS filesize
