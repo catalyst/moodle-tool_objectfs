@@ -199,8 +199,10 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
         // Set all objects to have a filesize of null.
         $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
-        // Set first object to be orphaned.
-        manager::update_object_by_hash($filehashes[0], OBJECT_LOCATION_ORPHANED);
+        // Set first object to be orphaned (direct column write to preserve NULL filesize).
+        $columns = \tool_objectfs\local\location_helper::bits_to_columns(OBJECT_LOCATION_ORPHANED);
+        $columns['id'] = $DB->get_field('tool_objectfs_objects', 'id', ['contenthash' => $filehashes[0]]);
+        $DB->update_record('tool_objectfs_objects', $columns);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
@@ -234,8 +236,10 @@ final class populate_objects_filesize_test extends \tool_objectfs\tests\testcase
         // Set all objects to have a filesize of null.
         $DB->set_field('tool_objectfs_objects', 'filesize', null);
 
-        // Set first object to have error/missing state.
-        manager::update_object_by_hash($file1->get_contenthash(), OBJECT_LOCATION_MISSING);
+        // Set first object to have error/missing state (direct column write to preserve NULL filesize).
+        $columns = \tool_objectfs\local\location_helper::bits_to_columns(OBJECT_LOCATION_MISSING);
+        $columns['id'] = $DB->get_field('tool_objectfs_objects', 'id', ['contenthash' => $file1->get_contenthash()]);
+        $DB->update_record('tool_objectfs_objects', $columns);
 
         // Call ad-hoc task to populate filesizes.
         $task = new \tool_objectfs\task\populate_objects_filesize();
