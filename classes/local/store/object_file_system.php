@@ -306,17 +306,27 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * get_object_location_from_hash
      * @param mixed $contenthash
-     *
+     * @param int $knownlocations Bitmask of locations already known to be present without re-checking.
+     *                            Defaults to OBJECT_LOCATION_IN_MDL_FILES since most callers reach
+     *                            this function via a stored_file or mdl_files reference.
+     *                            Pass 0 when the caller only knows the object is in the objectfs
+     *                            table (e.g. the recoverer), so all bits are checked fresh.
      * @return int
      */
-    public function get_object_location_from_hash($contenthash) {
-        // The mdl_files bit is always set because this function is only called
-        // for objects known to be referenced in the files table.
-        $location = OBJECT_LOCATION_IN_MDL_FILES;
-        if ($this->is_file_readable_locally_by_hash($contenthash)) {
+    public function get_object_location_from_hash($contenthash, $knownlocations = OBJECT_LOCATION_IN_MDL_FILES) {
+        $location = $knownlocations;
+
+        // Only check each location if not already known — avoids redundant DB/filesystem calls.
+        if (!($location & OBJECT_LOCATION_IN_MDL_FILES)) {
+            global $DB;
+            if ($DB->record_exists('files', ['contenthash' => $contenthash])) {
+                $location |= OBJECT_LOCATION_IN_MDL_FILES;
+            }
+        }
+        if (!($location & OBJECT_LOCATION_IN_FILEDIR) && $this->is_file_readable_locally_by_hash($contenthash)) {
             $location |= OBJECT_LOCATION_IN_FILEDIR;
         }
-        if ($this->is_file_readable_externally_by_hash($contenthash)) {
+        if (!($location & OBJECT_LOCATION_IN_REMOTE) && $this->is_file_readable_externally_by_hash($contenthash)) {
             $location |= OBJECT_LOCATION_IN_REMOTE;
         }
 
