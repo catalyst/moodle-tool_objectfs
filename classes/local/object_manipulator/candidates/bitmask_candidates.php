@@ -40,12 +40,9 @@ use tool_objectfs\local\location_helper;
  *
  * Optional filters for filesize and timeduplicated are applied when provided.
  */
-class bitmask_candidates implements manipulator_candidates {
+class bitmask_candidates extends manipulator_candidates_base {
     /** @var string Query name for logging. */
     protected $queryname;
-
-    /** @var stdClass Plugin config. */
-    protected $config;
 
     /** @var int Bits that must be set in location. */
     private $hasmask;
@@ -70,19 +67,11 @@ class bitmask_candidates implements manipulator_candidates {
      *   'maxage' => int       - timeduplicated <= maxage (timestamp threshold)
      */
     public function __construct(stdClass $config, int $hasmask, int $notmask, string $queryname, array $options = []) {
-        $this->config = $config;
+        parent::__construct($config);
         $this->hasmask = $hasmask;
         $this->notmask = $notmask;
         $this->queryname = $queryname;
         $this->options = $options;
-    }
-
-    /**
-     * get_query_name
-     * @return string
-     */
-    public function get_query_name() {
-        return $this->queryname;
     }
 
     /**
@@ -94,7 +83,7 @@ class bitmask_candidates implements manipulator_candidates {
         global $DB;
 
         // Convert bitmasks to column-based SQL conditions.
-        // Fallback so the WHERE clause remains valid when no location filtering is requested.
+        // Fall back to a tautology so the WHERE clause remains valid when no location filtering is requested.
         $locationconditions = location_helper::bits_to_sql_conditions($this->hasmask, $this->notmask) ?: '1=1';
 
         $conditions = [$locationconditions];
