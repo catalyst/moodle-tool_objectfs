@@ -9,6 +9,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
     - [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
     - [Sharing files across environments to save time](#sharing-files-across-environments-to-save-time)
     - [Sharing files with data washed environments](#sharing-files-with-data-washed-environments)
+    - [Serving files directly from object storage with signed URLs](#serving-files-directly-from-object-storage-with-signed-urls)
   - [GDPR](#gdpr)
   - [Branches](#branches)
   - [Installation](#installation)
@@ -65,6 +66,27 @@ Using this plugin we can configure production to have full read write to the rem
 Often you want a sanitised version of the data for giving to developers or other 3rd parties to remove or obfuscate sensitive content. This plugin is designed to work in this scenario too where the 3rd party gets a 'cleaned' DB, and can still point to the production remote filesystem with readonly credentials. As they cannot query the filesystem directly and must know the content hash of any content in order to access a file, there is very low risk of them accessing sensitive content.
 
 https://github.com/catalyst/moodle-local_datacleaner
+
+### Serving files directly from object storage with signed URLs
+
+By default, when files are stored in remote object storage Moodle still proxies every file download through the web server: the file is fetched from the object store to the Moodle server and then streamed to the user. This is simple to set up but has significant downsides at scale:
+
+- **Bandwidth costs double.** Traffic flows from the object store to your web server and then again from your web server to the end user, doubling egress costs and network load.
+- **Web server CPU and memory are consumed streaming large files.** Video lectures, course backups, and large ZIP archives can tie up PHP workers for seconds at a time, reducing capacity for other requests.
+- **Throughput is limited by your web tier.** Peak concurrent downloads are capped by the number of available PHP workers rather than by the practically unlimited throughput of your object store.
+
+Enabling **Pre-Signed (signed) URLs** changes this behaviour. When a user requests a file, Moodle generates a short-lived, cryptographically signed URL pointing directly at the object store and redirects the user's browser to it. The file is then downloaded directly between the user and the object store, bypassing the Moodle web server entirely.
+
+Benefits include:
+
+- **Reduced server load.** Web server workers are freed immediately after issuing the redirect, so the same infrastructure can serve far more concurrent users.
+- **Lower bandwidth costs.** Egress from the object store goes directly to end users rather than being routed through your servers.
+- **Better performance for large files.** Users benefit from the high-throughput, geographically distributed infrastructure of the object store (or a CDN such as CloudFront placed in front of it).
+- **CDN acceleration.** When combined with a CDN such as Amazon CloudFront, signed URLs allow you to cache and deliver files from edge locations close to your users, dramatically reducing latency for globally distributed audiences.
+
+The trade-off is that signed URLs expose a time-limited direct link to the object store. You control the exposure window via the **Pre-Signed URL expiration time** setting and can restrict which file types are eligible via the **Pre-Signed URL whitelist**, so sensitive file types can still be proxied through Moodle's access-control layer if required.
+
+See [Pre-Signed URLs Settings](#pre-signed-urls-settings) for configuration options.
 
 
 ## GDPR
