@@ -27,45 +27,27 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 /**
  * orphaner_candidates
  */
-class orphaner_candidates implements manipulator_candidates {
+class orphaner_candidates extends manipulator_candidates_base {
     /**
      * queryname
      * @var string
      */
     protected $queryname = 'get_orphan_candidates';
 
-    /** @var \stdClass $config */
-    protected $config;
-
-    /**
-     * orphaner_candidates constructor.
-     * @param \stdClass $config
-     */
-    public function __construct(\stdClass $config) {
-        $this->config = $config;
-    }
-
-    /**
-     * get_query_name
-     * @return string
-     */
-    public function get_query_name() {
-        return $this->queryname;
-    }
-
     /**
      * Get tracked objects that no longer have a reference in {files}.
-     * Excludes objects already marked as orphaned (in_filedir=1, in_mdl_files=0, in_remote=0).
      *
      * @return array
      */
     public function get() {
         global $DB;
-        $sql = 'SELECT o.id, o.contenthash, o.in_filedir, o.in_mdl_files, o.in_remote
+        $notorphaned = 'NOT (' . \tool_objectfs\local\location_helper::bits_to_exact_sql(OBJECT_LOCATION_ORPHANED, 'o') . ')';
+        $sql = "SELECT o.id, o.contenthash
                   FROM {tool_objectfs_objects} o
              LEFT JOIN {files} f ON o.contenthash = f.contenthash
-                 WHERE f.id IS NULL
-                   AND NOT (o.in_filedir = 1 AND o.in_mdl_files = 0 AND o.in_remote = 0)';
-        return $DB->get_records_sql($sql, [], 0, $this->config->batchsize);
+                 WHERE f.id is null
+                   AND {$notorphaned}";
+        $params = [];
+        return $DB->get_records_sql($sql, $params, 0, $this->config->batchsize);
     }
 }

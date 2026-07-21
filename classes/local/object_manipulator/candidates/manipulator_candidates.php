@@ -34,7 +34,8 @@ interface manipulator_candidates {
     public function get_query_name();
 
     /**
-     * get
+     * Get candidate objects for manipulation.
+     *
      * @return array
      * @throws dml_exception
      */

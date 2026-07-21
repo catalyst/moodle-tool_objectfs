@@ -27,36 +27,15 @@ namespace tool_objectfs\local\object_manipulator\candidates;
 /**
  * chcker_candiates
  */
-class checker_candidates implements manipulator_candidates {
+class checker_candidates extends manipulator_candidates_base {
     /**
      * queryname
      * @var string
      */
     protected $queryname = 'get_check_candidates';
 
-    /** @var \stdClass $config */
-    protected $config;
-
     /**
-     * checker_candidates constructor.
-     * @param \stdClass $config
-     */
-    public function __construct(\stdClass $config) {
-        $this->config = $config;
-    }
-
-    /**
-     * get_query_name
-     * @return string
-     */
-    public function get_query_name() {
-        return $this->queryname;
-    }
-
-    /**
-     * Get files that exist in {files} but either have no tracking row in {tool_objectfs_objects}
-     * or have an ERROR state (all location bits zero), which includes rows migrated from a NULL
-     * location in the previous schema.
+     * Get files that exist in {files} but have no tracking row in {tool_objectfs_objects}.
      *
      * @return array
      */

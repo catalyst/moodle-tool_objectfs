@@ -35,31 +35,115 @@ use tool_objectfs\local\object_manipulator\orphaner;
 
 /**
  * Candidates Factory
+ *
+ * Maps manipulator classes to candidate finders. Uses bitmask_candidates for
+ * manipulators whose candidates are determined by location bitmask filters.
  */
 class candidates_factory {
-    /** @var array $manipulatormap */
-    private static $manipulatormap = [
+    /**
+     * Manipulators that use the legacy class-based mapping (non-bitmask queries).
+     * @var array
+     */
+    private static $legacymap = [
         checker::class => checker_candidates::class,
-        deleter::class => deleter_candidates::class,
-        puller::class => puller_candidates::class,
-        pusher::class => pusher_candidates::class,
-        recoverer::class => recoverer_candidates::class,
         orphaner::class => orphaner_candidates::class,
     ];
 
     /**
-     * Finder
-     * @param mixed $manipulator
-     * @param stdClass $config
+     * Get the bitmask map for manipulators.
+     * Must be a method rather than a static property because the OBJECT_LOCATION_*
+     * constants are defined at runtime via define().
      *
-     * @return mixed
+     * @return array
+     */
+    private static function get_bitmask_map(): array {
+        return [
+            pusher::class => [
+                'has_mask' => OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES, // Must be local and referenced.
+                'not_mask' => OBJECT_LOCATION_IN_REMOTE, // Must not be in remote.
+                'queryname' => 'get_push_candidates',
+            ],
+            puller::class => [
+                'has_mask' => OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE, // Must be referenced and in remote.
+                'not_mask' => OBJECT_LOCATION_IN_FILEDIR, // Must not be local.
+                'queryname' => 'get_pull_candidates',
+            ],
+            deleter::class => [
+                'has_mask' => OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE,
+                'not_mask' => 0, // All bits set, nothing excluded.
+                'queryname' => 'get_delete_candidates',
+            ],
+            recoverer::class => [
+                'has_mask' => OBJECT_LOCATION_IN_MDL_FILES, // Must be referenced.
+                'not_mask' => OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_REMOTE, // Must not be local or remote.
+                'queryname' => 'get_recover_candidates',
+            ],
+        ];
+    }
+
+    /**
+     * Create a candidate finder for the given manipulator.
+     *
+     * @param string $manipulator Manipulator class name.
+     * @param stdClass $config Plugin config.
+     * @return manipulator_candidates
      * @throws moodle_exception
      */
     public static function finder($manipulator, stdClass $config) {
-        if (isset(self::$manipulatormap[$manipulator])) {
-            $classname = self::$manipulatormap[$manipulator];
+        // Legacy candidates (checker, orphaner) use non-bitmask SQL.
+        if (isset(self::$legacymap[$manipulator])) {
+            $classname = self::$legacymap[$manipulator];
             return new $classname($config);
         }
+
+        // Bitmask-based candidates.
+        $bitmaskmap = self::get_bitmask_map();
+        if (isset($bitmaskmap[$manipulator])) {
+            $entry = $bitmaskmap[$manipulator];
+            $options = self::get_options_for_manipulator($manipulator, $config);
+            return new bitmask_candidates(
+                $config,
+                $entry['has_mask'],
+                $entry['not_mask'],
+                $entry['queryname'],
+                $options
+            );
+        }
+
         throw new moodle_exception('invalidclass', 'error', '', 'Invalid manipulator class');
+    }
+
+    /**
+     * Build filter options for a bitmask manipulator based on config.
+     *
+     * @param string $manipulator Manipulator class name.
+     * @param stdClass $config Plugin config.
+     * @return array
+     */
+    private static function get_options_for_manipulator(string $manipulator, stdClass $config): array {
+        switch ($manipulator) {
+            case pusher::class:
+                $filesystem = new $config->filesystem();
+                return [
+                    'threshold' => $config->sizethreshold,
+                    'max_filesize' => $filesystem->get_maximum_upload_filesize(),
+                    'maxage' => time() - $config->minimumage,
+                ];
+
+            case puller::class:
+                return [
+                    'size_ceiling' => $config->sizethreshold,
+                ];
+
+            case deleter::class:
+                return [
+                    'threshold' => $config->sizethreshold,
+                    'maxage' => time() - $config->consistencydelay,
+                ];
+
+            case recoverer::class:
+            default:
+                return [];
+        }
     }
 }

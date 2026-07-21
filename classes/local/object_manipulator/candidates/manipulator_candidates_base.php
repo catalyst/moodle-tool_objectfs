@@ -49,31 +49,4 @@ abstract class manipulator_candidates_base implements manipulator_candidates {
     public function get_query_name() {
         return $this->queryname;
     }
-
-    /**
-     * get
-     * @return array
-     * @throws dml_exception
-     */
-    public function get() {
-        global $DB;
-        return $DB->get_records_sql(
-            $this->get_candidates_sql(),
-            $this->get_candidates_sql_params(),
-            0,
-            $this->config->batchsize
-        );
-    }
-
-    /**
-     * Returns SQL to retrieve objects for manipulation.
-     * @return string
-     */
-    abstract protected function get_candidates_sql(): string;
-
-    /**
-     * Returns parameters for the SQL from get_candidates_sql.
-     * @return array
-     */
-    abstract protected function get_candidates_sql_params(): array;
 }
