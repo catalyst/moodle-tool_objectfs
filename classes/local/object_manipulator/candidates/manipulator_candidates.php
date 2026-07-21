@@ -34,21 +34,8 @@ interface manipulator_candidates {
     public function get_query_name();
 
     /**
-     * Returns SQL to retrieve objects for manipulation.
+     * Get candidate objects for manipulation.
      *
-     * @return string
-     */
-    public function get_candidates_sql();
-
-    /**
-     * Returns a list of parameters for SQL from get_candidates_sql.
-     *
-     * @return array
-     */
-    public function get_candidates_sql_params();
-
-    /**
-     * get
      * @return array
      * @throws dml_exception
      */

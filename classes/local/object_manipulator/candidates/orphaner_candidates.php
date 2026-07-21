@@ -35,24 +35,18 @@ class orphaner_candidates extends manipulator_candidates_base {
     protected $queryname = 'get_orphan_candidates';
 
     /**
-     * get_candidates_sql
-     * @return string
+     * Get tracked objects that no longer have a reference in {files}.
+     *
+     * @return array
      */
-    public function get_candidates_sql() {
-        return 'SELECT o.id, o.contenthash, o.location
+    public function get() {
+        global $DB;
+        $sql = 'SELECT o.id, o.contenthash, o.location
                   FROM {tool_objectfs_objects} o
              LEFT JOIN {files} f ON o.contenthash = f.contenthash
                  WHERE f.id is null
                    AND o.location != :location';
-    }
-
-    /**
-     * get_candidates_sql_params
-     * @return array
-     */
-    public function get_candidates_sql_params() {
-        return [
-          'location' => OBJECT_LOCATION_ORPHANED,
-        ];
+        $params = ['location' => OBJECT_LOCATION_ORPHANED];
+        return $DB->get_records_sql($sql, $params, 0, $this->config->batchsize);
     }
 }

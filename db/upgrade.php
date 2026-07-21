@@ -232,14 +232,14 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         $field = new xmldb_field('location', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, null, 'timeduplicated');
         $dbman->change_field_precision($table, $field);
 
-        // tool_objectfs_objects.location column.
+        // Tool_objectfs_objects.location column.
         $DB->execute('UPDATE {tool_objectfs_objects} SET location = 6 WHERE location = 2');
         $DB->execute('UPDATE {tool_objectfs_objects} SET location = 7 WHERE location = 1');
         $DB->execute('UPDATE {tool_objectfs_objects} SET location = 3 WHERE location = 0');
         $DB->execute('UPDATE {tool_objectfs_objects} SET location = 2 WHERE location = -1');
         $DB->execute('UPDATE {tool_objectfs_objects} SET location = 1 WHERE location = -2');
 
-        // tool_objectfs_report_data.datakey stores location values as strings for the 'location' report type.
+        // The tool_objectfs_report_data.datakey stores location values as strings for the 'location' report type.
         $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '6' WHERE reporttype = 'location' AND datakey = '2'");
         $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '7' WHERE reporttype = 'location' AND datakey = '1'");
         $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '3' WHERE reporttype = 'location' AND datakey = '0'");
