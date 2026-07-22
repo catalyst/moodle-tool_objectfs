@@ -53,6 +53,9 @@ require_once($CFG->libdir . '/filestorage/file_storage.php');
  * [Description object_file_system]
  */
 abstract class object_file_system extends \file_system_filedir {
+    /** @var string Origin for pre-signed urls. */
+    public const PLUGINFILE_ORIGIN_SEGMENT_PREFIX = 'objectfs-origin=';
+
     /**
      * @var mixed
      */
@@ -888,6 +891,30 @@ abstract class object_file_system extends \file_system_filedir {
         }
     }
 
+    /**
+     * Convert pre-signed URLs inside text back to pluginfiles.
+     *
+     * @param string $text The content that may contain URLs in need of rewriting.
+     * @return string The processed text.
+     */
+    public function normalise_presigned_urls(string $text): string {
+        if (!$this->presigned_url_configured()) {
+            return $text;
+        }
+
+        $re = sprintf(
+            '!https?://[^\s<>"\']*?\#%s([^\s<>"\']+\w)!',
+            preg_quote(self::PLUGINFILE_ORIGIN_SEGMENT_PREFIX)
+        );
+
+        // The origin URL should only have minimal RFC 3986 encoding on anchors.
+        // These characters should be rare and even desirable to keep encoded in pluginfile links.
+        return preg_replace_callback(
+            $re,
+            fn($matches) => (new \moodle_url($matches[1]))->out(),
+            $text
+        );
+    }
 
     /**
      * Return if the file system supports presigned_urls.

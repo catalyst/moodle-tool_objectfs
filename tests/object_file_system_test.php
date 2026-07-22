@@ -18,6 +18,7 @@ namespace tool_objectfs;
 
 use coding_exception;
 use tool_objectfs\local\store\object_file_system;
+use tool_objectfs\local\store\signed_url;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\tag\tag_manager;
 use tool_objectfs\tests\test_client;
@@ -1323,5 +1324,123 @@ final class object_file_system_test extends tests\testcase {
         $contenthash = $file->get_contenthash();
         $result = $reflection->invokeArgs($this->filesystem, [$contenthash]);
         $this->assertFalse($result);
+    }
+
+    /**
+     * Data provider for test_normalise_presigned_urls
+     *
+     * @return array
+     */
+    public static function normalise_presigned_urls_provider(): array {
+        return [
+            'default' => [[]],
+            's3 style presignedurl' => [[
+                'presignedurl' => 'https://bucket.s3.ap-southeast-2.amazonaws.com/bucketkeyprefix/?param1=val1&param2=val2',
+            ]],
+            'presignedurl uses http' => [[
+                'presignedurl' => 'https://presigned.url/x?param1=val1&param2=val2',
+            ]],
+            'presignedurl already has fragment' => [[
+                'presignedurl' => 'https://presigned.url/x?param1=val1#already-fragment',
+            ]],
+            'invalid presignedurl missing protocol' => [[
+                'presignedurl' => 'presigned.url/x?param1=val1',
+                'replace' => false,
+            ]],
+            'invalid presignedurl containing space' => [[
+                'presignedurl' => 'https://presigned.url/x?param1=val 1',
+                'replace' => false,
+            ]],
+            'url with embdedded image' => [[
+                'text' => '<img src="%s">',
+            ]],
+            'url in markdown style text' => [[
+                'text' => '[link](%s)',
+            ]],
+            'multiple embedded urls' => [[
+                'text' => 'One: https://example.org/unrelated.pdf Two: %s Three: https://example.org/other.pdf',
+            ]],
+            'multiple embedded urls without space' => [[
+                'text' => '<a href="https://example.org/">%s</a>',
+            ]],
+            'pluginfile with space' => [[
+                'pluginfiles' => ['/pluginfile.php/3854/tool_objectfs/content/1/test file.pdf'],
+            ]],
+            'pluginfile with trailing )' => [[
+                'pluginfiles' => ['/pluginfile.php/3854/tool_objectfs/content/1/test-file(1)'],
+            ]],
+            'pluginfile with trailing /' => [[
+                'pluginfiles' => ['/pluginfile.php/3854/tool_objectfs/content/1/test-file/'],
+            ]],
+            'pluginfile with encoded chars' => [[
+                'pluginfiles' => ['/pluginfile.php/1/tool_objectfs/settings/0/%F0%9F%98%80.txt'],
+            ]],
+            'multiple pluginfiles' => [[
+                'text' => 'One: %s Two: %s',
+                'pluginfiles' => [
+                    '/pluginfile.php/3854/tool_objectfs/content/1/test.pdf',
+                    '/pluginfile.php/7316/tool_objectfs/content/2/red.pdf',
+                ],
+            ]],
+            'multiple pluginfiles with no space' => [[
+                'text' => '<a href="%s">%s</a>',
+                'pluginfiles' => [
+                    '/pluginfile.php/3854/tool_objectfs/content/1/test.pdf',
+                    '/pluginfile.php/3854/tool_objectfs/content/1/test.pdf',
+                ],
+            ]],
+        ];
+    }
+
+    /**
+     * Test rewriting pre-signed URLs to pluginfiles.
+     *
+     * @dataProvider normalise_presigned_urls_provider
+     * @covers ::normalise_presigned_urls
+     *
+     * @param array $config
+     */
+    public function test_normalise_presigned_urls(array $config): void {
+        global $ME;
+
+        $presignedurl = $config['presignedurl'] ?? 'https://presigned.url/x?param1=val1&param2=val2';
+        $text = $config['text'] ?? 'File %s link';
+        $pluginfiles = $config['pluginfiles'] ?? ['/pluginfile.php/3854/tool_objectfs/content/1/test-file.pdf'];
+        $replace = $config['replace'] ?? true;
+
+        // The normalisation logic can be tested with a limited test client.
+        $filesystem = $this->getMockBuilder(test_file_system::class)
+            ->onlyMethods(['presigned_url_configured'])
+            ->getMock();
+        $filesystem->method('presigned_url_configured')->willReturn(true);
+
+        $anchorprop = (new \ReflectionClass(\moodle_url::class))->getProperty('anchor');
+        $prefix = object_file_system::PLUGINFILE_ORIGIN_SEGMENT_PREFIX;
+
+        $embeddedurls = [];
+        $expectedurls = [];
+        foreach ($pluginfiles as $pluginfile) {
+            $ME = $pluginfile;
+            $fullurl = (new signed_url(new \moodle_url($presignedurl), DAYSECS))->url;
+
+            // Verify that origin is added as an anchor when creating signed urls.
+            $anchor = $anchorprop->getValue($fullurl);
+            $this->assertEquals($prefix . $pluginfile, $anchor);
+
+            // Moodle url automatically encodes the fragment as RFC 3986, which we should keep for the link.
+            $fragment = (string)parse_url($fullurl->out(), PHP_URL_FRAGMENT);
+            $fullpluginfile = new \moodle_url(substr($fragment, strlen($prefix)));
+
+            // Manually build the embedded text from the provider so we can test poorly copied HTML text.
+            $embeddedurl = $presignedurl . '#' . $fragment;
+            $embeddedurls[] = $embeddedurl;
+            $expectedurls[] = $replace ? $fullpluginfile->out() : $embeddedurl;
+        }
+
+        // Verify that embedded pre-signed urls are converted back to the original pluginfiles.
+        $this->assertEquals(
+            sprintf($text, ...$expectedurls),
+            $filesystem->normalise_presigned_urls(sprintf($text, ...$embeddedurls))
+        );
     }
 }
