@@ -289,6 +289,13 @@ if ($ADMIN->fulltree) {
                 PARAM_RAW_TRIMMED
             ));
 
+            $settings->add(new admin_setting_configcheckbox(
+                'tool_objectfs/presignpublicurls',
+                new lang_string('settings:presignedurl:presignpublicurls', 'tool_objectfs'),
+                new lang_string('settings:presignedurl:presignpublicurls_help', 'tool_objectfs'),
+                '0'
+            ));
+
             $settings->add(
                 new admin_setting_filetypes(
                     'tool_objectfs/signingwhitelist',
