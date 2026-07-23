@@ -798,6 +798,61 @@ final class object_file_system_test extends tests\testcase {
     }
 
     /**
+     * Data provider for should_presign_cache_headers().
+     *
+     * @return array
+     */
+    public static function should_presign_cache_headers_provider(): array {
+        return [
+            'public immutable' => [
+                'headers' => ['Cache-Control: public, immutable, max-age=60'],
+                'expected' => false,
+            ],
+            'public long max-age' => [
+                'headers' => ['Cache-Control: public, max-age=5184000, no-transform'],
+                'expected' => false,
+            ],
+            'public short max-age' => [
+                'headers' => ['Cache-Control: public, max-age=3600'],
+                'expected' => true,
+            ],
+            'public short max-age long s-maxage' => [
+                'headers' => ['Cache-Control: public, max-age=3600, s-maxage=5184000'],
+                'expected' => false,
+            ],
+            'private immutable' => [
+                'headers' => ['Cache-Control: private, immutable, max-age=5184000'],
+                'expected' => true,
+            ],
+            'quoted max-age' => [
+                'headers' => ['Cache-Control: public, max-age="5184000"'],
+                'expected' => false,
+            ],
+            'missing cache-control header' => [
+                'headers' => ['Content-Type: text/plain'],
+                'expected' => true,
+            ],
+        ];
+    }
+
+    /**
+     * Tests detection and handling of cache control headers.
+     *
+     * @dataProvider should_presign_cache_headers_provider
+     * @covers ::should_presign_cache_headers
+     * @param array $headers response headers.
+     * @param bool $expected expected result.
+     * @return void
+     */
+    public function test_should_presign_cache_headers(array $headers, bool $expected): void {
+        set_config('presignpublicurls', 0, 'tool_objectfs');
+        $this->assertSame($expected, $this->filesystem->should_presign_cache_headers($headers));
+
+        set_config('presignpublicurls', 1, 'tool_objectfs');
+        $this->assertTrue($this->filesystem->should_presign_cache_headers($headers));
+    }
+
+    /**
      * Data provider for test_get_expiration_time_method_if_supported().
      *
      * @return array

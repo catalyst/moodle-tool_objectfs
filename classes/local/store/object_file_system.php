@@ -542,13 +542,14 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         $contenthash = $file->get_contenthash();
+        $headers = headers_list();
         try {
             if (
                 $this->presigned_url_configured() &&
-                $this->presigned_url_should_redirect_file($file) &&
+                $this->presigned_url_should_redirect_file($file, $headers) &&
                 $this->is_file_readable_externally_by_hash($contenthash)
             ) {
-                return $this->redirect_to_presigned_url($contenthash, headers_list());
+                return $this->redirect_to_presigned_url($contenthash, $headers);
             }
 
             $ranges = $this->get_valid_http_ranges($file->get_filesize());
@@ -911,10 +912,11 @@ abstract class object_file_system extends \file_system_filedir {
      * and get file name and file size directly from the object.
      *
      * @param  object $file        File object
+     * @param  array  $headers     Request headers.
      * @return bool
      * @throws \dml_exception
      */
-    public function presigned_url_should_redirect_file($file) {
+    public function presigned_url_should_redirect_file($file, array $headers = []) {
 
         // Core will throw an exception is we try to redirect inside cli or ajax.
         if (CLI_SCRIPT || AJAX_SCRIPT) {
@@ -922,6 +924,10 @@ abstract class object_file_system extends \file_system_filedir {
         }
 
         if ($this->is_disallowed_presigned_filearea($file)) {
+            return false;
+        }
+
+        if (!$this->should_presign_cache_headers($headers)) {
             return false;
         }
 
@@ -976,6 +982,58 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
+     * Determines whether we should presign a URL based on the provided cache headers.
+     *
+     * This is used to avoid redirecting to pre-signed URLs when Moodle has
+     * already emitted response headers suitable for long-term CDN/browser caching.
+     *
+     * @param array $headers Request headers.
+     * @return bool
+     */
+    public function should_presign_cache_headers(array $headers): bool {
+        // When presignpublicurls is enabled we want to presign regardless of headers.
+        if (!empty(get_config('tool_objectfs', 'presignpublicurls'))) {
+            return true;
+        }
+
+        $cachecontrol = strtolower((string)manager::get_header($headers, 'Cache-Control'));
+        if ($cachecontrol === '') {
+            return true;
+        }
+
+        // We don't want to presign URLs when the cache header is public and long lived.
+        $directives = array_map('trim', explode(',', strtolower($cachecontrol)));
+        if (!in_array('public', $directives)) {
+            return true;
+        }
+
+        // Immutable assets are long-lived by definition.
+        if (in_array('immutable', $directives)) {
+            return false;
+        }
+
+        // Also treat high max-age values as long-lived, even without immutable.
+        foreach ($directives as $directive) {
+            $separator = strpos($directive, '=');
+            if ($separator === false) {
+                continue;
+            }
+
+            $name = trim(substr($directive, 0, $separator));
+            if ($name !== 'max-age' && $name !== 's-maxage') {
+                continue;
+            }
+
+            $maxage = (int)trim(substr($directive, $separator + 1), ' "');
+            if ($maxage >= 30 * DAYSECS) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Returns true if the file system should redirect to pre-signed url.
      *
      * @param  string $contenthash File content hash.
@@ -984,6 +1042,10 @@ abstract class object_file_system extends \file_system_filedir {
      * @throws \dml_exception
      */
     public function presigned_url_should_redirect($contenthash, $headers = []) {
+        if (!$this->should_presign_cache_headers($headers)) {
+            return false;
+        }
+
         // Redirect regardless.
         if (
             $this->externalclient->presignedminfilesize == 0 &&
