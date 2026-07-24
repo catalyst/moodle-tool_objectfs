@@ -45,7 +45,7 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
   - [Crafted by Catalyst IT](#crafted-by-catalyst-it)
 
 ## Use cases
-There are a number of different ways you can use this plug in. See [Recommended use case settings](#recommended-use-case-settings) for recommended settings for each one.
+There are a number of different ways you can use this plugin. See [Recommended use case settings](#recommended-use-case-settings) for recommended settings for each one.
 
 ### Offloading large and old files to save money
 
@@ -57,9 +57,9 @@ Many of our clients have multiple moodle instances, and there is much duplicated
 
 ### Sharing files across environments to save time
 
-Some of our clients moodles are truly massive. We also have multiple environments for various types of testing, and often have ad hoc environments created on demand. Not only do we not want to have to store duplicated files, but we also want refreshing data to new environments to be as fast as possible.
+Some of our clients' Moodles are truly massive. We also have multiple environments for various types of testing, and often have ad hoc environments created on demand. Not only do we not want to have to store duplicated files, but we also want refreshing data to new environments to be as fast as possible.
 
-Using this plugin we can configure production to have full read write to the remote filesystem and store the vast bulk of content remotely. In this setup the latency and bandwidth isn't an issue as they are colocated. The local filedir on disk would only consist of small or fast churning files such as course backups. A refresh of the production data back to a staging environment can be much quicker now as we skip the sitedir clone completely and stage is simple configured with readonly access to the production filesystem. Any files it creates would only be written to it's local filesystem which can then be discarded when next refreshed.
+Using this plugin we can configure production to have full read write to the remote filesystem and store the vast bulk of content remotely. In this setup the latency and bandwidth isn't an issue as they are colocated. The local filedir on disk would only consist of small or fast churning files such as course backups. A refresh of the production data back to a staging environment can be much quicker now as we skip the sitedir clone completely and stage is simply configured with readonly access to the production filesystem. Any files it creates would only be written to its local filesystem which can then be discarded when next refreshed.
 
 ### Sharing files with data washed environments
 
@@ -91,7 +91,7 @@ See [Pre-Signed URLs Settings](#pre-signed-urls-settings) for configuration opti
 
 ## GDPR
 
-This plugin is GDPR complient if you enable the deletion of remote objects.
+This plugin is GDPR compliant if you enable the deletion of remote objects.
 
 ## Supported branches
 
@@ -111,7 +111,7 @@ This plugin is GDPR complient if you enable the deletion of remote objects.
     3. Clone [moodle-local_openstack](https://github.com/matt-catalyst/moodle-local_openstack.git) into local/openstack for openstack(swift) storage
 5. Install the plugins through the moodle GUI.
 6. Configure the plugin. See [Moodle configuration](#moodle-configuration)
-7. Place of the following lines inside your Moodle config.php:
+7. Place one of the following lines inside your Moodle config.php:
 
 * Amazon S3
 ```php
@@ -135,7 +135,7 @@ $CFG->alternative_file_system_class = '\tool_objectfs\swift_file_system';
 ```
 
 ## Compatible object stores
-Note: Not all object stores listed below are tested/in-use directly by Catalyst and some rely on community contributions. If you require commercial support/help please contact us privaately for details on our rates.
+Note: Not all object stores listed below are tested/in-use directly by Catalyst and some rely on community contributions. If you require commercial support/help please contact us privately for details on our rates.
 
 ### Amazon S3
 
@@ -189,7 +189,7 @@ For more details on S3 Object Ownership and permissions, refer to:
 
 ### Minio S3
 
-Setup for Minio.io bucket can be found on there website [here](https://min.io)
+Setup for Minio.io bucket can be found on their website [here](https://min.io)
 
 
 ### Google GCS
@@ -285,7 +285,7 @@ az storage container policy delete \
 
 *Openstack object storage container setup*
 
-Create a dedicated user that does **not** have the 'Object Storage' role, and is then assign read and write permissions directly on the object storage container. This is to ensure least privileges.
+Create a dedicated user that does **not** have the 'Object Storage' role and then assign read and write permissions directly on the object storage container. This is to ensure least privileges.
 
 
 - Create the container
@@ -307,13 +307,13 @@ Go to Site Administration -> Plugins -> Admin tools -> Object storage file syste
 ### General Settings
 - **Enable file transfer tasks**: Enable or disable the object file system tasks which move files between the filedir and remote object storage.
 - **Maximum task runtime**: Background tasks handle the transfer of objects to and from remote object storage. This setting controls the maximum runtime for all object transfer related tasks.
-- **Prefer remote objects**: If a file is stored both locally and in remote object storage, read from remote. This is setting is mainly for testing purposes and introduces overhead to check the location.
+- **Prefer remote objects**: If a file is stored both locally and in remote object storage, read from remote. This setting is mainly for testing purposes and introduces overhead to check the location.
 
 ### File Transfer settings
 These settings control the movement of files to and from object storage.
 
 - **Minimum size threshold (bytes)**: Minimum size threshold in bytes for transferring objects to remote object storage. If objects are over this size they will be transferred.
-- **Minimum age**: Minimum age that a object must exist on the local filedir before it will be considered for transfer.
+- **Minimum age**: Minimum age that an object must exist on the local filedir before it will be considered for transfer.
 - **Delete local objects**: Delete local objects once they are in remote object storage after the consistency delay.
 - **Consistency delay**: How long an object must have existed after being transferred to remote object storage before they are a candidate for deletion locally.
 
@@ -408,7 +408,7 @@ Apply the patch:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core38.diff
 </pre>
-The patch was created with following commands: 
+The patch was created with the following commands: 
 <pre>
 // Cherry-pick MDL-58281
 git cherry-pick 1fef1de5922f7ea130e4994b3453610079874b63
@@ -428,7 +428,7 @@ Apply the patch:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core33.diff
 </pre>
-The patch was created with following commands:
+The patch was created with the following commands:
 <pre>
 // Cherry-pick MDL-53240
 git cherry-pick 6c4a5fdf88ac8ad88c4e86cf9b54d2b55bf2fd58
@@ -454,7 +454,7 @@ Apply the patch:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core32.diff
 </pre>
-The patch was created with following commands: 
+The patch was created with the following commands: 
 <pre>
 // Cherry-pick MDL-46375
 git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
@@ -482,13 +482,13 @@ git format-patch MOODLE_32_STABLE --stdout > core32.diff
 </pre>
 
 #### Moodle 2.9 - 3.1 and Totara 2.9, 9 - 10:
-Apply the patch for you Moodle version:
+Apply the patch for your Moodle version:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core31.diff
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core30.diff
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core29.diff
 </pre>
-The patch was created with following commands: 
+The patch was created with the following commands: 
 <pre>
 // Cherry-pick MDL-46375
 git cherry-pick 16a34ae1892014a6ca3055a95ac7310442529a6c
@@ -519,12 +519,12 @@ git format-patch MOODLE_29_STABLE --stdout > core29.diff
 </pre>
 
 #### Moodle 2.7 - 2.8 and Totara 2.7 - 2.8:
-Apply the patch for you Moodle version:
+Apply the patch for your Moodle version:
 <pre>
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core28.diff
 git am --whitespace=nowarn < admin/tool/objectfs/patch/core27.diff
 </pre>
-The patch was created with following commands: 
+The patch was created with the following commands: 
 <pre>
 // Cherry-pick MDL-49627
 git cherry-pick b7067f065e6ce8d7587039094259ace3e0804663
@@ -568,10 +568,10 @@ TODO: Watch and add steps for these trackers when they are integrated: MDL-57971
 The file system API patch introduces tests that use:
 - setExpectedExceptionRegExp() which needs phpunit 4.3
 - setExpectedException() which needs phpunit 5.2 which needs needs php 5.6 (Ubuntu 14.04 runs 5.5.9)
-- exception strings that have have changed between Moodle versions.
+- exception strings that have changed between Moodle versions.
 
 
-By cherry-picking combination of patches to the new file system API tests and tweaking versions of Phphunit in composer.json, you can make all tests pass.
+By cherry-picking a combination of patches to the new file system API tests and tweaking versions of Phphunit in composer.json, you can make all tests pass.
 
 - [Patch A](https://github.com/kenneth-hendricks/moodle-fs-api/commit/175bd1fd01a0fbf11ac6370e04347c05bcbba62f) converts setExpectedExceptionRegExp calls to setExpectedException
 - [Patch B](https://github.com/kenneth-hendricks/moodle-fs-api/commit/b2c75c4a3c167cb6e9fa802025e77e87458ed32b) converts expectException calls to setExpectedException
