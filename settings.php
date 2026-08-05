@@ -24,6 +24,7 @@
  */
 
 use tool_objectfs\check\connection;
+use tool_objectfs\check\proxy_range_request;
 use tool_objectfs\check\token_expiry;
 use tool_objectfs\check\tagging_migration_status;
 use tool_objectfs\check\tagging_sync_status;
@@ -33,8 +34,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/classes/local/manager.php');
 require_once(__DIR__ . '/lib.php');
-
-global $PAGE, $CFG;
 
 if (!$hassiteconfig) {
     return;
@@ -70,20 +69,6 @@ $ADMIN->add('tool_objectfs', new admin_externalpage(
 ));
 
 if ($ADMIN->fulltree) {
-    // Check if we are actually on the Objectfs settings page, or in correct category.
-    $caturl = new moodle_url('/admin/category.php');
-    $pageurl = new moodle_url('/admin/settings.php');
-    $objectfspage = false;
-    if ($PAGE->has_set_url()) {
-        $thisurl = $PAGE->url;
-        if (
-            ($caturl->compare($thisurl, URL_MATCH_BASE) && $thisurl->get_param('category') == 'tool_objectfs') ||
-            ($pageurl->compare($thisurl, URL_MATCH_BASE) && $thisurl->get_param('section') == 'tool_objectfs_settings')
-        ) {
-            $objectfspage = true;
-        }
-    }
-
     $warntext = '';
     if (method_exists('file_storage', 'get_file_system')) {
         if (!\tool_objectfs\local\manager::check_file_storage_filesystem()) {
@@ -249,35 +234,20 @@ if ($ADMIN->fulltree) {
         ));
 
         if ($classexists) {
-            $connstatus = false;
-            if ($objectfspage) {
-                $testconn = $client->test_connection();
-                $connstatus = $testconn->success;
-            }
-
             $warningtext = '';
             $methodexists = method_exists('file_system', 'xsendfile_file');
             if (!$methodexists) {
                 $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:xsendfilefile', 'tool_objectfs'));
-            } else if ($connstatus) {
-                // Range request tests can only work if there is a valid connection.
-                $range = $client->test_range_request(new $config->filesystem());
-                if ($range->result) {
-                    $warningtext .= $OUTPUT->notification(
-                        get_string('settings:presignedurl:testrangeok', 'tool_objectfs'),
-                        'notifysuccess'
-                    );
-                } else {
-                    $warningtext .= $OUTPUT->notification(get_string('settings:presignedurl:testrangeerror', 'tool_objectfs'));
-                    $warningtext .= $OUTPUT->notification($range->error);
-                }
             }
+
             $settings->add(new admin_setting_configcheckbox(
                 'tool_objectfs/proxyrangerequests',
                 new lang_string('settings:presignedurl:proxyrangerequests', 'tool_objectfs'),
                 new lang_string('settings:presignedurl:proxyrangerequests_help', 'tool_objectfs') . $warningtext,
                 '1'
             ));
+
+            $settings->add(new admin_setting_check('tool_objectfs/proxyrangerequestscheck', new proxy_range_request()));
 
             $settings->add(new admin_setting_configcheckbox(
                 'tool_objectfs/enablepresignedurls',
