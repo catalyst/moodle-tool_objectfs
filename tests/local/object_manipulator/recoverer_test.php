@@ -17,7 +17,6 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use tool_objectfs\local\manager;
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 
 /**
  * Tests for object recoverer.
@@ -28,16 +27,12 @@ use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class recoverer_test extends \tool_objectfs\tests\testcase {
-    /** @var candidates_finder Candidates finder object */
-    protected $candidatesfinder;
-
     /** @var recoverer Recoverer object */
     protected $recoverer;
 
     protected function setUp(): void {
         parent::setUp();
         $config = manager::get_objectfs_config();
-        $this->candidatesfinder = new candidates_finder(recoverer::class, $config);
         manager::set_objectfs_config($config);
         $this->logger = new \tool_objectfs\log\aggregate_logger();
         $this->recoverer = new recoverer($this->filesystem, $config, $this->logger);
@@ -51,7 +46,7 @@ final class recoverer_test extends \tool_objectfs\tests\testcase {
 
     public function test_recoverer_get_candidate_objects_will_get_error_objects(): void {
         $recovererobject = $this->create_error_object();
-        $candidateobjects = $this->candidatesfinder->get();
+        $candidateobjects = recoverer::get_candidates(manager::get_objectfs_config());
 
         foreach ($candidateobjects as $candidate) {
             $this->assertEquals($recovererobject->contenthash, $candidate->contenthash);

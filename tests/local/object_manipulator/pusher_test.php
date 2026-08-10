@@ -17,7 +17,6 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use tool_objectfs\local\manager;
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 
 /**
  * Tests for object pusher.
@@ -161,8 +160,7 @@ final class pusher_test extends \tool_objectfs\tests\testcase {
         // Push initial objects so they arnt candidates.
         $config = manager::get_objectfs_config();
         $config->filesystem = get_class($this->filesystem);
-        $finder = new candidates_finder($this->manipulator, $config);
-        $objects = $finder->get();
+        $objects = $this->manipulator::get_candidates($config);
         $this->pusher->execute($objects);
 
         $object = $this->create_local_object();
@@ -173,7 +171,7 @@ final class pusher_test extends \tool_objectfs\tests\testcase {
         $file->pathnamehash = '1234';
         $DB->insert_record('files', $file);
 
-        $objects = $finder->get();
+        $objects = $this->manipulator::get_candidates($config);
 
         $this->assertEquals(1, count($objects));
     }
