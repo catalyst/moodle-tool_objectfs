@@ -205,7 +205,7 @@ abstract class object_file_system extends \file_system_filedir {
      */
     protected function get_remote_path_from_hash($contenthash) {
         if ($this->preferexternal) {
-            $location = $this->get_object_location_from_hash($contenthash);
+            $location = $this->get_object_location_from_hash($contenthash, OBJECT_LOCATION_IN_MDL_FILES);
             if ($location == OBJECT_LOCATION_DUPLICATED) {
                 return $this->get_external_path_from_hash($contenthash);
             }
@@ -307,13 +307,12 @@ abstract class object_file_system extends \file_system_filedir {
      * get_object_location_from_hash
      * @param mixed $contenthash
      * @param int $knownlocations Bitmask of locations already known to be present without re-checking.
-     *                            Defaults to OBJECT_LOCATION_IN_MDL_FILES since most callers reach
-     *                            this function via a stored_file or mdl_files reference.
-     *                            Pass 0 when the caller only knows the object is in the objectfs
-     *                            table (e.g. the recoverer), so all bits are checked fresh.
+     *                            Pass OBJECT_LOCATION_IN_MDL_FILES when the caller has a stored_file
+     *                            reference or otherwise knows the object is in {files}.
+     *                            Defaults to 0, which rechecks all location bits.
      * @return int
      */
-    public function get_object_location_from_hash($contenthash, $knownlocations = OBJECT_LOCATION_IN_MDL_FILES) {
+    public function get_object_location_from_hash($contenthash, $knownlocations = 0) {
         $location = $knownlocations;
 
         // Only check each location if not already known — avoids redundant DB/filesystem calls.
@@ -363,7 +362,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return int
      */
     public function copy_object_from_external_to_local_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_object_location_from_hash($contenthash);
+        $initiallocation = $this->get_object_location_from_hash($contenthash, OBJECT_LOCATION_IN_MDL_FILES);
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
@@ -404,7 +403,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return int
      */
     public function copy_object_from_local_to_external_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_object_location_from_hash($contenthash);
+        $initiallocation = $this->get_object_location_from_hash($contenthash, OBJECT_LOCATION_IN_MDL_FILES);
 
         $finallocation = $initiallocation;
 
@@ -452,7 +451,7 @@ abstract class object_file_system extends \file_system_filedir {
      * @return int
      */
     public function delete_object_from_local_by_hash($contenthash, $objectsize = 0) {
-        $initiallocation = $this->get_object_location_from_hash($contenthash);
+        $initiallocation = $this->get_object_location_from_hash($contenthash, OBJECT_LOCATION_IN_MDL_FILES);
         $finallocation = $initiallocation;
 
         if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {
@@ -761,24 +760,11 @@ abstract class object_file_system extends \file_system_filedir {
     public function delete_object_from_hash($contenthash) {
         $location = $this->get_object_location_from_hash($contenthash);
 
-        switch ($location) {
-            case OBJECT_LOCATION_LOCAL:
-                $this->delete_local_file_from_hash($contenthash);
-                break;
-
-            case OBJECT_LOCATION_DUPLICATED:
-                $this->delete_local_file_from_hash($contenthash);
-                $this->delete_external_file_from_hash($contenthash);
-                break;
-
-            case OBJECT_LOCATION_EXTERNAL:
-                $this->delete_external_file_from_hash($contenthash);
-                break;
-
-            case OBJECT_LOCATION_MISSING:
-            case OBJECT_LOCATION_ERROR:
-            default:
-                return;
+        if ($location & OBJECT_LOCATION_IN_FILEDIR) {
+            $this->delete_local_file_from_hash($contenthash);
+        }
+        if ($location & OBJECT_LOCATION_IN_REMOTE) {
+            $this->delete_external_file_from_hash($contenthash);
         }
     }
 

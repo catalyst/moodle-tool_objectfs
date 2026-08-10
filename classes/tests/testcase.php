@@ -21,7 +21,6 @@ use moodle_exception;
 use stdClass;
 use stored_file;
 use tool_objectfs\local\manager;
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\local\store\signed_url;
 
@@ -408,8 +407,7 @@ abstract class testcase extends \advanced_testcase {
     protected function objects_contain_hash($contenthash) {
         $config = manager::get_objectfs_config();
         $config->filesystem = get_class($this->filesystem);
-        $candidatesfinder = new candidates_finder($this->manipulator, $config);
-        $candidateobjects = $candidatesfinder->get();
+        $candidateobjects = $this->manipulator::get_candidates($config);
         foreach ($candidateobjects as $candidateobject) {
             if ($contenthash === $candidateobject->contenthash) {
                 return true;
