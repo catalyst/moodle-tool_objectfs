@@ -26,6 +26,7 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\local\location_helper;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -46,6 +47,40 @@ class pusher extends manipulator {
      * @var int
      */
     private $maximumfilesize;
+
+    /**
+     * Get query name for logging.
+     * @return string
+     */
+    public static function get_query_name(): string {
+        return 'get_push_candidates';
+    }
+
+    /**
+     * Get candidate objects to push to remote storage.
+     * @param stdClass $config Plugin config.
+     * @return array
+     */
+    public static function get_candidates(stdClass $config): array {
+        global $DB;
+        $filesystem = new $config->filesystem();
+        $locationconds = location_helper::bits_to_sql_conditions(
+            OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES,
+            OBJECT_LOCATION_IN_REMOTE
+        );
+        $sql = "SELECT contenthash, filesize
+                  FROM {tool_objectfs_objects}
+                 WHERE {$locationconds}
+                   AND filesize > :threshold
+                   AND filesize < :max_filesize
+                   AND timeduplicated <= :maxage";
+        $params = [
+            'threshold' => $config->sizethreshold,
+            'max_filesize' => $filesystem->get_maximum_upload_filesize(),
+            'maxage' => time() - $config->minimumage,
+        ];
+        return $DB->get_records_sql($sql, $params, 0, $config->batchsize);
+    }
 
     /**
      * pusher constructor.

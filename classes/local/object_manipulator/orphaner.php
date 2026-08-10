@@ -30,11 +30,36 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\local\location_helper;
 
 /**
  * orphaner
  */
 class orphaner extends manipulator {
+    /**
+     * Get query name for logging.
+     * @return string
+     */
+    public static function get_query_name(): string {
+        return 'get_orphan_candidates';
+    }
+
+    /**
+     * Get tracked objects that no longer have a reference in {files}.
+     * @param stdClass $config Plugin config.
+     * @return array
+     */
+    public static function get_candidates(stdClass $config): array {
+        global $DB;
+        $notorphaned = 'NOT (' . location_helper::bits_to_exact_sql(OBJECT_LOCATION_ORPHANED, 'o') . ')';
+        $sql = "SELECT o.id, o.contenthash
+                  FROM {tool_objectfs_objects} o
+             LEFT JOIN {files} f ON o.contenthash = f.contenthash
+                 WHERE f.id is null
+                   AND {$notorphaned}";
+        return $DB->get_records_sql($sql, [], 0, $config->batchsize);
+    }
+
     /**
      * Updates the location of {tool_objectfs_objects} records for files that
      * have been deleted from the core {files} table.

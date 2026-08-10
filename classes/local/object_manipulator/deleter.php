@@ -26,6 +26,7 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\local\location_helper;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -48,6 +49,37 @@ class deleter extends manipulator {
      * @var bool
      */
     private $deletelocal;
+
+    /**
+     * Get query name for logging.
+     * @return string
+     */
+    public static function get_query_name(): string {
+        return 'get_delete_candidates';
+    }
+
+    /**
+     * Get candidate objects to delete from local storage.
+     * @param stdClass $config Plugin config.
+     * @return array
+     */
+    public static function get_candidates(stdClass $config): array {
+        global $DB;
+        $locationconds = location_helper::bits_to_sql_conditions(
+            OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE,
+            0
+        ) ?: '1=1';
+        $sql = "SELECT contenthash, filesize
+                  FROM {tool_objectfs_objects}
+                 WHERE {$locationconds}
+                   AND filesize > :threshold
+                   AND timeduplicated <= :maxage";
+        $params = [
+            'threshold' => $config->sizethreshold,
+            'maxage' => time() - $config->consistencydelay,
+        ];
+        return $DB->get_records_sql($sql, $params, 0, $config->batchsize);
+    }
 
     /**
      * deleter constructor.
