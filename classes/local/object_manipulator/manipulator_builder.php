@@ -29,7 +29,6 @@ use coding_exception;
 use moodle_exception;
 use stdClass;
 use tool_objectfs\local\manager;
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 use tool_objectfs\log\aggregate_logger;
 
 defined('MOODLE_INTERNAL') || die();
@@ -52,9 +51,6 @@ class manipulator_builder {
 
     /** @var string $manipulatorclass */
     private $manipulatorclass;
-
-    /** @var candidates_finder $finder */
-    private $finder;
 
     /** @var stdClass $config  */
     private $config;
@@ -107,10 +103,9 @@ class manipulator_builder {
         $this->config = manager::get_objectfs_config();
         $this->manipulatorclass = $manipulator;
         $this->logger = new aggregate_logger();
-        $this->finder = new candidates_finder($manipulator, $this->config);
-        $this->candidates = $this->finder->get();
+        $this->candidates = $manipulator::get_candidates($this->config);
         $countcandidates = count($this->candidates);
-        $this->logger->log_object_query($this->finder->get_query_name(), $countcandidates);
+        $this->logger->log_object_query($manipulator::get_query_name(), $countcandidates);
         if ($countcandidates === 0) {
             mtrace('No candidate objects found.');
         }

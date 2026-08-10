@@ -26,11 +26,38 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\local\location_helper;
 
 /**
  * puller
  */
 class puller extends manipulator {
+    /**
+     * Get query name for logging.
+     * @return string
+     */
+    public static function get_query_name(): string {
+        return 'get_pull_candidates';
+    }
+
+    /**
+     * Get candidate objects to pull from remote storage.
+     * @param stdClass $config Plugin config.
+     * @return array
+     */
+    public static function get_candidates(stdClass $config): array {
+        global $DB;
+        $locationconds = location_helper::bits_to_sql_conditions(
+            OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE,
+            OBJECT_LOCATION_IN_FILEDIR
+        );
+        $sql = "SELECT contenthash, filesize
+                  FROM {tool_objectfs_objects}
+                 WHERE {$locationconds}
+                   AND filesize <= :size_ceiling";
+        return $DB->get_records_sql($sql, ['size_ceiling' => $config->sizethreshold], 0, $config->batchsize);
+    }
+
     /**
      * manipulate_object
      * @param stdClass $objectrecord

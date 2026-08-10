@@ -17,7 +17,6 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use tool_objectfs\local\manager;
-use tool_objectfs\local\object_manipulator\candidates\candidates_finder;
 
 /**
  * Tests for object orphaner.
@@ -85,15 +84,14 @@ final class orphaner_test extends \tool_objectfs\tests\testcase {
         // Initialise the candidate finder.
         $config = manager::get_objectfs_config();
         $config->filesystem = get_class($this->filesystem);
-        $finder = new candidates_finder($this->manipulator, $config);
-        $objects = $finder->get();
+        $objects = $this->manipulator::get_candidates($config);
         $this->assertCount(0, $objects); // No candidates.
 
         // Create an object.
         $object = $this->create_local_object();
 
         // Still no candidates - object created but nothing is missing from {files} table.
-        $objects = $finder->get();
+        $objects = $this->manipulator::get_candidates($config);
         $this->assertCount(0, $objects);
 
         // Update that object to have a different hash, to mock a non-existent
@@ -101,12 +99,12 @@ final class orphaner_test extends \tool_objectfs\tests\testcase {
         $DB->set_field('files', 'contenthash', 'different', ['contenthash' => $object->contenthash]);
 
         // Expect one candidate - no matching contenthash in {files}.
-        $objects = $finder->get();
+        $objects = $this->manipulator::get_candidates($config);
         $this->assertCount(1, $objects);
 
         // Ensure it ignores orphaned records during the find.
         manager::update_object_by_hash($object->contenthash, OBJECT_LOCATION_ORPHANED);
-        $objects = $finder->get();
+        $objects = $this->manipulator::get_candidates($config);
         $this->assertCount(0, $objects); // No candidates - only candidate has been orphaned.
     }
 

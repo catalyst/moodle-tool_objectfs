@@ -26,6 +26,7 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\local\location_helper;
 use tool_objectfs\local\store\object_file_system;
 use tool_objectfs\log\aggregate_logger;
 
@@ -33,6 +34,31 @@ use tool_objectfs\log\aggregate_logger;
  * checker
  */
 class checker extends manipulator {
+    /**
+     * Get query name for logging.
+     * @return string
+     */
+    public static function get_query_name(): string {
+        return 'get_check_candidates';
+    }
+
+    /**
+     * Get files that exist in {files} but have no tracking row or are in error state.
+     * @param stdClass $config Plugin config.
+     * @return array
+     */
+    public static function get_candidates(stdClass $config): array {
+        global $DB;
+        $errorconditions = location_helper::bits_to_exact_sql(OBJECT_LOCATION_ERROR, 'o');
+        $sql = "SELECT f.contenthash
+                  FROM {files} f
+             LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
+                 WHERE f.filesize > 0
+                   AND (o.id IS NULL OR ({$errorconditions}))
+              GROUP BY f.contenthash";
+        return $DB->get_records_sql($sql, [], 0, $config->batchsize * 10);
+    }
+
     /**
      * Checker constructor.
      * This manipulator adds location for files that do not have records in {tool_objectfs_objects} table.

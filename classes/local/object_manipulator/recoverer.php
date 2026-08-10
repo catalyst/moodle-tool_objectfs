@@ -26,11 +26,37 @@
 namespace tool_objectfs\local\object_manipulator;
 
 use stdClass;
+use tool_objectfs\local\location_helper;
 
 /**
  * recoverer
  */
 class recoverer extends manipulator {
+    /**
+     * Get query name for logging.
+     * @return string
+     */
+    public static function get_query_name(): string {
+        return 'get_recover_candidates';
+    }
+
+    /**
+     * Get candidate objects to recover from error state.
+     * @param stdClass $config Plugin config.
+     * @return array
+     */
+    public static function get_candidates(stdClass $config): array {
+        global $DB;
+        $locationconds = location_helper::bits_to_sql_conditions(
+            OBJECT_LOCATION_IN_MDL_FILES,
+            OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_REMOTE
+        );
+        $sql = "SELECT contenthash, filesize
+                  FROM {tool_objectfs_objects}
+                 WHERE {$locationconds}";
+        return $DB->get_records_sql($sql, [], 0, $config->batchsize);
+    }
+
     /**
      * manipulate_object
      * @param stdClass $objectrecord
