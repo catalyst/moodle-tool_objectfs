@@ -1269,4 +1269,145 @@ final class object_file_system_test extends tests\testcase {
         $result = $reflection->invokeArgs($this->filesystem, [$contenthash]);
         $this->assertFalse($result);
     }
+
+    /**
+     * Test that get_external_path_from_hash returns the primary path when the file is readable externally.
+     */
+    public function test_get_external_path_from_hash_returns_primary_path_when_readable(): void {
+        $file = $this->create_remote_file();
+        $contenthash = $file->get_contenthash();
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_external_path_from_hash');
+        $reflection->setAccessible(true);
+
+        $expectedpath = $this->filesystem->get_external_client()->get_fullpath_from_hash($contenthash);
+        $actualpath = $reflection->invokeArgs($this->filesystem, [$contenthash]);
+
+        $this->assertEquals($expectedpath, $actualpath);
+    }
+
+    /**
+     * Test that get_external_path_from_hash with checkreadable=false returns the raw path without hook dispatch.
+     */
+    public function test_get_external_path_from_hash_skips_hook_when_checkreadable_false(): void {
+        $fakehash = sha1('nonexistent file content for testing');
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_external_path_from_hash');
+        $reflection->setAccessible(true);
+
+        // Redirect the hook to set a fallback path — this should NOT be called.
+        $hookcalled = false;
+        $hookmanager = \core\di::get(\core\hook\manager::class);
+        $hookmanager->phpunit_redirect_hook(
+            \tool_objectfs\hook\resolve_external_path::class,
+            function (\tool_objectfs\hook\resolve_external_path $hook) use (&$hookcalled) {
+                $hookcalled = true;
+                $hook->set_resolved_path('/tmp/should_not_be_used');
+            }
+        );
+
+        $expectedpath = $this->filesystem->get_external_client()->get_fullpath_from_hash($fakehash);
+        $actualpath = $reflection->invokeArgs($this->filesystem, [$fakehash, false]);
+
+        $this->assertEquals($expectedpath, $actualpath);
+        $this->assertFalse($hookcalled, 'Hook should not be dispatched when checkreadable is false');
+
+        $hookmanager->phpunit_stop_redirections();
+    }
+
+    /**
+     * Test that get_external_path_from_hash dispatches the hook and uses the resolved path
+     * when the primary path is not readable.
+     */
+    public function test_get_external_path_from_hash_uses_hook_fallback_when_unreadable(): void {
+        // Enable external read fallback so the readability check + hook dispatch runs.
+        set_config('enableexternalreadfallback', '1', 'tool_objectfs');
+
+        // Use a hash that does not exist in the external store so the primary path is unreadable.
+        $fakehash = sha1('nonexistent file for hook fallback test');
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_external_path_from_hash');
+        $reflection->setAccessible(true);
+
+        // Create a real readable file to act as the fallback path.
+        $fallbackpath = make_request_directory() . '/fallback_file.txt';
+        file_put_contents($fallbackpath, 'fallback content');
+
+        $hookmanager = \core\di::get(\core\hook\manager::class);
+        $hookmanager->phpunit_redirect_hook(
+            \tool_objectfs\hook\resolve_external_path::class,
+            function (\tool_objectfs\hook\resolve_external_path $hook) use ($fallbackpath) {
+                $hook->set_resolved_path($fallbackpath);
+            }
+        );
+
+        $actualpath = $reflection->invokeArgs($this->filesystem, [$fakehash, true]);
+
+        $this->assertEquals($fallbackpath, $actualpath);
+
+        $hookmanager->phpunit_stop_redirections();
+    }
+
+    /**
+     * Test that get_external_path_from_hash ignores empty resolved paths from the hook
+     * and falls back to the primary path.
+     */
+    public function test_get_external_path_from_hash_ignores_empty_hook_resolution(): void {
+        // Enable external read fallback so the readability check + hook dispatch runs.
+        set_config('enableexternalreadfallback', '1', 'tool_objectfs');
+
+        $fakehash = sha1('nonexistent file for empty hook test');
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_external_path_from_hash');
+        $reflection->setAccessible(true);
+
+        $hookmanager = \core\di::get(\core\hook\manager::class);
+        $hookmanager->phpunit_redirect_hook(
+            \tool_objectfs\hook\resolve_external_path::class,
+            function (\tool_objectfs\hook\resolve_external_path $hook) {
+                // Set an empty string — should be rejected by the validation.
+                $hook->set_resolved_path('');
+            }
+        );
+
+        $expectedpath = $this->filesystem->get_external_client()->get_fullpath_from_hash($fakehash);
+        $actualpath = $reflection->invokeArgs($this->filesystem, [$fakehash, true]);
+
+        // Should fall back to primary path since the hook returned an empty string.
+        $this->assertEquals($expectedpath, $actualpath);
+
+        $hookmanager->phpunit_stop_redirections();
+    }
+
+    /**
+     * Test that get_external_path_from_hash does not dispatch the hook when the primary path IS readable.
+     */
+    public function test_get_external_path_from_hash_no_hook_when_primary_readable(): void {
+        // Enable external read fallback so the readability check + hook dispatch runs.
+        set_config('enableexternalreadfallback', '1', 'tool_objectfs');
+
+        $file = $this->create_remote_file();
+        $contenthash = $file->get_contenthash();
+
+        $reflection = new \ReflectionMethod(object_file_system::class, 'get_external_path_from_hash');
+        $reflection->setAccessible(true);
+
+        $hookcalled = false;
+        $hookmanager = \core\di::get(\core\hook\manager::class);
+        $hookmanager->phpunit_redirect_hook(
+            \tool_objectfs\hook\resolve_external_path::class,
+            function (\tool_objectfs\hook\resolve_external_path $hook) use (&$hookcalled) {
+                $hookcalled = true;
+                $hook->set_resolved_path('/tmp/should_not_be_used');
+            }
+        );
+
+        $expectedpath = $this->filesystem->get_external_client()->get_fullpath_from_hash($contenthash);
+        $actualpath = $reflection->invokeArgs($this->filesystem, [$contenthash, true]);
+
+        $this->assertEquals($expectedpath, $actualpath);
+        $this->assertFalse($hookcalled, 'Hook should not be dispatched when primary path is readable');
+
+        $hookmanager->phpunit_stop_redirections();
+    }
 }

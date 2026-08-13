@@ -104,6 +104,12 @@ class manipulator_builder {
         $this->manipulatorclass = $manipulator;
         $this->logger = new aggregate_logger();
         $this->candidates = $manipulator::get_candidates($this->config);
+
+        // Allow multi-store plugins to filter or inject candidates.
+        $hook = new \tool_objectfs\hook\filter_candidates($manipulator, $this->candidates);
+        \core\di::get(\core\hook\manager::class)->dispatch($hook);
+        $this->candidates = $hook->get_candidates();
+
         $countcandidates = count($this->candidates);
         $this->logger->log_object_query($manipulator::get_query_name(), $countcandidates);
         if ($countcandidates === 0) {

@@ -242,15 +242,15 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         }
 
         // Populate new columns from old location values.
-        // ORPHANED (-2): in_filedir=1, in_mdl_files=0, in_remote=0.
+        // Migrate legacy ORPHANED rows (location = -2) to in_filedir only.
         $DB->execute('UPDATE {tool_objectfs_objects} SET in_filedir = 1 WHERE location = -2');
-        // ERROR/MISSING (-1): in_filedir=0, in_mdl_files=1, in_remote=0.
+        // Migrate legacy ERROR/MISSING rows (location = -1) to in_mdl_files only.
         $DB->execute('UPDATE {tool_objectfs_objects} SET in_mdl_files = 1 WHERE location = -1');
-        // LOCAL (0): in_filedir=1, in_mdl_files=1, in_remote=0.
+        // Migrate legacy LOCAL rows (location = 0) to filedir + mdl_files.
         $DB->execute('UPDATE {tool_objectfs_objects} SET in_filedir = 1, in_mdl_files = 1 WHERE location = 0');
-        // DUPLICATED (1): in_filedir=1, in_mdl_files=1, in_remote=1.
+        // Migrate legacy DUPLICATED rows (location = 1) to filedir + mdl_files + remote.
         $DB->execute('UPDATE {tool_objectfs_objects} SET in_filedir = 1, in_mdl_files = 1, in_remote = 1 WHERE location = 1');
-        // EXTERNAL (2): in_filedir=0, in_mdl_files=1, in_remote=1.
+        // Migrate legacy EXTERNAL rows (location = 2) to mdl_files + remote.
         $DB->execute('UPDATE {tool_objectfs_objects} SET in_mdl_files = 1, in_remote = 1 WHERE location = 2');
 
         // Drop the old index that references location.

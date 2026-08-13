@@ -38,6 +38,7 @@ use file_storage;
 use BlobRestProxy;
 use coding_exception;
 use Throwable;
+use tool_objectfs\local\location_helper;
 use tool_objectfs\local\manager;
 use tool_objectfs\local\tag\environment_source;
 use tool_objectfs\local\tag\tag_manager;
@@ -206,7 +207,7 @@ abstract class object_file_system extends \file_system_filedir {
     protected function get_remote_path_from_hash($contenthash) {
         if ($this->preferexternal) {
             $location = $this->get_object_location_from_hash($contenthash, OBJECT_LOCATION_IN_MDL_FILES);
-            if ($location == OBJECT_LOCATION_DUPLICATED) {
+            if (location_helper::is_duplicated($location)) {
                 return $this->get_external_path_from_hash($contenthash);
             }
         }
@@ -214,8 +215,8 @@ abstract class object_file_system extends \file_system_filedir {
         if ($this->is_file_readable_locally_by_hash($contenthash)) {
             $path = $this->get_local_path_from_hash($contenthash);
         } else {
-            // We assume it is remote, not checking if it's readable.
-            $path = $this->get_external_path_from_hash($contenthash);
+            // Not local — resolve from external, with fallback to alternative stores.
+            $path = $this->get_external_path_from_hash($contenthash, true);
         }
 
         return $path;
@@ -224,11 +225,42 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * get_external_path_from_hash
      * @param mixed $contenthash
+     * @param bool $checkreadable When true, checks if the path is readable and
+     *                            dispatches the resolve_external_path hook to allow fallback
+     *                            from an alternative store. Defaults to false to avoid a
+     *                            network round-trip (HEAD request) on every file serve.
+     *                            Pass true only when the caller needs to verify availability
+     *                            before using the path.
      *
      * @return string
      */
-    protected function get_external_path_from_hash($contenthash) {
-        return $this->externalclient->get_fullpath_from_hash($contenthash);
+    protected function get_external_path_from_hash($contenthash, bool $checkreadable = false) {
+        $path = $this->externalclient->get_fullpath_from_hash($contenthash);
+
+        // Only perform the readability check + hook fallback when the caller
+        // requests it AND multi-store fallback is explicitly enabled. This avoids
+        // a HEAD request to the object store on every file serve for single-store
+        // installations.
+        $config = manager::get_objectfs_config();
+        if (!$checkreadable || empty($config->enableexternalreadfallback)) {
+            return $path;
+        }
+
+        // If the primary store path is not readable, allow a multi-store plugin to provide a fallback.
+        error_clear_last();
+        $readable = @is_readable($path);
+        if (!$readable) {
+            $hook = new \tool_objectfs\hook\resolve_external_path($contenthash);
+            \core\di::get(\core\hook\manager::class)->dispatch($hook);
+            if ($hook->is_resolved()) {
+                $resolved = $hook->get_resolved_path();
+                if (is_string($resolved) && $resolved !== '') {
+                    return $resolved;
+                }
+            }
+        }
+
+        return $path;
     }
 
     /**
@@ -329,7 +361,7 @@ abstract class object_file_system extends \file_system_filedir {
             $location |= OBJECT_LOCATION_IN_REMOTE;
         }
 
-        if ($location === OBJECT_LOCATION_MISSING) {
+        if (location_helper::is_missing($location)) {
             // Object exists in mdl_files but is not anywhere physically - record missing state.
             manager::update_object_by_hash($contenthash, OBJECT_LOCATION_MISSING);
         }
@@ -365,7 +397,7 @@ abstract class object_file_system extends \file_system_filedir {
         $initiallocation = $this->get_object_location_from_hash($contenthash, OBJECT_LOCATION_IN_MDL_FILES);
         $finallocation = $initiallocation;
 
-        if ($initiallocation === OBJECT_LOCATION_EXTERNAL) {
+        if (location_helper::is_external($initiallocation)) {
             $localdirpath = $this->get_fulldir_from_hash($contenthash);
 
             // Folder may not exist yet if pulling a file that came from another environment.
@@ -383,6 +415,10 @@ abstract class object_file_system extends \file_system_filedir {
             if ($success) {
                 chmod($this->get_local_path_from_hash($contenthash), $this->filepermissions);
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
+
+                // Dispatch hook for multi-store tracking.
+                $hook = new \tool_objectfs\hook\after_pull_from_external($contenthash, $objectsize);
+                \core\di::get(\core\hook\manager::class)->dispatch($hook);
             }
         }
         $this->logger->log_object_move(
@@ -407,11 +443,16 @@ abstract class object_file_system extends \file_system_filedir {
 
         $finallocation = $initiallocation;
 
-        if ($initiallocation === OBJECT_LOCATION_LOCAL) {
+        if (location_helper::is_local($initiallocation)) {
             $success = $this->copy_from_local_to_external($contenthash);
 
             if ($success) {
                 $finallocation = OBJECT_LOCATION_DUPLICATED;
+
+                // Dispatch hook for multi-store push.
+                $localpath = $this->get_local_path_from_hash($contenthash);
+                $hook = new \tool_objectfs\hook\after_push_to_external($contenthash, $objectsize, $localpath);
+                \core\di::get(\core\hook\manager::class)->dispatch($hook);
             }
         }
 
@@ -454,7 +495,7 @@ abstract class object_file_system extends \file_system_filedir {
         $initiallocation = $this->get_object_location_from_hash($contenthash, OBJECT_LOCATION_IN_MDL_FILES);
         $finallocation = $initiallocation;
 
-        if ($initiallocation === OBJECT_LOCATION_DUPLICATED) {
+        if (location_helper::is_duplicated($initiallocation)) {
             $localpath = $this->get_local_path_from_hash($contenthash);
             if ($this->verify_external_object_from_hash($contenthash)) {
                 $success = unlink($localpath);
@@ -832,7 +873,7 @@ abstract class object_file_system extends \file_system_filedir {
      */
     protected function copy_from_external_to_local($contenthash) {
         $localpath = $this->get_local_path_from_hash($contenthash);
-        $externalpath = $this->get_external_path_from_hash($contenthash);
+        $externalpath = $this->get_external_path_from_hash($contenthash, true);
 
         return copy($externalpath, $localpath);
     }
