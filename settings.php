@@ -149,6 +149,13 @@ if ($ADMIN->fulltree) {
     ));
 
     $settings->add(new admin_setting_configcheckbox(
+        'tool_objectfs/enableexternalreadfallback',
+        new lang_string('settings:enableexternalreadfallback', 'tool_objectfs'),
+        new lang_string('settings:enableexternalreadfallback_help', 'tool_objectfs'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
         'tool_objectfs/useproxy',
         new lang_string('settings:useproxy', 'tool_objectfs'),
         new lang_string('settings:useproxy_help', 'tool_objectfs'),
