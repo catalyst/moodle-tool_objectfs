@@ -295,9 +295,12 @@ class reconcile_filedir extends task {
                         } else {
                             // If ObjectFS thinks the file is remote-only,
                             // update it so it knows the file is duplicated.
+                            // OR in the IN_FILEDIR bit rather than replacing the whole mask,
+                            // to preserve any extension bits (multi-store placements).
                             $objectlocation = \tool_objectfs\local\location_helper::columns_to_bits($object);
-                            if ($objectlocation == OBJECT_LOCATION_EXTERNAL) {
-                                manager::upsert_object($object, OBJECT_LOCATION_DUPLICATED);
+                            if (\tool_objectfs\local\location_helper::is_external($objectlocation)) {
+                                $newlocation = $objectlocation | OBJECT_LOCATION_IN_FILEDIR;
+                                manager::upsert_object($object, $newlocation);
                                 $updated++;
                             }
                         }

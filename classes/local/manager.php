@@ -189,14 +189,17 @@ class manager {
     public static function upsert_object(stdClass $object, $newlocation) {
         global $DB;
 
-        // If location change is 'duplicated' we update timeduplicated.
-        if ($newlocation === OBJECT_LOCATION_DUPLICATED) {
-            $object->timeduplicated = time();
-        }
-
         // Determine if location actually changed.
         $oldlocation = isset($object->location) ? $object->location : null;
         $locationchanged = $oldlocation === null || $oldlocation != $newlocation;
+
+        // Only update timeduplicated when IN_REMOTE is being newly set (not already present).
+        if (
+            $locationchanged && location_helper::is_in_remote($newlocation)
+            && ($oldlocation === null || !location_helper::is_in_remote($oldlocation))
+        ) {
+            $object->timeduplicated = time();
+        }
 
         // Store the bitmask on the PHP object for callers.
         $object->location = $newlocation;
@@ -222,6 +225,12 @@ class manager {
         if ($locationchanged && tag_manager::is_tagging_enabled_and_supported()) {
             $fs = get_file_storage()->get_file_system();
             $fs->push_object_tags($object->contenthash);
+        }
+
+        // Dispatch hook for multi-store placement tracking.
+        if ($locationchanged) {
+            $hook = new \tool_objectfs\hook\after_object_location_changed($object, $newlocation, $oldlocation);
+            \core\di::get(\core\hook\manager::class)->dispatch($hook);
         }
 
         return $object;

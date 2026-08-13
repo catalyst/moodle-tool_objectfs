@@ -36,18 +36,56 @@ require_once(__DIR__ . '/../../lib.php');
  * Translates between the PHP bitmask representation and the DB boolean columns.
  */
 class location_helper {
+    /** @var array|null Cached merged bit columns (base + extensions). */
+    private static ?array $bitcolumnscache = null;
+
     /**
-     * Get the registry mapping each bit flag constant to its corresponding DB column name.
-     * Must be a method rather than a class constant because OBJECT_LOCATION_* are defined at runtime.
+     * Get the base registry mapping each bit flag constant to its corresponding DB column name.
+     * These are the core objectfs columns that always exist.
      *
      * @return array [bit_value => column_name, ...]
      */
-    public static function get_bit_columns(): array {
+    public static function get_base_bit_columns(): array {
         return [
             OBJECT_LOCATION_IN_FILEDIR => 'in_filedir',
             OBJECT_LOCATION_IN_MDL_FILES => 'in_mdl_files',
             OBJECT_LOCATION_IN_REMOTE => 'in_remote',
         ];
+    }
+
+    /**
+     * Get the full registry mapping each bit flag constant to its corresponding DB column name.
+     * Includes base columns plus any additional columns registered via the
+     * get_additional_location_bits hook (e.g. from a multi-store sub-plugin).
+     *
+     * Results are cached statically for the duration of the request.
+     *
+     * @return array [bit_value => column_name, ...]
+     */
+    public static function get_bit_columns(): array {
+        if (self::$bitcolumnscache !== null) {
+            return self::$bitcolumnscache;
+        }
+
+        $columns = self::get_base_bit_columns();
+
+        // Allow other plugins to register additional store-bit columns.
+        $hook = new \tool_objectfs\hook\get_additional_location_bits();
+        \core\di::get(\core\hook\manager::class)->dispatch($hook);
+        $additional = $hook->get_additional_bits();
+        if (!empty($additional)) {
+            $columns = $columns + $additional;
+        }
+
+        self::$bitcolumnscache = $columns;
+        return $columns;
+    }
+
+    /**
+     * Reset the static bit columns cache. Call this if store registrations change at runtime.
+     */
+    public static function reset_cache(): void {
+        self::$bitcolumnscache = null;
     }
 
     /**
@@ -152,5 +190,83 @@ class location_helper {
             $conditions[] = $prefix . $column . ' = ' . (($location & $bit) ? '1' : '0');
         }
         return implode(' AND ', $conditions);
+    }
+
+    /**
+     * Check whether a location bitmask has a specific bit (or combination of bits) set.
+     *
+     * @param int $location The bitmask to check.
+     * @param int $bit The bit(s) to test for.
+     * @return bool True if all specified bits are set.
+     */
+    public static function has_bit(int $location, int $bit): bool {
+        return ($location & $bit) === $bit;
+    }
+
+    /**
+     * Check whether a location bitmask does NOT have a specific bit set.
+     *
+     * @param int $location The bitmask to check.
+     * @param int $bit The bit(s) to test for absence.
+     * @return bool True if none of the specified bits are set.
+     */
+    public static function lacks_bit(int $location, int $bit): bool {
+        return ($location & $bit) === 0;
+    }
+
+    /**
+     * Check if a location represents LOCAL state: in filedir + mdl_files, NOT in any remote store.
+     * Uses only the base bits (ignores additional store columns).
+     *
+     * @param int $location The bitmask to check.
+     * @return bool
+     */
+    public static function is_local(int $location): bool {
+        return self::has_bit($location, OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES)
+            && self::lacks_bit($location, OBJECT_LOCATION_IN_REMOTE);
+    }
+
+    /**
+     * Check if a location represents EXTERNAL state: in remote + mdl_files, NOT in filedir.
+     * Uses only the base bits (ignores additional store columns).
+     *
+     * @param int $location The bitmask to check.
+     * @return bool
+     */
+    public static function is_external(int $location): bool {
+        return self::has_bit($location, OBJECT_LOCATION_IN_REMOTE | OBJECT_LOCATION_IN_MDL_FILES)
+            && self::lacks_bit($location, OBJECT_LOCATION_IN_FILEDIR);
+    }
+
+    /**
+     * Check if a location represents DUPLICATED state: in filedir + mdl_files + remote.
+     * Uses only the base bits (ignores additional store columns).
+     *
+     * @param int $location The bitmask to check.
+     * @return bool
+     */
+    public static function is_duplicated(int $location): bool {
+        return self::has_bit($location, OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_MDL_FILES | OBJECT_LOCATION_IN_REMOTE);
+    }
+
+    /**
+     * Check if a location represents MISSING state: in mdl_files only, not in filedir or remote.
+     *
+     * @param int $location The bitmask to check.
+     * @return bool
+     */
+    public static function is_missing(int $location): bool {
+        return self::has_bit($location, OBJECT_LOCATION_IN_MDL_FILES)
+            && self::lacks_bit($location, OBJECT_LOCATION_IN_FILEDIR | OBJECT_LOCATION_IN_REMOTE);
+    }
+
+    /**
+     * Check if a location indicates the file exists in remote storage (primary).
+     *
+     * @param int $location The bitmask to check.
+     * @return bool
+     */
+    public static function is_in_remote(int $location): bool {
+        return self::has_bit($location, OBJECT_LOCATION_IN_REMOTE);
     }
 }
