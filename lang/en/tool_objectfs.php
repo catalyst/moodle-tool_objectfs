@@ -49,7 +49,6 @@ $string['checktagging_status'] = 'Object tagging';
 $string['checktagging_sync_status'] = 'Object tagging sync status';
 $string['checktoken_expiry'] = 'Token expiry';
 $string['client_not_available'] = 'The configured remote client is not available. Please ensure it is installed correctly.';
-$string['connectionstatus'] = 'Connection status';
 $string['delete_local_empty_directories_task'] = 'Object file system delete local empty directories task';
 $string['delete_local_objects_task'] = 'Object file system delete local objects task';
 $string['delete_orphaned_object_metadata_task'] = 'Object file system delete orphaned metadata task';
