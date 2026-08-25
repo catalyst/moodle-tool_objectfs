@@ -43,6 +43,7 @@ $string['check:tokenexpiry:na'] = 'Token expiry check not implemented for filesy
 $string['check_objects_location_task'] = 'Object file system check objects location task';
 $string['checkconnection'] = 'Object store connection status';
 $string['checkproxy_range_request'] = 'Pre-signed URL range request proxy';
+$string['checks3_sdkcreds'] = 'SDK credential provider chain';
 $string['checktagging_migration_status'] = 'Object tagging migration status';
 $string['checktagging_status'] = 'Object tagging';
 $string['checktagging_sync_status'] = 'Object tagging sync status';
@@ -143,8 +144,8 @@ $string['settings:aws:key_prefix'] = 'Prefix to use in bucket';
 $string['settings:aws:key_prefix_help'] = 'Prefix to use inside Amazon S3 bucket. Must end with trailing slash when set. Leave blank to use root of bucket.';
 $string['settings:aws:region'] = 'region';
 $string['settings:aws:region_help'] = 'Amazon S3 API gateway region.';
-$string['settings:aws:sdkcredserror'] = 'Couldn\'t find AWS credentials. It\'s unsafe to enable this setting. Follow up <a href="https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html">AWS documentation</a>.';
-$string['settings:aws:sdkcredsok'] = 'AWS credentials found. This setting can be safely enabled.';
+$string['settings:aws:sdkcredserror'] = 'AWS credentials not found in the credential provider chain. Using the chain without credentials is unsafe, use an S3 key and secret instead. Follow up <a href="https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html">AWS documentation</a>.';
+$string['settings:aws:sdkcredsok'] = 'AWS credentials found in the credential provider chain.';
 $string['settings:aws:secret'] = 'Secret';
 $string['settings:aws:secret_help'] = 'Amazon S3 secret credential.';
 $string['settings:aws:usesdkcreds'] = 'Use the default credential provider chain to find AWS credentials';
