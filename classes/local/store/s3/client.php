@@ -469,6 +469,8 @@ class client extends object_client_base {
         ));
 
         if (empty($config->s3_usesdkcreds)) {
+            $settings->add(new \admin_setting_check('tool_objectfs/s3_checksdkcreds', new \tool_objectfs\check\s3_sdkcreds()));
+
             $settings->add(new \admin_setting_configtext(
                 'tool_objectfs/s3_key',
                 new \lang_string('settings:aws:key', 'tool_objectfs'),

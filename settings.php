@@ -148,6 +148,13 @@ if ($ADMIN->fulltree) {
         DAYSECS
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'tool_objectfs/preferexternal',
+        new lang_string('settings:preferexternal', 'tool_objectfs'),
+        '',
+        ''
+    ));
+
     $settings->add(new admin_setting_heading(
         'tool_objectfs/filetransfersettings',
         new lang_string('settings:filetransferheader', 'tool_objectfs'),
@@ -206,6 +213,8 @@ if ($ADMIN->fulltree) {
         '',
         \tool_objectfs\local\manager::get_available_fs_list()
     ));
+
+    $settings->add(new admin_setting_check('tool_objectfs/connectionstatus', new connection(), true));
 
     $client = \tool_objectfs\local\manager::get_client($config);
     if ($client && $client->get_availability()) {
@@ -350,19 +359,6 @@ if ($ADMIN->fulltree) {
         ));
     }
 
-    $settings->add(new admin_setting_heading(
-        'tool_objectfs/testsettings',
-        new lang_string('settings:testingheader', 'tool_objectfs'),
-        ''
-    ));
-
-    $settings->add(new admin_setting_configcheckbox(
-        'tool_objectfs/preferexternal',
-        new lang_string('settings:preferexternal', 'tool_objectfs'),
-        '',
-        ''
-    ));
-
     // Tagging settings.
     $settings->add(new admin_setting_heading(
         'tool_objectfs/taggingsettings',
@@ -421,15 +417,6 @@ if ($ADMIN->fulltree) {
         get_string('settings:overrideobjecttags:desc', 'tool_objectfs'),
         1
     ));
-
-    // Connection status.
-    $settings->add(new admin_setting_heading(
-        'tool_objectfs/connectionstatus',
-        new lang_string('connectionstatus', 'tool_objectfs'),
-        ''
-    ));
-
-    $settings->add(new admin_setting_check('tool_objectfs/check_connectionstatus', new connection(), true));
 
     // Tagging status.
     $settings->add(new admin_setting_heading(
