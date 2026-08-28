@@ -182,6 +182,10 @@ class client extends object_client_base {
         // Support base_url config for aws api compatible endpoints.
         if ($config->s3_base_url) {
             $options['endpoint'] = $config->s3_base_url;
+            // Set path style endpoint if configured.
+            if (isset($config->s3_endpoint_style) && $config->s3_endpoint_style === 'path') {
+                $options['use_path_style_endpoint'] = true;
+            }
         }
 
         $this->client = \Aws\S3\S3Client::factory($options);
@@ -513,6 +517,17 @@ class client extends object_client_base {
             new \lang_string('settings:aws:base_url', 'tool_objectfs'),
             new \lang_string('settings:aws:base_url_help', 'tool_objectfs'),
             ''
+        ));
+
+        $settings->add(new \admin_setting_configselect(
+            'tool_objectfs/s3_endpoint_style',
+            new \lang_string('settings:aws:endpoint_style', 'tool_objectfs'),
+            new \lang_string('settings:aws:endpoint_style_help', 'tool_objectfs'),
+            'virtual',
+            [
+                'virtual' => get_string('settings:aws:endpoint_style_virtual', 'tool_objectfs'),
+                'path' => get_string('settings:aws:endpoint_style_path', 'tool_objectfs'),
+            ]
         ));
 
         $settings->add(new \admin_setting_configtext(
