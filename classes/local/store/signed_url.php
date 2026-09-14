@@ -45,5 +45,19 @@ class signed_url {
     public function __construct($url, $expiresat) {
         $this->url = $url;
         $this->expiresat = $expiresat;
+        $this->embed_origin_url();
+    }
+
+    /**
+     * Embed origin URL to pre-signed URL.
+     */
+    public function embed_origin_url(): void {
+        global $ME;
+
+        if (!empty($ME)) {
+            $this->url->set_anchor(object_file_system::PLUGINFILE_ORIGIN_SEGMENT_PREFIX . $ME);
+        } else if (!CLI_SCRIPT && !PHPUNIT_TEST) {
+            debugging(OBJECTFS_PLUGIN_NAME . ': Missing origin for pre-signed url.', DEBUG_DEVELOPER);
+        }
     }
 }
