@@ -220,7 +220,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024120600, 'tool', 'objectfs');
     }
 
-    if ($oldversion < 2026041007) {
+    if ($oldversion < 2026091400) {
         // Migrate from single 'location' integer column to individual boolean columns.
         // Old values: ORPHANED=-2, ERROR(missing)=-1, LOCAL=0, DUPLICATED=1, EXTERNAL=2
         // New columns: in_filedir, in_mdl_files, in_remote (each 0 or 1).
@@ -279,7 +279,7 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '2' WHERE reporttype = 'location' AND datakey = '-1'");
         $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '1' WHERE reporttype = 'location' AND datakey = '-2'");
 
-        upgrade_plugin_savepoint(true, 2026041007, 'tool', 'objectfs');
+        upgrade_plugin_savepoint(true, 2026091400, 'tool', 'objectfs');
     }
 
     return true;
