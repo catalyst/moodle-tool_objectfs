@@ -15,19 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
+ * Hook callbacks for tool_objectfs.
  *
  * @package   tool_objectfs
- * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
- * @copyright Catalyst IT
+ * @author    Benjamin Walker (benjaminwalker@catalyst-au.net)
+ * @copyright 2026 Catalyst IT Australia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026041012;      // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 2026041012;      // Same as version.
-$plugin->requires  = 2024042200;      // Requires 4.4.
-$plugin->component = "tool_objectfs";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->supported = [404, 405];
+$callbacks = [
+    [
+        'hook' => \core_files\hook\before_editor_content_saved::class,
+        'callback' => '\tool_objectfs\hook_callbacks::before_editor_content_saved',
+        'priority' => 0,
+    ],
+];
