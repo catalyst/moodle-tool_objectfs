@@ -24,6 +24,8 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+use tool_objectfs\local\location_query;
+
 /**
  * recoverer_candidates
  */
@@ -42,7 +44,7 @@ class recoverer_candidates extends manipulator_candidates_base {
         return 'SELECT contenthash,
                        filesize
                   FROM {tool_objectfs_objects}
-                 WHERE location = :location';
+                 WHERE ' . location_query::condition(OBJECT_LOCATION_ERROR) . '';
     }
 
     /**
@@ -50,6 +52,6 @@ class recoverer_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        return ['location' => OBJECT_LOCATION_ERROR];
+        return [];
     }
 }

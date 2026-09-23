@@ -24,6 +24,8 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+use tool_objectfs\local\location_query;
+
 /**
  * puller_candidates
  */
@@ -43,7 +45,7 @@ class puller_candidates extends manipulator_candidates_base {
                        filesize
                   FROM {tool_objectfs_objects}
                  WHERE filesize <= :sizethreshold
-                   AND location = :location';
+                   AND ' . location_query::condition(OBJECT_LOCATION_EXTERNAL) . '';
     }
 
     /**
@@ -51,6 +53,6 @@ class puller_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        return ['sizethreshold' => $this->config->sizethreshold, 'location' => OBJECT_LOCATION_EXTERNAL];
+        return ['sizethreshold' => $this->config->sizethreshold];
     }
 }

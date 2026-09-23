@@ -24,6 +24,8 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+use tool_objectfs\local\location_query;
+
 /**
  * deleter_candidates
  */
@@ -43,7 +45,7 @@ class deleter_candidates extends manipulator_candidates_base {
                        filesize
                   FROM {tool_objectfs_objects}
                  WHERE timeduplicated <= :consistancythreshold
-                   AND location = :location
+                   AND ' . location_query::condition(OBJECT_LOCATION_DUPLICATED) . '
                    AND filesize > :sizethreshold';
     }
 
@@ -55,7 +57,6 @@ class deleter_candidates extends manipulator_candidates_base {
         $consistancythreshold = time() - $this->config->consistencydelay;
         return [
             'consistancythreshold' => $consistancythreshold,
-            'location' => OBJECT_LOCATION_DUPLICATED,
             'sizethreshold' => $this->config->sizethreshold,
         ];
     }
