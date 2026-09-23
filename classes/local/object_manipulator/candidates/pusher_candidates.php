@@ -24,6 +24,8 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+use tool_objectfs\local\location_query;
+
 /**
  * pusher_candidates
  */
@@ -45,7 +47,7 @@ class pusher_candidates extends manipulator_candidates_base {
                  WHERE filesize > :threshold
                    AND filesize < :maximum_file_size
                    AND timeduplicated <= :maxcreatedtimestamp
-                   AND location = :object_location';
+                   AND ' . location_query::condition(OBJECT_LOCATION_LOCAL) . '';
     }
 
     /**
@@ -58,7 +60,6 @@ class pusher_candidates extends manipulator_candidates_base {
             'maxcreatedtimestamp' => time() - $this->config->minimumage,
             'threshold' => $this->config->sizethreshold,
             'maximum_file_size' => $filesystem->get_maximum_upload_filesize(),
-            'object_location' => OBJECT_LOCATION_LOCAL,
         ];
     }
 }
