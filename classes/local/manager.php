@@ -152,7 +152,10 @@ class manager {
             $newobject->id = $oldobject->id;
 
             // If location hasn't changed we do not need to update unless filesize is not populated.
-            if ((int)$oldobject->location === $newlocation && isset($oldobject->filesize)) {
+            if (
+                (int)$oldobject->location === $newlocation && isset($oldobject->filesize)
+                && location_query::matches($oldobject, (int) $newlocation)
+            ) {
                 return $oldobject;
             }
 
@@ -193,6 +196,7 @@ class manager {
 
         $locationchanged = !isset($object->location) || $object->location != $newlocation;
         $object->location = $newlocation;
+        [$object->in_filedir, $object->in_mdl_files, $object->in_remote] = location_query::bits((int) $newlocation);
 
         // If id is set, update, else insert new.
         if (empty($object->id)) {
