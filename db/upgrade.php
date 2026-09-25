@@ -255,5 +255,36 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102100, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2026102600) {
+        // The async migration task verifies every row and only then sets this flag.
+        if (!get_config('tool_objectfs', 'locationbitsmigrationcomplete')) {
+            throw new upgrade_exception(
+                'tool_objectfs',
+                2026102600,
+                'The asynchronous object location migration must complete before this upgrade.'
+            );
+        }
+
+        $table = new xmldb_table('tool_objectfs_objects');
+        $index = new xmldb_index('toolobjeobje_con_idu_ix', XMLDB_INDEX_UNIQUE, ['contenthash', 'location']);
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        $field = new xmldb_field('location');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Reports store location values as string keys.
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '6' WHERE reporttype = 'location' AND datakey = '2'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '7' WHERE reporttype = 'location' AND datakey = '1'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '3' WHERE reporttype = 'location' AND datakey = '0'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '2' WHERE reporttype = 'location' AND datakey = '-1'");
+        $DB->execute("UPDATE {tool_objectfs_report_data} SET datakey = '1' WHERE reporttype = 'location' AND datakey = '-2'");
+
+        upgrade_plugin_savepoint(true, 2026102600, 'tool', 'objectfs');
+    }
+
     return true;
 }
