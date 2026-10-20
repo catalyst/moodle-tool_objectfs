@@ -46,6 +46,13 @@ class migrate_object_locations extends adhoc_task {
         $lastid = (int) get_config('tool_objectfs', 'locationbitsmigrationlastid');
         $total = (int) get_config('tool_objectfs', 'locationbitsmigrationtotal');
         $donesofar = (int) get_config('tool_objectfs', 'locationbitsmigrationdonesofar');
+
+        // A zero cursor marks a fresh migration pass, so never carry progress over from a previous run.
+        if ($lastid === 0) {
+            $donesofar = 0;
+            set_config('locationbitsmigrationdonesofar', 0, 'tool_objectfs');
+        }
+
         $this->start_stored_progress();
         if ($total === 0) {
             $total = $DB->count_records('tool_objectfs_objects');
