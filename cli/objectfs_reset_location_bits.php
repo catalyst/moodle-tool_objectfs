@@ -35,10 +35,12 @@ require_once($CFG->libdir . '/clilib.php');
     [
         'help' => false,
         'reset' => false,
+        'queuetask' => false,
     ],
     [
         'h' => 'help',
         'r' => 'reset',
+        'q' => 'queuetask',
     ]
 );
 
@@ -54,9 +56,10 @@ Without --reset, this command only reports what would be reset.
 Options:
  -h, --help     Print out this help
  -r, --reset    Reset the bit columns and migration progress, then queue the migration task
+ -q, --queuetask    Queue the migration task after resetting the bit columns
 
 Example:
- \$sudo -u www-data /usr/bin/php admin/tool/objectfs/cli/objectfs_reset_location_bits.php --reset
+ \$sudo -u www-data /usr/bin/php admin/tool/objectfs/cli/objectfs_reset_location_bits.php --reset --queuetask
 
 EOT;
 
@@ -87,7 +90,7 @@ if (!$options['reset']) {
 
 $dbman = $DB->get_manager();
 $table = new xmldb_table('tool_objectfs_objects');
-$index = new xmldb_index('ix_location_bits', XMLDB_INDEX_NOTUNIQUE, ['in_filedir', 'in_mdl_files', 'in_remote']);
+$index = new xmldb_index('ix_location_bits', XMLDB_INDEX_NOTUNIQUE, ['in_filedir', 'in_mdl_files', 'in_remote', 'filesize']);
 
 if ($dbman->index_exists($table, $index)) {
     $dbman->drop_index($table, $index);
@@ -106,11 +109,13 @@ foreach (['in_filedir', 'in_mdl_files', 'in_remote'] as $name) {
     }
 }
 
-foreach ([
+foreach (
+    [
     ['in_filedir', 'tagslastpushed'],
     ['in_mdl_files', 'in_filedir'],
     ['in_remote', 'in_mdl_files'],
-] as [$name, $after]) {
+    ] as [$name, $after]
+) {
     $field = new xmldb_field($name, XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', $after);
     $dbman->add_field($table, $field);
     cli_writeln("[db] Added {$name}.");
@@ -125,5 +130,9 @@ set_config('locationbitsmigrationtotal', $objectcount, 'tool_objectfs');
 set_config('locationbitsmigrationdonesofar', 0, 'tool_objectfs');
 cli_writeln('Migration configuration reset.');
 
-\core\task\manager::reschedule_or_queue_adhoc_task(new \tool_objectfs\task\migrate_object_locations());
-cli_writeln('Location bits reset and migration task queued.');
+if ($options['queuetask']) {
+    \core\task\manager::reschedule_or_queue_adhoc_task(new \tool_objectfs\task\migrate_object_locations());
+    cli_writeln('Location bits reset and migration task queued.');
+} else {
+    cli_writeln('Location bits reset, migration task not queued.');
+}
