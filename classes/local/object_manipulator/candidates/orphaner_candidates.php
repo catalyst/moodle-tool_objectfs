@@ -24,6 +24,8 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+use tool_objectfs\local\location_query;
+
 /**
  * orphaner_candidates
  */
@@ -43,7 +45,7 @@ class orphaner_candidates extends manipulator_candidates_base {
                   FROM {tool_objectfs_objects} o
              LEFT JOIN {files} f ON o.contenthash = f.contenthash
                  WHERE f.id is null
-                   AND o.location != :location';
+                   AND NOT (' . location_query::condition(OBJECT_LOCATION_ORPHANED, 'o') . ')';
     }
 
     /**
@@ -51,8 +53,6 @@ class orphaner_candidates extends manipulator_candidates_base {
      * @return array
      */
     public function get_candidates_sql_params() {
-        return [
-          'location' => OBJECT_LOCATION_ORPHANED,
-        ];
+        return [];
     }
 }
