@@ -25,7 +25,8 @@ require_once(__DIR__ . '/../../lib.php');
 
 /**
  * Ad-hoc task to migrate the legacy 'location' column on tool_objectfs_objects to the
- * in_filedir/in_mdl_files/in_remote boolean columns, in small batches. Used for async upgrade.
+ * in_filedir/in_mdl_files/in_remote boolean columns, and to backfill missing filesize values,
+ * in small batches. Used for async upgrade.
  *
  * @package    tool_objectfs
  * @copyright  Catalyst IT
@@ -34,8 +35,8 @@ require_once(__DIR__ . '/../../lib.php');
 class migrate_object_locations extends adhoc_task {
     use \core\task\stored_progress_task_trait;
 
-    /** @var int Number of rows migrated per task run. Updates below are set-based, so this can be large. */
-    const BATCH_SIZE = 1000000;
+    /** @var int Number of rows migrated per iteration. The filesize backfill does a {files} lookup per row. */
+    const BATCH_SIZE = 100000;
 
     /**
      * Action of task.
@@ -115,6 +116,16 @@ class migrate_object_locations extends adhoc_task {
                         ]
                     );
                 }
+
+                // Bits are set above, so in_mdl_files = 1 selects objects that have a {files} row.
+                $DB->execute(
+                    'UPDATE {tool_objectfs_objects}
+                        SET filesize = (SELECT MAX(f.filesize)
+                                          FROM {files} f
+                                         WHERE f.contenthash = {tool_objectfs_objects}.contenthash)
+                      WHERE filesize IS NULL AND in_mdl_files = 1 AND id > :lastid AND id <= :upperid',
+                    ['lastid' => $lastid, 'upperid' => $upperid]
+                );
             }
 
             $donesofar += $processed;
@@ -148,6 +159,13 @@ class migrate_object_locations extends adhoc_task {
             $inconsistent = $DB->count_records_select(
                 'tool_objectfs_objects',
                 implode(' OR ', $inconsistentconditions)
+            );
+            // Objects whose file is gone legitimately keep a NULL filesize, so only count those with a {files} row.
+            $inconsistent += $DB->count_records_sql(
+                'SELECT COUNT(1)
+                   FROM {tool_objectfs_objects} o
+                  WHERE o.filesize IS NULL AND o.in_mdl_files = 1
+                    AND EXISTS (SELECT 1 FROM {files} f WHERE f.contenthash = o.contenthash)'
             );
             if ($inconsistent === 0) {
                 set_config('locationbitsmigrationcomplete', 1, 'tool_objectfs');

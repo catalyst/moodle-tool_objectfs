@@ -23,7 +23,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="toolobjeobje_con_idu_ix" UNIQUE="true" FIELDS="contenthash, location"/>
-        <INDEX NAME="ix_location_bits" UNIQUE="false" FIELDS="in_filedir, in_mdl_files, in_remote"/>
+        <INDEX NAME="ix_location_bits" UNIQUE="false" FIELDS="in_filedir, in_mdl_files, in_remote, filesize"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="tool_objectfs_reports" COMMENT="List of Object reports for objectfs">
