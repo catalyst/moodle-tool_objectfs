@@ -93,14 +93,7 @@ class migrate_object_locations extends adhoc_task {
 
             // Set-based update per legacy location value, scoped to this ID range.
             if ($upperid > $lastid) {
-                $locations = [
-                    \OBJECT_LOCATION_ORPHANED => true,
-                    \OBJECT_LOCATION_ERROR => true,
-                    \OBJECT_LOCATION_LOCAL => true,
-                    \OBJECT_LOCATION_DUPLICATED => true,
-                    \OBJECT_LOCATION_EXTERNAL => true,
-                ];
-                foreach (array_keys($locations) as $location) {
+                foreach (location_query::LEGACY_LOCATIONS as $location) {
                     [$infiledir, $inmdlfiles, $inremote] = location_query::bits($location);
                     $DB->execute(
                         'UPDATE {tool_objectfs_objects}
@@ -144,15 +137,8 @@ class migrate_object_locations extends adhoc_task {
             }
 
             // Migration complete, verify consistency of location bits.
-            $locations = [
-                \OBJECT_LOCATION_ORPHANED,
-                \OBJECT_LOCATION_ERROR,
-                \OBJECT_LOCATION_LOCAL,
-                \OBJECT_LOCATION_DUPLICATED,
-                \OBJECT_LOCATION_EXTERNAL,
-            ];
             $inconsistentconditions = [];
-            foreach ($locations as $location) {
+            foreach (location_query::LEGACY_LOCATIONS as $location) {
                 $inconsistentconditions[] = '(location = ' . $location . ' AND NOT ('
                         . location_query::bit_condition($location) . '))';
             }

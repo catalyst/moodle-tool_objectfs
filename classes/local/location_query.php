@@ -18,59 +18,58 @@ namespace tool_objectfs\local;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/../../lib.php');
-
 /**
- * Builds location conditions for the legacy and bit-column representations.
+ * Maps legacy location values (the dropped `location` column) to the bit columns, for the async migration.
+ *
+ * The OBJECT_LOCATION_* constants are now bitmasks, so legacy values must not use them.
  *
  * @package    tool_objectfs
  * @copyright  Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class location_query {
-    /**
-     * Whether application queries should use the migrated bit columns.
-     *
-     * @return bool
-     */
-    public static function uses_bits(): bool {
-        return (bool) get_config('tool_objectfs', 'locationbitsmigrationcomplete');
-    }
+    /** @var int Legacy value for objects only in filedir. */
+    const LEGACY_ORPHANED = -2;
+
+    /** @var int Legacy value for objects only in {files}. */
+    const LEGACY_ERROR = -1;
+
+    /** @var int Legacy value for objects in filedir and {files}. */
+    const LEGACY_LOCAL = 0;
+
+    /** @var int Legacy value for objects in filedir, {files} and remote. */
+    const LEGACY_DUPLICATED = 1;
+
+    /** @var int Legacy value for objects in {files} and remote. */
+    const LEGACY_EXTERNAL = 2;
+
+    /** @var int[] All legacy location values. */
+    const LEGACY_LOCATIONS = [
+        self::LEGACY_ORPHANED,
+        self::LEGACY_ERROR,
+        self::LEGACY_LOCAL,
+        self::LEGACY_DUPLICATED,
+        self::LEGACY_EXTERNAL,
+    ];
 
     /**
-     * Get a SQL condition for a location value.
+     * Get the bit-column values for a legacy location value.
      *
      * @param int $location Legacy location value.
-     * @param string $alias Optional table alias.
-     * @return string
-     */
-    public static function condition(int $location, string $alias = ''): string {
-        if (!self::uses_bits()) {
-            $prefix = $alias === '' ? '' : $alias . '.';
-            return $prefix . 'location = ' . $location;
-        }
-
-        return self::bit_condition($location, $alias);
-    }
-
-    /**
-     * Get the bit-column values for a location value.
-     *
-     * @param int $location Legacy location value.
-     * @return array{int, int, int}
+     * @return array{int, int, int} in_filedir, in_mdl_files, in_remote.
      */
     public static function bits(int $location): array {
         return [
-            OBJECT_LOCATION_ORPHANED => [1, 0, 0],
-            OBJECT_LOCATION_ERROR => [0, 1, 0],
-            OBJECT_LOCATION_LOCAL => [1, 1, 0],
-            OBJECT_LOCATION_DUPLICATED => [1, 1, 1],
-            OBJECT_LOCATION_EXTERNAL => [0, 1, 1],
+            self::LEGACY_ORPHANED => [1, 0, 0],
+            self::LEGACY_ERROR => [0, 1, 0],
+            self::LEGACY_LOCAL => [1, 1, 0],
+            self::LEGACY_DUPLICATED => [1, 1, 1],
+            self::LEGACY_EXTERNAL => [0, 1, 1],
         ][$location];
     }
 
     /**
-     * Get a SQL condition for bit columns, regardless of migration state.
+     * Get a SQL condition on the bit columns for a legacy location value.
      *
      * @param int $location Legacy location value.
      * @param string $alias Optional table alias.
@@ -89,30 +88,5 @@ class location_query {
             $prefix,
             $bits[2]
         );
-    }
-
-    /**
-     * Check whether an object has the expected bit-column values.
-     *
-     * @param \stdClass $object Object record.
-     * @param int $location Legacy location value.
-     * @return bool
-     */
-    public static function matches(\stdClass $object, int $location): bool {
-        [$infiledir, $inmdlfiles, $inremote] = self::bits($location);
-        return isset($object->in_filedir, $object->in_mdl_files, $object->in_remote)
-                && (int) $object->in_filedir === $infiledir
-                && (int) $object->in_mdl_files === $inmdlfiles
-                && (int) $object->in_remote === $inremote;
-    }
-
-    /**
-     * Get the condition for an object not yet present in the objects table.
-     *
-     * @param string $alias Table alias.
-     * @return string
-     */
-    public static function missing(string $alias): string {
-        return self::uses_bits() ? $alias . '.id IS NULL' : $alias . '.location IS NULL';
     }
 }
