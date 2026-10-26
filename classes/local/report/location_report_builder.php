@@ -89,13 +89,17 @@ class location_report_builder extends objectfs_report_builder {
             $results[$location] = (object) ['objectcount' => 0, 'objectsum' => 0];
         }
 
+        // Group by every registered bit column so multi-store bits match the exact-location semantics.
+        $columns = array_map(fn($column) => 'o.' . $column, array_values(location_helper::get_bit_columns()));
+        $columnlist = implode(', ', $columns);
+
         // Zero-size files are excluded, matching the legacy report.
-        $sql = 'SELECT o.in_filedir, o.in_mdl_files, o.in_remote,
+        $sql = "SELECT {$columnlist},
                        COUNT(1) AS objectcount,
                        COALESCE(SUM(o.filesize), 0) AS objectsum
                   FROM {tool_objectfs_objects} o
                  WHERE o.in_mdl_files = 0 OR o.filesize IS NULL OR o.filesize > 0
-              GROUP BY o.in_filedir, o.in_mdl_files, o.in_remote';
+              GROUP BY {$columnlist}";
         $rows = $DB->get_recordset_sql($sql);
         foreach ($rows as $row) {
             $location = location_helper::columns_to_bits($row);
