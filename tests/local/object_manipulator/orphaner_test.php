@@ -105,7 +105,7 @@ final class orphaner_test extends \tool_objectfs\tests\testcase {
         $this->assertCount(1, $objects);
 
         // Ensure it ignores orphaned records during the find.
-        $DB->set_field('tool_objectfs_objects', 'location', OBJECT_LOCATION_ORPHANED, ['contenthash' => $object->contenthash]);
+        manager::update_object_by_hash($object->contenthash, OBJECT_LOCATION_ORPHANED);
         $objects = $finder->get();
         $this->assertCount(0, $objects); // No candidates - only candidate has been orphaned.
     }
