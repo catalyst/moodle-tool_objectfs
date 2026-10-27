@@ -55,7 +55,7 @@ Without --reset, this command only reports what would be reset.
 
 Options:
  -h, --help     Print out this help
- -r, --reset    Reset the bit columns and migration progress, then queue the migration task
+ -r, --reset    Reset the bit columns and migration progress
  -q, --queuetask    Queue the migration task after resetting the bit columns
 
 Example:
@@ -87,6 +87,9 @@ if (!$options['reset']) {
     cli_writeln('Nothing changed. Re-run with --reset to reset and requeue the migration.');
     exit(0);
 }
+
+// Clear first so readers fall back to the legacy location column while the bit columns are rebuilt.
+set_config('locationbitsmigrationcomplete', 0, 'tool_objectfs');
 
 $dbman = $DB->get_manager();
 $table = new xmldb_table('tool_objectfs_objects');
@@ -124,7 +127,6 @@ foreach (
 $dbman->add_index($table, $index);
 cli_writeln('[db] Added ix_location_bits.');
 
-set_config('locationbitsmigrationcomplete', 0, 'tool_objectfs');
 set_config('locationbitsmigrationlastid', 0, 'tool_objectfs');
 set_config('locationbitsmigrationtotal', $objectcount, 'tool_objectfs');
 set_config('locationbitsmigrationdonesofar', 0, 'tool_objectfs');
