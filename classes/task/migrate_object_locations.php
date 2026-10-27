@@ -33,10 +33,29 @@ require_once(__DIR__ . '/../../lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class migrate_object_locations extends adhoc_task {
-    use \core\task\stored_progress_task_trait;
+    /** @var \core\output\stored_progress_bar|null */
+    protected $progress = null;
 
     /** @var int Number of rows migrated per iteration. The filesize backfill does a {files} lookup per row. */
     const BATCH_SIZE = 100000;
+
+    /**
+     * Start stored progress when supported by the running Moodle version.
+     */
+    private function start_optional_stored_progress(): void {
+        if (!class_exists(\core\output\stored_progress_bar::class)) {
+            return;
+        }
+
+        global $OUTPUT, $PAGE;
+
+        $OUTPUT = $PAGE->get_renderer('core', null, 'cli');
+        $name = get_class($this) . '_' . $this->get_id();
+        $this->progress = new \core\output\stored_progress_bar(
+            \core\output\stored_progress_bar::convert_to_idnumber($name)
+        );
+        $this->progress->start();
+    }
 
     /**
      * Action of task.
@@ -54,7 +73,7 @@ class migrate_object_locations extends adhoc_task {
             set_config('locationbitsmigrationdonesofar', 0, 'tool_objectfs');
         }
 
-        $this->start_stored_progress();
+        $this->start_optional_stored_progress();
         if ($total === 0) {
             $total = $DB->count_records('tool_objectfs_objects');
             set_config('locationbitsmigrationtotal', $total, 'tool_objectfs');
@@ -138,51 +157,105 @@ class migrate_object_locations extends adhoc_task {
                 mtrace("tool_objectfs location bits migration: {$donesofar}/{$total} ({$percent}%) complete.");
             }
 
-            $this->progress->update($donesofar, $total, 'tool_objectfs location bits migration:');
+            if ($this->progress !== null) {
+                $this->progress->update($donesofar, $total, 'tool_objectfs location bits migration:');
+            }
+
             if ($upperid !== 0) {
                 continue;
             }
 
             // Migration complete, verify consistency of location bits.
-            $locations = [
-                \OBJECT_LOCATION_ORPHANED,
-                \OBJECT_LOCATION_ERROR,
-                \OBJECT_LOCATION_LOCAL,
-                \OBJECT_LOCATION_DUPLICATED,
-                \OBJECT_LOCATION_EXTERNAL,
-            ];
-            $inconsistentconditions = [];
-            foreach ($locations as $location) {
-                $inconsistentconditions[] = '(location = ' . $location . ' AND NOT ('
-                        . location_query::bit_condition($location) . '))';
-            }
-            $inconsistent = $DB->count_records_select(
-                'tool_objectfs_objects',
-                implode(' OR ', $inconsistentconditions)
-            );
-            // Objects whose file is gone legitimately keep a NULL filesize, so only count those with a {files} row.
-            $inconsistent += $DB->count_records_sql(
-                'SELECT COUNT(1)
-                   FROM {tool_objectfs_objects} o
-                  WHERE o.filesize IS NULL AND o.in_mdl_files = 1
-                    AND EXISTS (SELECT 1 FROM {files} f WHERE f.contenthash = o.contenthash)'
-            );
-            if ($inconsistent === 0) {
-                set_config('locationbitsmigrationcomplete', 1, 'tool_objectfs');
-                if (!PHPUNIT_TEST) {
-                    mtrace('tool_objectfs location bits migration complete and verified.');
-                }
-                break;
+            if ($this->count_inconsistent() > 0) {
+                // Fix only the rows missed by the ID pass rather than rescanning from the start.
+                $this->repair_inconsistent();
             }
 
-            // Repair rows missed by the ID pass, then verify again.
-            set_config('locationbitsmigrationcomplete', 0, 'tool_objectfs');
-            $lastid = 0;
-            $donesofar = 0;
-            set_config('locationbitsmigrationlastid', 0, 'tool_objectfs');
-            set_config('locationbitsmigrationdonesofar', 0, 'tool_objectfs');
-            \core\task\manager::queue_adhoc_task(new self(), true);
-            return;
+            $inconsistent = $this->count_inconsistent();
+            if ($inconsistent > 0) {
+                set_config('locationbitsmigrationcomplete', 0, 'tool_objectfs');
+                throw new \moodle_exception(
+                    'generalexceptionmessage',
+                    'error',
+                    '',
+                    "tool_objectfs location bits migration: {$inconsistent} rows still inconsistent after repair."
+                );
+            }
+
+            set_config('locationbitsmigrationcomplete', 1, 'tool_objectfs');
+            if (!PHPUNIT_TEST) {
+                mtrace('tool_objectfs location bits migration complete and verified.');
+            }
+            break;
         } while (true);
+    }
+
+    /**
+     * Legacy location values that have corresponding bit values.
+     *
+     * @return int[]
+     */
+    private static function locations(): array {
+        return [
+            \OBJECT_LOCATION_ORPHANED,
+            \OBJECT_LOCATION_ERROR,
+            \OBJECT_LOCATION_LOCAL,
+            \OBJECT_LOCATION_DUPLICATED,
+            \OBJECT_LOCATION_EXTERNAL,
+        ];
+    }
+
+    /**
+     * Count rows whose bits disagree with the legacy location, or whose filesize is missing despite a {files} row.
+     *
+     * @return int
+     */
+    private function count_inconsistent(): int {
+        global $DB;
+
+        $conditions = [];
+        foreach (self::locations() as $location) {
+            $conditions[] = '(location = ' . $location . ' AND NOT (' . location_query::bit_condition($location) . '))';
+        }
+        $inconsistent = $DB->count_records_select('tool_objectfs_objects', implode(' OR ', $conditions));
+
+        // Objects whose file is gone legitimately keep a NULL filesize, so only count those with a {files} row.
+        return $inconsistent + $DB->count_records_sql(
+            'SELECT COUNT(1)
+               FROM {tool_objectfs_objects} o
+              WHERE o.filesize IS NULL AND o.in_mdl_files = 1
+                AND EXISTS (SELECT 1 FROM {files} f WHERE f.contenthash = o.contenthash)'
+        );
+    }
+
+    /**
+     * Fix the bits and filesize on only the rows that count_inconsistent() reports.
+     */
+    private function repair_inconsistent(): void {
+        global $DB;
+
+        foreach (self::locations() as $location) {
+            [$infiledir, $inmdlfiles, $inremote] = location_query::bits($location);
+            $DB->execute(
+                'UPDATE {tool_objectfs_objects}
+                    SET in_filedir = :infiledir, in_mdl_files = :inmdlfiles, in_remote = :inremote
+                  WHERE location = :location AND NOT (' . location_query::bit_condition($location) . ')',
+                [
+                    'infiledir' => $infiledir,
+                    'inmdlfiles' => $inmdlfiles,
+                    'inremote' => $inremote,
+                    'location' => $location,
+                ]
+            );
+        }
+
+        $DB->execute(
+            'UPDATE {tool_objectfs_objects}
+                SET filesize = (SELECT MAX(f.filesize)
+                                  FROM {files} f
+                                 WHERE f.contenthash = {tool_objectfs_objects}.contenthash)
+              WHERE filesize IS NULL AND in_mdl_files = 1
+                AND EXISTS (SELECT 1 FROM {files} f2 WHERE f2.contenthash = {tool_objectfs_objects}.contenthash)'
+        );
     }
 }
