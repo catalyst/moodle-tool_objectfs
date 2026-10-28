@@ -28,6 +28,7 @@ namespace tool_objectfs\local\store\swift;
 defined('MOODLE_INTERNAL') || die();
 
 use tool_objectfs\local\store\object_file_system;
+use GuzzleHttp\Psr7\Stream;
 
 require_once($CFG->dirroot . '/admin/tool/objectfs/lib.php');
 
@@ -44,5 +45,38 @@ class file_system extends object_file_system {
     protected function initialise_external_client($config) {
         $client = new client($config);
         return $client;
+    }
+
+    /**
+     * copy_from_local_to_external
+     * @param mixed $contenthash
+     *
+     * @return void
+     */
+    public function copy_from_local_to_external($contenthash) {
+        $objpath = $this->get_local_path_from_hash($contenthash);
+
+        $pathval = parse_url($objpath)['path'] ?? '';
+        if (strpos($pathval, '/') === 0) {
+            $pathval = substr($pathval, 1);
+        }
+        $objectname = urldecode($pathval);
+
+        $objstream = new Stream(fopen($objpath, 'r'));
+        $container = $this->get_external_client()->get_container();
+
+        if ($objstream->getSize() > 5368709120) {
+             $object = $container->createLargeObject([
+                'name' => $objectname,
+                'stream' => $objstream,
+                'segmentContainer' => $container->name . '+segments',
+             ]);
+        } else {
+            $object = $container->createObject([
+                'name' => $objectname,
+                'stream' => $objstream,
+            ]);
+        }
+        $objstream->close();
     }
 }
