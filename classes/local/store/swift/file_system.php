@@ -57,7 +57,9 @@ class file_system extends object_file_system {
         $objpath = $this->get_local_path_from_hash($contenthash);
 
         $pathval = parse_url($objpath)['path'] ?? '';
-        if (strpos($pathval, '/') === 0) $pathval = substr($pathval, 1);
+        if (strpos($pathval, '/') === 0) {
+            $pathval = substr($pathval, 1);
+        }
         $objectname = urldecode($pathval);
 
         $objstream = new Stream(fopen($objpath, 'r'));
@@ -67,8 +69,8 @@ class file_system extends object_file_system {
              $object = $container->createLargeObject([
                 'name' => $objectname,
                 'stream' => $objstream,
-                'segmentContainer' => $container->name.'+segments',
-            ]);
+                'segmentContainer' => $container->name . '+segments',
+             ]);
         } else {
             $object = $container->createObject([
                 'name' => $objectname,
