@@ -1443,4 +1443,83 @@ final class object_file_system_test extends tests\testcase {
             $filesystem->normalise_presigned_urls(sprintf($text, ...$embeddedurls))
         );
     }
+
+    /**
+     * The cache key that core redirect() writes to core/htmlpurifier for a URL.
+     *
+     * Mirrors redirect() and purify_html() in lib/weblib.php.
+     *
+     * @param  string $url
+     * @return array [cache instance, key]
+     */
+    private function htmlpurifier_redirect_cache_entry(string $url): array {
+        global $CFG;
+
+        $encodedurl = preg_replace("/\&(?![a-zA-Z0-9#]{1,8};)/", "&amp;", $url);
+        $text = '<a href="' . $encodedurl . '" />';
+        $allowobjectembed = empty($CFG->allowobjectembed) ? 0 : 1;
+        $version = empty($CFG->version) ? 0 : $CFG->version;
+        $cache = \cache::make('core', 'htmlpurifier', ['type' => 'type_0_' . $allowobjectembed]);
+        return [$cache, "|$version|$allowobjectembed|0|$text"];
+    }
+
+    /**
+     * Sanitising a pre-signed URL must not write to core/htmlpurifier.
+     *
+     * Core redirect() does, which is the behaviour this replaces. The first
+     * half of the test proves the key is what core would write, so the
+     * assertion in the second half is meaningful.
+     *
+     * @covers ::sanitise_presigned_location
+     */
+    public function test_sanitise_presigned_location_does_not_write_htmlpurifier_cache(): void {
+        $this->resetAfterTest();
+
+        $url = 'https://bucket.s3.eu-west-2.amazonaws.com/ab/cd/abcd1234'
+            . '?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260101T000000Z'
+            . '&X-Amz-Expires=600&X-Amz-Signature=deadbeef';
+        [$cache, $key] = $this->htmlpurifier_redirect_cache_entry($url);
+        $cache->purge();
+
+        // Control: the clean_text() call inside core redirect() writes the entry.
+        $encodedurl = preg_replace("/\&(?![a-zA-Z0-9#]{1,8};)/", "&amp;", $url);
+        clean_text('<a href="' . $encodedurl . '" />', FORMAT_HTML);
+        $this->assertTrue($cache->has($key), 'Control failed: core clean_text() did not write the expected key');
+        $cache->purge();
+
+        $this->assertSame($url, object_file_system::sanitise_presigned_location($url));
+        $this->assertFalse($cache->has($key));
+    }
+
+    /**
+     * Data provider for test_sanitise_presigned_location.
+     *
+     * @return array
+     */
+    public static function sanitise_presigned_location_provider(): array {
+        return [
+            'https passthrough' => ['https://example.com/a?b=c&d=e', 'https://example.com/a?b=c&d=e'],
+            'http passthrough' => ['http://example.com/a', 'http://example.com/a'],
+            'scheme is case-insensitive' => ['HTTPS://example.com/a', 'HTTPS://example.com/a'],
+            'control characters stripped' => ["https://example.com/a\r\n?b=c\x00", 'https://example.com/a?b=c'],
+            'double quote encoded' => ['https://example.com/a?b="c"', 'https://example.com/a?b=%22c%22'],
+            'javascript rejected' => ['javascript:alert(1)', null],
+            'relative path rejected' => ['/pluginfile.php/1/a', null],
+            'protocol-relative rejected' => ['//example.com/a', null],
+            'control characters before scheme stripped first' => ["\x01https://example.com/a", 'https://example.com/a'],
+        ];
+    }
+
+    /**
+     * Sanitising keeps absolute http(s) URLs and rejects everything else.
+     *
+     * @dataProvider sanitise_presigned_location_provider
+     * @covers ::sanitise_presigned_location
+     *
+     * @param string      $input
+     * @param string|null $expected
+     */
+    public function test_sanitise_presigned_location(string $input, ?string $expected): void {
+        $this->assertSame($expected, object_file_system::sanitise_presigned_location($input));
+    }
 }
