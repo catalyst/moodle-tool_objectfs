@@ -33,6 +33,19 @@ use tool_objectfs\local\store\object_file_system;
  */
 class location_report_builder extends objectfs_report_builder {
     /**
+     * Maps an (in_filedir, in_mdl_files, in_remote) bit tuple to the legacy OBJECT_LOCATION_* constant.
+     * Must stay in sync with tool_objectfs\local\manager::location_to_bits().
+     * @var array
+     */
+    private const BITS_TO_LOCATION = [
+        '1:0:0' => OBJECT_LOCATION_ORPHANED,
+        '0:1:0' => OBJECT_LOCATION_ERROR,
+        '1:1:0' => OBJECT_LOCATION_LOCAL,
+        '1:1:1' => OBJECT_LOCATION_DUPLICATED,
+        '0:1:1' => OBJECT_LOCATION_EXTERNAL,
+    ];
+
+    /**
      * build_report
      * @param int $reportid
      * @return objectfs_report
@@ -49,10 +62,92 @@ class location_report_builder extends objectfs_report_builder {
             OBJECT_LOCATION_ERROR,
         ];
 
+        if (get_config('tool_objectfs', 'locationbitsmigrationcomplete')) {
+            $results = $this->get_results_from_bits();
+        } else {
+            $results = $this->get_results_from_legacy_location($locations);
+        }
+
         $totalcount = 0;
         $totalsum = 0;
         $filedircount = 0;
         $filedirsum = 0;
+        foreach ($locations as $location) {
+            $result = $results[$location];
+            $report->add_row($location, $result->objectcount, $result->objectsum);
+
+            if (in_array($location, [OBJECT_LOCATION_LOCAL, OBJECT_LOCATION_DUPLICATED])) {
+                $filedircount += $result->objectcount;
+                $filedirsum += $result->objectsum;
+            }
+            $totalcount += $result->objectcount;
+            $totalsum += $result->objectsum;
+        }
+
+        $report->add_row('total', $totalcount, $totalsum);
+        $this->add_filedir_size_stats($report, $filedircount, $filedirsum);
+        return $report;
+    }
+
+    /**
+     * Builds the location counts/sums in a single pass using the in_filedir/in_mdl_files/in_remote
+     * bit columns instead of one query per legacy location value.
+     *
+     * @return array<int, \stdClass> Keyed by OBJECT_LOCATION_* constant.
+     */
+    private function get_results_from_bits(): array {
+        global $DB;
+
+        $results = $this->empty_results();
+
+        // One pass over {files}/{tool_objectfs_objects} covers LOCAL/DUPLICATED/EXTERNAL/ERROR,
+        // since files with no matching object row default to the LOCAL bit tuple (1,1,0).
+        $sql =
+            'WITH cte_files AS (
+                SELECT f.contenthash, MAX(f.filesize) AS filesize
+                  FROM {files} f
+                 WHERE f.filesize > 0
+              GROUP BY f.contenthash)
+           SELECT COALESCE(o.in_filedir, 1) AS in_filedir,
+                  COALESCE(o.in_mdl_files, 1) AS in_mdl_files,
+                  COALESCE(o.in_remote, 0) AS in_remote,
+                  COUNT(cf.contenthash) AS objectcount,
+                  SUM(cf.filesize) AS objectsum
+             FROM cte_files cf
+        LEFT JOIN {tool_objectfs_objects} o ON o.contenthash = cf.contenthash
+         GROUP BY COALESCE(o.in_filedir, 1), COALESCE(o.in_mdl_files, 1), COALESCE(o.in_remote, 0)';
+
+        foreach ($DB->get_records_sql($sql) as $row) {
+            $location = self::BITS_TO_LOCATION["{$row->in_filedir}:{$row->in_mdl_files}:{$row->in_remote}"] ?? null;
+            if ($location === null || !isset($results[$location])) {
+                continue;
+            }
+            $results[$location]->objectcount = (int) $row->objectcount;
+            $results[$location]->objectsum = (int) $row->objectsum;
+        }
+
+        // Orphaned objects are not in {files} at all, so they are counted separately.
+        $orphaned = $DB->get_record_sql(
+            'SELECT COUNT(*) AS objectcount
+               FROM {tool_objectfs_objects} o
+              WHERE o.in_filedir = 1 AND o.in_mdl_files = 0 AND o.in_remote = 0'
+        );
+        $results[OBJECT_LOCATION_ORPHANED]->objectcount = (int) $orphaned->objectcount;
+
+        return $results;
+    }
+
+    /**
+     * Legacy per-location query fallback, used until the location bits migration completes.
+     *
+     * @param array $locations
+     * @return array<int, \stdClass> Keyed by OBJECT_LOCATION_* constant.
+     */
+    private function get_results_from_legacy_location(array $locations): array {
+        global $DB;
+
+        $results = $this->empty_results();
+
         foreach ($locations as $location) {
             $sql =
                 'WITH
@@ -104,21 +199,31 @@ class location_report_builder extends objectfs_report_builder {
                 $result->objectsum = 0;
             }
 
-            $result->datakey = $location;
-
-            $report->add_row($result->datakey, $result->objectcount, $result->objectsum);
-
-            if (in_array($location, [OBJECT_LOCATION_LOCAL, OBJECT_LOCATION_DUPLICATED])) {
-                $filedircount += $result->objectcount;
-                $filedirsum += $result->objectsum;
-            }
-            $totalcount += $result->objectcount;
-            $totalsum += $result->objectsum;
+            $results[$location] = $result;
         }
 
-        $report->add_row('total', $totalcount, $totalsum);
-        $this->add_filedir_size_stats($report, $filedircount, $filedirsum);
-        return $report;
+        return $results;
+    }
+
+    /**
+     * Zero-initialised result rows for every legacy location.
+     *
+     * @return array<int, \stdClass>
+     */
+    private function empty_results(): array {
+        $results = [];
+        foreach (
+            [
+                OBJECT_LOCATION_LOCAL,
+                OBJECT_LOCATION_DUPLICATED,
+                OBJECT_LOCATION_EXTERNAL,
+                OBJECT_LOCATION_ORPHANED,
+                OBJECT_LOCATION_ERROR,
+            ] as $location
+        ) {
+            $results[$location] = (object) ['objectcount' => 0, 'objectsum' => 0];
+        }
+        return $results;
     }
 
     /**

@@ -193,6 +193,7 @@ class manager {
 
         $locationchanged = !isset($object->location) || $object->location != $newlocation;
         $object->location = $newlocation;
+        [$object->in_filedir, $object->in_mdl_files, $object->in_remote] = self::location_to_bits($newlocation);
 
         // If id is set, update, else insert new.
         if (empty($object->id)) {
@@ -208,6 +209,30 @@ class manager {
         }
 
         return $object;
+    }
+
+    /**
+     * Convert a legacy location value to [in_filedir, in_mdl_files, in_remote] bits.
+     * Must stay in sync with location_report_builder::BITS_TO_LOCATION.
+     *
+     * @param int $location legacy OBJECT_LOCATION_* value.
+     * @return array{int, int, int}
+     */
+    public static function location_to_bits($location): array {
+        switch ((int) $location) {
+            case OBJECT_LOCATION_ORPHANED:
+                return [1, 0, 0];
+            case OBJECT_LOCATION_ERROR:
+                return [0, 1, 0];
+            case OBJECT_LOCATION_LOCAL:
+                return [1, 1, 0];
+            case OBJECT_LOCATION_DUPLICATED:
+                return [1, 1, 1];
+            case OBJECT_LOCATION_EXTERNAL:
+                return [0, 1, 1];
+            default:
+                return [0, 0, 0];
+        }
     }
 
     /**
