@@ -79,6 +79,7 @@ class manager {
         $config->s3_bucket_acl = 'private';
         $config->s3_region = 'us-east-1';
         $config->s3_base_url = '';
+        $config->s3_endpoint_style = 'virtual'; // 'virtual' or 'path'
         $config->key_prefix = '';
 
         // Digital ocean file system.
@@ -86,6 +87,7 @@ class manager {
         $config->do_secret = '';
         $config->do_space = '';
         $config->do_region = 'sfo2';
+        $config->do_endpoint_style = 'virtual'; // 'virtual' or 'path'
 
         // Azure file system.
         $config->azure_accountname = '';
