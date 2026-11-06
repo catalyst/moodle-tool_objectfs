@@ -7,5 +7,7 @@ jobs:
   ci:
     uses: catalyst/catalyst-moodle-workflows/.github/workflows/ci.yml@main
     secrets: inherit
+    permissions:
+      contents: write
     with:
       enable_composer_publish: true
