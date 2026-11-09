@@ -24,6 +24,8 @@
 
 namespace tool_objectfs\local\object_manipulator\candidates;
 
+use tool_objectfs\local\location_query;
+
 /**
  * chcker_candiates
  */
@@ -43,7 +45,7 @@ class checker_candidates extends manipulator_candidates_base {
                   FROM {files} f
              LEFT JOIN {tool_objectfs_objects} o ON f.contenthash = o.contenthash
                  WHERE f.filesize > 0
-                   AND o.location is NULL
+                   AND ' . location_query::missing('o') . '
               GROUP BY f.contenthash';
     }
 

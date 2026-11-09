@@ -220,5 +220,40 @@ function xmldb_tool_objectfs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024120600, 'tool', 'objectfs');
     }
 
+    if ($oldversion < 2026102100) {
+        $table = new xmldb_table('tool_objectfs_objects');
+
+        $field = new xmldb_field('in_filedir', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'tagslastpushed');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('in_mdl_files', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'in_filedir');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('in_remote', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'in_mdl_files');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Includes filesize so the location report can be answered from the index alone.
+        $index = new xmldb_index(
+            'ix_location_bits',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['in_filedir', 'in_mdl_files', 'in_remote', 'filesize']
+        );
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        set_config('locationbitsmigrationcomplete', 0, 'tool_objectfs');
+        set_config('locationbitsmigrationlastid', 0, 'tool_objectfs');
+        set_config('locationbitsmigrationtotal', $DB->count_records('tool_objectfs_objects'), 'tool_objectfs');
+        set_config('locationbitsmigrationdonesofar', 0, 'tool_objectfs');
+        \core\task\manager::queue_adhoc_task(new \tool_objectfs\task\migrate_object_locations(), true);
+
+        upgrade_plugin_savepoint(true, 2026102100, 'tool', 'objectfs');
+    }
+
     return true;
 }

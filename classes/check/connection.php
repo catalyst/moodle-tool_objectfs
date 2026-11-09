@@ -47,17 +47,31 @@ class connection extends check {
     public function get_result(): result {
         $config = manager::get_objectfs_config();
         $client = manager::get_client($config);
+        $migrationpending = !(bool) get_config('tool_objectfs', 'locationbitsmigrationcomplete');
+        $migrationtotal = (int) get_config('tool_objectfs', 'locationbitsmigrationtotal');
+        $migrationdone = (int) get_config('tool_objectfs', 'locationbitsmigrationdonesofar');
+        $migrationdetails = '';
+        if ($migrationpending && $migrationtotal > 0) {
+            $migrationdetails = get_string('check:locationbits:inprogress', 'tool_objectfs')
+                    . ' ' . get_string('check:locationbits:progress', 'tool_objectfs')
+                    . ': ' . $migrationdone . '/' . $migrationtotal;
+        }
 
         if (empty($client) || !$client->is_configured($config)) {
-            return new result(result::NA, get_string('check:connection:na', 'tool_objectfs'));
+            return new result(result::NA, get_string('check:connection:na', 'tool_objectfs'), $migrationdetails);
         }
 
         $connection = $client->test_connection();
 
         if ($connection->success) {
-            return new result(result::OK, get_string('check:connection:ok', 'tool_objectfs'));
+            $status = $migrationdetails === '' ? result::OK : result::INFO;
+            return new result($status, get_string('check:connection:ok', 'tool_objectfs'), $migrationdetails);
         }
 
-        return new result(result::ERROR, get_string('check:connection:error', 'tool_objectfs', $connection->details));
+        $details = get_string('check:connection:error', 'tool_objectfs', $connection->details);
+        if ($migrationdetails !== '') {
+            $details .= ' ' . $migrationdetails;
+        }
+        return new result(result::ERROR, $details);
     }
 }
