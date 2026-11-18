@@ -3,7 +3,17 @@
 # moodle-tool_objectfs
 
 A remote object storage file system for Moodle. Intended to provide a plug-in that can be installed and configured to work with any supported remote object storage solution.
+
+## Supported branches
+
+| Moodle version    | Totara version | Branch                                                                                       | PHP  | MySQL | PostgreSQL |
+|-------------------|----------------|----------------------------------------------------------------------------------------------|------|-------|------------|
+| Moodle 4.4+       |                | [MOODLE_404_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_404_STABLE) | 8.1+ | 8.0+  | 13+        |
+| Moodle 4.2+       |                | [MOODLE_402_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_402_STABLE) | 8.0+ | 8.0+  | 13+        |
+| Moodle 3.10 - 4.1 |                | [MOODLE_310_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_310_STABLE) | 7.2+ | 5.7+  | 12+        |
+
 - [moodle-tool\_objectfs](#moodle-tool_objectfs)
+  - [Supported branches](#supported-branches)
   - [Use cases](#use-cases)
     - [Offloading large and old files to save money](#offloading-large-and-old-files-to-save-money)
     - [Sharing files across moodles to save disk](#sharing-files-across-moodles-to-save-disk)
@@ -11,7 +21,6 @@ A remote object storage file system for Moodle. Intended to provide a plug-in th
     - [Sharing files with data washed environments](#sharing-files-with-data-washed-environments)
     - [Serving files directly from object storage with signed URLs](#serving-files-directly-from-object-storage-with-signed-urls)
   - [GDPR](#gdpr)
-  - [Branches](#branches)
   - [Installation](#installation)
   - [Compatible object stores](#compatible-object-stores)
     - [Amazon S3](#amazon-s3)
@@ -92,14 +101,6 @@ See [Pre-Signed URLs Settings](#pre-signed-urls-settings) for configuration opti
 ## GDPR
 
 This plugin is GDPR compliant if you enable the deletion of remote objects.
-
-## Supported branches
-
-| Moodle version    | Totara version           | Branch                                                                                       | PHP  | MySQL   | PostgreSQL  |
-|-------------------|--------------------------|----------------------------------------------------------------------------------------------|------|---------|-------------|
-| Moodle 4.4+       |                          | [MOODLE_404_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_404_STABLE) | 8.1+ | 8.0+    | 13+         |
-| Moodle 4.2+       |                          | [MOODLE_402_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_402_STABLE) | 8.0+ | 8.0+    | 13+         |
-| Moodle 3.10 - 4.1 |                          | [MOODLE_310_STABLE](https://github.com/catalyst/moodle-tool_objectfs/tree/MOODLE_310_STABLE) | 7.2+ | 5.7+    | 12+         |
 
 ## Installation
 1. If not on Moodle 3.3, backport the file system API. See [Backporting](#backporting)
