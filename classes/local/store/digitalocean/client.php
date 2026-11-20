@@ -81,12 +81,19 @@ class client extends s3_client {
             return;
         }
 
-        $this->client = \Aws\S3\S3Client::factory([
+        $options = [
             'credentials' => ['key' => $config->do_key, 'secret' => $config->do_secret],
             'region' => $config->do_region,
             'endpoint' => 'https://' . $config->do_region . '.digitaloceanspaces.com',
             'version' => AWS_API_VERSION,
-        ]);
+        ];
+
+        // Set path style endpoint if configured.
+        if (isset($config->do_endpoint_style) && $config->do_endpoint_style === 'path') {
+            $options['use_path_style_endpoint'] = true;
+        }
+
+        $this->client = \Aws\S3\S3Client::factory($options);
     }
 
     /**
@@ -138,6 +145,17 @@ class client extends s3_client {
             new \lang_string('settings:do:region_help', 'tool_objectfs'),
             '',
             $regionoptions
+        ));
+
+        $settings->add(new \admin_setting_configselect(
+            'tool_objectfs/do_endpoint_style',
+            new \lang_string('settings:aws:endpoint_style', 'tool_objectfs'),
+            new \lang_string('settings:aws:endpoint_style_help', 'tool_objectfs'),
+            'virtual',
+            [
+                'virtual' => get_string('settings:aws:endpoint_style_virtual', 'tool_objectfs'),
+                'path' => get_string('settings:aws:endpoint_style_path', 'tool_objectfs'),
+            ]
         ));
 
         return $settings;
