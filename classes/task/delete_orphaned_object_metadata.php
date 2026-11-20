@@ -56,7 +56,8 @@ class delete_orphaned_object_metadata extends task {
             'ageforremoval' => time() - $ageforremoval,
         ];
 
-        if (!empty($this->config->deleteexternal) && $this->config->deleteexternal == TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH) {
+        if (!empty($this->config->deleteexternal) &&
+            in_array($this->config->deleteexternal, [TOOL_OBJECTFS_DELETE_EXTERNAL_TRASH, TOOL_OBJECTFS_DELETE_EXTERNAL_FULL])) {
             // We need to delete the external files as well as the orphaned data.
             $filesystem = new $this->config->filesystem();
 
